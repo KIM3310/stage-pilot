@@ -140,19 +140,37 @@ function isRiskType(value: string): value is RiskType {
 function sendJson(
   response: ServerResponse,
   statusCode: number,
-  payload: JsonObject
+  payload: JsonObject,
+  options?: {
+    includeBody?: boolean;
+  }
 ): void {
   response.statusCode = statusCode;
   response.setHeader("Content-Type", JSON_CONTENT_TYPE);
   if (CLOSE_CONNECTION_STATUS_CODES.has(statusCode)) {
     response.setHeader("Connection", "close");
   }
+  if (options?.includeBody === false) {
+    response.end();
+    return;
+  }
   response.end(`${JSON.stringify(payload)}\n`);
 }
 
-function sendHtml(response: ServerResponse, statusCode: number, html: string) {
+function sendHtml(
+  response: ServerResponse,
+  statusCode: number,
+  html: string,
+  options?: {
+    includeBody?: boolean;
+  }
+) {
   response.statusCode = statusCode;
   response.setHeader("Content-Type", HTML_CONTENT_TYPE);
+  if (options?.includeBody === false) {
+    response.end();
+    return;
+  }
   response.end(html);
 }
 
@@ -780,17 +798,28 @@ function buildInboxReplyMessage(options: {
   return lines.join("\n");
 }
 
-function handleHealthRequest(response: ServerResponse) {
-  sendJson(response, 200, {
-    model: process.env.GEMINI_MODEL ?? "gemini-2.5-pro",
-    ok: true,
-    service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
-    useGpu: false,
-  });
+function handleHealthRequest(
+  response: ServerResponse,
+  options?: { includeBody?: boolean }
+) {
+  sendJson(
+    response,
+    200,
+    {
+      model: process.env.GEMINI_MODEL ?? "gemini-2.5-pro",
+      ok: true,
+      service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
+      useGpu: false,
+    },
+    options
+  );
 }
 
-function handleDemoRequest(response: ServerResponse) {
-  sendHtml(response, 200, renderStagePilotDemoHtml());
+function handleDemoRequest(
+  response: ServerResponse,
+  options?: { includeBody?: boolean }
+) {
+  sendHtml(response, 200, renderStagePilotDemoHtml(), options);
 }
 
 async function handlePlanRequest(options: {
@@ -1195,13 +1224,13 @@ async function handleRequest(options: {
   const method = request.method ?? "GET";
   const { pathname } = parseRequestUrl(request.url);
 
-  if (method === "GET" && pathname === "/demo") {
-    handleDemoRequest(response);
+  if ((method === "GET" || method === "HEAD") && pathname === "/demo") {
+    handleDemoRequest(response, { includeBody: method !== "HEAD" });
     return;
   }
 
-  if (method === "GET" && pathname === "/health") {
-    handleHealthRequest(response);
+  if ((method === "GET" || method === "HEAD") && pathname === "/health") {
+    handleHealthRequest(response, { includeBody: method !== "HEAD" });
     return;
   }
 

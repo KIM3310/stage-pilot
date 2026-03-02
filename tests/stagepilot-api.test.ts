@@ -265,6 +265,23 @@ describe("stagepilot api server", () => {
     expect(html).toContain("/v1/whatif");
   });
 
+  it("supports HEAD for desktop demo page", async () => {
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const response = await fetch(`${baseUrl}/demo`, {
+      method: "HEAD",
+    });
+    expect(response.status).toBe(200);
+
+    const contentType = response.headers.get("content-type") ?? "";
+    expect(contentType).toContain("text/html");
+
+    const html = await response.text();
+    expect(html).toBe("");
+  });
+
   it("returns health response", async () => {
     const { baseUrl } = await startServer({
       engine: new StagePilotEngine(),
@@ -282,6 +299,23 @@ describe("stagepilot api server", () => {
     expect(body.ok).toBe(true);
     expect(body.service).toBeTypeOf("string");
     expect(body.useGpu).toBe(false);
+  });
+
+  it("supports HEAD for health response", async () => {
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const response = await fetch(`${baseUrl}/health`, {
+      method: "HEAD",
+    });
+    expect(response.status).toBe(200);
+
+    const contentType = response.headers.get("content-type") ?? "";
+    expect(contentType).toContain("application/json");
+
+    const body = await response.text();
+    expect(body).toBe("");
   });
 
   it("runs planning endpoint", async () => {

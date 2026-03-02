@@ -1,6 +1,6 @@
 {
   "caseCount": 24,
-  "generatedAt": "2026-03-02T08:00:03.009Z",
+  "generatedAt": "2026-03-02T11:15:13.733Z",
   "improvements": {
     "loopVsBaseline": 70.83,
     "loopVsMiddleware": 12.5,
@@ -41,7 +41,7 @@
       "avgAttemptsUsed": 1,
       "avgLatencyMs": 0.14,
       "failedCaseIds": ["bench-4", "bench-11", "bench-18"],
-      "p95LatencyMs": 0.42,
+      "p95LatencyMs": 0.45,
       "parseSuccessCount": 21,
       "planSuccessCount": 21,
       "strategy": "middleware",
@@ -52,7 +52,7 @@
       "avgAttemptsUsed": 1.13,
       "avgLatencyMs": 0.04,
       "failedCaseIds": [],
-      "p95LatencyMs": 0.09,
+      "p95LatencyMs": 0.08,
       "parseSuccessCount": 24,
       "planSuccessCount": 24,
       "strategy": "middleware+ralph-loop",

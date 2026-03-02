@@ -17,6 +17,11 @@
 - GitHub repository: https://github.com/KIM3310/stage-pilot
 - Demo video: https://youtu.be/6trgTH1vX4M
 
+## References and attribution
+
+- Fork reference used during implementation: https://github.com/KIM3310/ai-sdk-tool-call-middleware
+- Upstream source repository: https://github.com/minpeter/ai-sdk-tool-call-middleware
+
 ## Hackathon context
 
 Built at the Gemini 3 Seoul Hackathon with a focus on tool-calling reliability, benchmarked success-rate improvement, and operational handoff readiness.

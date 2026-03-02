@@ -11,6 +11,18 @@
 1. `@ai-sdk-tool/parser`: AI SDK middleware for parsing tool calls from models that do not natively support `tools`.
 2. A hackathon-ready multi-agent orchestration vertical (`src/stagepilot`) with benchmark, API, demo UI, and Cloud Run deployment path.
 
+## Project links
+
+- GitHub profile: https://github.com/KIM3310
+- GitHub repository: https://github.com/KIM3310/stage-pilot
+- Demo video: https://youtu.be/6trgTH1vX4M
+
+## Hackathon context
+
+Built at the Gemini 3 Seoul Hackathon with a focus on tool-calling reliability, benchmarked success-rate improvement, and operational handoff readiness.
+
+If API integration is needed, you can connect and use it immediately through the provided API endpoints (`/v1/plan`, `/v1/benchmark`, `/v1/insights`, `/v1/whatif`, `/v1/notify`), either locally or on Cloud Run.
+
 ## Why this repo exists
 
 Many models still output tool calls as loose text (`<tool_call>...</tool_call>`, relaxed JSON, trailing tokens, mixed formatting). This project hardens that path so tool execution remains stable instead of silently failing.

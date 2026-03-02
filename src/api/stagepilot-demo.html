@@ -1,0 +1,1702 @@
+<!-- biome-ignore-all lint: static StagePilot operator console -->
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>StagePilot Review Console</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23165dff'/%3E%3Cpath d='M18 34h28M18 26h18M18 42h22' stroke='white' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f6f2ea;
+      --panel: rgba(255, 253, 249, 0.88);
+      --panel-strong: rgba(255, 255, 255, 0.94);
+      --surface: rgba(255, 255, 255, 0.8);
+      --line: rgba(24, 28, 36, 0.12);
+      --ink: #15181c;
+      --ink-soft: #58606f;
+      --ink-faint: #747c8b;
+      --brand: #165dff;
+      --brand-soft: rgba(22, 93, 255, 0.1);
+      --ok: #157347;
+      --ok-soft: rgba(21, 115, 71, 0.12);
+      --warn: #b96a00;
+      --warn-soft: rgba(185, 106, 0, 0.12);
+      --danger: #b42318;
+      --danger-soft: rgba(180, 35, 24, 0.12);
+      --shadow: 0 18px 48px rgba(31, 41, 55, 0.08);
+      --radius-xl: 26px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --display: "Space Grotesk", sans-serif;
+      --sans: "IBM Plex Sans", sans-serif;
+      --mono: "IBM Plex Mono", monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(22, 93, 255, 0.14), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(185, 106, 0, 0.14), transparent 28%),
+        linear-gradient(180deg, #fbf7ef 0%, #f3ede2 100%);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+      background-size: 28px 28px;
+      pointer-events: none;
+      opacity: 0.4;
+    }
+
+    .shell {
+      position: relative;
+      z-index: 1;
+      max-width: 1520px;
+      margin: 0 auto;
+      padding: 28px 22px 44px;
+    }
+
+    .hero,
+    .main-grid,
+    .secondary-grid,
+    .tertiary-grid,
+    .metric-strip {
+      animation: rise 540ms ease;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.78fr);
+      gap: 20px;
+      margin-bottom: 18px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .hero-main,
+    .hero-side,
+    .panel {
+      padding: 24px;
+    }
+
+    .eyebrow,
+    .chip,
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-height: 34px;
+      padding: 0 14px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    .eyebrow {
+      background: #111419;
+      color: #fff8ef;
+      font-family: var(--mono);
+    }
+
+    .chip {
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--ink-soft);
+      border: 1px solid var(--line);
+    }
+
+    .status-pill.live {
+      background: var(--brand-soft);
+      color: var(--brand);
+    }
+
+    .status-pill.ok {
+      background: var(--ok-soft);
+      color: var(--ok);
+    }
+
+    .status-pill.warn {
+      background: var(--warn-soft);
+      color: var(--warn);
+    }
+
+    .title {
+      margin: 12px 0 10px;
+      font-family: var(--display);
+      font-size: clamp(2.3rem, 4vw, 4rem);
+      line-height: 0.98;
+      letter-spacing: -0.05em;
+    }
+
+    .lede {
+      max-width: 840px;
+      margin: 0;
+      color: var(--ink-soft);
+      line-height: 1.7;
+      font-size: 1.02rem;
+    }
+
+    .muted-inline {
+      margin: 14px 0 0;
+      color: var(--ink-faint);
+      line-height: 1.6;
+      font-size: 0.94rem;
+    }
+
+    .hero-tags,
+    .inline-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .hero-tags {
+      margin-top: 18px;
+    }
+
+    .warm-status {
+      margin-top: 16px;
+      padding: 14px 15px;
+      border-radius: var(--radius-md);
+      background: var(--brand-soft);
+      border: 1px solid rgba(22, 93, 255, 0.16);
+      color: var(--brand);
+      font-weight: 600;
+      line-height: 1.55;
+    }
+
+    .warm-status.warn {
+      background: var(--warn-soft);
+      border-color: rgba(185, 106, 0, 0.18);
+      color: var(--warn);
+    }
+
+    .warm-status.danger {
+      background: var(--danger-soft);
+      border-color: rgba(180, 35, 24, 0.18);
+      color: var(--danger);
+    }
+
+    .stack,
+    .metric-strip,
+    .scenario-list,
+    .summary-list,
+    .route-list,
+    .raw-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .metric-strip {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .metric-card,
+    .card {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.82);
+      padding: 16px;
+    }
+
+    .metric-card label,
+    .section-label,
+    .field label,
+    .small-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--ink-faint);
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .metric-card strong {
+      display: block;
+      font-family: var(--display);
+      font-size: 1.14rem;
+      letter-spacing: -0.04em;
+    }
+
+    .metric-card span,
+    .card p,
+    .panel p {
+      color: var(--ink-soft);
+      line-height: 1.55;
+      font-size: 0.9rem;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 350px minmax(0, 1fr) 340px;
+      gap: 18px;
+      align-items: start;
+      margin-bottom: 18px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .section-head h2,
+    .section-head h3,
+    .summary-card h3 {
+      margin: 0;
+      font-family: var(--display);
+      letter-spacing: -0.03em;
+    }
+
+    .field-grid,
+    .summary-grid,
+    .secondary-grid,
+    .tertiary-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .field-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .field input,
+    .field textarea,
+    .field select {
+      width: 100%;
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(24, 28, 36, 0.16);
+      background: rgba(255, 255, 255, 0.96);
+      color: var(--ink);
+      font: inherit;
+      outline: none;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+
+    .field textarea {
+      min-height: 120px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      border-color: rgba(22, 93, 255, 0.4);
+      box-shadow: 0 0 0 4px rgba(22, 93, 255, 0.08);
+    }
+
+    .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .risk-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+      padding: 0 12px;
+      border-radius: 13px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--ink-soft);
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    .risk-option input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--brand);
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 14px;
+      min-height: 46px;
+      padding: 0 16px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 150ms ease, opacity 150ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.72;
+      cursor: wait;
+      transform: none;
+    }
+
+    .btn-primary {
+      background: #111418;
+      color: #fffaf2;
+      box-shadow: 0 14px 30px rgba(17, 20, 24, 0.16);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .btn-brand {
+      background: var(--brand);
+      color: white;
+      box-shadow: 0 12px 24px rgba(22, 93, 255, 0.18);
+    }
+
+    .scenario-card,
+    .summary-card,
+    .route-card,
+    .result-item {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.84);
+      padding: 14px 15px;
+    }
+
+    .scenario-card {
+      cursor: pointer;
+      transition: border-color 150ms ease, transform 150ms ease;
+    }
+
+    .scenario-card:hover,
+    .scenario-card.active {
+      border-color: rgba(22, 93, 255, 0.26);
+      transform: translateY(-1px);
+    }
+
+    .scenario-card strong,
+    .summary-card strong,
+    .route-card strong,
+    .result-item strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.98rem;
+      letter-spacing: -0.02em;
+    }
+
+    .payload-box,
+    .raw-box {
+      border-radius: 14px;
+      background: #111318;
+      color: #d9e1ec;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.55;
+      padding: 15px;
+      min-height: 160px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .workspace-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .summary-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .summary-hero {
+      display: grid;
+      grid-template-columns: 1.1fr repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(145deg, #111419, #20252c);
+      color: white;
+    }
+
+    .summary-hero label {
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 6px;
+    }
+
+    .summary-hero strong {
+      font-family: var(--display);
+      font-size: 1.9rem;
+      letter-spacing: -0.05em;
+    }
+
+    .summary-hero p {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.78);
+      line-height: 1.6;
+      font-size: 0.94rem;
+    }
+
+    .summary-metric {
+      padding-left: 12px;
+      border-left: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .inline-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .dual-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      color: var(--ink-faint);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .secondary-grid {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      margin-bottom: 18px;
+    }
+
+    .tertiary-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .bar-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 150px 1fr 84px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .bar {
+      position: relative;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(17, 24, 39, 0.08);
+      overflow: hidden;
+    }
+
+    .bar > span {
+      position: absolute;
+      inset: 0 auto 0 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #165dff, #0b46ce);
+    }
+
+    .bar.warn > span {
+      background: linear-gradient(90deg, #d97706, #b96a00);
+    }
+
+    .route-path {
+      font-family: var(--mono);
+      color: var(--brand);
+      font-size: 0.78rem;
+      background: var(--brand-soft);
+      border-radius: 999px;
+      padding: 7px 10px;
+    }
+
+    .route-method {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--ink-faint);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+    }
+
+    .empty-state {
+      color: var(--ink-faint);
+      line-height: 1.65;
+      font-size: 0.9rem;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1320px) {
+      .hero,
+      .main-grid,
+      .secondary-grid,
+      .tertiary-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .metric-strip {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 900px) {
+      .shell {
+        padding: 18px 14px 34px;
+      }
+
+      .metric-strip,
+      .field-grid,
+      .summary-grid,
+      .summary-hero {
+        grid-template-columns: 1fr;
+      }
+
+      .risk-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .metric-strip,
+      .risk-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .button-row {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="shell">
+    <section class="hero">
+      <article class="panel hero-main">
+        <div class="hero-tags">
+          <span class="eyebrow">StagePilot Judge Console</span>
+          <span class="chip">@ai-sdk-tool/parser</span>
+          <span class="chip">review-first orchestration</span>
+          <span class="chip">benchmark-backed demo</span>
+        </div>
+        <h1 class="title">StagePilot Review Console</h1>
+        <p class="lede">
+          This is a calmer, review-first surface for StagePilot. It does not invent a new product layer.
+          It simply makes the existing benchmark, runtime, workflow, and orchestration outputs easier to read
+          in the way a technical evaluator would actually scan them.
+        </p>
+      </article>
+
+      <aside class="panel hero-side">
+        <div class="section-head">
+          <div>
+            <label class="section-label">Reviewer Warm Start</label>
+            <h2 style="margin: 0;">What matters first</h2>
+          </div>
+          <span id="heroState" class="status-pill live">Booting</span>
+        </div>
+        <div id="warmStatus" class="warm-status">
+          Loading benchmark data.
+        </div>
+        <p class="muted-inline">Static/docs surfaces stay supporting docs; benchmark and runtime routes remain the claim source of truth.</p>
+        <div id="warmChecklist" class="stack"></div>
+      </aside>
+    </section>
+
+    <section id="metricStrip" class="metric-strip"></section>
+
+    <section class="main-grid">
+      <aside class="panel">
+        <div class="section-head">
+          <div>
+            <label class="section-label">Mission Intake</label>
+            <h2 style="margin: 0;">Demo Scenarios</h2>
+          </div>
+          <span class="status-pill live">Editable</span>
+        </div>
+
+        <div id="scenarioList" class="scenario-list"></div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="caseId">Case Identifier</label>
+            <input id="caseId" type="text" value="demo-live-001" />
+          </div>
+          <div class="field">
+            <label for="district">District</label>
+            <input id="district" type="text" value="Gangbuk-gu" />
+          </div>
+          <div class="field">
+            <label for="contactWindow">Contact Window</label>
+            <input id="contactWindow" type="text" value="18:00-21:00" />
+          </div>
+          <div class="field">
+            <label for="urgencyHint">Priority Level</label>
+            <select id="urgencyHint">
+              <option value="high">High</option>
+              <option value="medium" selected>Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="notes">Situation Brief</label>
+          <textarea id="notes">Target reports resource depletion, delayed response, and an urgent need for a routed intervention before the next contact window closes.</textarea>
+        </div>
+
+        <div class="field">
+          <label>Risk Vectors</label>
+          <div class="risk-grid" id="riskGrid">
+            <label class="risk-option"><input type="checkbox" value="housing" /> Housing</label>
+            <label class="risk-option"><input type="checkbox" value="food" checked /> Food</label>
+            <label class="risk-option"><input type="checkbox" value="income" checked /> Income</label>
+            <label class="risk-option"><input type="checkbox" value="isolation" /> Isolation</label>
+            <label class="risk-option"><input type="checkbox" value="care" /> Care</label>
+            <label class="risk-option"><input type="checkbox" value="other" /> Other</label>
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="staffingDeltaPct">Staffing Delta %</label>
+            <input id="staffingDeltaPct" type="number" value="-12" />
+          </div>
+          <div class="field">
+            <label for="demandDeltaPct">Demand Delta %</label>
+            <input id="demandDeltaPct" type="number" value="20" />
+          </div>
+          <div class="field">
+            <label for="contactRateDeltaPct">Contact Rate Delta %</label>
+            <input id="contactRateDeltaPct" type="number" value="-8" />
+          </div>
+          <div class="field">
+            <label for="benchmarkCases">Benchmark Cases</label>
+            <input id="benchmarkCases" type="number" value="24" />
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="planButton" class="btn-primary" type="button">Run Plan</button>
+          <button id="insightsButton" class="btn-secondary" type="button">Run Insights</button>
+          <button id="whatIfButton" class="btn-secondary" type="button">Run What-if</button>
+          <button id="notifyButton" class="btn-brand" type="button">Notify</button>
+        </div>
+
+        <div>
+          <label class="section-label">Envelope Preview</label>
+          <pre id="payloadPreview" class="payload-box"></pre>
+        </div>
+      </aside>
+
+      <section class="panel">
+        <div class="workspace-header">
+          <div>
+            <label class="section-label">Mission Output</label>
+            <h2 style="margin: 0;">Current Result</h2>
+          </div>
+          <div id="workspaceState" class="inline-tags">
+            <span class="chip">Awaiting run</span>
+          </div>
+        </div>
+
+        <section id="summaryHero" class="summary-hero">
+          <div>
+            <label class="small-label">Summary</label>
+            <strong>Idle</strong>
+            <p>No orchestration output yet. Use the mission form on the left to run the existing StagePilot endpoints.</p>
+          </div>
+          <div class="summary-metric">
+            <label>Judge Score</label>
+            <strong>--</strong>
+          </div>
+          <div class="summary-metric">
+            <label>SLA Minutes</label>
+            <strong>--</strong>
+          </div>
+          <div class="summary-metric">
+            <label>Referrals</label>
+            <strong>--</strong>
+          </div>
+        </section>
+
+        <section class="summary-grid">
+          <article class="summary-card">
+            <h3>Actions</h3>
+            <div id="actionList" class="summary-list">
+              <p class="empty-state">Action blueprint appears here after <span class="route-path">/v1/plan</span>.</p>
+            </div>
+          </article>
+
+          <article class="summary-card">
+            <h3>Referrals</h3>
+            <div id="referralList" class="summary-list">
+              <p class="empty-state">Referral routing appears here after the plan resolves.</p>
+            </div>
+          </article>
+
+          <article class="summary-card">
+            <h3>Judge Notes</h3>
+            <div id="judgeList" class="summary-list">
+              <p class="empty-state">Judge strengths, weaknesses, and fallback route appear here.</p>
+            </div>
+          </article>
+
+          <article class="summary-card">
+            <h3>What-if Result</h3>
+            <div id="twinList" class="summary-list">
+              <p class="empty-state">Simulation output appears here after <span class="route-path">/v1/whatif</span>.</p>
+            </div>
+          </article>
+
+          <article class="summary-card">
+            <h3>Insights</h3>
+            <div id="insightList" class="summary-list">
+              <p class="empty-state">Narrative insights appear here after <span class="route-path">/v1/insights</span>.</p>
+            </div>
+          </article>
+
+          <article class="summary-card">
+            <h3>Notify</h3>
+            <div id="notifyList" class="summary-list">
+              <p class="empty-state">Delivery outcome appears here after <span class="route-path">/v1/notify</span>.</p>
+            </div>
+          </article>
+        </section>
+      </section>
+
+      <aside class="panel">
+        <div class="section-head">
+          <div>
+            <label class="section-label">Review Surfaces</label>
+            <h2 style="margin: 0;">Review control tower</h2>
+          </div>
+          <button id="benchmarkButton" class="btn-secondary" type="button">Run Benchmark</button>
+        </div>
+
+        <div id="reviewSummary" class="stack"></div>
+
+        <div>
+          <div class="section-head">
+            <div>
+              <label class="section-label">Runtime Reality Check</label>
+              <h3 style="margin: 0;">Live vs bounded demo</h3>
+            </div>
+            <button id="copyRuntimeHandoffButton" class="btn-secondary" type="button">Copy Handoff</button>
+          </div>
+          <div id="runtimeReality" class="stack"></div>
+        </div>
+
+        <div>
+          <label class="section-label">Recent Workflow Runs</label>
+          <div id="workflowRuns" class="stack"></div>
+        </div>
+
+        <div>
+          <label class="section-label">Proof Assets</label>
+          <div id="proofAssets" class="stack"></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="secondary-grid">
+      <article class="panel">
+        <div class="section-head">
+          <div>
+            <label class="section-label">Benchmark Readout</label>
+            <h2 style="margin: 0;">Reliability Ladder</h2>
+          </div>
+          <span id="benchmarkState" class="status-pill live">Snapshot</span>
+        </div>
+        <div id="benchmarkLadder" class="bar-list"></div>
+      </article>
+
+      <article class="panel">
+        <div class="section-head">
+          <div>
+            <label class="section-label">Developer Ops</label>
+            <h2 style="margin: 0;">Lane Playbook</h2>
+          </div>
+          <div class="field" style="min-width: 210px;">
+            <label for="laneSelect">Lane</label>
+            <select id="laneSelect">
+              <option value="merge-request">merge-request</option>
+              <option value="pipeline-recovery">pipeline-recovery</option>
+              <option value="release-governor">release-governor</option>
+            </select>
+          </div>
+        </div>
+        <div id="opsPack" class="stack"></div>
+      </article>
+    </section>
+
+    <section class="tertiary-grid">
+      <article class="panel">
+        <div class="section-head">
+          <div>
+            <label class="section-label">Route Directory</label>
+            <h2 style="margin: 0;">Available Endpoints</h2>
+          </div>
+        </div>
+        <div id="routeList" class="route-list"></div>
+      </article>
+
+      <article class="panel">
+        <div class="section-head">
+          <div>
+            <label class="section-label">Reviewer Sequence</label>
+            <h2 style="margin: 0;">Read this order</h2>
+          </div>
+        </div>
+        <div id="reviewSequence" class="stack"></div>
+      </article>
+
+      <article class="panel">
+        <div class="section-head">
+          <div>
+            <label class="section-label">Raw Output</label>
+            <h2 style="margin: 0;">JSON Capture</h2>
+          </div>
+          <button id="copyJsonButton" class="btn-secondary" type="button">Copy JSON</button>
+        </div>
+        <div class="raw-list">
+          <pre id="rawOutput" class="raw-box">No mission response yet.</pre>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <script>
+    const API = {
+      benchmark: "/v1/benchmark",
+      benchmarkSummary: "/v1/benchmark-summary",
+      developerOpsPack: "/v1/developer-ops-pack",
+      insights: "/v1/insights",
+      notify: "/v1/notify",
+      plan: "/v1/plan",
+      summaryPack: "/v1/summary-pack",
+      runtimeBrief: "/v1/runtime-brief",
+      runtimeScorecard: "/v1/runtime-scorecard",
+      whatIf: "/v1/whatif",
+      workflowRuns: "/v1/workflow-runs",
+    };
+
+    const SCENARIOS = [
+      {
+        id: "food-bridge",
+        label: "After-hours food bridge",
+        notes: "Household missed wages this week, food budget is exhausted, and the contact window closes tonight.",
+        risks: ["food", "income"],
+        district: "Gangbuk-gu",
+        urgencyHint: "high",
+        contactWindow: "20:00-22:00",
+        whatIf: {
+          staffingDeltaPct: -15,
+          demandDeltaPct: 22,
+          contactRateDeltaPct: -8,
+        },
+      },
+      {
+        id: "housing-escalation",
+        label: "Housing escalation",
+        notes: "Resident received an eviction warning and needs a fallback route if the first outreach misses.",
+        risks: ["housing", "income"],
+        district: "Mapo-gu",
+        urgencyHint: "high",
+        contactWindow: "09:00-12:00",
+        whatIf: {
+          staffingDeltaPct: -10,
+          demandDeltaPct: 18,
+          contactRateDeltaPct: -5,
+        },
+      },
+      {
+        id: "care-coordination",
+        label: "Care coordination",
+        notes: "Elder resident living alone missed two wellness check-ins and needs coordinated support.",
+        risks: ["care", "isolation"],
+        district: "Songpa-gu",
+        urgencyHint: "medium",
+        contactWindow: "13:00-16:00",
+        whatIf: {
+          staffingDeltaPct: -6,
+          demandDeltaPct: 10,
+          contactRateDeltaPct: -4,
+        },
+      },
+    ];
+
+    const state = {
+      benchmarkSummary: null,
+      latestMission: null,
+      opsPack: null,
+      summaryPack: null,
+      runtimeBrief: null,
+      runtimeScorecard: null,
+      selectedScenarioId: SCENARIOS[0].id,
+      workflowRuns: null,
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+
+    const elements = {
+      actionList: $("#actionList"),
+      benchmarkButton: $("#benchmarkButton"),
+      benchmarkCases: $("#benchmarkCases"),
+      benchmarkLadder: $("#benchmarkLadder"),
+      benchmarkState: $("#benchmarkState"),
+      caseId: $("#caseId"),
+      contactRateDeltaPct: $("#contactRateDeltaPct"),
+      contactWindow: $("#contactWindow"),
+      copyJsonButton: $("#copyJsonButton"),
+      demandDeltaPct: $("#demandDeltaPct"),
+      district: $("#district"),
+      heroState: $("#heroState"),
+      insightList: $("#insightList"),
+      insightsButton: $("#insightsButton"),
+      laneSelect: $("#laneSelect"),
+      metricStrip: $("#metricStrip"),
+      notes: $("#notes"),
+      notifyButton: $("#notifyButton"),
+      notifyList: $("#notifyList"),
+      opsPack: $("#opsPack"),
+      payloadPreview: $("#payloadPreview"),
+      planButton: $("#planButton"),
+      proofAssets: $("#proofAssets"),
+      rawOutput: $("#rawOutput"),
+      referralList: $("#referralList"),
+      reviewSequence: $("#reviewSequence"),
+      reviewSummary: $("#reviewSummary"),
+      runtimeReality: $("#runtimeReality"),
+      riskGrid: $("#riskGrid"),
+      routeList: $("#routeList"),
+      scenarioList: $("#scenarioList"),
+      staffingDeltaPct: $("#staffingDeltaPct"),
+      summaryHero: $("#summaryHero"),
+      twinList: $("#twinList"),
+      urgencyHint: $("#urgencyHint"),
+      warmChecklist: $("#warmChecklist"),
+      warmStatus: $("#warmStatus"),
+      whatIfButton: $("#whatIfButton"),
+      workflowRuns: $("#workflowRuns"),
+      workspaceState: $("#workspaceState"),
+      judgeList: $("#judgeList"),
+      copyRuntimeHandoffButton: $("#copyRuntimeHandoffButton"),
+    };
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function formatPercent(value) {
+      if (typeof value !== "number" || !Number.isFinite(value)) {
+        return "--";
+      }
+      return `${Math.round(value * 100) / 100}%`;
+    }
+
+    function formatNumber(value) {
+      if (typeof value !== "number" || !Number.isFinite(value)) {
+        return "--";
+      }
+      return Intl.NumberFormat("en-US").format(value);
+    }
+
+    function setWarmStatus(message, tone) {
+      elements.warmStatus.textContent = message;
+      elements.warmStatus.className = `warm-status ${tone || ""}`.trim();
+    }
+
+    function setHeroState(label, tone) {
+      elements.heroState.className = `status-pill ${tone || "live"}`.trim();
+      elements.heroState.textContent = label;
+    }
+
+    function readRisks() {
+      return Array.from(elements.riskGrid.querySelectorAll("input:checked")).map((node) => node.value);
+    }
+
+    function buildPayload() {
+      return {
+        caseId: elements.caseId.value.trim() || "demo-live-001",
+        contactWindow: elements.contactWindow.value.trim(),
+        district: elements.district.value.trim(),
+        notes: elements.notes.value.trim(),
+        risks: readRisks(),
+        urgencyHint: elements.urgencyHint.value,
+      };
+    }
+
+    function buildWhatIfBody() {
+      return {
+        ...buildPayload(),
+        scenario: {
+          staffingDeltaPct: Number(elements.staffingDeltaPct.value),
+          demandDeltaPct: Number(elements.demandDeltaPct.value),
+          contactRateDeltaPct: Number(elements.contactRateDeltaPct.value),
+        },
+      };
+    }
+
+    function refreshPayloadPreview() {
+      elements.payloadPreview.textContent = JSON.stringify(buildWhatIfBody(), null, 2);
+    }
+
+    async function fetchJson(url, options) {
+      const response = await fetch(url, options);
+      const text = await response.text();
+      const payload = text ? JSON.parse(text) : {};
+      if (!response.ok) {
+        throw new Error(payload.error || `request failed (${response.status})`);
+      }
+      return payload;
+    }
+
+    function renderScenarios() {
+      elements.scenarioList.innerHTML = SCENARIOS.map((scenario) => `
+        <article class="scenario-card ${scenario.id === state.selectedScenarioId ? "active" : ""}" data-scenario-id="${escapeHtml(scenario.id)}">
+          <strong>${escapeHtml(scenario.label)}</strong>
+          <p>${escapeHtml(scenario.notes)}</p>
+        </article>
+      `).join("");
+
+      elements.scenarioList.querySelectorAll("[data-scenario-id]").forEach((node) => {
+        node.addEventListener("click", () => applyScenario(node.getAttribute("data-scenario-id")));
+      });
+    }
+
+    function applyRiskSelection(risks) {
+      const selected = new Set(risks);
+      elements.riskGrid.querySelectorAll("input").forEach((node) => {
+        node.checked = selected.has(node.value);
+      });
+    }
+
+    function applyScenario(id) {
+      const scenario = SCENARIOS.find((item) => item.id === id);
+      if (!scenario) {
+        return;
+      }
+      state.selectedScenarioId = id;
+      elements.caseId.value = `demo-${scenario.id}`;
+      elements.contactWindow.value = scenario.contactWindow;
+      elements.district.value = scenario.district;
+      elements.notes.value = scenario.notes;
+      elements.urgencyHint.value = scenario.urgencyHint;
+      elements.staffingDeltaPct.value = String(scenario.whatIf.staffingDeltaPct);
+      elements.demandDeltaPct.value = String(scenario.whatIf.demandDeltaPct);
+      elements.contactRateDeltaPct.value = String(scenario.whatIf.contactRateDeltaPct);
+      applyRiskSelection(scenario.risks);
+      refreshPayloadPreview();
+      renderScenarios();
+    }
+
+    function renderMetricStrip() {
+      const benchmark = state.benchmarkSummary?.benchmark;
+      const runtimeScorecard = state.runtimeScorecard;
+      const runtimeBrief = state.runtimeBrief;
+      const items = [
+        {
+          label: "Top Strategy",
+          value: benchmark?.topStrategy?.strategy || "--",
+          note: benchmark?.topStrategy?.successRate != null ? formatPercent(benchmark.topStrategy.successRate) : "No benchmark yet",
+        },
+        {
+          label: "Weakest Strategy",
+          value: benchmark?.weakestStrategy?.strategy || "--",
+          note: benchmark?.weakestStrategy?.successRate != null ? formatPercent(benchmark.weakestStrategy.successRate) : "No weakest strategy yet",
+        },
+        {
+          label: "Runtime",
+          value: runtimeBrief?.diagnostics?.integrationReady ? "Ready" : "Review",
+          note: runtimeBrief ? `${runtimeBrief.routeCount} routes` : "No runtime brief yet",
+        },
+        {
+          label: "Claim Tier",
+          value: state.summaryPack?.evidenceBundle?.evaluationPosture?.claimTier === "runtime-backed-review-ready"
+            ? "Runtime-backed"
+            : "Bounded demo",
+          note: "Docs stay supporting docs",
+        },
+        {
+          label: "Requests",
+          value: runtimeScorecard ? formatNumber(runtimeScorecard.traffic.requestCount) : "--",
+          note: runtimeScorecard ? `${formatPercent(runtimeScorecard.traffic.errorRatePct)} error rate` : "No traffic yet",
+        },
+        {
+          label: "Workflow Runs",
+          value: runtimeScorecard?.workflowRuns?.summary ? formatNumber(runtimeScorecard.workflowRuns.summary.totalRuns) : "--",
+          note: "Recent developer workflow history",
+        },
+        {
+          label: "Notify Posture",
+          value: runtimeBrief?.integrations?.openClaw?.configured ? "Configured" : "Local only",
+          note: "Explicit final operator step",
+        },
+      ];
+
+      elements.metricStrip.innerHTML = items.map((item) => `
+        <article class="metric-card">
+          <label>${escapeHtml(item.label)}</label>
+          <strong>${escapeHtml(item.value)}</strong>
+          <span>${escapeHtml(item.note)}</span>
+        </article>
+      `).join("");
+    }
+
+    function renderWarmStart() {
+      const checklist = [
+        {
+          title: "Runtime brief",
+          detail: state.runtimeBrief?.diagnostics?.integrationReady
+            ? "Live integrations look configured."
+            : "Live integrations are incomplete, so use this as an honest bounded demo.",
+        },
+        {
+          title: "Claim tier",
+          detail: state.summaryPack?.evidenceBundle?.evaluationPosture?.claimTier === "runtime-backed-review-ready"
+            ? "Benchmark and integrations support runtime-backed benchmark claims."
+            : "Keep the story premium but bounded: benchmark-backed proof, no oversized hosted-runtime promise.",
+        },
+        {
+          title: "Runtime/source split",
+          detail: state.summaryPack?.evidenceBundle?.evaluationPosture?.claimRule
+            || "Load the summary pack to pin docs-only posture before repeating claims.",
+        },
+        {
+          title: "Benchmark floor",
+          detail: state.benchmarkSummary?.benchmark?.weakestStrategy
+            ? `Weakest strategy is ${state.benchmarkSummary.benchmark.weakestStrategy.strategy}. Keep it visible.`
+            : "Benchmark floor is not available yet.",
+        },
+        {
+          title: "Workflow history",
+          detail: state.runtimeScorecard?.workflowRuns?.summary
+            ? `${state.runtimeScorecard.workflowRuns.summary.totalRuns} workflow events are recorded.`
+            : "Workflow history is not populated yet.",
+        },
+      ];
+
+      elements.warmChecklist.innerHTML = checklist.map((item) => `
+        <article class="card">
+          <strong>${escapeHtml(item.title)}</strong>
+          <p>${escapeHtml(item.detail)}</p>
+        </article>
+      `).join("");
+
+      if (state.runtimeBrief?.diagnostics?.integrationReady) {
+        setHeroState("Ready", "ok");
+        setWarmStatus("Runtime brief, summary pack, and benchmark surfaces loaded successfully.", "");
+      } else {
+        setHeroState("Review", "warn");
+        setWarmStatus("Loading benchmark data. Live integrations are still bounded, which is okay for a demo.", "warn");
+      }
+    }
+
+    function renderReviewSummary() {
+      const reviewRoute = (state.summaryPack?.reviewSequence || []).slice(0, 3).join(" → ");
+      const items = [
+        {
+          title: "Start here",
+          detail: reviewRoute || "Load the summary pack to reveal the recommended data route.",
+        },
+        {
+          title: "What this proves",
+          detail: state.summaryPack?.headline || "Summary pack not loaded.",
+        },
+        {
+          title: "Operator next step",
+          detail: state.runtimeBrief?.diagnostics?.nextAction || "No next action available.",
+        },
+      ];
+
+      elements.reviewSummary.innerHTML = items.map((item) => `
+        <article class="card">
+          <strong>${escapeHtml(item.title)}</strong>
+          <p>${escapeHtml(item.detail)}</p>
+        </article>
+      `).join("");
+    }
+
+    function buildRuntimeRealityItems() {
+      const missing = state.runtimeBrief?.diagnostics?.missingIntegrations || [];
+      const errorRate = state.runtimeScorecard?.traffic?.errorRatePct;
+      const workflowCount = state.runtimeScorecard?.workflowRuns?.summary?.totalRuns;
+      const benchmark = state.benchmarkSummary?.benchmark;
+      return [
+        {
+          title: "Planning utility",
+          detail: missing.includes("gemini_api_key")
+            ? "Gemini is not configured, so keep this in bounded-review mode and avoid overselling live narrative synthesis."
+            : "Gemini is configured, so live planning and insight enrichment are available for real evaluation runs.",
+        },
+        {
+          title: "Delivery utility",
+          detail: missing.includes("openclaw_delivery")
+            ? "Notify remains local-only because OpenClaw delivery is not configured."
+            : "Notify is wired for OpenClaw delivery, so the final operator step can be demonstrated honestly.",
+        },
+        {
+          title: "Data freshness",
+          detail: typeof workflowCount === "number"
+            ? `${workflowCount} workflow events are recorded${typeof errorRate === "number" ? ` with ${formatPercent(errorRate)} error rate.` : "."}`
+            : "Workflow history is still empty, so use the console as a guided surface rather than a proof of sustained traffic.",
+        },
+        {
+          title: "Benchmark anchor",
+          detail: benchmark?.topStrategy
+            ? `${benchmark.topStrategy.strategy} is the strongest visible strategy at ${formatPercent(benchmark.topStrategy.successRate)}.`
+            : "Run the benchmark when the evaluator wants a reliability anchor before runtime details.",
+        },
+      ];
+    }
+
+    function renderRuntimeReality() {
+      const items = buildRuntimeRealityItems();
+      elements.runtimeReality.innerHTML = items.map((item) => `
+        <article class="card">
+          <strong>${escapeHtml(item.title)}</strong>
+          <p>${escapeHtml(item.detail)}</p>
+        </article>
+      `).join("");
+    }
+
+    async function copyRuntimeHandoff() {
+      const missing = state.runtimeBrief?.diagnostics?.missingIntegrations || [];
+      const handoff = [
+        "StagePilot runtime handoff",
+        `- Planning utility: ${missing.includes("gemini_api_key") ? "bounded demo only" : "live-ready"}`,
+        `- Delivery utility: ${missing.includes("openclaw_delivery") ? "local only" : "OpenClaw configured"}`,
+        `- Next action: ${state.runtimeBrief?.diagnostics?.nextAction || "Load runtime brief first."}`,
+        `- Data route: ${(state.summaryPack?.reviewSequence || []).join(" | ") || "Load summary pack first."}`,
+      ].join("\\n");
+      await navigator.clipboard.writeText(handoff);
+      setWarmStatus("Runtime handoff copied. Use it to explain whether the console is live-ready or intentionally bounded.", "");
+    }
+
+    function renderWorkflowRuns() {
+      const items = state.runtimeScorecard?.workflowRuns?.items || [];
+      elements.workflowRuns.innerHTML = items.length > 0
+        ? items.map((item) => `
+          <article class="card">
+            <strong>${escapeHtml(item.lane || "workflow")}</strong>
+            <p>${escapeHtml(`${item.path} | ${item.statusCode} | ${item.timestamp}`)}</p>
+          </article>
+        `).join("")
+        : `<p class="empty-state">No workflow run history available yet.</p>`;
+    }
+
+    function renderProofAssets() {
+      const assets = state.summaryPack?.proofAssets || [];
+      elements.proofAssets.innerHTML = assets.map((asset) => `
+        <article class="card">
+          <strong>${escapeHtml(asset.label)}</strong>
+          <p>${escapeHtml(asset.path)}</p>
+        </article>
+      `).join("");
+    }
+
+    function renderBenchmarkLadder() {
+      const strategies = state.benchmarkSummary?.benchmark?.strategies || [];
+      elements.benchmarkLadder.innerHTML = strategies.map((item) => `
+        <div class="bar-row">
+          <strong>${escapeHtml(item.strategy)}</strong>
+          <div class="bar ${item.status === "attention" ? "warn" : ""}">
+            <span style="width:${Math.max(4, Math.min(item.successRate || 0, 100))}%"></span>
+          </div>
+          <span class="route-method">${escapeHtml(formatPercent(item.successRate))}</span>
+        </div>
+      `).join("");
+    }
+
+    function renderOpsPack() {
+      if (!state.opsPack) {
+        elements.opsPack.innerHTML = `<p class="empty-state">No developer ops pack loaded.</p>`;
+        return;
+      }
+
+      elements.opsPack.innerHTML = `
+        <article class="card">
+          <strong>${escapeHtml(state.opsPack.selectedLane.headline)}</strong>
+          <p>${escapeHtml(state.opsPack.headline)}</p>
+        </article>
+        <article class="card">
+          <strong>Operator Flow</strong>
+          <p>${escapeHtml(state.opsPack.selectedLane.operatorFlow.join(" | "))}</p>
+        </article>
+        <article class="card">
+          <strong>Guardrails</strong>
+          <p>${escapeHtml(state.opsPack.selectedLane.guardrails.join(" | "))}</p>
+        </article>
+      `;
+    }
+
+    function renderRouteList() {
+      const routes = state.runtimeBrief?.routes || [];
+      elements.routeList.innerHTML = routes.map((route) => `
+        <article class="route-card">
+          <strong>${escapeHtml(route.purpose)}</strong>
+          <p><span class="route-path">${escapeHtml(route.path)}</span> <span class="route-method">${escapeHtml(route.method)}</span></p>
+        </article>
+      `).join("");
+    }
+
+    function renderReviewSequence() {
+      const items = state.summaryPack?.reviewSequence || [];
+      elements.reviewSequence.innerHTML = items.map((item, index) => `
+        <article class="card">
+          <strong>Step ${index + 1}</strong>
+          <p>${escapeHtml(item)}</p>
+        </article>
+      `).join("");
+    }
+
+    function setWorkspaceState(labels) {
+      elements.workspaceState.innerHTML = labels.map((label) => `<span class="chip">${escapeHtml(label)}</span>`).join("");
+    }
+
+    function renderMissionSummary(payload, phaseLabel) {
+      const result = payload?.result;
+      if (!result) {
+        return;
+      }
+
+      state.latestMission = payload;
+      elements.rawOutput.textContent = JSON.stringify(payload, null, 2);
+      elements.summaryHero.innerHTML = `
+        <div>
+          <label class="small-label">Summary</label>
+          <strong>${escapeHtml(result.plan.summary)}</strong>
+          <p>Case ${escapeHtml(result.intake.caseId)} in ${escapeHtml(result.intake.district)}.</p>
+        </div>
+        <div class="summary-metric">
+          <label>Judge Score</label>
+          <strong>${escapeHtml(String(result.judge.score))}</strong>
+        </div>
+        <div class="summary-metric">
+          <label>SLA Minutes</label>
+          <strong>${escapeHtml(String(result.safety.slaMinutes))}</strong>
+        </div>
+        <div class="summary-metric">
+          <label>Referrals</label>
+          <strong>${escapeHtml(String(result.eligibility.referrals.length))}</strong>
+        </div>
+      `;
+
+      elements.actionList.innerHTML = result.plan.actions.map((action) => `
+        <article class="result-item">
+          <strong>${escapeHtml(action.step)}</strong>
+          <div class="dual-line">
+            <span>${escapeHtml(action.channel)}</span>
+            <span>${escapeHtml(action.owner)}</span>
+            <span>${escapeHtml(String(action.dueInHours))}h</span>
+          </div>
+          <p>${escapeHtml(action.details)}</p>
+        </article>
+      `).join("");
+
+      elements.referralList.innerHTML = result.eligibility.referrals.map((referral) => `
+        <article class="result-item">
+          <strong>${escapeHtml(referral.agencyName)}</strong>
+          <div class="dual-line">
+            <span>${escapeHtml(referral.programName)}</span>
+            <span>${escapeHtml(referral.phone)}</span>
+            <span>Priority ${escapeHtml(String(referral.priority))}</span>
+          </div>
+          <p>${escapeHtml(referral.reason)}</p>
+        </article>
+      `).join("") || `<p class="empty-state">No referrals returned.</p>`;
+
+      elements.judgeList.innerHTML = `
+        <article class="result-item">
+          <strong>Strengths</strong>
+          <p>${escapeHtml(result.judge.strengths.join(" | "))}</p>
+        </article>
+        <article class="result-item">
+          <strong>Weaknesses</strong>
+          <p>${escapeHtml(result.judge.weaknesses.join(" | "))}</p>
+        </article>
+        <article class="result-item">
+          <strong>Fallback Route</strong>
+          <p>${escapeHtml(result.plan.fallbackRoute)}</p>
+        </article>
+      `;
+
+      setWorkspaceState([phaseLabel, "Plan available", payload.insights ? "Insights attached" : "Insights pending", payload.twin ? "What-if attached" : "What-if pending"]);
+    }
+
+    function renderInsights(payload) {
+      if (!payload?.insights) {
+        elements.insightList.innerHTML = `<p class="empty-state">No insight payload returned.</p>`;
+        return;
+      }
+      elements.insightList.innerHTML = `
+        <article class="result-item">
+          <strong>${escapeHtml(payload.insights.source || "insight")}</strong>
+          <p>${escapeHtml(payload.insights.narrative || "No narrative returned.")}</p>
+        </article>
+      `;
+    }
+
+    function renderTwin(payload) {
+      if (!payload?.twin) {
+        elements.twinList.innerHTML = `<p class="empty-state">No what-if payload returned.</p>`;
+        return;
+      }
+      const recommendation = payload.twin.recommendation;
+      elements.twinList.innerHTML = `
+        <article class="result-item">
+          <strong>Recommendation</strong>
+          <p>${escapeHtml(recommendation ? `${recommendation.agencyName} | wait ${recommendation.expectedWaitMinutes}m | breach ${formatPercent(recommendation.slaBreachProbability * 100)}` : "No recommendation available.")}</p>
+        </article>
+        <article class="result-item">
+          <strong>Scenario Deltas</strong>
+          <p>${escapeHtml(`Staffing ${payload.twin.scenario.staffingDeltaPct}% | demand ${payload.twin.scenario.demandDeltaPct}% | contact ${payload.twin.scenario.contactRateDeltaPct}%`)}</p>
+        </article>
+      `;
+    }
+
+    function renderNotify(payload) {
+      const delivery = payload?.delivery;
+      if (!delivery) {
+        elements.notifyList.innerHTML = `<p class="empty-state">No delivery payload returned.</p>`;
+        return;
+      }
+      elements.notifyList.innerHTML = `
+        <article class="result-item">
+          <strong>${escapeHtml(delivery.status || "notify")}</strong>
+          <p>${escapeHtml(delivery.message || "Notify completed.")}</p>
+        </article>
+      `;
+    }
+
+    async function loadSummaries() {
+      const [runtimeBrief, summaryPack, benchmarkSummary, runtimeScorecard, workflowRuns] = await Promise.all([
+        fetchJson(API.runtimeBrief),
+        fetchJson(API.summaryPack),
+        fetchJson(API.benchmarkSummary),
+        fetchJson(API.runtimeScorecard),
+        fetchJson(API.workflowRuns),
+      ]);
+      state.runtimeBrief = runtimeBrief;
+      state.summaryPack = summaryPack;
+      state.benchmarkSummary = benchmarkSummary;
+      state.runtimeScorecard = runtimeScorecard;
+      state.workflowRuns = workflowRuns;
+      renderMetricStrip();
+      renderWarmStart();
+      renderReviewSummary();
+      renderRuntimeReality();
+      renderWorkflowRuns();
+      renderProofAssets();
+      renderBenchmarkLadder();
+      renderRouteList();
+      renderReviewSequence();
+    }
+
+    async function loadOpsPack(lane) {
+      state.opsPack = await fetchJson(`${API.developerOpsPack}?lane=${encodeURIComponent(lane)}`);
+      renderOpsPack();
+    }
+
+    async function runPlan() {
+      const payload = await fetchJson(API.plan, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildPayload()),
+      });
+      renderMissionSummary(payload, "Plan");
+      setWarmStatus("Plan generated. Review actions, referrals, and judge notes before moving to delivery.", "");
+    }
+
+    async function runInsights() {
+      const payload = await fetchJson(API.insights, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildPayload()),
+      });
+      renderMissionSummary(payload, "Insights");
+      renderInsights(payload);
+      setWarmStatus("Narrative insights attached. Keep them grounded in the plan output, not as standalone truth.", "");
+    }
+
+    async function runWhatIf() {
+      const payload = await fetchJson(API.whatIf, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildWhatIfBody()),
+      });
+      renderMissionSummary(payload, "What-if");
+      renderTwin(payload);
+      setWarmStatus("What-if simulation completed. Compare recommendation quality with the original plan before claiming robustness.", "");
+    }
+
+    async function runNotify() {
+      const payload = await fetchJson(API.notify, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...buildWhatIfBody(),
+          delivery: {
+            dryRun: true,
+            message: "Reviewer-controlled notify step",
+            target: {
+              channel: "openclaw-demo",
+              target: "summary-pack",
+            },
+          },
+        }),
+      });
+      renderMissionSummary(payload, "Notify");
+      renderTwin(payload);
+      renderNotify(payload);
+      setWarmStatus("Notify stays an explicit final operator action, separate from plan success.", "");
+    }
+
+    async function runBenchmark() {
+      const payload = await fetchJson(API.benchmark, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          caseCount: Number(elements.benchmarkCases.value) || 24,
+          maxLoopAttempts: 2,
+        }),
+      });
+      elements.rawOutput.textContent = JSON.stringify(payload, null, 2);
+      setWarmStatus(`Fresh benchmark completed over ${payload.report.caseCount} cases. Use this result carefully because it reflects live rerun output, not just the checked-in snapshot.`, "");
+      elements.benchmarkState.textContent = "Live rerun";
+      elements.benchmarkState.className = "status-pill ok";
+    }
+
+    function wrapBusy(button, task) {
+      return async () => {
+        const original = button.textContent;
+        button.disabled = true;
+        button.textContent = "Working...";
+        try {
+          await task();
+        } catch (error) {
+          setWarmStatus(error instanceof Error ? error.message : "Unexpected error", "danger");
+        } finally {
+          button.disabled = false;
+          button.textContent = original;
+        }
+      };
+    }
+
+    async function boot() {
+      renderScenarios();
+      applyScenario(state.selectedScenarioId);
+      refreshPayloadPreview();
+
+      document.querySelectorAll("input, textarea, select").forEach((node) => {
+        node.addEventListener("input", refreshPayloadPreview);
+        node.addEventListener("change", refreshPayloadPreview);
+      });
+
+      await Promise.all([
+        loadSummaries(),
+        loadOpsPack(elements.laneSelect.value),
+      ]);
+
+      elements.planButton.addEventListener("click", wrapBusy(elements.planButton, runPlan));
+      elements.insightsButton.addEventListener("click", wrapBusy(elements.insightsButton, runInsights));
+      elements.whatIfButton.addEventListener("click", wrapBusy(elements.whatIfButton, runWhatIf));
+      elements.notifyButton.addEventListener("click", wrapBusy(elements.notifyButton, runNotify));
+      elements.benchmarkButton.addEventListener("click", wrapBusy(elements.benchmarkButton, runBenchmark));
+      elements.laneSelect.addEventListener("change", async () => {
+        try {
+          await loadOpsPack(elements.laneSelect.value);
+        } catch (error) {
+          setWarmStatus(error instanceof Error ? error.message : "Failed to load developer ops pack.", "danger");
+        }
+      });
+      elements.copyJsonButton.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(JSON.stringify(state.latestMission || {}, null, 2));
+          setWarmStatus("Latest mission JSON copied to clipboard.", "");
+        } catch {
+          setWarmStatus("Clipboard write failed.", "danger");
+        }
+      });
+      elements.copyRuntimeHandoffButton.addEventListener("click", async () => {
+        try {
+          await copyRuntimeHandoff();
+        } catch {
+          setWarmStatus("Clipboard write failed.", "danger");
+        }
+      });
+    }
+
+    boot().catch((error) => {
+      setHeroState("Error", "warn");
+      setWarmStatus(error instanceof Error ? error.message : "Failed to boot operator console.", "danger");
+    });
+  </script>
+</body>
+
+</html>

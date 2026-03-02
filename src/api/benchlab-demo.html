@@ -1,0 +1,2302 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BenchLab</title>
+    <style>
+    :root {
+      --bg: #f3eee5;
+      --bg-accent: #e2d4bf;
+      --panel: rgba(255, 252, 246, 0.88);
+      --panel-strong: rgba(255, 250, 240, 0.97);
+      --line: rgba(60, 45, 32, 0.16);
+      --text: #1f1812;
+      --muted: #6f6156;
+      --good: #1f7a43;
+      --bad: #b1432e;
+      --warn: #8c6417;
+      --flat: #555d68;
+      --accent: #8c3f2b;
+      --accent-2: #254c73;
+      --shadow: 0 20px 60px rgba(72, 48, 28, 0.12);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(
+          circle at top left,
+          rgba(140, 63, 43, 0.12),
+          transparent 32%
+        ),
+        radial-gradient(
+          circle at top right,
+          rgba(37, 76, 115, 0.14),
+          transparent 28%
+        ),
+        linear-gradient(180deg, #f7f1e8 0%, var(--bg) 100%);
+    }
+
+    .shell {
+      display: grid;
+      gap: 18px;
+      width: min(1480px, calc(100vw - 32px));
+      margin: 24px auto;
+    }
+
+    .hero,
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .hero {
+      display: grid;
+      gap: 16px;
+      padding: 28px;
+      background:
+        linear-gradient(
+          135deg,
+          rgba(255, 250, 241, 0.96),
+          rgba(249, 242, 231, 0.9)
+        ),
+        var(--panel);
+    }
+
+    .hero-header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: end;
+      justify-content: space-between;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      font-family: "Iowan Old Style", "Palatino Linotype", serif;
+      letter-spacing: -0.03em;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 3vw, 3.2rem);
+    }
+
+    .hero p,
+    .panel p,
+    .meta,
+    .tiny {
+      color: var(--muted);
+    }
+
+    .hero p {
+      max-width: 900px;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .brief-banner {
+      display: grid;
+      gap: 10px;
+      padding: 16px 18px;
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+    }
+
+    .brief-badge {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      width: fit-content;
+      padding: 7px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent-2);
+      background: rgba(37, 76, 115, 0.12);
+      border: 1px solid rgba(37, 76, 115, 0.18);
+      border-radius: 999px;
+    }
+
+    .pill-row,
+    .stat-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .pill,
+    .stat {
+      padding: 8px 14px;
+      font-size: 0.95rem;
+      background: rgba(255, 255, 255, 0.62);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+    }
+
+    .stat {
+      min-width: 132px;
+      padding: 12px 16px;
+      border-radius: 18px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 440px minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 18px;
+    }
+
+    .panel {
+      padding: 20px;
+    }
+
+    .panel-header {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 0.92rem;
+      color: var(--muted);
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 12px 14px;
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid rgba(56, 36, 20, 0.18);
+      border-radius: 16px;
+    }
+
+    textarea {
+      min-height: 94px;
+      resize: vertical;
+    }
+
+    button {
+      padding: 12px 16px;
+      cursor: pointer;
+      border: 0;
+      border-radius: 16px;
+      transition:
+        transform 160ms ease,
+        opacity 160ms ease,
+        box-shadow 160ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      cursor: default;
+      opacity: 0.55;
+      transform: none;
+    }
+
+    .primary {
+      color: white;
+      background: linear-gradient(135deg, var(--accent), #b25d3d);
+      box-shadow: 0 12px 26px rgba(140, 63, 43, 0.22);
+    }
+
+    .secondary {
+      color: white;
+      background: linear-gradient(135deg, var(--accent-2), #35688e);
+      box-shadow: 0 12px 26px rgba(37, 76, 115, 0.2);
+    }
+
+    .ghost {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.68);
+      border: 1px solid var(--line);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .card {
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      background: var(--panel-strong);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+    }
+
+    .card-top {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .card-title {
+      display: grid;
+      gap: 4px;
+    }
+
+    .badge {
+      display: inline-flex;
+      gap: 6px;
+      align-items: center;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+      border: 1px solid transparent;
+      border-radius: 999px;
+    }
+
+    .status-running {
+      color: var(--accent-2);
+      background: rgba(37, 76, 115, 0.12);
+      border-color: rgba(37, 76, 115, 0.18);
+    }
+
+    .status-completed,
+    .status-preflight_ok {
+      color: var(--good);
+      background: rgba(31, 122, 67, 0.12);
+      border-color: rgba(31, 122, 67, 0.18);
+    }
+
+    .status-failed,
+    .status-regressed {
+      color: var(--bad);
+      background: rgba(177, 67, 46, 0.12);
+      border-color: rgba(177, 67, 46, 0.18);
+    }
+
+    .status-flat {
+      color: var(--flat);
+      background: rgba(85, 93, 104, 0.12);
+      border-color: rgba(85, 93, 104, 0.18);
+    }
+
+    .status-improved {
+      color: var(--good);
+      background: rgba(31, 122, 67, 0.12);
+      border-color: rgba(31, 122, 67, 0.18);
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .meta-item {
+      padding: 10px 12px;
+      background: rgba(244, 238, 229, 0.74);
+      border-radius: 14px;
+    }
+
+    .meta-item strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    pre {
+      padding: 16px;
+      margin: 0;
+      overflow: auto;
+      font-family: "SFMono-Regular", "JetBrains Mono", monospace;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: #f7f1e8;
+      background: #1f1d1a;
+      border-radius: 18px;
+    }
+
+    .report-shell {
+      display: grid;
+      gap: 12px;
+    }
+
+    .artifact-chart {
+      min-height: 120px;
+      padding: 12px;
+      overflow: auto;
+      background: rgba(255, 255, 255, 0.52);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+    }
+
+    .artifact-chart svg {
+      display: block;
+      width: 100%;
+      min-width: 520px;
+      height: auto;
+    }
+
+    .empty {
+      padding: 18px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.4);
+      border: 1px dashed var(--line);
+      border-radius: 18px;
+    }
+
+    .muted-link {
+      color: var(--accent-2);
+      text-decoration: none;
+    }
+
+    .tiny {
+      font-size: 0.82rem;
+    }
+
+    @media (max-width: 1100px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .field-grid,
+      .meta-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .shell {
+        width: min(100vw - 20px, 100%);
+        margin: 10px auto 20px;
+      }
+
+      .hero,
+      .panel {
+        padding: 18px;
+      }
+    }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div class="hero-header">
+          <div>
+            <h1>BenchLab</h1>
+            <p>
+              Prompt-mode BFCL matrix lab for local and hosted models. Launch
+              preflight or benchmark runs, inspect regressions, and read reports
+              without touching the shell.
+            </p>
+          </div>
+          <div class="pill-row">
+            <span class="pill">Local-first</span>
+            <span class="pill">BFCL prompt-mode</span>
+            <span class="pill">RALPH baseline vs loop</span>
+          </div>
+        </div>
+        <div class="stat-row" id="headline-stats">
+          <div class="stat">
+            <strong>Loading</strong>
+            <div class="tiny">Fetching latest runs</div>
+          </div>
+        </div>
+        <div class="brief-banner">
+          <span class="brief-badge" id="brief-badge"
+            >benchlab-runtime-brief</span
+          >
+          <p id="brief-headline">
+            Loading operator brief for configs, runtimes, artifacts, and
+            forensics.
+          </p>
+          <div class="stat-row" id="brief-stats">
+            <div class="stat">
+              <strong>Loading</strong>
+              <div class="tiny">Fetching readiness counts</div>
+            </div>
+          </div>
+          <p class="tiny" id="brief-review-sequence">
+            Loading promotion sequence for checked-in claims.
+          </p>
+          <div class="pill-row" style="margin-top: 14px">
+            <button class="ghost" id="copy-review-button" type="button">
+              Copy Review Path
+            </button>
+            <button class="ghost" id="copy-proof-button" type="button">
+              Copy Routes
+            </button>
+            <button class="ghost" id="copy-top-claim-button" type="button">
+              Copy Top Claim
+            </button>
+            <button class="ghost" id="copy-payload-button" type="button">
+              Copy Launch Payload
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="layout">
+        <div class="stack">
+          <section class="panel">
+            <div class="panel-header">
+              <h2>Launch Run</h2>
+              <button class="ghost" id="refresh-button" type="button">
+                Refresh
+              </button>
+            </div>
+            <form id="launch-form">
+              <div class="field-grid">
+                <label>
+                  Config
+                  <select id="models-file" name="modelsFile"></select>
+                </label>
+                <label>
+                  Mode
+                  <select id="mode" name="mode">
+                    <option value="benchmark">Benchmark</option>
+                    <option value="preflight">Preflight</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="field-grid">
+                <label>
+                  Cases / Category
+                  <input
+                    id="cases-per-category"
+                    name="casesPerCategory"
+                    type="number"
+                    min="0"
+                    value="5"
+                  >
+                </label>
+                <label>
+                  Runtime Name
+                  <input
+                    id="runtime-name"
+                    name="runtimeName"
+                    type="text"
+                    placeholder="runtime-ollama-live-10"
+                  >
+                </label>
+              </div>
+
+              <div class="field-grid">
+                <label>
+                  Model IDs (comma-separated)
+                  <input
+                    id="model-ids"
+                    name="modelIds"
+                    type="text"
+                    placeholder="ollama-llama3-2,ollama-qwen3-5-4b"
+                  >
+                </label>
+                <label>
+                  Categories (comma-separated)
+                  <input
+                    id="categories"
+                    name="categories"
+                    type="text"
+                    placeholder="simple_python,multiple,parallel,parallel_multiple"
+                  >
+                </label>
+              </div>
+
+              <div class="field-grid">
+                <label>
+                  Num Threads
+                  <input
+                    id="num-threads"
+                    name="numThreads"
+                    type="number"
+                    min="1"
+                    value="1"
+                  >
+                </label>
+                <label>
+                  Max Step Limit
+                  <input
+                    id="max-step-limit"
+                    name="maxStepLimit"
+                    type="number"
+                    min="1"
+                    value="20"
+                  >
+                </label>
+              </div>
+
+              <div class="actions">
+                <button class="primary" id="launch-button" type="submit">
+                  Start Job
+                </button>
+                <button class="secondary" id="preflight-button" type="button">
+                  Quick Preflight
+                </button>
+              </div>
+              <div class="tiny" id="launch-feedback"></div>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h2>Jobs</h2>
+              <span class="tiny" id="jobs-meta">live</span>
+            </div>
+            <div class="list" id="jobs-list">
+              <div class="empty">No jobs yet.</div>
+            </div>
+          </section>
+        </div>
+
+        <div class="stack">
+          <section class="panel">
+            <div class="panel-header">
+              <h2>Runtime Matrix</h2>
+              <span class="tiny" id="runs-meta">live</span>
+            </div>
+            <div class="list" id="runs-list">
+              <div class="empty">No runtimes found yet.</div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h2>Model Results</h2>
+              <span class="tiny" id="runtime-models-meta"
+                >select a runtime</span
+              >
+            </div>
+            <div class="list" id="runtime-models-list">
+              <div class="empty">
+                Pick a runtime to inspect model-level results.
+              </div>
+            </div>
+          </section>
+
+          <section class="panel report-shell">
+            <div class="panel-header">
+              <h2>Runtime Compare</h2>
+              <span class="tiny" id="compare-title">pick two runtimes</span>
+            </div>
+            <div class="field-grid">
+              <label>
+                Left Runtime
+                <select id="compare-left"></select>
+              </label>
+              <label>
+                Right Runtime
+                <select id="compare-right"></select>
+              </label>
+            </div>
+            <div class="meta-grid" id="compare-meta"></div>
+            <pre
+              id="compare-body"
+            >Pick two runtimes to compare model deltas and variants.</pre>
+          </section>
+
+          <section class="panel report-shell">
+            <div class="panel-header">
+              <h2>Failure Forensics</h2>
+              <span class="tiny" id="forensics-title">select a runtime</span>
+            </div>
+            <div class="meta-grid" id="forensics-meta"></div>
+            <pre
+              id="forensics-body"
+            >Pick a runtime to inspect timeout, schema, and missing-arg trends.</pre>
+          </section>
+
+          <section class="panel report-shell">
+            <div class="panel-header">
+              <h2>Variant Search</h2>
+              <span class="tiny" id="variant-title"
+                >historical recommendations</span
+              >
+            </div>
+            <div class="pill-row" style="margin-bottom: 12px">
+              <button class="ghost" id="copy-next-config-button" type="button">
+                Copy Next Config
+              </button>
+              <button class="ghost" id="copy-next-command-button" type="button">
+                Copy Matrix Command
+              </button>
+            </div>
+            <div class="meta-grid" id="variant-meta"></div>
+            <pre
+              id="variant-body"
+            >Loading variant leaderboard and next-try recommendations.</pre>
+          </section>
+
+          <section class="panel">
+            <div class="panel-header">
+              <h2>Best Checked-In Claims</h2>
+              <span class="tiny" id="artifacts-meta">loading</span>
+            </div>
+            <div class="list" id="artifacts-list">
+              <div class="empty">No tracked artifacts found yet.</div>
+            </div>
+          </section>
+
+          <section class="panel report-shell">
+            <div class="panel-header">
+              <h2>Checked-In Artifact Forensics</h2>
+              <span class="tiny" id="artifact-forensics-title"
+                >loading checked-in claims</span
+              >
+            </div>
+            <div class="meta-grid" id="artifact-forensics-meta"></div>
+            <pre id="artifact-forensics-body">
+Loading checked-in artifact failure taxonomy.</pre
+            >
+          </section>
+
+          <section class="panel report-shell">
+            <div class="panel-header">
+              <h2>Artifact Snapshot</h2>
+              <span class="tiny" id="artifact-title">select an artifact</span>
+            </div>
+            <div class="meta-grid" id="artifact-meta"></div>
+            <div class="artifact-chart" id="artifact-chart">
+              Pick a checked-in artifact to inspect its chart.
+            </div>
+            <pre
+              id="artifact-body"
+            >Pick a checked-in artifact to inspect its benchmark report.</pre>
+          </section>
+
+          <section class="panel report-shell">
+            <div class="panel-header">
+              <h2>Report</h2>
+              <span class="tiny" id="report-title">select a runtime</span>
+            </div>
+            <div class="meta-grid" id="report-meta"></div>
+            <pre
+              id="report-body"
+            >Pick a runtime to inspect its matrix report.</pre>
+          </section>
+
+          <section class="panel report-shell">
+            <div class="panel-header">
+              <h2>Model Detail</h2>
+              <span class="tiny" id="runtime-model-title"
+                >select a model run</span
+              >
+            </div>
+            <div class="meta-grid" id="runtime-model-meta"></div>
+            <pre
+              id="runtime-model-body"
+            >Pick a model run to inspect its benchmark report and execution excerpt.</pre>
+          </section>
+
+          <section class="panel report-shell">
+            <div class="panel-header">
+              <h2>Job Logs</h2>
+              <span class="tiny" id="logs-title">select a job</span>
+            </div>
+            <div class="tiny" id="logs-meta">stdout + stderr</div>
+            <pre id="logs-body">Pick a job to inspect its execution logs.</pre>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script>
+    "use strict";
+    const state = {
+      artifacts: [],
+      artifactForensics: null,
+      compare: null,
+      configs: [],
+      forensics: null,
+      jobs: [],
+      summaryPack: null,
+      runtimeBrief: null,
+      runtimeModels: [],
+      selectedRuntimeModelKey: null,
+      selectedArtifactId: null,
+      selectedCompareLeft: null,
+      selectedCompareRight: null,
+      runs: [],
+      selectedJobId: null,
+      selectedRun: null,
+      variantSearch: null,
+    };
+
+    const els = {
+      briefBadge: document.querySelector("#brief-badge"),
+      briefHeadline: document.querySelector("#brief-headline"),
+      briefReviewSequence: document.querySelector("#brief-review-sequence"),
+      briefStats: document.querySelector("#brief-stats"),
+      artifactForensicsBody: document.querySelector("#artifact-forensics-body"),
+      artifactForensicsMeta: document.querySelector("#artifact-forensics-meta"),
+      artifactForensicsTitle: document.querySelector(
+        "#artifact-forensics-title"
+      ),
+      artifactBody: document.querySelector("#artifact-body"),
+      artifactChart: document.querySelector("#artifact-chart"),
+      artifactMeta: document.querySelector("#artifact-meta"),
+      artifactTitle: document.querySelector("#artifact-title"),
+      artifactsList: document.querySelector("#artifacts-list"),
+      artifactsMeta: document.querySelector("#artifacts-meta"),
+      casesPerCategory: document.querySelector("#cases-per-category"),
+      categories: document.querySelector("#categories"),
+      compareBody: document.querySelector("#compare-body"),
+      compareLeft: document.querySelector("#compare-left"),
+      compareMeta: document.querySelector("#compare-meta"),
+      compareRight: document.querySelector("#compare-right"),
+      compareTitle: document.querySelector("#compare-title"),
+      copyNextCommandButton: document.querySelector(
+        "#copy-next-command-button"
+      ),
+      copyNextConfigButton: document.querySelector("#copy-next-config-button"),
+      copyPayloadButton: document.querySelector("#copy-payload-button"),
+      copyProofButton: document.querySelector("#copy-proof-button"),
+      copyReviewButton: document.querySelector("#copy-review-button"),
+      copyTopClaimButton: document.querySelector("#copy-top-claim-button"),
+      forensicsBody: document.querySelector("#forensics-body"),
+      forensicsMeta: document.querySelector("#forensics-meta"),
+      forensicsTitle: document.querySelector("#forensics-title"),
+      headlineStats: document.querySelector("#headline-stats"),
+      jobsList: document.querySelector("#jobs-list"),
+      jobsMeta: document.querySelector("#jobs-meta"),
+      launchButton: document.querySelector("#launch-button"),
+      launchFeedback: document.querySelector("#launch-feedback"),
+      launchForm: document.querySelector("#launch-form"),
+      maxStepLimit: document.querySelector("#max-step-limit"),
+      modelIds: document.querySelector("#model-ids"),
+      mode: document.querySelector("#mode"),
+      modelsFile: document.querySelector("#models-file"),
+      numThreads: document.querySelector("#num-threads"),
+      preflightButton: document.querySelector("#preflight-button"),
+      refreshButton: document.querySelector("#refresh-button"),
+      logsBody: document.querySelector("#logs-body"),
+      logsMeta: document.querySelector("#logs-meta"),
+      logsTitle: document.querySelector("#logs-title"),
+      reportBody: document.querySelector("#report-body"),
+      reportMeta: document.querySelector("#report-meta"),
+      reportTitle: document.querySelector("#report-title"),
+      runtimeName: document.querySelector("#runtime-name"),
+      runtimeModelBody: document.querySelector("#runtime-model-body"),
+      runtimeModelMeta: document.querySelector("#runtime-model-meta"),
+      runtimeModelTitle: document.querySelector("#runtime-model-title"),
+      runtimeModelsList: document.querySelector("#runtime-models-list"),
+      runtimeModelsMeta: document.querySelector("#runtime-models-meta"),
+      runsList: document.querySelector("#runs-list"),
+      runsMeta: document.querySelector("#runs-meta"),
+      variantBody: document.querySelector("#variant-body"),
+      variantMeta: document.querySelector("#variant-meta"),
+      variantTitle: document.querySelector("#variant-title"),
+    };
+
+    function statusClass(value) {
+      return `status-${String(value || "unknown").replace(/[^a-z0-9_]/gi, "_")}`;
+    }
+
+    function formatDate(value) {
+      if (!value) {
+        return "-";
+      }
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return String(value);
+      }
+      return date.toLocaleString();
+    }
+
+    function safeJoin(values) {
+      if (!Array.isArray(values) || values.length === 0) {
+        return "-";
+      }
+      return values.join(", ");
+    }
+
+    function formatMetric(value, digits = 2) {
+      return typeof value === "number" && Number.isFinite(value)
+        ? value.toFixed(digits)
+        : "-";
+    }
+
+    function formatPercent(value) {
+      return typeof value === "number" && Number.isFinite(value)
+        ? `${value.toFixed(2)}%`
+        : "-";
+    }
+
+    async function copyTextToClipboard(text) {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+
+      const helper = document.createElement("textarea");
+      helper.value = text;
+      helper.setAttribute("readonly", "true");
+      helper.style.position = "absolute";
+      helper.style.left = "-9999px";
+      document.body.append(helper);
+      helper.select();
+      document.execCommand("copy");
+      helper.remove();
+    }
+
+    function flashButtonLabel(button, idleLabel, nextLabel) {
+      if (!button) {
+        return;
+      }
+      button.textContent = nextLabel;
+      window.setTimeout(() => {
+        button.textContent = idleLabel;
+      }, 1400);
+    }
+
+    function formatRuntimeProgress(modelRun) {
+      const parts = [];
+      if (
+        typeof modelRun?.progressCurrent === "number" &&
+        typeof modelRun?.progressTotal === "number"
+      ) {
+        parts.push(`${modelRun.progressCurrent}/${modelRun.progressTotal}`);
+      }
+      if (
+        typeof modelRun?.progressPercent === "number" &&
+        Number.isFinite(modelRun.progressPercent)
+      ) {
+        parts.push(`${modelRun.progressPercent.toFixed(0)}%`);
+      }
+      if (modelRun?.executionPhase) {
+        parts.push(modelRun.executionPhase);
+      }
+      if (parts.length > 0) {
+        return parts.join(" · ");
+      }
+      if (modelRun?.status === "completed") {
+        return "completed";
+      }
+      if (modelRun?.status === "running") {
+        return "running";
+      }
+      return "waiting for logs";
+    }
+
+    function formatSignedMetric(value, digits = 2) {
+      return typeof value === "number" && Number.isFinite(value)
+        ? `${value >= 0 ? "+" : ""}${value.toFixed(digits)}`
+        : "-";
+    }
+
+    function getArtifactForensicsClaim(artifactId) {
+      const claims = state.artifactForensics?.claims;
+      if (!Array.isArray(claims)) {
+        return null;
+      }
+      return claims.find((claim) => claim.artifactId === artifactId) || null;
+    }
+
+    function formatArtifactForensicsStatus(claimForensics) {
+      if (!claimForensics) {
+        return "loading";
+      }
+      if (claimForensics.hasErrorBuckets) {
+        return claimForensics.dominantBucket || "tracked";
+      }
+      if (claimForensics.hasForensicsFile) {
+        return "no_error_buckets";
+      }
+      return "missing_forensics";
+    }
+
+    function renderCompareControls() {
+      const options = state.runs
+        .map((run) => {
+          return `<option value="${run.name}">${run.name}</option>`;
+        })
+        .join("");
+      els.compareLeft.innerHTML = options;
+      els.compareRight.innerHTML = options;
+      if (state.selectedCompareLeft) {
+        els.compareLeft.value = state.selectedCompareLeft;
+      }
+      if (state.selectedCompareRight) {
+        els.compareRight.value = state.selectedCompareRight;
+      }
+    }
+
+    function ensureCompareSelection() {
+      const runNames = state.runs.map((run) => run.name);
+      if (runNames.length === 0) {
+        state.selectedCompareLeft = null;
+        state.selectedCompareRight = null;
+        renderCompareControls();
+        return;
+      }
+      if (!runNames.includes(state.selectedCompareLeft)) {
+        state.selectedCompareLeft = runNames[0];
+      }
+      if (
+        !runNames.includes(state.selectedCompareRight) ||
+        state.selectedCompareRight === state.selectedCompareLeft
+      ) {
+        state.selectedCompareRight =
+          runNames.find((name) => name !== state.selectedCompareLeft) ||
+          runNames[0];
+      }
+      renderCompareControls();
+    }
+
+    async function fetchJson(path, options) {
+      const response = await fetch(path, {
+        headers: { "Content-Type": "application/json" },
+        ...options,
+      });
+      const payload = await response.json();
+      if (!response.ok) {
+        throw new Error(payload.error || `request failed: ${response.status}`);
+      }
+      return payload;
+    }
+
+    function renderHeadline() {
+      if (state.runs.length === 0 && state.artifacts.length === 0) {
+        els.headlineStats.innerHTML =
+          '<div class="stat"><strong>No runs yet</strong><div class="tiny">Launch a preflight or benchmark.</div></div>';
+        return;
+      }
+
+      const latest = state.runs[0];
+      const counts = latest?.counts || {};
+      const improvedArtifacts = state.artifacts.filter(
+        (artifact) => artifact.outcome === "improved"
+      );
+      const bestArtifact = improvedArtifacts[0] || null;
+      const artifactForensicsSummary = state.artifactForensics?.summary || null;
+      els.headlineStats.innerHTML = [
+        latest
+          ? { label: "Latest Runtime", value: latest.name }
+          : { label: "Latest Runtime", value: "-" },
+        { label: "Completed", value: String(counts.completed ?? 0) },
+        { label: "Improved", value: String(counts.improved ?? 0) },
+        {
+          label: "Checked-In Gains",
+          value: String(improvedArtifacts.length),
+        },
+        {
+          label: "Best Checked-In Delta",
+          value: bestArtifact ? `${formatMetric(bestArtifact.deltaPp)}pp` : "-",
+        },
+        {
+          label: "Tracked Claim Errors",
+          value: artifactForensicsSummary
+            ? `${artifactForensicsSummary.baselineErrorItems} -> ${artifactForensicsSummary.ralphErrorItems}`
+            : "-",
+        },
+        {
+          label: "Dominant Claim Bucket",
+          value: artifactForensicsSummary?.dominantBucket || "-",
+        },
+      ]
+        .map(
+          (item) =>
+            `<div class="stat"><strong>${item.label}</strong><div>${item.value}</div></div>`
+        )
+        .join("");
+    }
+
+    function renderRuntimeBrief(payload) {
+      state.runtimeBrief = payload || null;
+
+      if (!payload || payload.status !== "ok") {
+        els.briefBadge.textContent = "brief-error";
+        els.briefHeadline.textContent =
+          "BenchLab operator brief is unavailable. Check /health and repository paths.";
+        els.briefStats.innerHTML =
+          '<div class="stat"><strong>Unavailable</strong><div class="tiny">Runtime brief fetch failed</div></div>';
+        return;
+      }
+
+      els.briefBadge.textContent =
+        payload.readinessContract || "benchlab-runtime-brief";
+      els.briefHeadline.textContent =
+        payload.headline ||
+        "Local-first BFCL matrix lab with tracked jobs and forensics evidence.";
+      const counts = payload.evidenceCounts || {};
+      els.briefStats.innerHTML = [
+        { label: "Configs", value: String(counts.configs ?? 0) },
+        { label: "Jobs", value: String(counts.jobs ?? 0) },
+        { label: "Runs", value: String(counts.runs ?? 0) },
+        { label: "Artifacts", value: String(counts.artifacts ?? 0) },
+        { label: "Schema", value: payload.reportContract?.schema || "-" },
+        { label: "Routes", value: String(payload.routeCount ?? 0) },
+      ]
+        .map(
+          (item) =>
+            `<div class="stat"><strong>${item.label}</strong><div class="tiny">${item.value}</div></div>`
+        )
+        .join("");
+    }
+
+    function renderSummaryPack(payload) {
+      state.summaryPack = payload || null;
+
+      if (!payload || payload.status !== "ok") {
+        els.briefReviewSequence.textContent =
+          "Summary pack unavailable. Check /health, /v1/benchlab/runtime-brief, and artifact routes.";
+        return;
+      }
+
+      const counts = payload.evidenceBundle?.counts || {};
+      const bestDelta = payload.evidenceBundle?.bestArtifact?.deltaPp;
+      const bestClaim = payload.evidenceBundle?.bestArtifact?.claimName || "-";
+
+      els.briefBadge.textContent =
+        payload.summaryPackId || "benchlab-summary-pack";
+      els.briefHeadline.textContent =
+        payload.headline ||
+        "BenchLab validation data is ready for configs, runs, and checked-in claims.";
+      els.briefStats.innerHTML = [
+        { label: "Configs", value: String(counts.configs ?? 0) },
+        { label: "Runs", value: String(counts.runs ?? 0) },
+        {
+          label: "Best Delta",
+          value:
+            typeof bestDelta === "number"
+              ? `${formatMetric(bestDelta)}pp`
+              : "-",
+        },
+        {
+          label: "Bucket",
+          value: payload.evidenceBundle?.dominantBucket || "-",
+        },
+        {
+          label: "Improved",
+          value: String(payload.evidenceBundle?.improvedArtifacts ?? 0),
+        },
+        { label: "Schema", value: payload.evidenceBundle?.schema || "-" },
+      ]
+        .map(
+          (item) =>
+            `<div class="stat"><strong>${item.label}</strong><div class="tiny">${item.value}</div></div>`
+        )
+        .join("");
+      els.briefReviewSequence.textContent = `[promotion flow] ${payload.reviewSequence.join(" -> ")} | top claim: ${bestClaim}`;
+    }
+
+    function renderConfigs() {
+      const selected = els.modelsFile.value;
+      els.modelsFile.innerHTML = state.configs
+        .map((config) => {
+          const isSelected = selected
+            ? config.name === selected
+            : config.isRecommended;
+          return `<option value="${config.name}" ${isSelected ? "selected" : ""}>${config.name}${config.isRecommended ? " (recommended)" : ""}</option>`;
+        })
+        .join("");
+    }
+
+    function renderJobs() {
+      els.jobsMeta.textContent = `${state.jobs.length} tracked`;
+      if (state.jobs.length === 0) {
+        els.jobsList.innerHTML = '<div class="empty">No jobs yet.</div>';
+        return;
+      }
+
+      els.jobsList.innerHTML = state.jobs
+        .map((job) => {
+          const canCancel = job.status === "running";
+          return `
+              <article class="card">
+                <div class="card-top">
+                  <div class="card-title">
+                    <strong>${job.id}</strong>
+                    <span class="tiny">${job.mode} · ${job.runtimeName}</span>
+                  </div>
+                  <span class="badge ${statusClass(job.status)}">${job.status}</span>
+                </div>
+                <div class="meta-grid">
+                  <div class="meta-item"><strong>Models File</strong>${job.modelsFileName}</div>
+                  <div class="meta-item"><strong>Created</strong>${formatDate(job.createdAt)}</div>
+                  <div class="meta-item"><strong>Started</strong>${formatDate(job.startedAt)}</div>
+                  <div class="meta-item"><strong>Ended</strong>${formatDate(job.endedAt)}</div>
+                </div>
+                <div class="actions">
+                  <button class="ghost" type="button" data-run="${job.runtimeName}">Open Runtime</button>
+                  <button class="ghost" type="button" data-job="${job.id}">View Logs</button>
+                  ${canCancel ? `<button class="ghost" type="button" data-cancel="${job.id}">Cancel</button>` : ""}
+                </div>
+                ${job.errorMessage ? `<div class="tiny" style="color:var(--bad)">${job.errorMessage}</div>` : ""}
+              </article>
+            `;
+        })
+        .join("");
+    }
+
+    function renderRuns() {
+      els.runsMeta.textContent = `${state.runs.length} runtimes`;
+      if (state.runs.length === 0) {
+        els.runsList.innerHTML =
+          '<div class="empty">No runtimes found yet.</div>';
+        return;
+      }
+
+      els.runsList.innerHTML = state.runs
+        .map((run) => {
+          const counts = run.counts || {};
+          return `
+              <article class="card">
+                <div class="card-top">
+                  <div class="card-title">
+                    <strong>${run.name}</strong>
+                    <span class="tiny">${run.modelsFileName || "unknown config"}</span>
+                  </div>
+                  <span class="badge ${statusClass(run.primaryOutcome)}">${run.primaryOutcome}</span>
+                </div>
+                <div class="meta-grid">
+                  <div class="meta-item"><strong>Updated</strong>${formatDate(run.updatedAt)}</div>
+                  <div class="meta-item"><strong>Cases / Category</strong>${run.casesPerCategory ?? "-"}</div>
+                  <div class="meta-item"><strong>Counts</strong>C:${counts.completed ?? 0} I:${counts.improved ?? 0} F:${counts.flat ?? 0} R:${counts.regressed ?? 0}</div>
+                  <div class="meta-item"><strong>Categories</strong>${safeJoin(run.categories)}</div>
+                </div>
+                <div class="actions">
+                  <button class="ghost" type="button" data-run="${run.name}">Inspect</button>
+                </div>
+              </article>
+            `;
+        })
+        .join("");
+    }
+
+    function renderRuntimeModels() {
+      const selectedRunName = state.selectedRun?.name || null;
+      if (selectedRunName) {
+        const runningCount = state.runtimeModels.filter(
+          (modelRun) => modelRun.status === "running"
+        ).length;
+        els.runtimeModelsMeta.textContent = `${state.runtimeModels.length} model runs · ${runningCount} running`;
+      } else {
+        els.runtimeModelsMeta.textContent = "select a runtime";
+      }
+      if (!selectedRunName) {
+        els.runtimeModelsList.innerHTML =
+          '<div class="empty">Pick a runtime to inspect model-level results.</div>';
+        return;
+      }
+      if (state.runtimeModels.length === 0) {
+        els.runtimeModelsList.innerHTML =
+          '<div class="empty">No model summaries found for this runtime yet.</div>';
+        return;
+      }
+
+      els.runtimeModelsList.innerHTML = state.runtimeModels
+        .map((modelRun) => {
+          const modelKey = `${selectedRunName}::${modelRun.name}`;
+          const badgeValue =
+            modelRun.status === "completed"
+              ? modelRun.outcome
+              : modelRun.status;
+          return `
+              <article class="card">
+                <div class="card-top">
+                  <div class="card-title">
+                    <strong>${modelRun.modelName || modelRun.name}</strong>
+                    <span class="tiny">${modelRun.providerName || "-"} · ${modelRun.name}</span>
+                  </div>
+                  <span class="badge ${statusClass(badgeValue)}">${badgeValue}</span>
+                </div>
+                <div class="meta-grid">
+                  <div class="meta-item"><strong>Status</strong>${modelRun.status}</div>
+                  <div class="meta-item"><strong>Progress</strong>${formatRuntimeProgress(modelRun)}</div>
+                  <div class="meta-item"><strong>Scores</strong>${formatMetric(modelRun.baselineScore)} -> ${formatMetric(modelRun.ralphScore)}</div>
+                  <div class="meta-item"><strong>Delta</strong>${formatMetric(modelRun.deltaPp)} pp</div>
+                  <div class="meta-item"><strong>Cases</strong>${modelRun.casesPerCategory ?? "-"}</div>
+                  <div class="meta-item"><strong>Categories</strong>${safeJoin(modelRun.categories)}</div>
+                </div>
+                <div class="actions">
+                  <button class="ghost" type="button" data-runtime-model="${modelKey}">Inspect</button>
+                </div>
+              </article>
+            `;
+        })
+        .join("");
+    }
+
+    function renderCompare(payload) {
+      state.compare = payload || null;
+      if (!(payload?.leftRun && payload?.rightRun)) {
+        els.compareTitle.textContent = "pick two runtimes";
+        els.compareMeta.innerHTML = "";
+        els.compareBody.textContent =
+          "Pick two runtimes to compare model deltas and variants.";
+        return;
+      }
+
+      els.compareTitle.textContent = `${payload.leftRun.name} vs ${payload.rightRun.name}`;
+      els.compareMeta.innerHTML = [
+        { label: "Shared", value: String(payload.summary?.shared ?? 0) },
+        {
+          label: "Right Better",
+          value: String(payload.summary?.rightBetter ?? 0),
+        },
+        {
+          label: "Left Better",
+          value: String(payload.summary?.leftBetter ?? 0),
+        },
+        { label: "Right Only", value: String(payload.summary?.rightOnly ?? 0) },
+      ]
+        .map(
+          (item) =>
+            `<div class="meta-item"><strong>${item.label}</strong>${item.value}</div>`
+        )
+        .join("");
+
+      const lines = [];
+      for (const row of payload.rows || []) {
+        lines.push(
+          [
+            `${row.modelName || row.key} [${row.verdict}]`,
+            `left: ${row.left?.ralphVariant || "-"} ${formatSignedMetric(row.left?.deltaPp)} pp (${row.left?.outcome || "-"})`,
+            `right: ${row.right?.ralphVariant || "-"} ${formatSignedMetric(row.right?.deltaPp)} pp (${row.right?.outcome || "-"})`,
+            `shift: ${formatSignedMetric(row.deltaPpShift)} pp`,
+          ].join("\n")
+        );
+      }
+      if ((payload.leftOnly || []).length > 0) {
+        lines.push(
+          [
+            "[left only]",
+            ...payload.leftOnly.map(
+              (row) =>
+                `${row.id} · ${row.ralphVariant || "-"} · ${formatSignedMetric(row.deltaPp)} pp`
+            ),
+          ].join("\n")
+        );
+      }
+      if ((payload.rightOnly || []).length > 0) {
+        lines.push(
+          [
+            "[right only]",
+            ...payload.rightOnly.map(
+              (row) =>
+                `${row.id} · ${row.ralphVariant || "-"} · ${formatSignedMetric(row.deltaPp)} pp`
+            ),
+          ].join("\n")
+        );
+      }
+      els.compareBody.textContent = lines.length
+        ? lines.join("\n\n")
+        : "No overlapping model records were found.";
+    }
+
+    function renderForensics(payload) {
+      state.forensics = payload?.forensics || null;
+      if (!payload?.forensics) {
+        els.forensicsTitle.textContent = "select a runtime";
+        els.forensicsMeta.innerHTML = "";
+        els.forensicsBody.textContent =
+          "Pick a runtime to inspect timeout, schema, and missing-arg trends.";
+        return;
+      }
+
+      const forensics = payload.forensics;
+      els.forensicsTitle.textContent = forensics.runtimeName;
+      els.forensicsMeta.innerHTML = [
+        {
+          label: "Baseline Errors",
+          value: `${forensics.baselineErrorItems} / ${forensics.baselineTotalItems}`,
+        },
+        {
+          label: "RALPH Errors",
+          value: `${forensics.ralphErrorItems} / ${forensics.ralphTotalItems}`,
+        },
+        {
+          label: "Models Improved",
+          value: String(forensics.modelsWithImprovedErrors ?? 0),
+        },
+        {
+          label: "Models Regressed",
+          value: String(forensics.modelsWithRegressedErrors ?? 0),
+        },
+      ]
+        .map(
+          (item) =>
+            `<div class="meta-item"><strong>${item.label}</strong>${item.value}</div>`
+        )
+        .join("");
+
+      const bucketLines = (forensics.buckets || []).map((bucket) => {
+        return `${bucket.bucket}: baseline ${bucket.baselineCount}, ralph ${bucket.ralphCount}, delta ${formatSignedMetric(bucket.deltaCount, 0)}`;
+      });
+      const modelLines = (forensics.modelRuns || [])
+        .filter(
+          (modelRun) => modelRun.baselineErrorItems || modelRun.ralphErrorItems
+        )
+        .map((modelRun) => {
+          return `${modelRun.modelName || modelRun.name}: ${modelRun.dominantBucket || "no dominant bucket"} · baseline ${modelRun.baselineErrorItems}, ralph ${modelRun.ralphErrorItems}`;
+        });
+      const sections = [];
+      if (bucketLines.length > 0) {
+        sections.push(["[buckets]", ...bucketLines].join("\n"));
+      }
+      if (modelLines.length > 0) {
+        sections.push(["[models]", ...modelLines].join("\n"));
+      }
+      els.forensicsBody.textContent = sections.length
+        ? sections.join("\n\n")
+        : "No error forensics captured for this runtime yet.";
+    }
+
+    function renderVariantSearch(payload) {
+      state.variantSearch = payload || null;
+      if (!payload) {
+        els.variantTitle.textContent = "historical recommendations";
+        els.variantMeta.innerHTML = "";
+        els.variantBody.textContent =
+          "Loading variant leaderboard and next-try recommendations.";
+        return;
+      }
+
+      els.variantTitle.textContent = "historical recommendations";
+      els.variantMeta.innerHTML = [
+        { label: "Variants", value: String(payload.summary?.variants ?? 0) },
+        { label: "Models", value: String(payload.summary?.models ?? 0) },
+        {
+          label: "Top Variant",
+          value: payload.variants?.[0]
+            ? `${payload.variants[0].variant} (${formatSignedMetric(payload.variants[0].avgDeltaPp)} pp avg)`
+            : "-",
+        },
+        {
+          label: "Top Model",
+          value: payload.recommendations?.[0]?.modelName || "-",
+        },
+      ]
+        .map(
+          (item) =>
+            `<div class="meta-item"><strong>${item.label}</strong>${item.value}</div>`
+        )
+        .join("");
+
+      const variantLines = (payload.variants || [])
+        .slice(0, 6)
+        .map((variant) => {
+          return `${variant.modelKey} · ${variant.variant} · avg ${formatSignedMetric(variant.avgDeltaPp)} pp · ${variant.runsCount} run(s)`;
+        });
+      const recommendationLines = (payload.recommendations || [])
+        .slice(0, 8)
+        .map((item) => {
+          const nextText =
+            Array.isArray(item.nextVariantsToTry) &&
+            item.nextVariantsToTry.length > 0
+              ? item.nextVariantsToTry.join(", ")
+              : "promote / validate current best";
+          const copyHints = [];
+          if (item.suggestedModelEntryJson) {
+            copyHints.push("config ready");
+          }
+          if (item.suggestedMatrixCommand) {
+            copyHints.push("command ready");
+          }
+          const hintText =
+            copyHints.length > 0 ? ` · ${copyHints.join(" / ")}` : "";
+          return `${item.modelName || "-"} [${item.stage}] best=${item.bestVariant || "-"} ${formatSignedMetric(item.bestDeltaPp)} pp next=${nextText}${hintText}`;
+        });
+      els.variantBody.textContent = [
+        ["[variant leaderboard]", ...variantLines].join("\n"),
+        ["[next recommendations]", ...recommendationLines].join("\n"),
+      ].join("\n\n");
+    }
+
+    function renderArtifacts() {
+      els.artifactsMeta.textContent = `${state.artifacts.length} best claims`;
+      if (state.artifacts.length === 0) {
+        els.artifactsList.innerHTML =
+          '<div class="empty">No tracked artifacts found yet.</div>';
+        return;
+      }
+
+      els.artifactsList.innerHTML = state.artifacts
+        .map((artifact) => {
+          const claimForensics = getArtifactForensicsClaim(artifact.id);
+          const forensicsStatus = formatArtifactForensicsStatus(claimForensics);
+          const errorDelta = claimForensics
+            ? `${claimForensics.baselineErrorItems} -> ${claimForensics.ralphErrorItems}`
+            : "-";
+          return `
+              <article class="card">
+                <div class="card-top">
+                  <div class="card-title">
+                    <strong>${artifact.modelName || artifact.claimName}</strong>
+                    <span class="tiny">${artifact.providerName || artifact.experimentName} · ${artifact.claimName}</span>
+                  </div>
+                  <span class="badge ${statusClass(artifact.outcome)}">${artifact.outcome}</span>
+                </div>
+                <div class="meta-grid">
+                  <div class="meta-item"><strong>Cases / Category</strong>${artifact.casesPerCategory ?? "-"}</div>
+                  <div class="meta-item"><strong>Delta</strong>${formatMetric(artifact.deltaPp)} pp</div>
+                  <div class="meta-item"><strong>Baseline</strong>${formatMetric(artifact.baselineScore)}</div>
+                  <div class="meta-item"><strong>RALPH</strong>${formatMetric(artifact.ralphScore)}</div>
+                  <div class="meta-item"><strong>Failure Bucket</strong>${forensicsStatus}</div>
+                  <div class="meta-item"><strong>Error Items</strong>${errorDelta}</div>
+                </div>
+                <div class="actions">
+                  <button class="ghost" type="button" data-artifact="${artifact.id}">Inspect</button>
+                </div>
+              </article>
+            `;
+        })
+        .join("");
+    }
+
+    function renderArtifactForensics(payload) {
+      state.artifactForensics = payload || null;
+      if (!payload?.summary) {
+        els.artifactForensicsTitle.textContent = "loading checked-in claims";
+        els.artifactForensicsMeta.innerHTML = "";
+        els.artifactForensicsBody.textContent =
+          "Loading checked-in artifact failure taxonomy.";
+        return;
+      }
+
+      const summary = payload.summary;
+      els.artifactForensicsTitle.textContent = `${summary.artifactsWithTrackedErrors || 0} claim(s) with tracked errors`;
+      els.artifactForensicsMeta.innerHTML = [
+        { label: "Claims", value: String(summary.artifacts ?? 0) },
+        {
+          label: "With Buckets",
+          value: String(summary.artifactsWithErrorBuckets ?? 0),
+        },
+        {
+          label: "Coverage Gaps",
+          value: String((payload.gaps || []).length),
+        },
+        {
+          label: "Baseline Errors",
+          value: `${summary.baselineErrorItems} / ${summary.baselineTotalItems}`,
+        },
+        {
+          label: "RALPH Errors",
+          value: `${summary.ralphErrorItems} / ${summary.ralphTotalItems}`,
+        },
+        {
+          label: "Dominant Bucket",
+          value: summary.dominantBucket || "-",
+        },
+      ]
+        .map(
+          (item) =>
+            `<div class="meta-item"><strong>${item.label}</strong>${item.value}</div>`
+        )
+        .join("");
+
+      const bucketLines = (payload.buckets || []).slice(0, 8).map((bucket) => {
+        return `${bucket.bucket}: ${bucket.baselineCount} -> ${bucket.ralphCount}`;
+      });
+      const gapLines = (payload.gaps || []).slice(0, 8).map((gap) => {
+        return `${gap.gap}: ${gap.modelName || gap.claimName}`;
+      });
+      const strongestClaims = (payload.claims || [])
+        .filter((claim) => claim.hasErrorBuckets)
+        .slice(0, 5)
+        .map((claim) => {
+          return `${claim.modelName || claim.claimName}: ${claim.baselineErrorItems} -> ${claim.ralphErrorItems} (${claim.dominantBucket || "-"})`;
+        });
+      const sections = [];
+      if (bucketLines.length > 0) {
+        sections.push(["[tracked buckets]", ...bucketLines].join("\n"));
+      }
+      if (strongestClaims.length > 0) {
+        sections.push(["[claim deltas]", ...strongestClaims].join("\n"));
+      }
+      if (gapLines.length > 0) {
+        sections.push(["[coverage gaps]", ...gapLines].join("\n"));
+      }
+      els.artifactForensicsBody.textContent = sections.length
+        ? sections.join("\n\n")
+        : "No checked-in artifact forensics found yet.";
+    }
+
+    function renderReport(run) {
+      state.selectedRun = run || null;
+      if (!run) {
+        els.reportTitle.textContent = "select a runtime";
+        els.reportMeta.innerHTML = "";
+        els.reportBody.textContent =
+          "Pick a runtime to inspect its matrix report.";
+        return;
+      }
+
+      const counts = run.counts || {};
+      els.reportTitle.textContent = run.name;
+      els.reportMeta.innerHTML = [
+        { label: "Config", value: run.modelsFileName || "-" },
+        { label: "Updated", value: formatDate(run.updatedAt) },
+        { label: "Cases", value: String(run.casesPerCategory ?? "-") },
+        {
+          label: "Counts",
+          value: `C:${counts.completed ?? 0} I:${counts.improved ?? 0} F:${counts.flat ?? 0} R:${counts.regressed ?? 0}`,
+        },
+      ]
+        .map(
+          (item) =>
+            `<div class="meta-item"><strong>${item.label}</strong>${item.value}</div>`
+        )
+        .join("");
+      els.reportBody.textContent =
+        run.reportMarkdown || "matrix_report.md not found";
+    }
+
+    function renderLogs(logs, jobId) {
+      state.selectedJobId = jobId || null;
+      if (!(logs && jobId)) {
+        els.logsTitle.textContent = "select a job";
+        els.logsMeta.textContent = "stdout + stderr";
+        els.logsBody.textContent = "Pick a job to inspect its execution logs.";
+        return;
+      }
+
+      const stdout = logs.stdout?.text || "";
+      const stderr = logs.stderr?.text || "";
+      const sections = [];
+      if (stdout) {
+        sections.push(["[stdout]", stdout].join("\n"));
+      }
+      if (stderr) {
+        sections.push(["[stderr]", stderr].join("\n"));
+      }
+      if (sections.length === 0) {
+        sections.push("No logs captured yet.");
+      }
+
+      els.logsTitle.textContent = jobId;
+      els.logsMeta.textContent = `runtime ${logs.runtimeName || "-"}`;
+      els.logsBody.textContent = sections.join("\n\n");
+    }
+
+    function renderArtifact(detail) {
+      if (!detail?.artifact) {
+        els.artifactTitle.textContent = "select an artifact";
+        els.artifactMeta.innerHTML = "";
+        els.artifactChart.textContent =
+          "Pick a checked-in artifact to inspect its chart.";
+        els.artifactBody.textContent =
+          "Pick a checked-in artifact to inspect its benchmark report.";
+        return;
+      }
+
+      state.selectedArtifactId = detail.artifact.id;
+      const artifact = detail.artifact;
+      const claimForensics = getArtifactForensicsClaim(artifact.id);
+      els.artifactTitle.textContent = artifact.modelName || artifact.claimName;
+      els.artifactMeta.innerHTML = [
+        { label: "Provider", value: artifact.providerName || "-" },
+        { label: "Experiment", value: artifact.experimentName },
+        { label: "Cases", value: String(artifact.casesPerCategory ?? "-") },
+        {
+          label: "Scores",
+          value: `${formatMetric(artifact.baselineScore)} -> ${formatMetric(artifact.ralphScore)}`,
+        },
+        {
+          label: "Delta",
+          value: `${formatMetric(artifact.deltaPp)} pp / ${formatPercent(artifact.relativeDeltaPercent)}`,
+        },
+        {
+          label: "Evidence",
+          value: artifact.summaryRelativePath,
+        },
+        {
+          label: "Failure Bucket",
+          value: claimForensics?.dominantBucket || "-",
+        },
+        {
+          label: "Error Items",
+          value: claimForensics
+            ? `${claimForensics.baselineErrorItems} -> ${claimForensics.ralphErrorItems}`
+            : "-",
+        },
+      ]
+        .map(
+          (item) =>
+            `<div class="meta-item"><strong>${item.label}</strong>${item.value}</div>`
+        )
+        .join("");
+      if (detail.chartSvg) {
+        els.artifactChart.innerHTML = detail.chartSvg;
+      } else {
+        els.artifactChart.textContent = "No chart found for this artifact.";
+      }
+      els.artifactBody.textContent =
+        detail.reportMarkdown || "benchmark_report.md not found";
+      if (claimForensics) {
+        const coverageText = claimForensics.hasErrorBuckets
+          ? [
+              "[checked-in forensics]",
+              `dominant_bucket=${claimForensics.dominantBucket || "-"}`,
+              `errors=${claimForensics.baselineErrorItems} -> ${claimForensics.ralphErrorItems}`,
+            ].join("\n")
+          : [
+              "[checked-in forensics]",
+              claimForensics.hasForensicsFile
+                ? "no populated error buckets in checked-in artifact"
+                : "missing error_forensics.json",
+            ].join("\n");
+        els.artifactBody.textContent = [
+          coverageText,
+          detail.reportMarkdown || "benchmark_report.md not found",
+        ].join("\n\n");
+      }
+    }
+
+    function renderRuntimeModel(detail) {
+      if (!detail?.modelRun) {
+        els.runtimeModelTitle.textContent = "select a model run";
+        els.runtimeModelMeta.innerHTML = "";
+        els.runtimeModelBody.textContent =
+          "Pick a model run to inspect its benchmark report and execution excerpt.";
+        return;
+      }
+
+      const modelRun = detail.modelRun;
+      state.selectedRuntimeModelKey = `${modelRun.runtimeName}::${modelRun.name}`;
+      els.runtimeModelTitle.textContent = modelRun.modelName || modelRun.name;
+      els.runtimeModelMeta.innerHTML = [
+        { label: "Provider", value: modelRun.providerName || "-" },
+        { label: "Runtime", value: modelRun.runtimeName },
+        { label: "Status", value: modelRun.status },
+        { label: "Progress", value: formatRuntimeProgress(modelRun) },
+        {
+          label: "Forensics",
+          value: detail.forensics
+            ? `${detail.forensics.baselineErrorItems} -> ${detail.forensics.ralphErrorItems}`
+            : "-",
+        },
+        {
+          label: "Scores",
+          value: `${formatMetric(modelRun.baselineScore)} -> ${formatMetric(modelRun.ralphScore)}`,
+        },
+        {
+          label: "Delta",
+          value: `${formatMetric(modelRun.deltaPp)} pp / ${formatPercent(modelRun.relativeDeltaPercent)}`,
+        },
+      ]
+        .map(
+          (item) =>
+            `<div class="meta-item"><strong>${item.label}</strong>${item.value}</div>`
+        )
+        .join("");
+      const sections = [];
+      if (detail.reportMarkdown) {
+        sections.push(detail.reportMarkdown);
+      }
+      if (detail.stdout) {
+        sections.push(["[stdout tail]", detail.stdout].join("\n"));
+      }
+      if (detail.stderr) {
+        sections.push(["[stderr tail]", detail.stderr].join("\n"));
+      }
+      if (detail.forensics) {
+        const bucketLines = (detail.forensics.buckets || []).map((bucket) => {
+          return `${bucket.bucket}: ${bucket.baselineCount} -> ${bucket.ralphCount}`;
+        });
+        sections.push(
+          [
+            "[forensics]",
+            `dominant_bucket=${detail.forensics.dominantBucket || "-"}`,
+            ...bucketLines,
+          ].join("\n")
+        );
+      }
+      els.runtimeModelBody.textContent = sections.length
+        ? sections.join("\n\n")
+        : "No model-run detail found.";
+    }
+
+    async function loadConfigs() {
+      const payload = await fetchJson("/v1/benchlab/configs");
+      state.configs = payload.configs || [];
+      renderConfigs();
+    }
+
+    async function loadJobs() {
+      const payload = await fetchJson("/v1/benchlab/jobs");
+      state.jobs = payload.jobs || [];
+      renderJobs();
+    }
+
+    async function loadRuns() {
+      const payload = await fetchJson("/v1/benchlab/runs");
+      state.runs = payload.runs || [];
+      renderRuns();
+      renderHeadline();
+      ensureCompareSelection();
+
+      if (state.selectedRun) {
+        const matched = state.runs.find(
+          (run) => run.name === state.selectedRun.name
+        );
+        const selectedRun = matched || state.runs[0] || null;
+        renderReport(selectedRun);
+        await loadRuntimeModels(selectedRun?.name || null);
+        await loadForensics(selectedRun?.name || null);
+      } else {
+        const selectedRun = state.runs[0] || null;
+        renderReport(selectedRun);
+        await loadRuntimeModels(selectedRun?.name || null);
+        await loadForensics(selectedRun?.name || null);
+      }
+      await loadCompare(state.selectedCompareLeft, state.selectedCompareRight);
+    }
+
+    async function loadArtifacts() {
+      const [artifactsPayload, forensicsPayload] = await Promise.all([
+        fetchJson("/v1/benchlab/artifacts/best"),
+        fetchJson("/v1/benchlab/artifacts/forensics"),
+      ]);
+      state.artifacts = artifactsPayload.artifacts || [];
+      renderArtifactForensics(forensicsPayload);
+      renderArtifacts();
+      renderHeadline();
+
+      if (state.selectedArtifactId) {
+        const matched = state.artifacts.find(
+          (artifact) => artifact.id === state.selectedArtifactId
+        );
+        if (matched) {
+          await loadArtifactDetail(matched.id);
+          return;
+        }
+      }
+      if (state.artifacts[0]) {
+        await loadArtifactDetail(state.artifacts[0].id);
+      } else {
+        renderArtifact(null);
+      }
+    }
+
+    async function loadJobLogs(jobId) {
+      const payload = await fetchJson(
+        `/v1/benchlab/jobs/${encodeURIComponent(jobId)}/logs?stream=both&maxBytes=20000`
+      );
+      renderLogs(payload.logs, jobId);
+    }
+
+    async function loadArtifactDetail(artifactId) {
+      const payload = await fetchJson(
+        `/v1/benchlab/artifacts/${encodeURIComponent(artifactId)}`
+      );
+      renderArtifact(payload);
+    }
+
+    async function loadCompare(leftRunName, rightRunName) {
+      if (!(leftRunName && rightRunName)) {
+        renderCompare(null);
+        return;
+      }
+      const payload = await fetchJson(
+        `/v1/benchlab/compare?left=${encodeURIComponent(leftRunName)}&right=${encodeURIComponent(rightRunName)}`
+      );
+      renderCompare(payload);
+    }
+
+    async function loadForensics(runName) {
+      if (!runName) {
+        renderForensics(null);
+        return;
+      }
+      const payload = await fetchJson(
+        `/v1/benchlab/runs/${encodeURIComponent(runName)}/forensics`
+      );
+      renderForensics(payload);
+    }
+
+    async function loadRuntimeModels(runName) {
+      if (!runName) {
+        state.runtimeModels = [];
+        renderRuntimeModels();
+        renderRuntimeModel(null);
+        return;
+      }
+
+      const payload = await fetchJson(
+        `/v1/benchlab/runs/${encodeURIComponent(runName)}/models`
+      );
+      state.runtimeModels = payload.modelRuns || [];
+      renderRuntimeModels();
+
+      if (state.selectedRuntimeModelKey) {
+        const matched = state.runtimeModels.find(
+          (modelRun) =>
+            `${runName}::${modelRun.name}` === state.selectedRuntimeModelKey
+        );
+        if (matched) {
+          await loadRuntimeModelDetail(runName, matched.name);
+          return;
+        }
+      }
+
+      if (state.runtimeModels[0]) {
+        await loadRuntimeModelDetail(runName, state.runtimeModels[0].name);
+      } else {
+        renderRuntimeModel(null);
+      }
+    }
+
+    async function loadRuntimeModelDetail(runName, modelRunName) {
+      const payload = await fetchJson(
+        `/v1/benchlab/runs/${encodeURIComponent(runName)}/models/${encodeURIComponent(modelRunName)}`
+      );
+      renderRuntimeModel(payload);
+    }
+
+    async function loadVariantSearch() {
+      const payload = await fetchJson("/v1/benchlab/leaderboards/variants");
+      renderVariantSearch(payload);
+    }
+
+    async function loadRuntimeBrief() {
+      const payload = await fetchJson("/v1/benchlab/runtime-brief");
+      renderRuntimeBrief(payload);
+    }
+
+    async function loadSummaryPack() {
+      const payload = await fetchJson("/v1/benchlab/summary-pack");
+      renderSummaryPack(payload);
+    }
+
+    async function refreshAll() {
+      try {
+        await Promise.all([
+          loadRuntimeBrief(),
+          loadConfigs(),
+          loadJobs(),
+          loadArtifacts(),
+          loadVariantSearch(),
+        ]);
+        await loadSummaryPack();
+        await loadRuns();
+        if (state.selectedJobId) {
+          const matchedJob = state.jobs.find(
+            (job) => job.id === state.selectedJobId
+          );
+          if (matchedJob) {
+            await loadJobLogs(matchedJob.id);
+          } else {
+            renderLogs(null, null);
+          }
+        } else {
+          renderLogs(null, null);
+        }
+        els.launchFeedback.textContent = "";
+      } catch (error) {
+        els.launchFeedback.textContent = error.message;
+      }
+    }
+
+    function buildJobPayload(modeOverride) {
+      const mode = modeOverride || els.mode.value;
+      return {
+        mode,
+        modelsFile: els.modelsFile.value,
+        casesPerCategory: Number.parseInt(
+          els.casesPerCategory.value || "0",
+          10
+        ),
+        runtimeName: els.runtimeName.value || undefined,
+        modelIds: els.modelIds.value
+          ? els.modelIds.value
+              .split(",")
+              .map((value) => value.trim())
+              .filter(Boolean)
+          : undefined,
+        categories: els.categories.value
+          ? els.categories.value
+              .split(",")
+              .map((value) => value.trim())
+              .filter(Boolean)
+          : undefined,
+        numThreads: Number.parseInt(els.numThreads.value || "1", 10),
+        maxStepLimit: Number.parseInt(els.maxStepLimit.value || "20", 10),
+      };
+    }
+
+    async function handleCopyReviewPath() {
+      const counts =
+        state.summaryPack?.evidenceBundle?.counts ||
+        state.runtimeBrief?.evidenceCounts ||
+        {};
+      const steps =
+        Array.isArray(state.summaryPack?.reviewSequence) &&
+        state.summaryPack.reviewSequence.length > 0
+          ? state.summaryPack.reviewSequence
+          : [els.briefReviewSequence.textContent || "Review path unavailable"];
+      const text = [
+        "BenchLab evaluation path",
+        `Headline: ${els.briefHeadline.textContent || "-"}`,
+        `Schema: ${
+          state.summaryPack?.evidenceBundle?.schema ||
+          state.runtimeBrief?.reportContract?.schema ||
+          "-"
+        }`,
+        `Configs: ${counts.configs ?? 0}`,
+        `Runs: ${counts.runs ?? 0}`,
+        `Artifacts: ${counts.artifacts ?? 0}`,
+        "",
+        "Promotion sequence",
+        ...steps.map((step) => `- ${step}`),
+      ].join("\n");
+
+      try {
+        await copyTextToClipboard(text);
+        flashButtonLabel(els.copyReviewButton, "Copy Review Path", "Copied");
+      } catch (error) {
+        console.warn("copy review path failed", error);
+        flashButtonLabel(
+          els.copyReviewButton,
+          "Copy Review Path",
+          "Copy failed"
+        );
+      }
+    }
+
+    async function handleCopyProofRoutes() {
+      const counts =
+        state.summaryPack?.evidenceBundle?.counts ||
+        state.runtimeBrief?.evidenceCounts ||
+        {};
+      const text = [
+        "BenchLab evidence routes",
+        `Configs: ${counts.configs ?? 0}`,
+        `Runs: ${counts.runs ?? 0}`,
+        `Artifacts: ${counts.artifacts ?? 0}`,
+        "- /health",
+        "- /v1/benchlab/runtime-brief",
+        "- /v1/benchlab/summary-pack",
+        "- /v1/benchlab/schema/job-report",
+        "- /v1/benchlab/artifacts/best",
+        "- docs/summary-pack.svg",
+      ].join("\n");
+
+      try {
+        await copyTextToClipboard(text);
+        flashButtonLabel(els.copyProofButton, "Copy Routes", "Copied");
+      } catch (error) {
+        console.warn("copy evidence routes failed", error);
+        flashButtonLabel(els.copyProofButton, "Copy Routes", "Copy failed");
+      }
+    }
+
+    async function handleCopyTopClaim() {
+      const strongestArtifact =
+        state.summaryPack?.evidenceBundle?.bestArtifact ||
+        state.artifacts.find((artifact) => artifact.outcome === "improved") ||
+        state.artifacts[0] ||
+        null;
+      const text = [
+        "BenchLab top claim snapshot",
+        `Headline: ${els.briefHeadline.textContent || "-"}`,
+        `Claim: ${strongestArtifact?.claimName || strongestArtifact?.modelName || "-"}`,
+        `Provider: ${strongestArtifact?.providerName || "-"}`,
+        `Experiment: ${strongestArtifact?.experimentName || "-"}`,
+        `Delta: ${formatMetric(strongestArtifact?.deltaPp)} pp`,
+        `Scores: ${formatMetric(strongestArtifact?.baselineScore)} -> ${formatMetric(strongestArtifact?.ralphScore)}`,
+        `Cases: ${strongestArtifact?.casesPerCategory ?? "-"}`,
+        "",
+        "Evidence routes",
+        "- /v1/benchlab/summary-pack",
+        "- /v1/benchlab/artifacts/best",
+        "- /v1/benchlab/artifacts/forensics",
+      ].join("\n");
+
+      try {
+        await copyTextToClipboard(text);
+        flashButtonLabel(els.copyTopClaimButton, "Copy Top Claim", "Copied");
+      } catch (error) {
+        console.warn("copy top claim failed", error);
+        flashButtonLabel(
+          els.copyTopClaimButton,
+          "Copy Top Claim",
+          "Copy failed"
+        );
+      }
+    }
+
+    async function handleCopyPayload() {
+      try {
+        await copyTextToClipboard(JSON.stringify(buildJobPayload(), null, 2));
+        flashButtonLabel(
+          els.copyPayloadButton,
+          "Copy Launch Payload",
+          "Copied"
+        );
+      } catch (error) {
+        console.warn("copy payload failed", error);
+        flashButtonLabel(
+          els.copyPayloadButton,
+          "Copy Launch Payload",
+          "Copy failed"
+        );
+      }
+    }
+
+    function getPrimaryVariantRecommendation() {
+      const recommendations = state.variantSearch?.recommendations;
+      if (!Array.isArray(recommendations)) {
+        return null;
+      }
+      return (
+        recommendations.find(
+          (item) =>
+            item?.suggestedModelEntryJson || item?.suggestedMatrixCommand
+        ) || null
+      );
+    }
+
+    async function handleCopyNextConfig() {
+      const recommendation = getPrimaryVariantRecommendation();
+      const payload = recommendation?.suggestedModelEntryJson;
+      if (!payload) {
+        flashButtonLabel(
+          els.copyNextConfigButton,
+          "Copy Next Config",
+          "No config"
+        );
+        return;
+      }
+      try {
+        await copyTextToClipboard(payload);
+        flashButtonLabel(
+          els.copyNextConfigButton,
+          "Copy Next Config",
+          "Copied"
+        );
+      } catch (error) {
+        console.warn("copy next config failed", error);
+        flashButtonLabel(
+          els.copyNextConfigButton,
+          "Copy Next Config",
+          "Copy failed"
+        );
+      }
+    }
+
+    async function handleCopyNextCommand() {
+      const recommendation = getPrimaryVariantRecommendation();
+      const payload = recommendation?.suggestedMatrixCommand;
+      if (!payload) {
+        flashButtonLabel(
+          els.copyNextCommandButton,
+          "Copy Matrix Command",
+          "No command"
+        );
+        return;
+      }
+      try {
+        await copyTextToClipboard(payload);
+        flashButtonLabel(
+          els.copyNextCommandButton,
+          "Copy Matrix Command",
+          "Copied"
+        );
+      } catch (error) {
+        console.warn("copy next command failed", error);
+        flashButtonLabel(
+          els.copyNextCommandButton,
+          "Copy Matrix Command",
+          "Copy failed"
+        );
+      }
+    }
+
+    async function submitJob(modeOverride) {
+      els.launchButton.disabled = true;
+      els.preflightButton.disabled = true;
+      els.launchFeedback.textContent = "Starting job...";
+      try {
+        const payload = await fetchJson("/v1/benchlab/jobs", {
+          method: "POST",
+          body: JSON.stringify(buildJobPayload(modeOverride)),
+        });
+        state.selectedJobId = payload.job.id;
+        els.launchFeedback.textContent = `Started ${payload.job.id}`;
+        await refreshAll();
+      } catch (error) {
+        els.launchFeedback.textContent = error.message;
+      } finally {
+        els.launchButton.disabled = false;
+        els.preflightButton.disabled = false;
+      }
+    }
+
+    async function cancelJob(jobId) {
+      try {
+        await fetchJson(
+          `/v1/benchlab/jobs/${encodeURIComponent(jobId)}/cancel`,
+          {
+            method: "POST",
+          }
+        );
+        await refreshAll();
+      } catch (error) {
+        els.launchFeedback.textContent = error.message;
+      }
+    }
+
+    els.launchForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      await submitJob();
+    });
+
+    els.preflightButton.addEventListener("click", async () => {
+      await submitJob("preflight");
+    });
+
+    els.refreshButton.addEventListener("click", async () => {
+      await refreshAll();
+    });
+
+    els.copyReviewButton.addEventListener("click", async () => {
+      await handleCopyReviewPath();
+    });
+
+    els.copyProofButton.addEventListener("click", async () => {
+      await handleCopyProofRoutes();
+    });
+
+    els.copyTopClaimButton.addEventListener("click", async () => {
+      await handleCopyTopClaim();
+    });
+
+    els.copyPayloadButton.addEventListener("click", async () => {
+      await handleCopyPayload();
+    });
+
+    els.copyNextConfigButton.addEventListener("click", async () => {
+      await handleCopyNextConfig();
+    });
+
+    els.copyNextCommandButton.addEventListener("click", async () => {
+      await handleCopyNextCommand();
+    });
+
+    els.jobsList.addEventListener("click", async (event) => {
+      const button = event.target.closest("button");
+      if (!button) {
+        return;
+      }
+      if (button.dataset.run) {
+        const run = state.runs.find((item) => item.name === button.dataset.run);
+        renderReport(run || null);
+      }
+      if (button.dataset.job) {
+        await loadJobLogs(button.dataset.job);
+      }
+      if (button.dataset.cancel) {
+        await cancelJob(button.dataset.cancel);
+      }
+    });
+
+    els.runsList.addEventListener("click", (event) => {
+      const button = event.target.closest("button");
+      if (!button?.dataset.run) {
+        return;
+      }
+      const run = state.runs.find((item) => item.name === button.dataset.run);
+      renderReport(run || null);
+      loadRuntimeModels(run?.name || null);
+      loadForensics(run?.name || null);
+    });
+
+    els.compareLeft.addEventListener("change", async () => {
+      state.selectedCompareLeft = els.compareLeft.value || null;
+      if (state.selectedCompareLeft === state.selectedCompareRight) {
+        const alternate = state.runs.find(
+          (run) => run.name !== state.selectedCompareLeft
+        );
+        state.selectedCompareRight =
+          alternate?.name || state.selectedCompareLeft;
+        renderCompareControls();
+      }
+      await loadCompare(state.selectedCompareLeft, state.selectedCompareRight);
+    });
+
+    els.compareRight.addEventListener("change", async () => {
+      state.selectedCompareRight = els.compareRight.value || null;
+      if (state.selectedCompareLeft === state.selectedCompareRight) {
+        const alternate = state.runs.find(
+          (run) => run.name !== state.selectedCompareRight
+        );
+        state.selectedCompareLeft =
+          alternate?.name || state.selectedCompareRight;
+        renderCompareControls();
+      }
+      await loadCompare(state.selectedCompareLeft, state.selectedCompareRight);
+    });
+
+    els.artifactsList.addEventListener("click", async (event) => {
+      const button = event.target.closest("button");
+      if (!button?.dataset.artifact) {
+        return;
+      }
+      await loadArtifactDetail(button.dataset.artifact);
+    });
+
+    els.runtimeModelsList.addEventListener("click", async (event) => {
+      const button = event.target.closest("button");
+      if (!(button?.dataset.runtimeModel && state.selectedRun?.name)) {
+        return;
+      }
+      const modelRunName = button.dataset.runtimeModel.slice(
+        `${state.selectedRun.name}::`.length
+      );
+      await loadRuntimeModelDetail(state.selectedRun.name, modelRunName);
+    });
+
+    refreshAll();
+    setInterval(refreshAll, 5000);
+    </script>
+  </body>
+</html>

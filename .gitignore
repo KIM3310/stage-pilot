@@ -49,3 +49,6 @@ yarn-error.log*
 AGENTS.md
 .ralph-tui
 tasks
+
+# Debug artifacts
+.venv_*/

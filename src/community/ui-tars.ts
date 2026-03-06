@@ -1,0 +1,179 @@
+import type { LanguageModelV3FunctionTool } from "@ai-sdk/provider";
+import { morphFormatToolResponseAsXml } from "../core/prompts/morph-xml-prompt";
+import {
+  renderInputExamplesSection,
+  safeStringifyInputExample,
+} from "../core/prompts/shared/input-examples";
+import { createToolMiddleware, uiTarsXmlProtocol } from "../index";
+import {
+  escapeXmlMinimalAttr,
+  escapeXmlMinimalText,
+} from "../rxml/utils/helpers";
+
+/**
+ * UI-TARS middleware using a custom protocol that handles <function=name> syntax (qwen3CoderProtocol)
+ * This is a modified version of https://github.com/julien-blanchon/silo/blob/6ebbc24e9dcf21e502b65b07b86a1e76169d4e8c/src/lib/middleware/uiTars.ts
+ */
+export const uiTarsToolMiddleware = createToolMiddleware({
+  protocol: uiTarsXmlProtocol,
+  toolResponsePromptTemplate: morphFormatToolResponseAsXml,
+  toolSystemPromptTemplate(tools: LanguageModelV3FunctionTool[]) {
+    const toolsJson = JSON.stringify(tools);
+    const basePrompt = `You have access to callable functions (tools).
+Tool list/context:
+${toolsJson}
+
+===============================
+UI-TARS FUNCTION CALLING FORMAT
+===============================
+You MUST use the EXACT format below for ALL function calls:
+
+<tool_call>
+<function=tool_name>
+<parameter=parameter_name>
+value
+</parameter>
+<parameter=another_parameter>
+value
+</parameter>
+</function>
+</tool_call>
+
+===============================
+CRITICAL SYNTAX RULES
+===============================
+1. Start with <tool_call>
+2. Next line must be <function=TOOL_NAME> (use the exact tool name from the list above)
+3. Each parameter MUST use opening/closing tags:
+   <parameter=PARAM_NAME>
+   VALUE
+   </parameter>
+4. End the function with </function>
+5. End the tool call with </tool_call>
+6. NO quotes around tool names or parameter names
+7. NO extra spaces or characters
+8. NO JSON format - only use this XML-like format
+
+===============================
+CORRECT EXAMPLES
+===============================
+Screenshot:
+<tool_call>
+<function=computer>
+<parameter=action>
+screenshot
+</parameter>
+</function>
+</tool_call>
+
+Click at coordinates:
+<tool_call>
+<function=computer>
+<parameter=action>
+left_click
+</parameter>
+<parameter=coordinate>
+[100, 200]
+</parameter>
+</function>
+</tool_call>
+
+Type text:
+<tool_call>
+<function=computer>
+<parameter=action>
+type
+</parameter>
+<parameter=text>
+Hello World
+</parameter>
+</function>
+</tool_call>
+
+Scroll:
+<tool_call>
+<function=computer>
+<parameter=action>
+scroll
+</parameter>
+<parameter=coordinate>
+[500, 400]
+</parameter>
+<parameter=scroll_direction>
+down
+</parameter>
+<parameter=scroll_amount>
+3
+</parameter>
+</function>
+</tool_call>
+
+===============================
+WRONG FORMATS (DO NOT USE)
+===============================
+❌ Missing <tool_call>...</tool_call> wrapper
+❌ <function=function='screenshot'> (no quotes or extra text)
+❌ <parameter=parameters> (must use actual parameter name)
+❌ JSON format like {"action": "screenshot"}
+❌ Any format other than the exact XML-like format above
+
+===============================
+EXECUTION RULES
+===============================
+- Use ONLY the tool names listed above
+- Include ALL required parameters for each tool
+- If you don't know a parameter value, ask the user
+- After calling a function, STOP and wait for the result
+- Do NOT add extra text before or after tool calls`;
+
+    const inputExamplesText = renderUiTarsInputExamples(tools);
+    if (inputExamplesText.length === 0) {
+      return basePrompt;
+    }
+
+    return `${basePrompt}\n\n${inputExamplesText}`;
+  },
+});
+
+function renderUiTarsInputExamples(
+  tools: LanguageModelV3FunctionTool[]
+): string {
+  return renderInputExamplesSection({
+    tools,
+    renderExample: renderUiTarsInputExample,
+  });
+}
+
+function renderUiTarsInputExample(toolName: string, input: unknown): string {
+  const parameterBlocks = renderUiTarsParameters(input);
+  return `<tool_call>\n<function=${escapeXmlMinimalAttr(toolName, '"')}>${parameterBlocks}\n</function>\n</tool_call>`;
+}
+
+function renderUiTarsParameters(input: unknown): string {
+  if (isRecord(input)) {
+    const lines = Object.entries(input).map(([key, value]) => {
+      const content = renderUiTarsParameterValue(value);
+      return `<parameter=${escapeXmlMinimalAttr(key, '"')}>\n${content}\n</parameter>`;
+    });
+
+    if (lines.length > 0) {
+      return `\n${lines.join("\n")}`;
+    }
+  }
+
+  const fallback = renderUiTarsParameterValue(input);
+  return `\n<parameter=input>\n${fallback}\n</parameter>`;
+}
+
+function renderUiTarsParameterValue(value: unknown): string {
+  if (typeof value === "string") {
+    return escapeXmlMinimalText(value);
+  }
+
+  const serialized = safeStringifyInputExample(value);
+  return escapeXmlMinimalText(serialized);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}

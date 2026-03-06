@@ -466,6 +466,19 @@ function buildMetaPayload(): JsonObject {
   const bodyTimeoutMs = readBodyTimeoutMs(
     process.env.STAGEPILOT_REQUEST_BODY_TIMEOUT_MS
   );
+  const geminiHasApiKey =
+    typeof process.env.GEMINI_API_KEY === "string" &&
+    process.env.GEMINI_API_KEY.trim().length > 0;
+  const openClawConfigured =
+    Boolean(toNonEmptyString(process.env.OPENCLAW_WEBHOOK_URL)) ||
+    Boolean(toNonEmptyString(process.env.OPENCLAW_CMD));
+  const missingIntegrations: string[] = [];
+  if (!geminiHasApiKey) {
+    missingIntegrations.push("gemini_api_key");
+  }
+  if (!openClawConfigured) {
+    missingIntegrations.push("openclaw_delivery");
+  }
 
   return {
     benchmarkDefaults: {
@@ -486,15 +499,11 @@ function buildMetaPayload(): JsonObject {
     },
     integrations: {
       gemini: {
-        hasApiKey:
-          typeof process.env.GEMINI_API_KEY === "string" &&
-          process.env.GEMINI_API_KEY.trim().length > 0,
+        hasApiKey: geminiHasApiKey,
         timeoutMs: geminiTimeoutMs,
       },
       openClaw: {
-        configured:
-          Boolean(toNonEmptyString(process.env.OPENCLAW_WEBHOOK_URL)) ||
-          Boolean(toNonEmptyString(process.env.OPENCLAW_CMD)),
+        configured: openClawConfigured,
         hasApiKey:
           typeof process.env.OPENCLAW_API_KEY === "string" &&
           process.env.OPENCLAW_API_KEY.trim().length > 0,
@@ -505,6 +514,15 @@ function buildMetaPayload(): JsonObject {
     },
     model: process.env.GEMINI_MODEL ?? "gemini-2.5-pro",
     ok: true,
+    diagnostics: {
+      integrationReady: missingIntegrations.length === 0,
+      missingIntegrations,
+      nextAction:
+        missingIntegrations.length === 0
+          ? "Run POST /v1/plan or POST /v1/benchmark to validate live flows."
+          : `Configure ${missingIntegrations[0]} to unlock live planning diagnostics.`,
+      requestBodyTimeoutMs: bodyTimeoutMs,
+    },
     requestLimits: {
       bodyBytes: DEFAULT_BODY_LIMIT_BYTES,
       bodyTimeoutMs,

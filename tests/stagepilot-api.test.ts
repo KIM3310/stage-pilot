@@ -5,9 +5,11 @@ import { StagePilotEngine } from "../src/stagepilot/orchestrator";
 
 const serversToClose: ReturnType<typeof createStagePilotApiServer>[] = [];
 const BODY_TIMEOUT_ENV_KEY = "STAGEPILOT_REQUEST_BODY_TIMEOUT_MS";
+const GEMINI_API_KEY_ENV_KEY = "GEMINI_API_KEY";
 const GEMINI_TIMEOUT_ENV_KEY = "GEMINI_HTTP_TIMEOUT_MS";
 const OPENCLAW_WEBHOOK_ENV_KEY = "OPENCLAW_WEBHOOK_URL";
 const BODY_TIMEOUT_ENV_SNAPSHOT = process.env[BODY_TIMEOUT_ENV_KEY];
+const GEMINI_API_KEY_ENV_SNAPSHOT = process.env[GEMINI_API_KEY_ENV_KEY];
 const GEMINI_TIMEOUT_ENV_SNAPSHOT = process.env[GEMINI_TIMEOUT_ENV_KEY];
 const HTTP_STATUS_LINE_REGEX = /^HTTP\/1\.1 (\d{3})/m;
 const OPENCLAW_WEBHOOK_ENV_SNAPSHOT = process.env[OPENCLAW_WEBHOOK_ENV_KEY];
@@ -31,6 +33,12 @@ afterEach(async () => {
     delete process.env[GEMINI_TIMEOUT_ENV_KEY];
   } else {
     process.env[GEMINI_TIMEOUT_ENV_KEY] = GEMINI_TIMEOUT_ENV_SNAPSHOT;
+  }
+
+  if (typeof GEMINI_API_KEY_ENV_SNAPSHOT === "undefined") {
+    delete process.env[GEMINI_API_KEY_ENV_KEY];
+  } else {
+    process.env[GEMINI_API_KEY_ENV_KEY] = GEMINI_API_KEY_ENV_SNAPSHOT;
   }
 
   if (typeof OPENCLAW_WEBHOOK_ENV_SNAPSHOT === "undefined") {
@@ -333,6 +341,8 @@ describe("stagepilot api server", () => {
   });
 
   it("returns health response", async () => {
+    process.env.STAGEPILOT_REQUEST_BODY_TIMEOUT_MS = "1500";
+
     const { baseUrl } = await startServer({
       engine: new StagePilotEngine(),
     });
@@ -341,6 +351,11 @@ describe("stagepilot api server", () => {
     expect(response.status).toBe(200);
 
     const body = (await response.json()) as {
+      diagnostics: {
+        integrationReady: boolean;
+        nextAction: string;
+        requestBodyTimeoutMs: number;
+      };
       ok: boolean;
       service: string;
       useGpu: boolean;
@@ -349,6 +364,9 @@ describe("stagepilot api server", () => {
     expect(body.ok).toBe(true);
     expect(body.service).toBeTypeOf("string");
     expect(body.useGpu).toBe(false);
+    expect(body.diagnostics.integrationReady).toBe(false);
+    expect(body.diagnostics.requestBodyTimeoutMs).toBe(1500);
+    expect(body.diagnostics.nextAction).toContain("gemini_api_key");
   });
 
   it("supports HEAD for health response", async () => {
@@ -370,6 +388,7 @@ describe("stagepilot api server", () => {
 
   it("returns runtime meta for integrations and routes", async () => {
     process.env.GEMINI_HTTP_TIMEOUT_MS = "4321";
+    process.env.GEMINI_API_KEY = "stagepilot-test-key";
     process.env.STAGEPILOT_REQUEST_BODY_TIMEOUT_MS = "2100";
     process.env.OPENCLAW_WEBHOOK_URL = "https://example.invalid/webhook";
 
@@ -381,6 +400,11 @@ describe("stagepilot api server", () => {
     expect(response.status).toBe(200);
 
     const body = (await response.json()) as {
+      diagnostics: {
+        integrationReady: boolean;
+        missingIntegrations: string[];
+        nextAction: string;
+      };
       integrations: {
         gemini: {
           timeoutMs: number;
@@ -402,6 +426,9 @@ describe("stagepilot api server", () => {
 
     expect(body.ok).toBe(true);
     expect(body.requestLimits.bodyTimeoutMs).toBe(2100);
+    expect(body.diagnostics.integrationReady).toBe(true);
+    expect(body.diagnostics.missingIntegrations).toEqual([]);
+    expect(body.diagnostics.nextAction).toContain("POST /v1/plan");
     expect(body.integrations.gemini.timeoutMs).toBe(4321);
     expect(body.integrations.openClaw.configured).toBe(true);
     expect(body.integrations.openClaw.hasWebhookUrl).toBe(true);

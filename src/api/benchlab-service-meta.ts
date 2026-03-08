@@ -257,22 +257,27 @@ export function buildBenchLabReviewPack(options: {
       {
         step: "1. Runtime brief",
         surface: "/v1/benchlab/runtime-brief",
-        proof: "Check configs, jobs, runs, and artifact counts before opening any matrix claim.",
+        proof:
+          "Check configs, jobs, runs, and artifact counts before opening any matrix claim.",
       },
       {
         step: "2. Promotion proof",
         surface: "/v1/benchlab/review-pack -> /v1/benchlab/artifacts/best",
-        proof: "Validate the strongest checked-in delta before comparing runtimes.",
+        proof:
+          "Validate the strongest checked-in delta before comparing runtimes.",
       },
       {
         step: "3. Failure buckets",
-        surface: "/v1/benchlab/artifacts/forensics -> docs/benchlab/FAILURE_TAXONOMY.md",
-        proof: "Inspect dominant error modes before promoting a new prompt or model path.",
+        surface:
+          "/v1/benchlab/artifacts/forensics -> docs/benchlab/FAILURE_TAXONOMY.md",
+        proof:
+          "Inspect dominant error modes before promoting a new prompt or model path.",
       },
       {
         step: "4. Operator docs",
         surface: "docs/benchlab/TOOL_CALLING_GAINS.md -> experiments/",
-        proof: "Connect claim narrative to checked-in notes and runnable experiments.",
+        proof:
+          "Connect claim narrative to checked-in notes and runnable experiments.",
       },
     ],
     proofBundle: {

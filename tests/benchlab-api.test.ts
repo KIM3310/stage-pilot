@@ -477,6 +477,18 @@ describe("benchlab api", () => {
       expect.arrayContaining([expect.stringContaining("Validate configs")])
     );
 
+    const reviewPackResponse = await fetch(
+      `${baseUrl}/v1/benchlab/review-pack`
+    );
+    const reviewPackPayload = await reviewPackResponse.json();
+    expect(reviewPackResponse.status).toBe(200);
+    expect(reviewPackPayload.reviewPackId).toBe("benchlab-review-pack-v1");
+    expect(reviewPackPayload.proofBundle.counts.configs).toBe(2);
+    expect(reviewPackPayload.proofBundle.counts.runs).toBeGreaterThanOrEqual(2);
+    expect(reviewPackPayload.proofBundle.bestArtifact.deltaPp).toBe(1.25);
+    expect(reviewPackPayload.proofBundle.dominantBucket).toBe("timeout");
+    expect(reviewPackPayload.links.reviewPack).toBe("/v1/benchlab/review-pack");
+
     const schemaResponse = await fetch(
       `${baseUrl}/v1/benchlab/schema/job-report`
     );

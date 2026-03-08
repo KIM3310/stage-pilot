@@ -463,6 +463,9 @@
               <div class="tiny">Fetching readiness counts</div>
             </div>
           </div>
+          <p class="tiny" id="brief-review-sequence">
+            Loading promotion sequence for checked-in claims.
+          </p>
         </div>
       </section>
 
@@ -731,6 +734,7 @@ Loading checked-in artifact failure taxonomy.</pre
       configs: [],
       forensics: null,
       jobs: [],
+      reviewPack: null,
       runtimeBrief: null,
       runtimeModels: [],
       selectedRuntimeModelKey: null,
@@ -746,6 +750,7 @@ Loading checked-in artifact failure taxonomy.</pre
     const els = {
       briefBadge: document.querySelector("#brief-badge"),
       briefHeadline: document.querySelector("#brief-headline"),
+      briefReviewSequence: document.querySelector("#brief-review-sequence"),
       briefStats: document.querySelector("#brief-stats"),
       artifactForensicsBody: document.querySelector("#artifact-forensics-body"),
       artifactForensicsMeta: document.querySelector("#artifact-forensics-meta"),
@@ -1017,6 +1022,49 @@ Loading checked-in artifact failure taxonomy.</pre
             `<div class="stat"><strong>${item.label}</strong><div class="tiny">${item.value}</div></div>`
         )
         .join("");
+    }
+
+    function renderReviewPack(payload) {
+      state.reviewPack = payload || null;
+
+      if (!payload || payload.status !== "ok") {
+        els.briefReviewSequence.textContent =
+          "Review pack unavailable. Check /health, /v1/benchlab/runtime-brief, and artifact routes.";
+        return;
+      }
+
+      const counts = payload.proofBundle?.counts || {};
+      const bestDelta = payload.proofBundle?.bestArtifact?.deltaPp;
+      const bestClaim = payload.proofBundle?.bestArtifact?.claimName || "-";
+
+      els.briefBadge.textContent =
+        payload.reviewPackId || "benchlab-review-pack";
+      els.briefHeadline.textContent =
+        payload.headline ||
+        "BenchLab reviewer proof is ready for configs, runs, and checked-in claims.";
+      els.briefStats.innerHTML = [
+        { label: "Configs", value: String(counts.configs ?? 0) },
+        { label: "Runs", value: String(counts.runs ?? 0) },
+        {
+          label: "Best Delta",
+          value:
+            typeof bestDelta === "number"
+              ? `${formatMetric(bestDelta)}pp`
+              : "-",
+        },
+        { label: "Bucket", value: payload.proofBundle?.dominantBucket || "-" },
+        {
+          label: "Improved",
+          value: String(payload.proofBundle?.improvedArtifacts ?? 0),
+        },
+        { label: "Schema", value: payload.proofBundle?.schema || "-" },
+      ]
+        .map(
+          (item) =>
+            `<div class="stat"><strong>${item.label}</strong><div class="tiny">${item.value}</div></div>`
+        )
+        .join("");
+      els.briefReviewSequence.textContent = `[promotion flow] ${payload.reviewSequence.join(" -> ")} | top claim: ${bestClaim}`;
     }
 
     function renderConfigs() {
@@ -1785,6 +1833,11 @@ Loading checked-in artifact failure taxonomy.</pre
       renderRuntimeBrief(payload);
     }
 
+    async function loadReviewPack() {
+      const payload = await fetchJson("/v1/benchlab/review-pack");
+      renderReviewPack(payload);
+    }
+
     async function refreshAll() {
       try {
         await Promise.all([
@@ -1794,6 +1847,7 @@ Loading checked-in artifact failure taxonomy.</pre
           loadArtifacts(),
           loadVariantSearch(),
         ]);
+        await loadReviewPack();
         await loadRuns();
         if (state.selectedJobId) {
           const matchedJob = state.jobs.find(

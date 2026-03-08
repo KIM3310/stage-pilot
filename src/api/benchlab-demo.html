@@ -108,6 +108,29 @@
       line-height: 1.5;
     }
 
+    .brief-banner {
+      display: grid;
+      gap: 10px;
+      padding: 16px 18px;
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+    }
+
+    .brief-badge {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      width: fit-content;
+      padding: 7px 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent-2);
+      background: rgba(37, 76, 115, 0.12);
+      border: 1px solid rgba(37, 76, 115, 0.18);
+      border-radius: 999px;
+    }
+
     .pill-row,
     .stat-row {
       display: flex;
@@ -426,6 +449,21 @@
             <div class="tiny">Fetching latest runs</div>
           </div>
         </div>
+        <div class="brief-banner">
+          <span class="brief-badge" id="brief-badge"
+            >benchlab-runtime-brief</span
+          >
+          <p id="brief-headline">
+            Loading operator brief for configs, runtimes, artifacts, and
+            forensics.
+          </p>
+          <div class="stat-row" id="brief-stats">
+            <div class="stat">
+              <strong>Loading</strong>
+              <div class="tiny">Fetching readiness counts</div>
+            </div>
+          </div>
+        </div>
       </section>
 
       <section class="layout">
@@ -693,6 +731,7 @@ Loading checked-in artifact failure taxonomy.</pre
       configs: [],
       forensics: null,
       jobs: [],
+      runtimeBrief: null,
       runtimeModels: [],
       selectedRuntimeModelKey: null,
       selectedArtifactId: null,
@@ -705,6 +744,9 @@ Loading checked-in artifact failure taxonomy.</pre
     };
 
     const els = {
+      briefBadge: document.querySelector("#brief-badge"),
+      briefHeadline: document.querySelector("#brief-headline"),
+      briefStats: document.querySelector("#brief-stats"),
       artifactForensicsBody: document.querySelector("#artifact-forensics-body"),
       artifactForensicsMeta: document.querySelector("#artifact-forensics-meta"),
       artifactForensicsTitle: document.querySelector(
@@ -940,6 +982,39 @@ Loading checked-in artifact failure taxonomy.</pre
         .map(
           (item) =>
             `<div class="stat"><strong>${item.label}</strong><div>${item.value}</div></div>`
+        )
+        .join("");
+    }
+
+    function renderRuntimeBrief(payload) {
+      state.runtimeBrief = payload || null;
+
+      if (!payload || payload.status !== "ok") {
+        els.briefBadge.textContent = "brief-error";
+        els.briefHeadline.textContent =
+          "BenchLab operator brief is unavailable. Check /health and repository paths.";
+        els.briefStats.innerHTML =
+          '<div class="stat"><strong>Unavailable</strong><div class="tiny">Runtime brief fetch failed</div></div>';
+        return;
+      }
+
+      els.briefBadge.textContent =
+        payload.readinessContract || "benchlab-runtime-brief";
+      els.briefHeadline.textContent =
+        payload.headline ||
+        "Local-first BFCL matrix lab with tracked jobs and forensics evidence.";
+      const counts = payload.evidenceCounts || {};
+      els.briefStats.innerHTML = [
+        { label: "Configs", value: String(counts.configs ?? 0) },
+        { label: "Jobs", value: String(counts.jobs ?? 0) },
+        { label: "Runs", value: String(counts.runs ?? 0) },
+        { label: "Artifacts", value: String(counts.artifacts ?? 0) },
+        { label: "Schema", value: payload.reportContract?.schema || "-" },
+        { label: "Routes", value: String(payload.routeCount ?? 0) },
+      ]
+        .map(
+          (item) =>
+            `<div class="stat"><strong>${item.label}</strong><div class="tiny">${item.value}</div></div>`
         )
         .join("");
     }
@@ -1705,9 +1780,15 @@ Loading checked-in artifact failure taxonomy.</pre
       renderVariantSearch(payload);
     }
 
+    async function loadRuntimeBrief() {
+      const payload = await fetchJson("/v1/benchlab/runtime-brief");
+      renderRuntimeBrief(payload);
+    }
+
     async function refreshAll() {
       try {
         await Promise.all([
+          loadRuntimeBrief(),
           loadConfigs(),
           loadJobs(),
           loadArtifacts(),

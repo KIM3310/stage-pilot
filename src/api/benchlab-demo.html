@@ -470,6 +470,9 @@
             <button class="ghost" id="copy-review-button" type="button">
               Copy Review Path
             </button>
+            <button class="ghost" id="copy-proof-button" type="button">
+              Copy Proof Routes
+            </button>
             <button class="ghost" id="copy-payload-button" type="button">
               Copy Launch Payload
             </button>
@@ -779,6 +782,7 @@ Loading checked-in artifact failure taxonomy.</pre
       compareRight: document.querySelector("#compare-right"),
       compareTitle: document.querySelector("#compare-title"),
       copyPayloadButton: document.querySelector("#copy-payload-button"),
+      copyProofButton: document.querySelector("#copy-proof-button"),
       copyReviewButton: document.querySelector("#copy-review-button"),
       forensicsBody: document.querySelector("#forensics-body"),
       forensicsMeta: document.querySelector("#forensics-meta"),
@@ -1970,6 +1974,30 @@ Loading checked-in artifact failure taxonomy.</pre
       }
     }
 
+    async function handleCopyProofRoutes() {
+      const text = [
+        "BenchLab proof routes",
+        "- /health",
+        "- /v1/benchlab/runtime-brief",
+        "- /v1/benchlab/review-pack",
+        "- /v1/benchlab/schema/job-report",
+        "- /v1/benchlab/artifacts/best",
+        "- docs/review-pack.svg",
+      ].join("\n");
+
+      try {
+        await copyTextToClipboard(text);
+        flashButtonLabel(els.copyProofButton, "Copy Proof Routes", "Copied");
+      } catch (error) {
+        console.warn("copy proof routes failed", error);
+        flashButtonLabel(
+          els.copyProofButton,
+          "Copy Proof Routes",
+          "Copy failed"
+        );
+      }
+    }
+
     async function handleCopyPayload() {
       try {
         await copyTextToClipboard(JSON.stringify(buildJobPayload(), null, 2));
@@ -2037,6 +2065,10 @@ Loading checked-in artifact failure taxonomy.</pre
 
     els.copyReviewButton.addEventListener("click", async () => {
       await handleCopyReviewPath();
+    });
+
+    els.copyProofButton.addEventListener("click", async () => {
+      await handleCopyProofRoutes();
     });
 
     els.copyPayloadButton.addEventListener("click", async () => {

@@ -6,10 +6,11 @@
 [![npm downloads - parser](https://img.shields.io/npm/dt/@ai-sdk-tool/parser)](https://www.npmjs.com/package/@ai-sdk-tool/parser)
 [![codecov](https://codecov.io/gh/minpeter/ai-sdk-tool-call-middleware/branch/main/graph/badge.svg)](https://codecov.io/gh/minpeter/ai-sdk-tool-call-middleware)
 
-`StagePilot` combines two things in one repo:
+`StagePilot` is the canonical repo for three connected surfaces:
 
 1. `@ai-sdk-tool/parser`: AI SDK middleware for parsing tool calls from models that do not natively support `tools`.
-2. A hackathon-ready multi-agent orchestration vertical (`src/stagepilot`) with benchmark, API, demo UI, and Cloud Run deployment path.
+2. `StagePilot`: a multi-agent orchestration vertical with benchmark, API, demo UI, and Cloud Run path.
+3. `BenchLab`: prompt-mode BFCL experiment tooling, forensics, and local operator APIs.
 
 ## Project links
 
@@ -19,8 +20,10 @@
 
 ## References and attribution
 
-- Fork reference used during implementation: https://github.com/KIM3310/ai-sdk-tool-call-middleware
-- Upstream source repository: https://github.com/minpeter/ai-sdk-tool-call-middleware
+- Earlier fork / baseline reference: https://github.com/KIM3310/ai-sdk-tool-call-middleware
+- Upstream source lineage: https://github.com/minpeter/ai-sdk-tool-call-middleware
+
+This repo keeps attribution explicit while treating `stage-pilot` as the canonical working surface for new development.
 
 ## Hackathon context
 
@@ -32,11 +35,33 @@ If API integration is needed, you can connect and use it immediately through the
 
 Many models still output tool calls as loose text (`<tool_call>...</tool_call>`, relaxed JSON, trailing tokens, mixed formatting). This project hardens that path so tool execution remains stable instead of silently failing.
 
+For the parser layer, this means:
+
+- parsing malformed tool-call text safely
+- coercing payloads to schema-compatible shapes
+- streaming tool inputs without depending on native provider tooling
+
 For StagePilot, this directly improves operation routing reliability by:
 
-- parsing malformed tool-call text safely,
-- coercing payloads to schema-compatible shapes,
 - applying a bounded Ralph-loop retry when the first call is invalid.
+
+For BenchLab, it creates a repeatable environment to test prompt-mode tool-calling strategies and inspect error buckets instead of relying on anecdotal wins.
+
+## Repository layout
+
+```text
+stage-pilot/
+  src/
+    api/
+    bin/
+    stagepilot/
+  tests/
+  docs/
+    benchmarks/
+    benchlab/
+  experiments/
+  scripts/
+```
 
 ## StagePilot benchmark (latest)
 
@@ -97,6 +122,31 @@ Optional benchmark knobs:
 BENCHMARK_CASES=24 BENCHMARK_SEED=20260228 BENCHMARK_LOOP_ATTEMPTS=2 npm run bench:stagepilot
 ```
 
+## BenchLab quick start
+
+Run the local BenchLab operator API:
+
+```bash
+npm run api:benchlab
+# open http://127.0.0.1:8090/benchlab
+```
+
+BenchLab surfaces:
+
+- `GET /benchlab`
+- `GET /health`
+- `GET /v1/benchlab/configs`
+- `GET /v1/benchlab/jobs`
+- `GET /v1/benchlab/jobs/:id`
+- `GET /v1/benchlab/jobs/:id/logs`
+- `POST /v1/benchlab/jobs/:id/cancel`
+
+BenchLab repo assets:
+
+- research notes under `docs/benchlab/`
+- runnable prompt-mode experiments under `experiments/`
+- local operator scripts under `scripts/`
+
 ## StagePilot architecture (high-level)
 
 - `EligibilityAgent`: triage eligibility and constraints
@@ -137,6 +187,12 @@ Endpoints:
 - `POST /v1/openclaw/inbox`
 
 See full behavior and payload examples in [`docs/STAGEPILOT.md`](docs/STAGEPILOT.md).
+
+BenchLab API entrypoint:
+
+```bash
+npm run api:benchlab
+```
 
 ## Cloud Run deployment (Google-only)
 
@@ -243,8 +299,11 @@ corepack prepare pnpm@9.14.4 --activate
 
 - StagePilot guide: [`docs/STAGEPILOT.md`](docs/STAGEPILOT.md)
 - Latest benchmark artifact: [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json)
+- BenchLab gains: [`docs/benchlab/TOOL_CALLING_GAINS.md`](docs/benchlab/TOOL_CALLING_GAINS.md)
+- BenchLab failure taxonomy: [`docs/benchlab/FAILURE_TAXONOMY.md`](docs/benchlab/FAILURE_TAXONOMY.md)
 - Parser core examples: [`examples/parser-core/README.md`](examples/parser-core/README.md)
 - RXML examples: [`examples/rxml-core/README.md`](examples/rxml-core/README.md)
+- Prompt-mode experiments: `experiments/*`
 
 ## License
 

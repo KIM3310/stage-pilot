@@ -8,6 +8,31 @@ export const STAGEPILOT_READINESS_CONTRACT = "stagepilot-runtime-brief-v1";
 export const STAGEPILOT_PLAN_REPORT_SCHEMA = "stagepilot-plan-report-v1";
 export const STAGEPILOT_REVIEW_PACK_ID = "stagepilot-review-pack-v1";
 
+function buildStagePilotProofAssets() {
+  return [
+    {
+      label: "Review pack diagram",
+      path: "docs/review-pack.svg",
+      kind: "diagram",
+    },
+    {
+      label: "Latest benchmark snapshot",
+      path: "docs/benchmarks/stagepilot-latest.json",
+      kind: "report",
+    },
+    {
+      label: "Operator runbook",
+      path: "docs/STAGEPILOT.md",
+      kind: "doc",
+    },
+    {
+      label: "BenchLab gains note",
+      path: "docs/benchlab/TOOL_CALLING_GAINS.md",
+      kind: "doc",
+    },
+  ];
+}
+
 interface StagePilotBenchmarkSnapshot {
   caseCount: number;
   generatedAt: string | null;
@@ -227,6 +252,28 @@ export function buildStagePilotReviewPack(options: {
       "Inspect /v1/review-pack to validate benchmark lift, parser posture, and operator handoff boundaries.",
       "Run /v1/plan and /v1/benchmark before promoting any routing claim or delivery workflow.",
     ],
+    twoMinuteReview: [
+      {
+        step: "1. Runtime brief",
+        surface: "/v1/runtime-brief",
+        proof: "Confirm Gemini/OpenClaw readiness and request boundary before trusting orchestration.",
+      },
+      {
+        step: "2. Benchmark lift",
+        surface: "/v1/review-pack -> docs/benchmarks/stagepilot-latest.json",
+        proof: "Validate baseline, middleware, and Ralph-loop deltas before repeating any claim.",
+      },
+      {
+        step: "3. Contract boundary",
+        surface: "/v1/schema/plan-report",
+        proof: "Check report sections and operator rules before handing output to downstream tools.",
+      },
+      {
+        step: "4. Operator proof",
+        surface: "docs/review-pack.svg -> docs/STAGEPILOT.md",
+        proof: "Read the end-to-end orchestration and handoff shape without tracing the full source tree.",
+      },
+    ],
     proofBundle: {
       benchmark: options.benchmarkSnapshot,
       integrationsReady: options.geminiHasApiKey && options.openClawConfigured,
@@ -237,6 +284,7 @@ export function buildStagePilotReviewPack(options: {
       requestBodyTimeoutMs: options.bodyTimeoutMs,
       routeCount: buildStagePilotRouteDescriptors().length,
     },
+    proofAssets: buildStagePilotProofAssets(),
     links: {
       health: "/health",
       meta: "/v1/meta",

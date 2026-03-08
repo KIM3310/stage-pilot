@@ -1237,6 +1237,7 @@
     async function copyProofRoutes() {
       const text = [
         "StagePilot proof routes",
+        `Benchmark lift: ${el("briefBenchmarkDelta").textContent || "-"}`,
         "- /health",
         "- /v1/runtime-brief",
         "- /v1/review-pack",

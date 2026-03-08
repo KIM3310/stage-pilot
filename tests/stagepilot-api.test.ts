@@ -524,6 +524,7 @@ describe("stagepilot api server", () => {
         reviewPack: string;
       };
       operatorJourney: Array<{ stage: string }>;
+      proofAssets: Array<{ label: string }>;
       proofBundle: {
         benchmark: {
           caseCount: number;
@@ -534,12 +535,15 @@ describe("stagepilot api server", () => {
       };
       reviewPackId: string;
       reviewSequence: string[];
+      twoMinuteReview: Array<{ step: string }>;
     };
 
     expect(body.reviewPackId).toBe("stagepilot-review-pack-v1");
     expect(body.links.reviewPack).toBe("/v1/review-pack");
     expect(body.operatorJourney).toHaveLength(4);
     expect(body.reviewSequence.length).toBeGreaterThanOrEqual(3);
+    expect(body.twoMinuteReview.length).toBe(4);
+    expect(body.proofAssets.length).toBeGreaterThanOrEqual(4);
     expect(body.proofBundle.benchmark.caseCount).toBeGreaterThanOrEqual(20);
     expect(
       body.proofBundle.benchmark.improvements.loopVsBaseline

@@ -487,6 +487,8 @@ describe("benchlab api", () => {
     expect(reviewPackPayload.proofBundle.counts.runs).toBeGreaterThanOrEqual(2);
     expect(reviewPackPayload.proofBundle.bestArtifact.deltaPp).toBe(1.25);
     expect(reviewPackPayload.proofBundle.dominantBucket).toBe("timeout");
+    expect(reviewPackPayload.twoMinuteReview).toHaveLength(4);
+    expect(reviewPackPayload.proofAssets.length).toBeGreaterThanOrEqual(4);
     expect(reviewPackPayload.links.reviewPack).toBe("/v1/benchlab/review-pack");
 
     const schemaResponse = await fetch(

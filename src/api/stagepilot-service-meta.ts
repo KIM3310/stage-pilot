@@ -256,22 +256,26 @@ export function buildStagePilotReviewPack(options: {
       {
         step: "1. Runtime brief",
         surface: "/v1/runtime-brief",
-        proof: "Confirm Gemini/OpenClaw readiness and request boundary before trusting orchestration.",
+        proof:
+          "Confirm Gemini/OpenClaw readiness and request boundary before trusting orchestration.",
       },
       {
         step: "2. Benchmark lift",
         surface: "/v1/review-pack -> docs/benchmarks/stagepilot-latest.json",
-        proof: "Validate baseline, middleware, and Ralph-loop deltas before repeating any claim.",
+        proof:
+          "Validate baseline, middleware, and Ralph-loop deltas before repeating any claim.",
       },
       {
         step: "3. Contract boundary",
         surface: "/v1/schema/plan-report",
-        proof: "Check report sections and operator rules before handing output to downstream tools.",
+        proof:
+          "Check report sections and operator rules before handing output to downstream tools.",
       },
       {
         step: "4. Operator proof",
         surface: "docs/review-pack.svg -> docs/STAGEPILOT.md",
-        proof: "Read the end-to-end orchestration and handoff shape without tracing the full source tree.",
+        proof:
+          "Read the end-to-end orchestration and handoff shape without tracing the full source tree.",
       },
     ],
     proofBundle: {

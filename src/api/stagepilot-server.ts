@@ -1349,6 +1349,117 @@ async function handleOpenClawInboxRequest(options: {
   }
 }
 
+function handleReadonlyRequest(options: {
+  method: string;
+  pathname: string;
+  response: ServerResponse;
+}) {
+  const { method, pathname, response } = options;
+  if (method !== "GET" && method !== "HEAD") {
+    return false;
+  }
+
+  const includeBody = method !== "HEAD";
+  switch (pathname) {
+    case "/demo":
+      handleDemoRequest(response, { includeBody });
+      return true;
+    case "/health":
+      handleHealthRequest(response, { includeBody });
+      return true;
+    case "/v1/meta":
+      handleMetaRequest(response, { includeBody });
+      return true;
+    default:
+      return false;
+  }
+}
+
+async function handlePostRequest(options: {
+  benchmarkRunner: BenchmarkRunner;
+  engine: StagePilotEngineLike;
+  insightDeriver: InsightDeriver;
+  logger: Pick<Console, "error" | "info" | "warn">;
+  method: string;
+  openClawNotifier: StagePilotOpenClawNotifier;
+  pathname: string;
+  request: IncomingMessage;
+  response: ServerResponse;
+  twinSimulator: TwinSimulator;
+}) {
+  const {
+    benchmarkRunner,
+    engine,
+    insightDeriver,
+    logger,
+    method,
+    openClawNotifier,
+    pathname,
+    request,
+    response,
+    twinSimulator,
+  } = options;
+
+  if (method !== "POST") {
+    return false;
+  }
+
+  switch (pathname) {
+    case "/v1/plan":
+      await handlePlanRequest({ engine, logger, request, response });
+      return true;
+    case "/v1/benchmark":
+      await handleBenchmarkRequest({
+        benchmarkRunner,
+        logger,
+        request,
+        response,
+      });
+      return true;
+    case "/v1/insights":
+      await handleInsightsRequest({
+        engine,
+        insightDeriver,
+        logger,
+        request,
+        response,
+      });
+      return true;
+    case "/v1/whatif":
+      await handleWhatIfRequest({
+        engine,
+        logger,
+        request,
+        response,
+        twinSimulator,
+      });
+      return true;
+    case "/v1/notify":
+      await handleNotifyRequest({
+        engine,
+        logger,
+        openClawNotifier,
+        request,
+        response,
+        twinSimulator,
+      });
+      return true;
+    case "/v1/openclaw/inbox":
+      await handleOpenClawInboxRequest({
+        engine,
+        insightDeriver,
+        logger,
+        openClawNotifier,
+        request,
+        response,
+        twinSimulator,
+      });
+      return true;
+    default:
+      return false;
+  }
+}
+
 async function handleRequest(options: {
   benchmarkRunner: BenchmarkRunner;
   engine: StagePilotEngineLike;
@@ -1372,80 +1483,24 @@ async function handleRequest(options: {
   const method = request.method ?? "GET";
   const { pathname } = parseRequestUrl(request.url);
 
-  if ((method === "GET" || method === "HEAD") && pathname === "/demo") {
-    handleDemoRequest(response, { includeBody: method !== "HEAD" });
+  if (handleReadonlyRequest({ method, pathname, response })) {
     return;
   }
 
-  if ((method === "GET" || method === "HEAD") && pathname === "/health") {
-    handleHealthRequest(response, { includeBody: method !== "HEAD" });
-    return;
-  }
-
-  if ((method === "GET" || method === "HEAD") && pathname === "/v1/meta") {
-    handleMetaRequest(response, { includeBody: method !== "HEAD" });
-    return;
-  }
-
-  if (method === "POST" && pathname === "/v1/plan") {
-    await handlePlanRequest({ engine, logger, request, response });
-    return;
-  }
-
-  if (method === "POST" && pathname === "/v1/benchmark") {
-    await handleBenchmarkRequest({
+  if (
+    await handlePostRequest({
       benchmarkRunner,
-      logger,
-      request,
-      response,
-    });
-    return;
-  }
-
-  if (method === "POST" && pathname === "/v1/insights") {
-    await handleInsightsRequest({
       engine,
       insightDeriver,
       logger,
-      request,
-      response,
-    });
-    return;
-  }
-
-  if (method === "POST" && pathname === "/v1/whatif") {
-    await handleWhatIfRequest({
-      engine,
-      logger,
-      request,
-      response,
-      twinSimulator,
-    });
-    return;
-  }
-
-  if (method === "POST" && pathname === "/v1/notify") {
-    await handleNotifyRequest({
-      engine,
-      logger,
+      method,
       openClawNotifier,
+      pathname,
       request,
       response,
       twinSimulator,
-    });
-    return;
-  }
-
-  if (method === "POST" && pathname === "/v1/openclaw/inbox") {
-    await handleOpenClawInboxRequest({
-      engine,
-      insightDeriver,
-      logger,
-      openClawNotifier,
-      request,
-      response,
-      twinSimulator,
-    });
+    })
+  ) {
     return;
   }
 

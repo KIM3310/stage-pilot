@@ -466,6 +466,14 @@
           <p class="tiny" id="brief-review-sequence">
             Loading promotion sequence for checked-in claims.
           </p>
+          <div class="pill-row" style="margin-top: 14px">
+            <button class="ghost" id="copy-review-button" type="button">
+              Copy Review Path
+            </button>
+            <button class="ghost" id="copy-payload-button" type="button">
+              Copy Launch Payload
+            </button>
+          </div>
         </div>
       </section>
 
@@ -770,6 +778,8 @@ Loading checked-in artifact failure taxonomy.</pre
       compareMeta: document.querySelector("#compare-meta"),
       compareRight: document.querySelector("#compare-right"),
       compareTitle: document.querySelector("#compare-title"),
+      copyPayloadButton: document.querySelector("#copy-payload-button"),
+      copyReviewButton: document.querySelector("#copy-review-button"),
       forensicsBody: document.querySelector("#forensics-body"),
       forensicsMeta: document.querySelector("#forensics-meta"),
       forensicsTitle: document.querySelector("#forensics-title"),
@@ -837,6 +847,33 @@ Loading checked-in artifact failure taxonomy.</pre
       return typeof value === "number" && Number.isFinite(value)
         ? `${value.toFixed(2)}%`
         : "-";
+    }
+
+    async function copyTextToClipboard(text) {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+
+      const helper = document.createElement("textarea");
+      helper.value = text;
+      helper.setAttribute("readonly", "true");
+      helper.style.position = "absolute";
+      helper.style.left = "-9999px";
+      document.body.append(helper);
+      helper.select();
+      document.execCommand("copy");
+      helper.remove();
+    }
+
+    function flashButtonLabel(button, idleLabel, nextLabel) {
+      if (!button) {
+        return;
+      }
+      button.textContent = nextLabel;
+      window.setTimeout(() => {
+        button.textContent = idleLabel;
+      }, 1400);
     }
 
     function formatRuntimeProgress(modelRun) {
@@ -1894,6 +1931,63 @@ Loading checked-in artifact failure taxonomy.</pre
       };
     }
 
+    async function handleCopyReviewPath() {
+      const counts =
+        state.reviewPack?.proofBundle?.counts ||
+        state.runtimeBrief?.evidenceCounts ||
+        {};
+      const steps =
+        Array.isArray(state.reviewPack?.reviewSequence) &&
+        state.reviewPack.reviewSequence.length > 0
+          ? state.reviewPack.reviewSequence
+          : [els.briefReviewSequence.textContent || "Review path unavailable"];
+      const text = [
+        "BenchLab reviewer path",
+        `Headline: ${els.briefHeadline.textContent || "-"}`,
+        `Schema: ${
+          state.reviewPack?.proofBundle?.schema ||
+          state.runtimeBrief?.reportContract?.schema ||
+          "-"
+        }`,
+        `Configs: ${counts.configs ?? 0}`,
+        `Runs: ${counts.runs ?? 0}`,
+        `Artifacts: ${counts.artifacts ?? 0}`,
+        "",
+        "Promotion sequence",
+        ...steps.map((step) => `- ${step}`),
+      ].join("\n");
+
+      try {
+        await copyTextToClipboard(text);
+        flashButtonLabel(els.copyReviewButton, "Copy Review Path", "Copied");
+      } catch (error) {
+        console.warn("copy review path failed", error);
+        flashButtonLabel(
+          els.copyReviewButton,
+          "Copy Review Path",
+          "Copy failed"
+        );
+      }
+    }
+
+    async function handleCopyPayload() {
+      try {
+        await copyTextToClipboard(JSON.stringify(buildJobPayload(), null, 2));
+        flashButtonLabel(
+          els.copyPayloadButton,
+          "Copy Launch Payload",
+          "Copied"
+        );
+      } catch (error) {
+        console.warn("copy payload failed", error);
+        flashButtonLabel(
+          els.copyPayloadButton,
+          "Copy Launch Payload",
+          "Copy failed"
+        );
+      }
+    }
+
     async function submitJob(modeOverride) {
       els.launchButton.disabled = true;
       els.preflightButton.disabled = true;
@@ -1939,6 +2033,14 @@ Loading checked-in artifact failure taxonomy.</pre
 
     els.refreshButton.addEventListener("click", async () => {
       await refreshAll();
+    });
+
+    els.copyReviewButton.addEventListener("click", async () => {
+      await handleCopyReviewPath();
+    });
+
+    els.copyPayloadButton.addEventListener("click", async () => {
+      await handleCopyPayload();
     });
 
     els.jobsList.addEventListener("click", async (event) => {

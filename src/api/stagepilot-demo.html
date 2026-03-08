@@ -807,6 +807,10 @@
         <ul class="brief-list" id="briefReviewFlow">
           <li>Fetching review pack.</li>
         </ul>
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">
+          <button class="btn-secondary" id="copyReviewBtn" type="button">Copy Review Path</button>
+          <button class="btn-secondary" id="copyPayloadBtn" type="button">Copy Payload</button>
+        </div>
       </article>
       <article class="brief-item">
         <span class="brief-label">Schema</span>
@@ -1175,6 +1179,67 @@
         const li = document.createElement("li");
         li.textContent = item;
         root.append(li);
+      }
+    }
+
+    async function copyTextToClipboard(text) {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+
+      const helper = document.createElement("textarea");
+      helper.value = text;
+      helper.setAttribute("readonly", "true");
+      helper.style.position = "absolute";
+      helper.style.left = "-9999px";
+      document.body.append(helper);
+      helper.select();
+      document.execCommand("copy");
+      helper.remove();
+    }
+
+    function flashButtonLabel(buttonId, idleLabel, nextLabel) {
+      const button = el(buttonId);
+      if (!button) return;
+      button.textContent = nextLabel;
+      window.setTimeout(() => {
+        button.textContent = idleLabel;
+      }, 1400);
+    }
+
+    async function copyReviewPath() {
+      const steps = Array.from(document.querySelectorAll("#briefReviewFlow li"))
+        .map((item) => item.textContent?.trim())
+        .filter(Boolean);
+      const text = [
+        "StagePilot reviewer path",
+        `Headline: ${el("briefHeadline").textContent || "-"}`,
+        `Schema: ${el("briefSchema").textContent || "-"}`,
+        `Runtime mode: ${el("briefMode").textContent || "-"}`,
+        `Benchmark lift: ${el("briefBenchmarkDelta").textContent || "-"}`,
+        `Route count: ${el("briefRouteCount").textContent || "-"}`,
+        "",
+        "Review flow",
+        ...(steps.length > 0 ? steps.map((step) => `- ${step}`) : ["- Review flow unavailable"]),
+      ].join("\n");
+
+      try {
+        await copyTextToClipboard(text);
+        flashButtonLabel("copyReviewBtn", "Copy Review Path", "Copied");
+      } catch (error) {
+        console.warn("copy review path failed", error);
+        flashButtonLabel("copyReviewBtn", "Copy Review Path", "Copy failed");
+      }
+    }
+
+    async function copyPayloadPreview() {
+      try {
+        await copyTextToClipboard(JSON.stringify(readPayload(), null, 2));
+        flashButtonLabel("copyPayloadBtn", "Copy Payload", "Copied");
+      } catch (error) {
+        console.warn("copy payload failed", error);
+        flashButtonLabel("copyPayloadBtn", "Copy Payload", "Copy failed");
       }
     }
 
@@ -1590,6 +1655,8 @@
       el("runBtn").addEventListener("click", runFlow);
       el("notifyBtn").addEventListener("click", notifyOpenClaw);
       el("sampleBtn").addEventListener("click", loadSample);
+      el("copyReviewBtn").addEventListener("click", copyReviewPath);
+      el("copyPayloadBtn").addEventListener("click", copyPayloadPreview);
       if (el("autoDemoBtn")) el("autoDemoBtn").addEventListener("click", runAutoDemo);
     }
 

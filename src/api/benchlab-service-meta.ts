@@ -8,6 +8,31 @@ export const BENCHLAB_READINESS_CONTRACT = "benchlab-runtime-brief-v1";
 export const BENCHLAB_JOB_REPORT_SCHEMA = "benchlab-job-report-v1";
 export const BENCHLAB_REVIEW_PACK_ID = "benchlab-review-pack-v1";
 
+function buildBenchLabProofAssets() {
+  return [
+    {
+      label: "Review pack diagram",
+      path: "docs/review-pack.svg",
+      kind: "diagram",
+    },
+    {
+      label: "Failure taxonomy",
+      path: "docs/benchlab/FAILURE_TAXONOMY.md",
+      kind: "doc",
+    },
+    {
+      label: "Tool calling gains note",
+      path: "docs/benchlab/TOOL_CALLING_GAINS.md",
+      kind: "doc",
+    },
+    {
+      label: "Experiment folder",
+      path: "experiments/",
+      kind: "sample",
+    },
+  ];
+}
+
 export function buildBenchLabRouteDescriptors(): BenchLabRouteDescriptor[] {
   return [
     {
@@ -228,6 +253,28 @@ export function buildBenchLabReviewPack(options: {
       "Inspect best checked-in delta and dominant failure bucket before comparing variants.",
       "Promote only artifacts with aligned summary, report, and tracked forensics evidence.",
     ],
+    twoMinuteReview: [
+      {
+        step: "1. Runtime brief",
+        surface: "/v1/benchlab/runtime-brief",
+        proof: "Check configs, jobs, runs, and artifact counts before opening any matrix claim.",
+      },
+      {
+        step: "2. Promotion proof",
+        surface: "/v1/benchlab/review-pack -> /v1/benchlab/artifacts/best",
+        proof: "Validate the strongest checked-in delta before comparing runtimes.",
+      },
+      {
+        step: "3. Failure buckets",
+        surface: "/v1/benchlab/artifacts/forensics -> docs/benchlab/FAILURE_TAXONOMY.md",
+        proof: "Inspect dominant error modes before promoting a new prompt or model path.",
+      },
+      {
+        step: "4. Operator docs",
+        surface: "docs/benchlab/TOOL_CALLING_GAINS.md -> experiments/",
+        proof: "Connect claim narrative to checked-in notes and runnable experiments.",
+      },
+    ],
     proofBundle: {
       counts: {
         configs: options.configCount,
@@ -245,6 +292,7 @@ export function buildBenchLabReviewPack(options: {
       routeCount: buildBenchLabRouteDescriptors().length,
       schema: BENCHLAB_JOB_REPORT_SCHEMA,
     },
+    proofAssets: buildBenchLabProofAssets(),
     links: {
       health: "/health",
       runtimeBrief: "/v1/benchlab/runtime-brief",

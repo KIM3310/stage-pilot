@@ -1975,8 +1975,15 @@ Loading checked-in artifact failure taxonomy.</pre
     }
 
     async function handleCopyProofRoutes() {
+      const counts =
+        state.reviewPack?.proofBundle?.counts ||
+        state.runtimeBrief?.evidenceCounts ||
+        {};
       const text = [
         "BenchLab proof routes",
+        `Configs: ${counts.configs ?? 0}`,
+        `Runs: ${counts.runs ?? 0}`,
+        `Artifacts: ${counts.artifacts ?? 0}`,
         "- /health",
         "- /v1/benchlab/runtime-brief",
         "- /v1/benchlab/review-pack",

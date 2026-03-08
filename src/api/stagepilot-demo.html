@@ -146,6 +146,65 @@
       align-items: start;
     }
 
+    .brief-strip {
+      display: grid;
+      grid-template-columns: 1.25fr repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .brief-item {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgba(16, 21, 31, 0.72);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .brief-label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--ink-muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brief-value {
+      font-size: 1rem;
+      color: #fff;
+    }
+
+    .brief-headline {
+      font-size: 0.92rem;
+      color: var(--ink-muted);
+      line-height: 1.5;
+    }
+
+    .brief-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      margin-bottom: 10px;
+      border-radius: 999px;
+      background: rgba(0, 229, 255, 0.1);
+      border: 1px solid rgba(0, 229, 255, 0.2);
+      color: var(--primary);
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .brief-list {
+      margin: 12px 0 0;
+      padding-left: 18px;
+      color: var(--ink-muted);
+      font-size: 0.82rem;
+      line-height: 1.55;
+    }
+
     .panel {
       background: var(--bg-panel);
       border: 1px solid var(--line);
@@ -686,6 +745,10 @@
     }
 
     @media (max-width: 1300px) {
+      .brief-strip {
+        grid-template-columns: 1fr 1fr;
+      }
+
       .grid {
         grid-template-columns: 1fr 1fr;
       }
@@ -696,6 +759,10 @@
     }
 
     @media (max-width: 900px) {
+      .brief-strip {
+        grid-template-columns: 1fr;
+      }
+
       .grid {
         grid-template-columns: 1fr;
       }
@@ -730,6 +797,30 @@
         Google-only | Gemini + Built-in Twin
       </div>
     </header>
+
+    <section class="brief-strip">
+      <article class="brief-item">
+        <div class="brief-badge" id="briefBadge">stagepilot-runtime-brief</div>
+        <div class="brief-headline" id="briefHeadline">
+          Loading operator readiness surface...
+        </div>
+        <ul class="brief-list" id="briefReviewFlow">
+          <li>Fetching runtime brief.</li>
+        </ul>
+      </article>
+      <article class="brief-item">
+        <span class="brief-label">Schema</span>
+        <div class="brief-value" id="briefSchema">-</div>
+      </article>
+      <article class="brief-item">
+        <span class="brief-label">Runtime Mode</span>
+        <div class="brief-value" id="briefMode">-</div>
+      </article>
+      <article class="brief-item">
+        <span class="brief-label">Route Count</span>
+        <div class="brief-value" id="briefRouteCount">-</div>
+      </article>
+    </section>
 
     <section class="grid">
       <!-- Panel 1: Intake -->
@@ -1067,6 +1158,53 @@
 
     function previewPayload(payload) {
       el("payloadPreview").textContent = JSON.stringify(payload, null, 2);
+    }
+
+    function renderBriefList(items) {
+      const root = el("briefReviewFlow");
+      if (!root) return;
+      root.innerHTML = "";
+      const values = Array.isArray(items) && items.length > 0
+        ? items
+        : ["Runtime brief is unavailable."];
+      for (const item of values) {
+        const li = document.createElement("li");
+        li.textContent = item;
+        root.append(li);
+      }
+    }
+
+    async function loadRuntimeBrief() {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), API_REQUEST_TIMEOUT_MS);
+      try {
+        const response = await fetch("/v1/runtime-brief", {
+          method: "GET",
+          signal: controller.signal,
+        });
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload?.error || "runtime brief unavailable");
+        }
+        el("briefBadge").textContent = payload.readinessContract || "stagepilot-runtime-brief";
+        el("briefHeadline").textContent = payload.headline || "No runtime headline available.";
+        el("briefSchema").textContent = payload.reportContract?.schema || "-";
+        el("briefMode").textContent = payload.diagnostics?.integrationReady
+          ? "ready"
+          : (payload.diagnostics?.missingIntegrations || ["degraded"]).join(", ");
+        el("briefRouteCount").textContent = String(payload.routeCount || 0);
+        renderBriefList(payload.reviewFlow);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "runtime brief unavailable";
+        el("briefBadge").textContent = "brief-error";
+        el("briefHeadline").textContent = `Operator readiness fetch failed: ${message}`;
+        el("briefSchema").textContent = "unavailable";
+        el("briefMode").textContent = "degraded";
+        el("briefRouteCount").textContent = "0";
+        renderBriefList(["Check /health and /v1/meta before trusting a live run."]);
+      } finally {
+        clearTimeout(timeoutId);
+      }
     }
 
     function readPayload() {
@@ -1535,6 +1673,7 @@
       setProfileFromDistrict();
       bindEvents();
       previewPayload(readPayload());
+      loadRuntimeBrief();
     }
 
     boot();

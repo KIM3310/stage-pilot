@@ -16,6 +16,10 @@ import {
 } from "node:http";
 import { dirname, extname, join, relative, resolve, sep } from "node:path";
 import { renderBenchLabDemoHtml } from "./benchlab-demo";
+import {
+  buildBenchLabJobReportSchema,
+  buildBenchLabRuntimeBrief,
+} from "./benchlab-service-meta";
 
 type Logger = Pick<Console, "error" | "info" | "warn">;
 
@@ -2582,6 +2586,28 @@ export function createBenchLabApiServer(
     return job;
   }
 
+  function buildRuntimeBriefPayload(): JsonObject {
+    return buildBenchLabRuntimeBrief({
+      artifactCount: listArtifactSummaries(repoRoot).length,
+      benchmarkRoot,
+      configCount: listConfigFiles(matrixRoot).length,
+      jobCount: jobs.size,
+      matrixRoot,
+      pythonExecutable,
+      repoRoot,
+      runCount: listRuntimeSummaries(matrixRoot).length,
+    });
+  }
+
+  function buildJobReportSchemaPayload(): JsonObject {
+    return {
+      service: "benchlab-api",
+      status: "ok",
+      generatedAt: nowIso(),
+      ...buildBenchLabJobReportSchema(),
+    };
+  }
+
   function handleRootRoute(
     request: IncomingMessage,
     response: ServerResponse,
@@ -2606,12 +2632,40 @@ export function createBenchLabApiServer(
       return false;
     }
     sendJson(response, 200, {
+      ...buildRuntimeBriefPayload(),
       ok: true,
       benchmarkRoot,
       matrixRoot,
       pythonExecutable,
       repoRoot,
     });
+    return true;
+  }
+
+  function handleRuntimeBriefRoute(
+    request: IncomingMessage,
+    response: ServerResponse,
+    pathname: string
+  ): boolean {
+    if (request.method !== "GET" || pathname !== "/v1/benchlab/runtime-brief") {
+      return false;
+    }
+    sendJson(response, 200, buildRuntimeBriefPayload());
+    return true;
+  }
+
+  function handleJobReportSchemaRoute(
+    request: IncomingMessage,
+    response: ServerResponse,
+    pathname: string
+  ): boolean {
+    if (
+      request.method !== "GET" ||
+      pathname !== "/v1/benchlab/schema/job-report"
+    ) {
+      return false;
+    }
+    sendJson(response, 200, buildJobReportSchemaPayload());
     return true;
   }
 
@@ -3007,6 +3061,10 @@ export function createBenchLabApiServer(
       handleRootRoute(request, response, requestUrl.pathname),
     (request, response, requestUrl) =>
       handleHealthRoute(request, response, requestUrl.pathname),
+    (request, response, requestUrl) =>
+      handleRuntimeBriefRoute(request, response, requestUrl.pathname),
+    (request, response, requestUrl) =>
+      handleJobReportSchemaRoute(request, response, requestUrl.pathname),
     (request, response, requestUrl) =>
       handleConfigsRoute(request, response, requestUrl.pathname),
     (request, response, requestUrl) =>

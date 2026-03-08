@@ -321,7 +321,7 @@ describe("stagepilot api server", () => {
     const html = await response.text();
     expect(html).toContain("StagePilot Judge Console");
     expect(html).toContain("/v1/whatif");
-    expect(html).toContain("Loading operator readiness surface");
+    expect(html).toContain("Loading benchmark-backed reviewer surface");
   });
 
   it("supports HEAD for desktop demo page", async () => {
@@ -506,6 +506,44 @@ describe("stagepilot api server", () => {
     expect(body.reviewFlow.length).toBeGreaterThanOrEqual(3);
     expect(body.routeCount).toBeGreaterThanOrEqual(10);
     expect(body.headline).toContain("orchestration");
+  });
+
+  it("returns benchmark-backed review pack", async () => {
+    process.env.GEMINI_API_KEY = "stagepilot-test-key";
+    process.env.OPENCLAW_WEBHOOK_URL = "https://example.invalid/webhook";
+
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const response = await fetch(`${baseUrl}/v1/review-pack`);
+    expect(response.status).toBe(200);
+
+    const body = (await response.json()) as {
+      links: {
+        reviewPack: string;
+      };
+      operatorJourney: Array<{ stage: string }>;
+      proofBundle: {
+        benchmark: {
+          caseCount: number;
+          improvements: {
+            loopVsBaseline: number | null;
+          };
+        };
+      };
+      reviewPackId: string;
+      reviewSequence: string[];
+    };
+
+    expect(body.reviewPackId).toBe("stagepilot-review-pack-v1");
+    expect(body.links.reviewPack).toBe("/v1/review-pack");
+    expect(body.operatorJourney).toHaveLength(4);
+    expect(body.reviewSequence.length).toBeGreaterThanOrEqual(3);
+    expect(body.proofBundle.benchmark.caseCount).toBeGreaterThanOrEqual(20);
+    expect(
+      body.proofBundle.benchmark.improvements.loopVsBaseline
+    ).toBeGreaterThan(50);
   });
 
   it("returns plan report schema surface", async () => {

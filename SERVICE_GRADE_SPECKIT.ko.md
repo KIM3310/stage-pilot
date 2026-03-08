@@ -14,13 +14,13 @@ Last updated: 2026-03-08
 - package export surface와 README quickstart를 중심으로 canonical repo posture 유지
 - BenchLab / parser / StagePilot 흐름을 같은 품질 기준으로 검증
 - release 전 typecheck, test, build, example smoke를 반복
-- 이번 iteration에서 StagePilot/BenchLab 모두 runtime brief + schema surface를 API/UI에 추가
+- 이번 iteration에서 StagePilot/BenchLab 모두 runtime brief + review pack + schema surface를 API/UI에 추가
 
 ## C - Criteria
 - `npm test`, `npm run typecheck`, `npm run build` green
 - parser package 목적과 BenchLab 가치가 README 첫 화면에서 이해됨
 - legacy 연구 레포와 역할 분리가 명확함
-- `/demo`와 `/benchlab` 첫 화면에서 operator posture가 즉시 보임
+- `/demo`와 `/benchlab` 첫 화면에서 operator posture와 benchmark/artifact proof가 즉시 보임
 
 ## K - Keep
 - parser contract 중심 설계
@@ -30,6 +30,7 @@ Last updated: 2026-03-08
 - CLI demo transcript와 benchmark delta 리포트 강화
 - StagePilot orchestration screenshot / GIF 추가
 - checked-in artifact promotion rules와 BenchLab job evidence 더 엄격히 연결
+- hosted demo smoke와 checked-in review-pack screenshots 추가
 
 ## T - Trace
 - `README.md`

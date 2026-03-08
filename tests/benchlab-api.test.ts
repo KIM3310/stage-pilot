@@ -458,6 +458,33 @@ describe("benchlab api", () => {
     expect(htmlResponse.status).toBe(200);
     expect(html).toContain("BenchLab");
     expect(html).toContain("Best Checked-In Claims");
+    expect(html).toContain("Loading operator brief");
+
+    const healthResponse = await fetch(`${baseUrl}/health`);
+    const healthPayload = await healthResponse.json();
+    expect(healthResponse.status).toBe(200);
+    expect(healthPayload.readinessContract).toBe("benchlab-runtime-brief-v1");
+    expect(healthPayload.reportContract.schema).toBe("benchlab-job-report-v1");
+
+    const briefResponse = await fetch(`${baseUrl}/v1/benchlab/runtime-brief`);
+    const briefPayload = await briefResponse.json();
+    expect(briefResponse.status).toBe(200);
+    expect(briefPayload.readinessContract).toBe("benchlab-runtime-brief-v1");
+    expect(briefPayload.reportContract.schema).toBe("benchlab-job-report-v1");
+    expect(briefPayload.evidenceCounts.configs).toBe(2);
+    expect(briefPayload.evidenceCounts.artifacts).toBe(2);
+    expect(briefPayload.reviewFlow).toEqual(
+      expect.arrayContaining([expect.stringContaining("Validate configs")])
+    );
+
+    const schemaResponse = await fetch(
+      `${baseUrl}/v1/benchlab/schema/job-report`
+    );
+    const schemaPayload = await schemaResponse.json();
+    expect(schemaResponse.status).toBe(200);
+    expect(schemaPayload.schema).toBe("benchlab-job-report-v1");
+    expect(schemaPayload.requiredSections).toContain("forensics");
+    expect(schemaPayload.operatorRules.length).toBeGreaterThanOrEqual(3);
 
     const configResponse = await fetch(`${baseUrl}/v1/benchlab/configs`);
     const payload = await configResponse.json();

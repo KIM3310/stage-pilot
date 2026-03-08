@@ -321,6 +321,7 @@ describe("stagepilot api server", () => {
     const html = await response.text();
     expect(html).toContain("StagePilot Judge Console");
     expect(html).toContain("/v1/whatif");
+    expect(html).toContain("Loading operator readiness surface");
   });
 
   it("supports HEAD for desktop demo page", async () => {
@@ -360,6 +361,10 @@ describe("stagepilot api server", () => {
       ops_contract: {
         schema: string;
       };
+      readinessContract: string;
+      reportContract: {
+        schema: string;
+      };
       service: string;
       status: string;
       useGpu: boolean;
@@ -369,6 +374,8 @@ describe("stagepilot api server", () => {
     expect(body.service).toBeTypeOf("string");
     expect(body.status).toBe("ok");
     expect(body.ops_contract.schema).toBe("ops-envelope-v1");
+    expect(body.readinessContract).toBe("stagepilot-runtime-brief-v1");
+    expect(body.reportContract.schema).toBe("stagepilot-plan-report-v1");
     expect(body.useGpu).toBe(false);
     expect(body.diagnostics.integrationReady).toBe(false);
     expect(body.diagnostics.requestBodyTimeoutMs).toBe(1500);
@@ -421,6 +428,10 @@ describe("stagepilot api server", () => {
         };
       };
       ok: boolean;
+      readinessContract: string;
+      reportContract: {
+        schema: string;
+      };
       requestLimits: {
         bodyTimeoutMs: number;
       };
@@ -431,6 +442,8 @@ describe("stagepilot api server", () => {
     };
 
     expect(body.ok).toBe(true);
+    expect(body.readinessContract).toBe("stagepilot-runtime-brief-v1");
+    expect(body.reportContract.schema).toBe("stagepilot-plan-report-v1");
     expect(body.requestLimits.bodyTimeoutMs).toBe(2100);
     expect(body.diagnostics.integrationReady).toBe(true);
     expect(body.diagnostics.missingIntegrations).toEqual([]);
@@ -461,6 +474,59 @@ describe("stagepilot api server", () => {
 
     const body = await response.text();
     expect(body).toBe("");
+  });
+
+  it("returns operator runtime brief", async () => {
+    process.env.GEMINI_API_KEY = "stagepilot-test-key";
+    process.env.OPENCLAW_WEBHOOK_URL = "https://example.invalid/webhook";
+
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const response = await fetch(`${baseUrl}/v1/runtime-brief`);
+    expect(response.status).toBe(200);
+
+    const body = (await response.json()) as {
+      diagnostics: {
+        integrationReady: boolean;
+      };
+      headline: string;
+      readinessContract: string;
+      reportContract: {
+        schema: string;
+      };
+      reviewFlow: string[];
+      routeCount: number;
+    };
+
+    expect(body.readinessContract).toBe("stagepilot-runtime-brief-v1");
+    expect(body.reportContract.schema).toBe("stagepilot-plan-report-v1");
+    expect(body.diagnostics.integrationReady).toBe(true);
+    expect(body.reviewFlow.length).toBeGreaterThanOrEqual(3);
+    expect(body.routeCount).toBeGreaterThanOrEqual(10);
+    expect(body.headline).toContain("orchestration");
+  });
+
+  it("returns plan report schema surface", async () => {
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const response = await fetch(`${baseUrl}/v1/schema/plan-report`);
+    expect(response.status).toBe(200);
+
+    const body = (await response.json()) as {
+      operatorRules: string[];
+      requiredSections: string[];
+      schema: string;
+      status: string;
+    };
+
+    expect(body.status).toBe("ok");
+    expect(body.schema).toBe("stagepilot-plan-report-v1");
+    expect(body.requiredSections).toContain("plan");
+    expect(body.operatorRules.length).toBeGreaterThanOrEqual(3);
   });
 
   it("runs planning endpoint", async () => {

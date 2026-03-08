@@ -473,6 +473,9 @@
             <button class="ghost" id="copy-proof-button" type="button">
               Copy Proof Routes
             </button>
+            <button class="ghost" id="copy-top-claim-button" type="button">
+              Copy Top Claim
+            </button>
             <button class="ghost" id="copy-payload-button" type="button">
               Copy Launch Payload
             </button>
@@ -784,6 +787,7 @@ Loading checked-in artifact failure taxonomy.</pre
       copyPayloadButton: document.querySelector("#copy-payload-button"),
       copyProofButton: document.querySelector("#copy-proof-button"),
       copyReviewButton: document.querySelector("#copy-review-button"),
+      copyTopClaimButton: document.querySelector("#copy-top-claim-button"),
       forensicsBody: document.querySelector("#forensics-body"),
       forensicsMeta: document.querySelector("#forensics-meta"),
       forensicsTitle: document.querySelector("#forensics-title"),
@@ -2005,6 +2009,41 @@ Loading checked-in artifact failure taxonomy.</pre
       }
     }
 
+    async function handleCopyTopClaim() {
+      const strongestArtifact =
+        state.reviewPack?.proofBundle?.bestArtifact ||
+        state.artifacts.find((artifact) => artifact.outcome === "improved") ||
+        state.artifacts[0] ||
+        null;
+      const text = [
+        "BenchLab top claim snapshot",
+        `Headline: ${els.briefHeadline.textContent || "-"}`,
+        `Claim: ${strongestArtifact?.claimName || strongestArtifact?.modelName || "-"}`,
+        `Provider: ${strongestArtifact?.providerName || "-"}`,
+        `Experiment: ${strongestArtifact?.experimentName || "-"}`,
+        `Delta: ${formatMetric(strongestArtifact?.deltaPp)} pp`,
+        `Scores: ${formatMetric(strongestArtifact?.baselineScore)} -> ${formatMetric(strongestArtifact?.ralphScore)}`,
+        `Cases: ${strongestArtifact?.casesPerCategory ?? "-"}`,
+        "",
+        "Proof routes",
+        "- /v1/benchlab/review-pack",
+        "- /v1/benchlab/artifacts/best",
+        "- /v1/benchlab/artifacts/forensics",
+      ].join("\n");
+
+      try {
+        await copyTextToClipboard(text);
+        flashButtonLabel(els.copyTopClaimButton, "Copy Top Claim", "Copied");
+      } catch (error) {
+        console.warn("copy top claim failed", error);
+        flashButtonLabel(
+          els.copyTopClaimButton,
+          "Copy Top Claim",
+          "Copy failed"
+        );
+      }
+    }
+
     async function handleCopyPayload() {
       try {
         await copyTextToClipboard(JSON.stringify(buildJobPayload(), null, 2));
@@ -2076,6 +2115,10 @@ Loading checked-in artifact failure taxonomy.</pre
 
     els.copyProofButton.addEventListener("click", async () => {
       await handleCopyProofRoutes();
+    });
+
+    els.copyTopClaimButton.addEventListener("click", async () => {
+      await handleCopyTopClaim();
     });
 
     els.copyPayloadButton.addEventListener("click", async () => {

@@ -33,6 +33,12 @@ import type {
   StagePilotResult,
 } from "../stagepilot/types";
 import { renderStagePilotDemoHtml } from "./stagepilot-demo";
+import {
+  buildStagePilotPlanReportSchema,
+  buildStagePilotRouteDescriptors,
+  buildStagePilotRuntimeBrief,
+  type StagePilotRouteDescriptor,
+} from "./stagepilot-service-meta";
 
 interface JsonObject {
   [key: string]: unknown;
@@ -40,12 +46,6 @@ interface JsonObject {
 
 interface ParsedRequestUrl {
   pathname: string;
-}
-
-interface RouteDescriptor {
-  method: "GET" | "POST";
-  path: string;
-  purpose: string;
 }
 
 export interface StagePilotEngineLike {
@@ -409,54 +409,8 @@ function extractBenchmarkOptions(body: unknown): Required<BenchmarkOptions> {
   };
 }
 
-function buildRouteDescriptors(): RouteDescriptor[] {
-  return [
-    {
-      method: "GET",
-      path: "/demo",
-      purpose: "Interactive StagePilot judge console",
-    },
-    {
-      method: "GET",
-      path: "/health",
-      purpose: "Lightweight service health probe",
-    },
-    {
-      method: "GET",
-      path: "/v1/meta",
-      purpose: "Runtime defaults, routes, and integration readiness",
-    },
-    {
-      method: "POST",
-      path: "/v1/plan",
-      purpose: "Run StagePilot planning and routing",
-    },
-    {
-      method: "POST",
-      path: "/v1/benchmark",
-      purpose: "Run benchmark harness over sample cases",
-    },
-    {
-      method: "POST",
-      path: "/v1/insights",
-      purpose: "Derive Gemini-backed narrative insights",
-    },
-    {
-      method: "POST",
-      path: "/v1/whatif",
-      purpose: "Simulate staffing and demand deltas",
-    },
-    {
-      method: "POST",
-      path: "/v1/notify",
-      purpose: "Deliver StagePilot result through OpenClaw channel",
-    },
-    {
-      method: "POST",
-      path: "/v1/openclaw/inbox",
-      purpose: "Accept inbox-style commands and optional replies",
-    },
-  ];
+function buildRouteDescriptors(): StagePilotRouteDescriptor[] {
+  return buildStagePilotRouteDescriptors();
 }
 
 function buildMetaPayload(): JsonObject {
@@ -479,6 +433,19 @@ function buildMetaPayload(): JsonObject {
   if (!openClawConfigured) {
     missingIntegrations.push("openclaw_delivery");
   }
+
+  const service = process.env.SERVICE_NAME_API ?? "stagepilot-api";
+  const runtimeBrief = buildStagePilotRuntimeBrief({
+    bodyTimeoutMs,
+    geminiHasApiKey,
+    geminiTimeoutMs,
+    model: process.env.GEMINI_MODEL ?? "gemini-2.5-pro",
+    openClawConfigured,
+    openClawHasWebhookUrl: Boolean(
+      toNonEmptyString(process.env.OPENCLAW_WEBHOOK_URL)
+    ),
+    service,
+  });
 
   return {
     benchmarkDefaults: {
@@ -512,6 +479,7 @@ function buildMetaPayload(): JsonObject {
         ),
       },
     },
+    links: runtimeBrief.links,
     model: process.env.GEMINI_MODEL ?? "gemini-2.5-pro",
     ok: true,
     diagnostics: {
@@ -528,14 +496,50 @@ function buildMetaPayload(): JsonObject {
       version: 1,
       required_fields: ["service", "status", "diagnostics.nextAction"],
     },
+    readinessContract: runtimeBrief.readinessContract,
+    reportContract: runtimeBrief.reportContract,
     requestLimits: {
       bodyBytes: DEFAULT_BODY_LIMIT_BYTES,
       bodyTimeoutMs,
     },
     routes: buildRouteDescriptors(),
-    service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
+    service,
     status: "ok",
     useGpu: false,
+  };
+}
+
+function buildRuntimeBriefPayload(): JsonObject {
+  const meta = buildMetaPayload();
+  const service =
+    typeof meta.service === "string" ? meta.service : "stagepilot-api";
+  return buildStagePilotRuntimeBrief({
+    bodyTimeoutMs: readBodyTimeoutMs(
+      process.env.STAGEPILOT_REQUEST_BODY_TIMEOUT_MS
+    ),
+    geminiHasApiKey:
+      typeof process.env.GEMINI_API_KEY === "string" &&
+      process.env.GEMINI_API_KEY.trim().length > 0,
+    geminiTimeoutMs: readGeminiHttpTimeoutMs(
+      process.env.GEMINI_HTTP_TIMEOUT_MS
+    ),
+    model: process.env.GEMINI_MODEL ?? "gemini-2.5-pro",
+    openClawConfigured:
+      Boolean(toNonEmptyString(process.env.OPENCLAW_WEBHOOK_URL)) ||
+      Boolean(toNonEmptyString(process.env.OPENCLAW_CMD)),
+    openClawHasWebhookUrl: Boolean(
+      toNonEmptyString(process.env.OPENCLAW_WEBHOOK_URL)
+    ),
+    service,
+  });
+}
+
+function buildPlanReportSchemaPayload(): JsonObject {
+  return {
+    service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
+    status: "ok",
+    generatedAt: new Date().toISOString(),
+    ...buildStagePilotPlanReportSchema(),
   };
 }
 
@@ -963,6 +967,20 @@ function handleMetaRequest(
   sendJson(response, 200, buildMetaPayload(), options);
 }
 
+function handleRuntimeBriefRequest(
+  response: ServerResponse,
+  options?: { includeBody?: boolean }
+) {
+  sendJson(response, 200, buildRuntimeBriefPayload(), options);
+}
+
+function handlePlanReportSchemaRequest(
+  response: ServerResponse,
+  options?: { includeBody?: boolean }
+) {
+  sendJson(response, 200, buildPlanReportSchemaPayload(), options);
+}
+
 function handleDemoRequest(
   response: ServerResponse,
   options?: { includeBody?: boolean }
@@ -1369,6 +1387,12 @@ function handleReadonlyRequest(options: {
       return true;
     case "/v1/meta":
       handleMetaRequest(response, { includeBody });
+      return true;
+    case "/v1/runtime-brief":
+      handleRuntimeBriefRequest(response, { includeBody });
+      return true;
+    case "/v1/schema/plan-report":
+      handlePlanReportSchemaRequest(response, { includeBody });
       return true;
     default:
       return false;

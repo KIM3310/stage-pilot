@@ -135,6 +135,8 @@ BenchLab surfaces:
 
 - `GET /benchlab`
 - `GET /health`
+- `GET /v1/benchlab/runtime-brief`
+- `GET /v1/benchlab/schema/job-report`
 - `GET /v1/benchlab/configs`
 - `GET /v1/benchlab/jobs`
 - `GET /v1/benchlab/jobs/:id`
@@ -179,6 +181,9 @@ Endpoints:
 
 - `GET /demo`
 - `GET /health`
+- `GET /v1/meta`
+- `GET /v1/runtime-brief`
+- `GET /v1/schema/plan-report`
 - `POST /v1/plan`
 - `POST /v1/benchmark`
 - `POST /v1/insights`
@@ -187,6 +192,12 @@ Endpoints:
 - `POST /v1/openclaw/inbox`
 
 See full behavior and payload examples in [`docs/STAGEPILOT.md`](docs/STAGEPILOT.md).
+
+## Service-Grade Surfaces
+
+- `/v1/runtime-brief` and `/v1/schema/plan-report` expose StagePilot readiness, integration posture, and report contract.
+- `/v1/benchlab/runtime-brief` and `/v1/benchlab/schema/job-report` expose BenchLab evidence counts, operator review flow, and job-report expectations.
+- `/demo` and `/benchlab` now render readiness surfaces directly in the UI so reviewers can validate posture without reading code first.
 
 BenchLab API entrypoint:
 

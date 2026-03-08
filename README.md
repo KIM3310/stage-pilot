@@ -18,6 +18,15 @@
 - GitHub repository: https://github.com/KIM3310/stage-pilot
 - Demo video: https://youtu.be/6trgTH1vX4M
 
+## Review Pack At A Glance
+
+- StagePilot reviewer API: `GET /v1/runtime-brief`, `GET /v1/review-pack`, `GET /v1/schema/plan-report`
+- BenchLab reviewer API: `GET /v1/benchlab/runtime-brief`, `GET /v1/benchlab/review-pack`, `GET /v1/benchlab/schema/job-report`
+- Checked-in benchmark proof: baseline `29.17%` -> middleware `87.50%` -> Ralph loop `100.00%`
+- Checked-in BenchLab claims: runtime compare, variant leaderboard, best artifacts, and failure forensics
+
+![StagePilot Review Pack](docs/review-pack.svg)
+
 ## References and attribution
 
 - Earlier fork / baseline reference: https://github.com/KIM3310/ai-sdk-tool-call-middleware
@@ -89,6 +98,8 @@ Ralph-loop point (what changed):
 
 Latency note: these numbers come from deterministic in-process benchmark harness execution (parser + planning), not network LLM round-trip latency.
 
+Review-pack surfaces now expose this benchmark delta directly through `/v1/review-pack` so reviewers can inspect the lift without parsing the raw JSON file first.
+
 ## Quick start
 
 ### 1) Install
@@ -136,6 +147,7 @@ BenchLab surfaces:
 - `GET /benchlab`
 - `GET /health`
 - `GET /v1/benchlab/runtime-brief`
+- `GET /v1/benchlab/review-pack`
 - `GET /v1/benchlab/schema/job-report`
 - `GET /v1/benchlab/configs`
 - `GET /v1/benchlab/jobs`
@@ -183,6 +195,7 @@ Endpoints:
 - `GET /health`
 - `GET /v1/meta`
 - `GET /v1/runtime-brief`
+- `GET /v1/review-pack`
 - `GET /v1/schema/plan-report`
 - `POST /v1/plan`
 - `POST /v1/benchmark`
@@ -195,9 +208,9 @@ See full behavior and payload examples in [`docs/STAGEPILOT.md`](docs/STAGEPILOT
 
 ## Service-Grade Surfaces
 
-- `/v1/runtime-brief` and `/v1/schema/plan-report` expose StagePilot readiness, integration posture, and report contract.
-- `/v1/benchlab/runtime-brief` and `/v1/benchlab/schema/job-report` expose BenchLab evidence counts, operator review flow, and job-report expectations.
-- `/demo` and `/benchlab` now render readiness surfaces directly in the UI so reviewers can validate posture without reading code first.
+- `/v1/runtime-brief`, `/v1/review-pack`, and `/v1/schema/plan-report` expose StagePilot readiness, benchmark proof, parser/orchestration posture, and report contract.
+- `/v1/benchlab/runtime-brief`, `/v1/benchlab/review-pack`, and `/v1/benchlab/schema/job-report` expose BenchLab evidence counts, checked-in claim proof, dominant failure buckets, and job-report expectations.
+- `/demo` and `/benchlab` now render review-pack surfaces directly in the UI so reviewers can validate posture without reading code first.
 
 BenchLab API entrypoint:
 

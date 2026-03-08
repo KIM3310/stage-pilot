@@ -148,7 +148,7 @@
 
     .brief-strip {
       display: grid;
-      grid-template-columns: 1.25fr repeat(3, minmax(0, 1fr));
+      grid-template-columns: 1.2fr repeat(4, minmax(0, 1fr));
       gap: 16px;
       margin-bottom: 24px;
     }
@@ -800,12 +800,12 @@
 
     <section class="brief-strip">
       <article class="brief-item">
-        <div class="brief-badge" id="briefBadge">stagepilot-runtime-brief</div>
+        <div class="brief-badge" id="briefBadge">stagepilot-review-pack</div>
         <div class="brief-headline" id="briefHeadline">
-          Loading operator readiness surface...
+          Loading benchmark-backed reviewer surface...
         </div>
         <ul class="brief-list" id="briefReviewFlow">
-          <li>Fetching runtime brief.</li>
+          <li>Fetching review pack.</li>
         </ul>
       </article>
       <article class="brief-item">
@@ -815,6 +815,10 @@
       <article class="brief-item">
         <span class="brief-label">Runtime Mode</span>
         <div class="brief-value" id="briefMode">-</div>
+      </article>
+      <article class="brief-item">
+        <span class="brief-label">Benchmark Lift</span>
+        <div class="brief-value" id="briefBenchmarkDelta">-</div>
       </article>
       <article class="brief-item">
         <span class="brief-label">Route Count</span>
@@ -1186,22 +1190,59 @@
         if (!response.ok) {
           throw new Error(payload?.error || "runtime brief unavailable");
         }
-        el("briefBadge").textContent = payload.readinessContract || "stagepilot-runtime-brief";
-        el("briefHeadline").textContent = payload.headline || "No runtime headline available.";
-        el("briefSchema").textContent = payload.reportContract?.schema || "-";
         el("briefMode").textContent = payload.diagnostics?.integrationReady
           ? "ready"
           : (payload.diagnostics?.missingIntegrations || ["degraded"]).join(", ");
-        el("briefRouteCount").textContent = String(payload.routeCount || 0);
-        renderBriefList(payload.reviewFlow);
+        if (el("briefSchema").textContent === "-") {
+          el("briefSchema").textContent = payload.reportContract?.schema || "-";
+        }
+        if (el("briefRouteCount").textContent === "-") {
+          el("briefRouteCount").textContent = String(payload.routeCount || 0);
+        }
       } catch (error) {
         const message = error instanceof Error ? error.message : "runtime brief unavailable";
-        el("briefBadge").textContent = "brief-error";
-        el("briefHeadline").textContent = `Operator readiness fetch failed: ${message}`;
-        el("briefSchema").textContent = "unavailable";
-        el("briefMode").textContent = "degraded";
-        el("briefRouteCount").textContent = "0";
-        renderBriefList(["Check /health and /v1/meta before trusting a live run."]);
+        if (el("briefMode").textContent === "-") {
+          el("briefMode").textContent = "degraded";
+        }
+        if (el("briefRouteCount").textContent === "-") {
+          el("briefRouteCount").textContent = "0";
+        }
+        console.warn("runtime brief unavailable", message);
+      } finally {
+        clearTimeout(timeoutId);
+      }
+    }
+
+    async function loadReviewPack() {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), API_REQUEST_TIMEOUT_MS);
+      try {
+        const response = await fetch("/v1/review-pack", {
+          method: "GET",
+          signal: controller.signal,
+        });
+        const payload = await response.json();
+        if (!response.ok) {
+          throw new Error(payload?.error || "review pack unavailable");
+        }
+
+        const benchmarkDelta = payload.proofBundle?.benchmark?.improvements?.loopVsBaseline;
+        el("briefBadge").textContent = payload.reviewPackId || "stagepilot-review-pack";
+        el("briefHeadline").textContent = payload.headline || "No review-pack headline available.";
+        el("briefSchema").textContent = payload.proofBundle?.planSchema || "-";
+        el("briefMode").textContent = payload.proofBundle?.integrationsReady
+          ? "ready"
+          : "check runtime";
+        el("briefBenchmarkDelta").textContent =
+          typeof benchmarkDelta === "number" ? `+${benchmarkDelta.toFixed(2)}pp` : "unavailable";
+        el("briefRouteCount").textContent = String(payload.proofBundle?.routeCount || 0);
+        renderBriefList(payload.reviewSequence);
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "review pack unavailable";
+        el("briefBadge").textContent = "review-pack-error";
+        el("briefHeadline").textContent = `Reviewer proof fetch failed: ${message}`;
+        el("briefBenchmarkDelta").textContent = "unavailable";
+        renderBriefList(["Check /health, /v1/meta, and /v1/runtime-brief before trusting a live run."]);
       } finally {
         clearTimeout(timeoutId);
       }
@@ -1666,14 +1707,15 @@
       }
     }
 
-    function boot() {
+    async function boot() {
       buildRiskTags();
       bootstrapStatusStack();
       setRangeOutputs();
       setProfileFromDistrict();
       bindEvents();
       previewPayload(readPayload());
-      loadRuntimeBrief();
+      await loadRuntimeBrief();
+      await loadReviewPack();
     }
 
     boot();

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import {
   createServer,
   type IncomingMessage,
@@ -35,6 +36,7 @@ import type {
 import { renderStagePilotDemoHtml } from "./stagepilot-demo";
 import {
   buildStagePilotPlanReportSchema,
+  buildStagePilotReviewPack,
   buildStagePilotRouteDescriptors,
   buildStagePilotRuntimeBrief,
   type StagePilotRouteDescriptor,
@@ -534,6 +536,108 @@ function buildRuntimeBriefPayload(): JsonObject {
   });
 }
 
+function readStagePilotBenchmarkSnapshot() {
+  const fallback = {
+    caseCount: BENCHMARK_DEFAULT_CASE_COUNT,
+    generatedAt: null,
+    improvements: {
+      loopVsBaseline: null,
+      loopVsMiddleware: null,
+      middlewareVsBaseline: null,
+    },
+    strategies: {
+      baseline: null,
+      middleware: null,
+      ralphLoop: null,
+    },
+  };
+
+  try {
+    const payload = JSON.parse(
+      readFileSync(
+        new URL(
+          "../../docs/benchmarks/stagepilot-latest.json",
+          import.meta.url
+        ),
+        "utf8"
+      )
+    ) as {
+      caseCount?: unknown;
+      generatedAt?: unknown;
+      improvements?: Record<string, unknown>;
+      strategies?: Array<{ strategy?: unknown; successRate?: unknown }>;
+    };
+
+    const strategyMap = new Map(
+      Array.isArray(payload.strategies)
+        ? payload.strategies.map((strategy) => [
+            String(strategy.strategy ?? ""),
+            typeof strategy.successRate === "number"
+              ? strategy.successRate
+              : null,
+          ])
+        : []
+    );
+
+    return {
+      caseCount:
+        typeof payload.caseCount === "number"
+          ? payload.caseCount
+          : fallback.caseCount,
+      generatedAt:
+        typeof payload.generatedAt === "string" ? payload.generatedAt : null,
+      improvements: {
+        loopVsBaseline:
+          typeof payload.improvements?.loopVsBaseline === "number"
+            ? payload.improvements.loopVsBaseline
+            : null,
+        loopVsMiddleware:
+          typeof payload.improvements?.loopVsMiddleware === "number"
+            ? payload.improvements.loopVsMiddleware
+            : null,
+        middlewareVsBaseline:
+          typeof payload.improvements?.middlewareVsBaseline === "number"
+            ? payload.improvements.middlewareVsBaseline
+            : null,
+      },
+      strategies: {
+        baseline: strategyMap.get("baseline") ?? null,
+        middleware: strategyMap.get("middleware") ?? null,
+        ralphLoop: strategyMap.get("middleware+ralph-loop") ?? null,
+      },
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+function buildReviewPackPayload(): JsonObject {
+  const runtimeBrief = buildRuntimeBriefPayload() as ReturnType<
+    typeof buildStagePilotRuntimeBrief
+  >;
+
+  return buildStagePilotReviewPack({
+    benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
+    bodyTimeoutMs: readBodyTimeoutMs(
+      process.env.STAGEPILOT_REQUEST_BODY_TIMEOUT_MS
+    ),
+    geminiHasApiKey:
+      typeof process.env.GEMINI_API_KEY === "string" &&
+      process.env.GEMINI_API_KEY.trim().length > 0,
+    model: process.env.GEMINI_MODEL ?? "gemini-2.5-pro",
+    openClawConfigured:
+      Boolean(toNonEmptyString(process.env.OPENCLAW_WEBHOOK_URL)) ||
+      Boolean(toNonEmptyString(process.env.OPENCLAW_CMD)),
+    openClawHasWebhookUrl: Boolean(
+      toNonEmptyString(process.env.OPENCLAW_WEBHOOK_URL)
+    ),
+    service:
+      typeof runtimeBrief.service === "string"
+        ? runtimeBrief.service
+        : "stagepilot-api",
+  });
+}
+
 function buildPlanReportSchemaPayload(): JsonObject {
   return {
     service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
@@ -981,6 +1085,15 @@ function handlePlanReportSchemaRequest(
   sendJson(response, 200, buildPlanReportSchemaPayload(), options);
 }
 
+function handleReviewPackRequest(
+  response: ServerResponse,
+  options?: {
+    includeBody?: boolean;
+  }
+) {
+  sendJson(response, 200, buildReviewPackPayload(), options);
+}
+
 function handleDemoRequest(
   response: ServerResponse,
   options?: { includeBody?: boolean }
@@ -1390,6 +1503,9 @@ function handleReadonlyRequest(options: {
       return true;
     case "/v1/runtime-brief":
       handleRuntimeBriefRequest(response, { includeBody });
+      return true;
+    case "/v1/review-pack":
+      handleReviewPackRequest(response, { includeBody });
       return true;
     case "/v1/schema/plan-report":
       handlePlanReportSchemaRequest(response, { includeBody });

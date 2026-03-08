@@ -1,0 +1,52 @@
+{
+  "models": [
+    {
+      "id": "openai-gpt-4o-mini",
+      "label": "OpenAI GPT-4o mini",
+      "kind": "openai-compatible",
+      "enabled": false,
+      "provider_name": "OpenAI",
+      "provider_docs_url": "https://platform.openai.com/docs/api-reference/chat/create",
+      "provider_license": "Proprietary",
+      "model_name": "gpt-4o-mini",
+      "base_url": "https://api.openai.com/v1",
+      "api_key_env": "LLM_OPENAI_API_KEY"
+    },
+    {
+      "id": "google-gemini-cli-2-5-flash-lite",
+      "label": "Gemini CLI 2.5 Flash-Lite",
+      "kind": "gemini-cli",
+      "enabled": false,
+      "provider_name": "Gemini CLI",
+      "provider_docs_url": "https://github.com/google-gemini/gemini-cli",
+      "provider_license": "Proprietary",
+      "model_name": "gemini-cli-2-5-flash-lite",
+      "cli_path": "gemini",
+      "gemini_model": "gemini-2.5-flash-lite"
+    },
+    {
+      "id": "anthropic-claude-cli-sonnet",
+      "label": "Claude CLI Sonnet",
+      "kind": "claude-cli",
+      "enabled": false,
+      "provider_name": "Claude CLI",
+      "provider_docs_url": "https://docs.anthropic.com/en/docs/claude-code/overview",
+      "provider_license": "Proprietary",
+      "model_name": "claude-cli-sonnet",
+      "cli_path": "claude",
+      "claude_model": "sonnet"
+    },
+    {
+      "id": "mistral-small-latest",
+      "label": "Mistral Small Latest",
+      "kind": "openai-compatible",
+      "enabled": false,
+      "provider_name": "Mistral",
+      "provider_docs_url": "https://docs.mistral.ai/api/",
+      "provider_license": "Proprietary",
+      "model_name": "mistral-small-latest",
+      "base_url": "https://api.mistral.ai/v1",
+      "api_key_env": "MISTRAL_API_KEY"
+    }
+  ]
+}

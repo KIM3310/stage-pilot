@@ -809,6 +809,7 @@
         </ul>
         <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">
           <button class="btn-secondary" id="copyReviewBtn" type="button">Copy Review Path</button>
+          <button class="btn-secondary" id="copyProofBtn" type="button">Copy Proof Routes</button>
           <button class="btn-secondary" id="copyPayloadBtn" type="button">Copy Payload</button>
         </div>
       </article>
@@ -1230,6 +1231,26 @@
       } catch (error) {
         console.warn("copy review path failed", error);
         flashButtonLabel("copyReviewBtn", "Copy Review Path", "Copy failed");
+      }
+    }
+
+    async function copyProofRoutes() {
+      const text = [
+        "StagePilot proof routes",
+        "- /health",
+        "- /v1/runtime-brief",
+        "- /v1/review-pack",
+        "- /v1/schema/plan-report",
+        "- docs/benchmarks/stagepilot-latest.json",
+        "- docs/review-pack.svg",
+      ].join("\n");
+
+      try {
+        await copyTextToClipboard(text);
+        flashButtonLabel("copyProofBtn", "Copy Proof Routes", "Copied");
+      } catch (error) {
+        console.warn("copy proof routes failed", error);
+        flashButtonLabel("copyProofBtn", "Copy Proof Routes", "Copy failed");
       }
     }
 
@@ -1656,6 +1677,7 @@
       el("notifyBtn").addEventListener("click", notifyOpenClaw);
       el("sampleBtn").addEventListener("click", loadSample);
       el("copyReviewBtn").addEventListener("click", copyReviewPath);
+      el("copyProofBtn").addEventListener("click", copyProofRoutes);
       el("copyPayloadBtn").addEventListener("click", copyPayloadPreview);
       if (el("autoDemoBtn")) el("autoDemoBtn").addEventListener("click", runAutoDemo);
     }

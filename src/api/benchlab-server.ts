@@ -18,6 +18,7 @@ import { dirname, extname, join, relative, resolve, sep } from "node:path";
 import { renderBenchLabDemoHtml } from "./benchlab-demo";
 import {
   buildBenchLabJobReportSchema,
+  buildBenchLabReviewPack,
   buildBenchLabRuntimeBrief,
 } from "./benchlab-service-meta";
 
@@ -2599,6 +2600,26 @@ export function createBenchLabApiServer(
     });
   }
 
+  function buildReviewPackPayload(): JsonObject {
+    const bestArtifacts = listBestArtifactSummaries(repoRoot);
+    const bestArtifact = bestArtifacts[0] ?? null;
+    const artifactForensicsOverview = listArtifactForensicsOverview(repoRoot);
+
+    return buildBenchLabReviewPack({
+      artifactCount: bestArtifacts.length,
+      artifactsWithTrackedErrors:
+        artifactForensicsOverview.summary.artifactsWithTrackedErrors,
+      bestArtifactClaimName: bestArtifact?.claimName ?? null,
+      bestArtifactDeltaPp: bestArtifact?.deltaPp ?? null,
+      configCount: listConfigFiles(matrixRoot).length,
+      dominantBucket: artifactForensicsOverview.summary.dominantBucket,
+      improvedArtifactCount:
+        artifactForensicsOverview.summary.improvedArtifacts,
+      jobCount: jobs.size,
+      runCount: listRuntimeSummaries(matrixRoot).length,
+    });
+  }
+
   function buildJobReportSchemaPayload(): JsonObject {
     return {
       service: "benchlab-api",
@@ -2651,6 +2672,18 @@ export function createBenchLabApiServer(
       return false;
     }
     sendJson(response, 200, buildRuntimeBriefPayload());
+    return true;
+  }
+
+  function handleReviewPackRoute(
+    request: IncomingMessage,
+    response: ServerResponse,
+    pathname: string
+  ): boolean {
+    if (request.method !== "GET" || pathname !== "/v1/benchlab/review-pack") {
+      return false;
+    }
+    sendJson(response, 200, buildReviewPackPayload());
     return true;
   }
 
@@ -3063,6 +3096,8 @@ export function createBenchLabApiServer(
       handleHealthRoute(request, response, requestUrl.pathname),
     (request, response, requestUrl) =>
       handleRuntimeBriefRoute(request, response, requestUrl.pathname),
+    (request, response, requestUrl) =>
+      handleReviewPackRoute(request, response, requestUrl.pathname),
     (request, response, requestUrl) =>
       handleJobReportSchemaRoute(request, response, requestUrl.pathname),
     (request, response, requestUrl) =>

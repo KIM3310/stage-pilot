@@ -6,6 +6,22 @@ export interface StagePilotRouteDescriptor {
 
 export const STAGEPILOT_READINESS_CONTRACT = "stagepilot-runtime-brief-v1";
 export const STAGEPILOT_PLAN_REPORT_SCHEMA = "stagepilot-plan-report-v1";
+export const STAGEPILOT_REVIEW_PACK_ID = "stagepilot-review-pack-v1";
+
+interface StagePilotBenchmarkSnapshot {
+  caseCount: number;
+  generatedAt: string | null;
+  improvements: {
+    loopVsBaseline: number | null;
+    loopVsMiddleware: number | null;
+    middlewareVsBaseline: number | null;
+  };
+  strategies: {
+    baseline: number | null;
+    middleware: number | null;
+    ralphLoop: number | null;
+  };
+}
 
 export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
   return [
@@ -28,6 +44,11 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
       method: "GET",
       path: "/v1/runtime-brief",
       purpose: "Operator readiness brief and runtime posture",
+    },
+    {
+      method: "GET",
+      path: "/v1/review-pack",
+      purpose: "Benchmark-backed reviewer proof pack",
     },
     {
       method: "GET",
@@ -148,7 +169,82 @@ export function buildStagePilotRuntimeBrief(options: {
       health: "/health",
       meta: "/v1/meta",
       runtimeBrief: "/v1/runtime-brief",
+      reviewPack: "/v1/review-pack",
       planSchema: "/v1/schema/plan-report",
+    },
+  };
+}
+
+export function buildStagePilotReviewPack(options: {
+  benchmarkSnapshot: StagePilotBenchmarkSnapshot;
+  bodyTimeoutMs: number;
+  geminiHasApiKey: boolean;
+  model: string;
+  openClawConfigured: boolean;
+  openClawHasWebhookUrl: boolean;
+  service: string;
+}) {
+  return {
+    service: options.service,
+    status: "ok",
+    generatedAt: new Date().toISOString(),
+    reviewPackId: STAGEPILOT_REVIEW_PACK_ID,
+    headline:
+      "Parser hardening, bounded retry, and orchestration handoff proof now live in one reviewer-facing surface.",
+    operatorJourney: [
+      {
+        stage: "Collect",
+        summary:
+          "Intake payloads enter one bounded case envelope with fixed body timeout and schema-safe defaults.",
+        surface: "/v1/plan",
+      },
+      {
+        stage: "Parse + Plan",
+        summary:
+          "Parser middleware and StagePilot agents keep malformed tool-style outputs reviewable instead of silent-failing.",
+        surface: "@ai-sdk-tool/parser + StagePilotEngine",
+      },
+      {
+        stage: "Benchmark",
+        summary:
+          "Deterministic benchmark snapshots show the lift from baseline to middleware to bounded Ralph-loop recovery.",
+        surface: "docs/benchmarks/stagepilot-latest.json",
+      },
+      {
+        stage: "Deliver",
+        summary:
+          "OpenClaw delivery remains a final operator-confirmed step, separate from plan synthesis success.",
+        surface: "/v1/notify",
+      },
+    ],
+    trustBoundary: [
+      "Gemini integration improves live planning and insights, but benchmark proof remains reproducible without network LLM latency.",
+      "Parser and orchestration surfaces stay inspectable through explicit report contracts instead of opaque tool-call success claims.",
+      "Notify delivery is not treated as implicit success; operators still confirm the final handoff path.",
+    ],
+    reviewSequence: [
+      "Check /v1/runtime-brief to confirm Gemini and OpenClaw readiness before trusting live synthesis.",
+      "Inspect /v1/review-pack to validate benchmark lift, parser posture, and operator handoff boundaries.",
+      "Run /v1/plan and /v1/benchmark before promoting any routing claim or delivery workflow.",
+    ],
+    proofBundle: {
+      benchmark: options.benchmarkSnapshot,
+      integrationsReady: options.geminiHasApiKey && options.openClawConfigured,
+      model: options.model,
+      openClawHasWebhookUrl: options.openClawHasWebhookUrl,
+      packageSurface: "@ai-sdk-tool/parser",
+      planSchema: STAGEPILOT_PLAN_REPORT_SCHEMA,
+      requestBodyTimeoutMs: options.bodyTimeoutMs,
+      routeCount: buildStagePilotRouteDescriptors().length,
+    },
+    links: {
+      health: "/health",
+      meta: "/v1/meta",
+      runtimeBrief: "/v1/runtime-brief",
+      reviewPack: "/v1/review-pack",
+      planSchema: "/v1/schema/plan-report",
+      benchmark: "/v1/benchmark",
+      demo: "/demo",
     },
   };
 }

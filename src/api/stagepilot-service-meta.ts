@@ -7,6 +7,8 @@ export interface StagePilotRouteDescriptor {
 export const STAGEPILOT_READINESS_CONTRACT = "stagepilot-runtime-brief-v1";
 export const STAGEPILOT_PLAN_REPORT_SCHEMA = "stagepilot-plan-report-v1";
 export const STAGEPILOT_REVIEW_PACK_ID = "stagepilot-review-pack-v1";
+export const STAGEPILOT_BENCHMARK_SUMMARY_SCHEMA =
+  "stagepilot-benchmark-summary-v1";
 
 function buildStagePilotProofAssets() {
   return [
@@ -48,6 +50,23 @@ interface StagePilotBenchmarkSnapshot {
   };
 }
 
+function buildStrategyRows(snapshot: StagePilotBenchmarkSnapshot) {
+  return [
+    {
+      strategy: "baseline",
+      successRate: snapshot.strategies.baseline,
+    },
+    {
+      strategy: "middleware",
+      successRate: snapshot.strategies.middleware,
+    },
+    {
+      strategy: "middleware+ralph-loop",
+      successRate: snapshot.strategies.ralphLoop,
+    },
+  ].filter((item) => typeof item.successRate === "number");
+}
+
 export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
   return [
     {
@@ -74,6 +93,12 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
       method: "GET",
       path: "/v1/review-pack",
       purpose: "Benchmark-backed reviewer proof pack",
+    },
+    {
+      method: "GET",
+      path: "/v1/benchmark-summary",
+      purpose:
+        "Reviewer summary of benchmark lift, weakest strategy, and promotion posture",
     },
     {
       method: "GET",
@@ -195,7 +220,69 @@ export function buildStagePilotRuntimeBrief(options: {
       meta: "/v1/meta",
       runtimeBrief: "/v1/runtime-brief",
       reviewPack: "/v1/review-pack",
+      benchmarkSummary: "/v1/benchmark-summary",
       planSchema: "/v1/schema/plan-report",
+    },
+  };
+}
+
+export function buildStagePilotBenchmarkSummary(options: {
+  benchmarkSnapshot: StagePilotBenchmarkSnapshot;
+  minSuccessRate?: number | null;
+  service: string;
+}) {
+  const minSuccessRate =
+    typeof options.minSuccessRate === "number" &&
+    Number.isFinite(options.minSuccessRate)
+      ? Math.max(0, Math.min(100, options.minSuccessRate))
+      : null;
+  const strategies = buildStrategyRows(options.benchmarkSnapshot);
+  const filteredStrategies =
+    minSuccessRate === null
+      ? strategies
+      : strategies.filter((item) => (item.successRate ?? 0) >= minSuccessRate);
+  const ranked = [...strategies].sort(
+    (left, right) => (right.successRate ?? 0) - (left.successRate ?? 0)
+  );
+  const topStrategy = ranked[0] ?? null;
+  const weakestStrategy = ranked.at(-1) ?? null;
+
+  return {
+    service: options.service,
+    status: "ok",
+    generatedAt: new Date().toISOString(),
+    schema: STAGEPILOT_BENCHMARK_SUMMARY_SCHEMA,
+    filters: {
+      minSuccessRate,
+    },
+    benchmark: {
+      caseCount: options.benchmarkSnapshot.caseCount,
+      generatedAt: options.benchmarkSnapshot.generatedAt,
+      improvements: options.benchmarkSnapshot.improvements,
+      topStrategy,
+      weakestStrategy,
+      strategies: filteredStrategies.map((item) => ({
+        ...item,
+        deltaFromTop:
+          typeof topStrategy?.successRate === "number" &&
+          typeof item.successRate === "number"
+            ? Math.round((topStrategy.successRate - item.successRate) * 100) /
+              100
+            : null,
+        status:
+          weakestStrategy?.strategy === item.strategy ? "attention" : "ready",
+      })),
+    },
+    reviewerNotes: [
+      "Review benchmark lift before claiming parser or loop recovery gains.",
+      "Weakest strategy stays visible so regressions are not hidden by average lift.",
+      "Use the summary as a promotion screen, then confirm with /v1/benchmark when changing runtime code.",
+    ],
+    links: {
+      reviewPack: "/v1/review-pack",
+      benchmark: "/v1/benchmark",
+      benchmarkSummary: "/v1/benchmark-summary",
+      runtimeBrief: "/v1/runtime-brief",
     },
   };
 }
@@ -280,6 +367,7 @@ export function buildStagePilotReviewPack(options: {
     ],
     proofBundle: {
       benchmark: options.benchmarkSnapshot,
+      benchmarkSummarySchema: STAGEPILOT_BENCHMARK_SUMMARY_SCHEMA,
       integrationsReady: options.geminiHasApiKey && options.openClawConfigured,
       model: options.model,
       openClawHasWebhookUrl: options.openClawHasWebhookUrl,
@@ -294,6 +382,7 @@ export function buildStagePilotReviewPack(options: {
       meta: "/v1/meta",
       runtimeBrief: "/v1/runtime-brief",
       reviewPack: "/v1/review-pack",
+      benchmarkSummary: "/v1/benchmark-summary",
       planSchema: "/v1/schema/plan-report",
       benchmark: "/v1/benchmark",
       demo: "/demo",

@@ -521,6 +521,7 @@ describe("stagepilot api server", () => {
 
     const body = (await response.json()) as {
       links: {
+        benchmarkSummary: string;
         reviewPack: string;
       };
       operatorJourney: Array<{ stage: string }>;
@@ -532,6 +533,7 @@ describe("stagepilot api server", () => {
             loopVsBaseline: number | null;
           };
         };
+        benchmarkSummarySchema: string;
       };
       reviewPackId: string;
       reviewSequence: string[];
@@ -548,6 +550,69 @@ describe("stagepilot api server", () => {
     expect(
       body.proofBundle.benchmark.improvements.loopVsBaseline
     ).toBeGreaterThan(50);
+    expect(body.links.benchmarkSummary).toBe("/v1/benchmark-summary");
+    expect(body.proofBundle.benchmarkSummarySchema).toBe(
+      "stagepilot-benchmark-summary-v1"
+    );
+  });
+
+  it("returns benchmark summary for reviewer triage", async () => {
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const response = await fetch(
+      `${baseUrl}/v1/benchmark-summary?minSuccessRate=80`
+    );
+    expect(response.status).toBe(200);
+
+    const body = (await response.json()) as {
+      benchmark: {
+        strategies: Array<{
+          status: string;
+          strategy: string;
+          successRate: number;
+        }>;
+        topStrategy: { strategy: string } | null;
+        weakestStrategy: { strategy: string } | null;
+      };
+      filters: {
+        minSuccessRate: number | null;
+      };
+      links: {
+        benchmarkSummary: string;
+      };
+      schema: string;
+      status: string;
+    };
+
+    expect(body.status).toBe("ok");
+    expect(body.schema).toBe("stagepilot-benchmark-summary-v1");
+    expect(body.filters.minSuccessRate).toBe(80);
+    expect(body.links.benchmarkSummary).toBe("/v1/benchmark-summary");
+    expect(
+      body.benchmark.strategies.every((item) => item.successRate >= 80)
+    ).toBe(true);
+    expect(body.benchmark.topStrategy).not.toBeNull();
+    expect(body.benchmark.weakestStrategy).not.toBeNull();
+  });
+
+  it("rejects invalid benchmark summary filter", async () => {
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const response = await fetch(
+      `${baseUrl}/v1/benchmark-summary?minSuccessRate=not-a-number`
+    );
+    expect(response.status).toBe(400);
+
+    const body = (await response.json()) as {
+      error: string;
+      ok: boolean;
+    };
+    expect(body.ok).toBe(false);
+    expect(body.error).toContain("minSuccessRate");
   });
 
   it("returns plan report schema surface", async () => {

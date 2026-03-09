@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import {
   createServer,
@@ -41,6 +42,8 @@ import {
 import {
   appendStagePilotRuntimeEvent,
   buildStagePilotRuntimeStoreSummary,
+  buildStagePilotWorkflowRunDetail,
+  buildStagePilotWorkflowRunList,
 } from "./runtime-store";
 import { renderStagePilotDemoHtml } from "./stagepilot-demo";
 import {
@@ -61,6 +64,10 @@ interface JsonObject {
 interface ParsedRequestUrl {
   pathname: string;
 }
+
+type StagePilotTrackedRequest = IncomingMessage & {
+  requestId?: string;
+};
 
 export interface StagePilotEngineLike {
   run(input: IntakeInput): Promise<StagePilotResult>;
@@ -449,7 +456,10 @@ function recordRuntimeTelemetry(
   telemetry: StagePilotRuntimeTelemetry,
   method: string,
   pathname: string,
-  statusCode: number
+  statusCode: number,
+  options?: {
+    requestId?: string;
+  }
 ): void {
   telemetry.requestCount += 1;
   telemetry.lastRequestAt = new Date().toISOString();
@@ -464,6 +474,7 @@ function recordRuntimeTelemetry(
   appendStagePilotRuntimeEvent({
     method,
     path: pathname,
+    requestId: options?.requestId,
     statusCode,
     timestamp: telemetry.lastRequestAt ?? new Date().toISOString(),
   });
@@ -717,6 +728,7 @@ function buildRuntimeScorecardPayload(
   telemetry: StagePilotRuntimeTelemetry
 ): JsonObject {
   const persisted = buildStagePilotRuntimeStoreSummary(10);
+  const workflowRuns = buildStagePilotWorkflowRunList({ limit: 5 });
   const scorecard = buildStagePilotRuntimeScorecard({
     benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
     bodyTimeoutMs: readBodyTimeoutMs(
@@ -753,6 +765,7 @@ function buildRuntimeScorecardPayload(
       statusClasses: persisted.statusClasses,
       recentEvents: persisted.recentEvents,
     },
+    workflowRuns,
     operatorAuth: {
       enabled: isStagePilotOperatorAuthEnabled(),
       protectedRoutes: [
@@ -765,6 +778,10 @@ function buildRuntimeScorecardPayload(
       ],
     },
   };
+}
+
+function nextStagePilotRequestId(): string {
+  return `spr-${randomUUID().replace(/-/g, "").slice(0, 12)}`;
 }
 
 function buildPlanReportSchemaPayload(): JsonObject {
@@ -1249,17 +1266,7 @@ function handleDeveloperOpsPackRequest(
   sendJson(response, 200, buildDeveloperOpsPackPayload(lane), options);
 }
 
-function handleRuntimeScorecardRequest(
-  response: ServerResponse,
-  telemetry: StagePilotRuntimeTelemetry,
-  options?: {
-    includeBody?: boolean;
-  }
-) {
-  sendJson(response, 200, buildRuntimeScorecardPayload(telemetry), options);
-}
-
-function parseDeveloperOpsLane(rawUrl?: string): {
+function parseStagePilotLane(rawUrl?: string): {
   error?: string;
   lane?: string;
 } {
@@ -1281,6 +1288,136 @@ function parseDeveloperOpsLane(rawUrl?: string): {
   }
 
   return { lane };
+}
+
+function handleWorkflowRunsRequest(
+  response: ServerResponse,
+  lane?: string,
+  limit?: number,
+  options?: {
+    includeBody?: boolean;
+  }
+) {
+  sendJson(
+    response,
+    200,
+    buildStagePilotWorkflowRunList({
+      lane:
+        lane === "merge-request" ||
+        lane === "pipeline-recovery" ||
+        lane === "release-governor"
+          ? lane
+          : undefined,
+      limit,
+    }),
+    options
+  );
+}
+
+function handleWorkflowRunDetailRequest(
+  response: ServerResponse,
+  requestId: string,
+  options?: {
+    includeBody?: boolean;
+  }
+) {
+  const detail = buildStagePilotWorkflowRunDetail(requestId);
+  if (!detail) {
+    sendJson(response, 404, {
+      error: `unknown workflow run: ${requestId}`,
+      ok: false,
+    });
+    return;
+  }
+  sendJson(response, 200, detail, options);
+}
+
+function handleBenchmarkSummaryReadonly(
+  response: ServerResponse,
+  rawUrl: string | undefined,
+  options: { includeBody?: boolean }
+) {
+  const parsed = new URL(rawUrl ?? "/", "http://127.0.0.1");
+  const rawMinSuccessRate = parsed.searchParams.get("minSuccessRate");
+  const rawStrategy = parsed.searchParams.get("strategy");
+  const minSuccessRate =
+    rawMinSuccessRate === null
+      ? undefined
+      : Number.parseFloat(rawMinSuccessRate);
+  const strategy =
+    rawStrategy === null || rawStrategy.trim().length === 0
+      ? undefined
+      : rawStrategy.trim().toLowerCase();
+  if (
+    typeof minSuccessRate !== "undefined" &&
+    (!Number.isFinite(minSuccessRate) || Number.isNaN(minSuccessRate))
+  ) {
+    sendJson(response, 400, {
+      error: "minSuccessRate must be a finite number",
+      ok: false,
+    });
+    return;
+  }
+  if (
+    typeof strategy !== "undefined" &&
+    !["baseline", "middleware", "middleware+ralph-loop"].includes(strategy)
+  ) {
+    sendJson(response, 400, {
+      error: "strategy must be baseline, middleware, or middleware+ralph-loop",
+      ok: false,
+    });
+    return;
+  }
+  handleBenchmarkSummaryRequest(response, minSuccessRate, strategy, options);
+}
+
+function handleDeveloperOpsPackReadonly(
+  response: ServerResponse,
+  rawUrl: string | undefined,
+  options: { includeBody?: boolean }
+) {
+  const laneConfig = parseStagePilotLane(rawUrl);
+  if (laneConfig.error) {
+    sendJson(response, 400, {
+      error: laneConfig.error,
+      ok: false,
+    });
+    return;
+  }
+  handleDeveloperOpsPackRequest(response, laneConfig.lane, options);
+}
+
+function handleWorkflowRunsReadonly(
+  response: ServerResponse,
+  rawUrl: string | undefined,
+  options: { includeBody?: boolean }
+) {
+  const parsed = new URL(rawUrl ?? "/", "http://127.0.0.1");
+  const laneConfig = parseStagePilotLane(rawUrl);
+  const rawLimit = Number.parseInt(parsed.searchParams.get("limit") ?? "", 10);
+  if (laneConfig.error) {
+    sendJson(response, 400, {
+      error: laneConfig.error,
+      ok: false,
+    });
+    return;
+  }
+  handleWorkflowRunsRequest(
+    response,
+    laneConfig.lane,
+    Number.isFinite(rawLimit) ? rawLimit : undefined,
+    options
+  );
+}
+
+function handleRuntimeScorecardRequest(
+  response: ServerResponse,
+  telemetry: StagePilotRuntimeTelemetry,
+  options?: {
+    includeBody?: boolean;
+  }
+) {
+  sendJson(response, 200, buildRuntimeScorecardPayload(telemetry), options);
 }
 
 function handleDemoRequest(
@@ -1701,62 +1838,29 @@ function handleReadonlyRequest(options: {
     case "/v1/runtime-scorecard":
       handleRuntimeScorecardRequest(response, telemetry, { includeBody });
       return true;
-    case "/v1/benchmark-summary": {
-      const parsed = new URL(rawUrl ?? "/", "http://127.0.0.1");
-      const rawMinSuccessRate = parsed.searchParams.get("minSuccessRate");
-      const rawStrategy = parsed.searchParams.get("strategy");
-      const minSuccessRate =
-        rawMinSuccessRate === null
-          ? undefined
-          : Number.parseFloat(rawMinSuccessRate);
-      const strategy =
-        rawStrategy === null || rawStrategy.trim().length === 0
-          ? undefined
-          : rawStrategy.trim().toLowerCase();
-      if (
-        typeof minSuccessRate !== "undefined" &&
-        (!Number.isFinite(minSuccessRate) || Number.isNaN(minSuccessRate))
-      ) {
-        sendJson(response, 400, {
-          error: "minSuccessRate must be a finite number",
-          ok: false,
-        });
-        return true;
-      }
-      if (
-        typeof strategy !== "undefined" &&
-        !["baseline", "middleware", "middleware+ralph-loop"].includes(strategy)
-      ) {
-        sendJson(response, 400, {
-          error:
-            "strategy must be baseline, middleware, or middleware+ralph-loop",
-          ok: false,
-        });
-        return true;
-      }
-      handleBenchmarkSummaryRequest(response, minSuccessRate, strategy, {
-        includeBody,
-      });
+    case "/v1/benchmark-summary":
+      handleBenchmarkSummaryReadonly(response, rawUrl, { includeBody });
       return true;
-    }
-    case "/v1/developer-ops-pack": {
-      const laneConfig = parseDeveloperOpsLane(rawUrl);
-      if (laneConfig.error) {
-        sendJson(response, 400, {
-          error: laneConfig.error,
-          ok: false,
-        });
-        return true;
-      }
-      handleDeveloperOpsPackRequest(response, laneConfig.lane, {
-        includeBody,
-      });
+    case "/v1/developer-ops-pack":
+      handleDeveloperOpsPackReadonly(response, rawUrl, { includeBody });
       return true;
-    }
+    case "/v1/workflow-runs":
+      handleWorkflowRunsReadonly(response, rawUrl, { includeBody });
+      return true;
     case "/v1/schema/plan-report":
       handlePlanReportSchemaRequest(response, { includeBody });
       return true;
     default:
+      if (pathname.startsWith("/v1/workflow-runs/")) {
+        handleWorkflowRunDetailRequest(
+          response,
+          pathname.slice("/v1/workflow-runs/".length),
+          {
+            includeBody,
+          }
+        );
+        return true;
+      }
       return false;
   }
 }
@@ -1769,7 +1873,7 @@ async function handlePostRequest(options: {
   method: string;
   openClawNotifier: StagePilotOpenClawNotifier;
   pathname: string;
-  request: IncomingMessage;
+  request: StagePilotTrackedRequest;
   response: ServerResponse;
   twinSimulator: TwinSimulator;
 }) {
@@ -1852,7 +1956,7 @@ async function handleRequest(options: {
   insightDeriver: InsightDeriver;
   logger: Pick<Console, "error" | "info" | "warn">;
   openClawNotifier: StagePilotOpenClawNotifier;
-  request: IncomingMessage;
+  request: StagePilotTrackedRequest;
   response: ServerResponse;
   telemetry: StagePilotRuntimeTelemetry;
   twinSimulator: TwinSimulator;
@@ -1871,8 +1975,17 @@ async function handleRequest(options: {
   const method = request.method ?? "GET";
   const { pathname } = parseRequestUrl(request.url);
   response.once("finish", () => {
-    recordRuntimeTelemetry(telemetry, method, pathname, response.statusCode);
+    recordRuntimeTelemetry(telemetry, method, pathname, response.statusCode, {
+      requestId: request.requestId,
+    });
   });
+
+  request.requestId =
+    typeof request.headers["x-request-id"] === "string" &&
+    request.headers["x-request-id"].trim().length > 0
+      ? request.headers["x-request-id"].trim()
+      : nextStagePilotRequestId();
+  response.setHeader("x-request-id", request.requestId);
 
   if (
     handleReadonlyRequest({

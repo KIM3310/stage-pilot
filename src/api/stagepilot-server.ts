@@ -36,9 +36,18 @@ import type {
 } from "../stagepilot/types";
 import {
   getStagePilotOperatorAuthStatus,
+  isStagePilotOperatorAuthEnabled,
   requiresStagePilotOperatorToken,
   validateStagePilotOperatorAccess,
 } from "./operator-access";
+import {
+  applyStagePilotOperatorSession,
+  clearStagePilotOperatorSessionCookie,
+  createStagePilotOperatorSessionCookie,
+  getStagePilotOperatorSessionCookieName,
+  readStagePilotOperatorSession,
+  type StagePilotOperatorSessionView,
+} from "./operator-session";
 import {
   appendStagePilotRuntimeEvent,
   buildStagePilotRuntimeStoreSummary,
@@ -66,6 +75,7 @@ interface ParsedRequestUrl {
 }
 
 type StagePilotTrackedRequest = IncomingMessage & {
+  operatorSession?: StagePilotOperatorSessionView | null;
   requestId?: string;
 };
 
@@ -112,6 +122,7 @@ interface NotifyRequestOptions {
 }
 
 type InboxAction = "insights" | "plan" | "whatif";
+type SessionAuthMode = "oidc" | "token";
 
 interface InboxRequestOptions {
   action: InboxAction;
@@ -225,6 +236,121 @@ function toErrorMessage(error: unknown): string {
     return error.message;
   }
   return "unknown error";
+}
+
+function logStagePilotEvent(
+  logger: Pick<Console, "error" | "info" | "warn">,
+  level: "error" | "info" | "warn",
+  event: string,
+  payload: Record<string, unknown>
+) {
+  const line = JSON.stringify({
+    at: new Date().toISOString(),
+    event,
+    level,
+    service: "stagepilot-api",
+    ...payload,
+  });
+  if (level === "error") {
+    logger.error(line);
+  } else if (level === "warn") {
+    logger.warn(line);
+  } else {
+    logger.info(line);
+  }
+}
+
+function normalizeSessionAuthMode(value: unknown): SessionAuthMode | null {
+  const normalized = String(value || "")
+    .trim()
+    .toLowerCase();
+  if (!normalized) {
+    return null;
+  }
+  if (normalized === "oidc" || normalized === "token") {
+    return normalized;
+  }
+  return null;
+}
+
+function normalizeSessionRoles(value: unknown): string[] {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => String(item).trim().toLowerCase())
+      .filter(Boolean);
+  }
+  if (typeof value === "string") {
+    return value
+      .split(",")
+      .map((item) => item.trim().toLowerCase())
+      .filter(Boolean);
+  }
+  return [];
+}
+
+function readOperatorSessionBootstrapBody(body: unknown):
+  | {
+      authMode: SessionAuthMode | null;
+      credential: string;
+      roles: string[];
+    }
+  | {
+      error: string;
+    } {
+  const record =
+    body && typeof body === "object" ? (body as Record<string, unknown>) : {};
+  const authMode = normalizeSessionAuthMode(record.authMode ?? null);
+  if (Object.hasOwn(record, "authMode") && authMode === null) {
+    return {
+      error: "authMode must be either token or oidc",
+    };
+  }
+  return {
+    authMode,
+    credential: String(record.credential || "").trim(),
+    roles: normalizeSessionRoles(record.roles ?? []),
+  };
+}
+
+function setStagePilotOperatorHeaders(
+  request: StagePilotTrackedRequest,
+  bootstrap: {
+    authMode: SessionAuthMode | null;
+    credential: string;
+    roles: string[];
+  }
+): () => void {
+  const previousAuthorization = request.headers.authorization;
+  const previousOperatorToken = request.headers["x-operator-token"];
+  const previousOperatorRoles = request.headers["x-operator-roles"];
+
+  request.headers.authorization = undefined;
+  request.headers["x-operator-token"] = undefined;
+  request.headers["x-operator-roles"] = undefined;
+
+  if (bootstrap.authMode === "oidc") {
+    request.headers.authorization = `Bearer ${bootstrap.credential}`;
+  } else {
+    request.headers["x-operator-token"] = bootstrap.credential;
+  }
+  if (bootstrap.roles.length > 0) {
+    request.headers["x-operator-roles"] = bootstrap.roles.join(",");
+  }
+
+  return () => {
+    request.headers.authorization =
+      typeof previousAuthorization === "string"
+        ? previousAuthorization
+        : undefined;
+    request.headers["x-operator-token"] =
+      typeof previousOperatorToken === "string"
+        ? previousOperatorToken
+        : undefined;
+    request.headers["x-operator-roles"] =
+      typeof previousOperatorRoles === "string"
+        ? previousOperatorRoles
+        : undefined;
+  };
 }
 
 function toHttpError(error: unknown): HttpError {
@@ -779,6 +905,7 @@ function buildRuntimeScorecardPayload(
         "/v1/openclaw/inbox",
       ],
       acceptedHeaders: getStagePilotOperatorAuthStatus().acceptedHeaders,
+      sessionCookie: getStagePilotOperatorSessionCookieName(),
       roleHeaders: getStagePilotOperatorAuthStatus().roleHeaders,
       requiredRoles: getStagePilotOperatorAuthStatus().requiredRoles,
       oidc: getStagePilotOperatorAuthStatus().oidc,
@@ -1426,6 +1553,124 @@ function handleRuntimeScorecardRequest(
   sendJson(response, 200, buildRuntimeScorecardPayload(telemetry), options);
 }
 
+async function handleOperatorSessionReadonly(options: {
+  request: StagePilotTrackedRequest;
+  response: ServerResponse;
+  includeBody?: boolean;
+}) {
+  const { includeBody = true, request, response } = options;
+  const session = readStagePilotOperatorSession(request);
+  const authResult = session
+    ? await validateStagePilotOperatorAccess(request)
+    : null;
+  sendJson(
+    response,
+    200,
+    {
+      active: Boolean(session && authResult?.ok),
+      cookieName: getStagePilotOperatorSessionCookieName(),
+      ok: true,
+      session,
+      validation:
+        authResult && session
+          ? {
+              authMode: authResult.authMode,
+              ok: authResult.ok,
+              reason: authResult.reason,
+              roles: authResult.roles,
+              subject: authResult.subject,
+            }
+          : null,
+    },
+    { includeBody }
+  );
+}
+
+async function handleOperatorSessionCreate(options: {
+  logger: Pick<Console, "error" | "info" | "warn">;
+  request: StagePilotTrackedRequest;
+  response: ServerResponse;
+}) {
+  const { logger, request, response } = options;
+  if (!isStagePilotOperatorAuthEnabled()) {
+    sendJson(response, 409, {
+      error: "operator auth is not configured for session login",
+      ok: false,
+    });
+    return;
+  }
+
+  const bootstrap = readOperatorSessionBootstrapBody(
+    await readJsonBody(request)
+  );
+  if ("error" in bootstrap) {
+    sendJson(response, 400, {
+      error: bootstrap.error,
+      ok: false,
+    });
+    return;
+  }
+  if (!bootstrap.credential) {
+    sendJson(response, 400, {
+      error: "missing credential",
+      ok: false,
+    });
+    return;
+  }
+
+  const restoreHeaders = setStagePilotOperatorHeaders(request, bootstrap);
+  const authResult = await validateStagePilotOperatorAccess(request);
+  restoreHeaders();
+
+  if (!authResult.ok) {
+    sendJson(response, 403, {
+      error:
+        authResult.reason === "missing-role"
+          ? "missing required operator role for session bootstrap"
+          : "missing or invalid operator credential for session bootstrap",
+      ok: false,
+    });
+    return;
+  }
+
+  const sessionCookie = createStagePilotOperatorSessionCookie({
+    authMode: authResult.authMode === "oidc" ? "oidc" : "token",
+    credential: bootstrap.credential,
+    roles: authResult.roles,
+    subject: authResult.subject,
+  });
+  response.setHeader("set-cookie", sessionCookie.cookie);
+  logStagePilotEvent(logger, "info", "operator-session-created", {
+    authMode: sessionCookie.session.authMode,
+    requestId: request.requestId || null,
+    roles: sessionCookie.session.roles,
+    subject: sessionCookie.session.subject,
+  });
+  sendJson(response, 200, {
+    active: true,
+    cookieName: getStagePilotOperatorSessionCookieName(),
+    ok: true,
+    session: sessionCookie.session,
+  });
+}
+
+function handleOperatorSessionDelete(options: {
+  logger: Pick<Console, "error" | "info" | "warn">;
+  request: StagePilotTrackedRequest;
+  response: ServerResponse;
+}) {
+  const { logger, request, response } = options;
+  response.setHeader("set-cookie", clearStagePilotOperatorSessionCookie());
+  logStagePilotEvent(logger, "info", "operator-session-cleared", {
+    requestId: request.requestId || null,
+  });
+  sendJson(response, 200, {
+    active: false,
+    cookieName: getStagePilotOperatorSessionCookieName(),
+    ok: true,
+  });
+}
+
 function handleDemoRequest(
   response: ServerResponse,
   options?: { includeBody?: boolean }
@@ -1901,6 +2146,9 @@ async function handlePostRequest(options: {
   }
 
   switch (pathname) {
+    case "/v1/auth/session":
+      await handleOperatorSessionCreate({ logger, request, response });
+      return true;
     case "/v1/plan":
       await handlePlanRequest({ engine, logger, request, response });
       return true;
@@ -1956,6 +2204,24 @@ async function handlePostRequest(options: {
   }
 }
 
+function handleDeleteRequest(options: {
+  logger: Pick<Console, "error" | "info" | "warn">;
+  method: string;
+  pathname: string;
+  request: StagePilotTrackedRequest;
+  response: ServerResponse;
+}) {
+  const { logger, method, pathname, request, response } = options;
+  if (method !== "DELETE") {
+    return false;
+  }
+  if (pathname !== "/v1/auth/session") {
+    return false;
+  }
+  handleOperatorSessionDelete({ logger, request, response });
+  return true;
+}
+
 async function handleRequest(options: {
   benchmarkRunner: BenchmarkRunner;
   engine: StagePilotEngineLike;
@@ -1980,10 +2246,25 @@ async function handleRequest(options: {
   } = options;
   const method = request.method ?? "GET";
   const { pathname } = parseRequestUrl(request.url);
+  request.operatorSession = applyStagePilotOperatorSession(request);
   response.once("finish", () => {
     recordRuntimeTelemetry(telemetry, method, pathname, response.statusCode, {
       requestId: request.requestId,
     });
+    logStagePilotEvent(
+      logger,
+      response.statusCode >= 400 ? "warn" : "info",
+      "request-finished",
+      {
+        method,
+        operatorAuthMode: request.operatorSession?.authMode || null,
+        operatorRoles: request.operatorSession?.roles || [],
+        path: pathname,
+        requestId: request.requestId || null,
+        sessionActive: Boolean(request.operatorSession),
+        statusCode: response.statusCode,
+      }
+    );
   });
 
   request.requestId =
@@ -1992,6 +2273,19 @@ async function handleRequest(options: {
       ? request.headers["x-request-id"].trim()
       : nextStagePilotRequestId();
   response.setHeader("x-request-id", request.requestId);
+  response.setHeader("cache-control", "no-store");
+
+  if (
+    (method === "GET" || method === "HEAD") &&
+    pathname === "/v1/auth/session"
+  ) {
+    await handleOperatorSessionReadonly({
+      includeBody: method !== "HEAD",
+      request,
+      response,
+    });
+    return;
+  }
 
   if (
     handleReadonlyRequest({
@@ -2032,6 +2326,18 @@ async function handleRequest(options: {
       request,
       response,
       twinSimulator,
+    })
+  ) {
+    return;
+  }
+
+  if (
+    handleDeleteRequest({
+      logger,
+      method,
+      pathname,
+      request,
+      response,
     })
   ) {
     return;

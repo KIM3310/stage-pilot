@@ -547,6 +547,9 @@ describe("stagepilot api server", () => {
     expect(body.links.runtimeScorecard).toBe("/v1/runtime-scorecard");
     expect(body.runtime.integrationsReady).toBe(true);
     expect(body.traffic.requestCount).toBeGreaterThanOrEqual(2);
+    expect(body.persistence.enabled).toBe(true);
+    expect(typeof body.persistence.persistedCount).toBe("number");
+    expect(body.operatorAuth.enabled).toBe(false);
     expect(body.traffic.routeCounts).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ path: "/v1/runtime-brief" }),

@@ -64,6 +64,7 @@
     "api:benchlab": "tsx src/bin/benchlab-api.ts",
     "exercise:runtime": "node scripts/exercise-runtime-scorecard.mjs",
     "load:runtime": "tsx scripts/load-runtime.ts",
+    "load:k6": "k6 run scripts/k6-runtime-scorecard.js",
     "deploy:stagepilot": "bash scripts/deploy-stagepilot.sh",
     "smoke:stagepilot": "bash scripts/smoke-stagepilot.sh"
   },

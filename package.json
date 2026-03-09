@@ -62,6 +62,7 @@
     "bench:stagepilot": "tsx src/examples/stagepilot-benchmark.ts",
     "api:stagepilot": "tsx src/bin/stagepilot-api.ts",
     "api:benchlab": "tsx src/bin/benchlab-api.ts",
+    "exercise:runtime": "node scripts/exercise-runtime-scorecard.mjs",
     "deploy:stagepilot": "bash scripts/deploy-stagepilot.sh",
     "smoke:stagepilot": "bash scripts/smoke-stagepilot.sh"
   },

@@ -1,6 +1,6 @@
 # StagePilot Multi-Agent Skeleton
 
-This repository now includes a hackathon-oriented, Google-only orchestration skeleton under `src/stagepilot`.
+This repository now includes a production-style orchestration skeleton under `src/stagepilot`.
 
 ## What it includes
 - Ontology snapshot builder (`buildOntologySnapshot`)

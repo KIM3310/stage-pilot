@@ -7,7 +7,7 @@ Tool-calling failures often look like model failures, but many are really parsin
 ## What StagePilot changes
 
 - raises success rate for non-native tool-calling models
-- exposes benchmark lift in a reviewer-first surface
+- exposes benchmark lift in a compact review surface
 - turns parser reliability into a productized integration layer
 
 ## Buyer value

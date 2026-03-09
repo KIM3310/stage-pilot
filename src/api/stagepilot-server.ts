@@ -35,6 +35,9 @@ import type {
   StagePilotResult,
 } from "../stagepilot/types";
 import {
+  getStagePilotAllowedRoles,
+  getStagePilotOperatorRoleHeaders,
+  hasRequiredStagePilotOperatorRole,
   hasValidStagePilotOperatorToken,
   isStagePilotOperatorAuthEnabled,
   requiresStagePilotOperatorToken,
@@ -776,6 +779,8 @@ function buildRuntimeScorecardPayload(
         "/v1/notify",
         "/v1/openclaw/inbox",
       ],
+      roleHeaders: getStagePilotOperatorRoleHeaders(),
+      requiredRoles: getStagePilotAllowedRoles(),
     },
   };
 }
@@ -2005,6 +2010,17 @@ async function handleRequest(options: {
   ) {
     sendJson(response, 403, {
       error: "missing or invalid operator token",
+      ok: false,
+      path: pathname,
+    });
+    return;
+  }
+  if (
+    requiresStagePilotOperatorToken(method, pathname) &&
+    !hasRequiredStagePilotOperatorRole(request)
+  ) {
+    sendJson(response, 403, {
+      error: "missing required operator role",
       ok: false,
       path: pathname,
     });

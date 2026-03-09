@@ -9,6 +9,7 @@ const iterations = Number.parseInt(
 const operatorToken = String(
   process.env.STAGEPILOT_OPERATOR_TOKEN || ""
 ).trim();
+const operatorRole = String(process.env.STAGEPILOT_OPERATOR_ROLE || "").trim();
 
 function buildHeaders() {
   const headers: Record<string, string> = {
@@ -16,6 +17,9 @@ function buildHeaders() {
   };
   if (operatorToken) {
     headers.authorization = `Bearer ${operatorToken}`;
+  }
+  if (operatorRole) {
+    headers["x-operator-role"] = operatorRole;
   }
   return headers;
 }

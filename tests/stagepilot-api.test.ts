@@ -508,6 +508,55 @@ describe("stagepilot api server", () => {
     expect(body.headline).toContain("orchestration");
   });
 
+  it("returns runtime scorecard with live route telemetry", async () => {
+    process.env.GEMINI_API_KEY = "stagepilot-test-key";
+    process.env.OPENCLAW_WEBHOOK_URL = "https://example.invalid/webhook";
+
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    await fetch(`${baseUrl}/v1/runtime-brief`);
+    await fetch(`${baseUrl}/v1/benchmark-summary`);
+
+    const response = await fetch(`${baseUrl}/v1/runtime-scorecard`);
+    expect(response.status).toBe(200);
+
+    const body = (await response.json()) as {
+      benchmark: {
+        topStrategy: { strategy: string } | null;
+      };
+      links: {
+        runtimeScorecard: string;
+      };
+      recommendations: string[];
+      runtime: {
+        integrationsReady: boolean;
+      };
+      schema: string;
+      traffic: {
+        requestCount: number;
+        routeCounts: Array<{
+          count: number;
+          path: string;
+        }>;
+      };
+    };
+
+    expect(body.schema).toBe("stagepilot-runtime-scorecard-v1");
+    expect(body.links.runtimeScorecard).toBe("/v1/runtime-scorecard");
+    expect(body.runtime.integrationsReady).toBe(true);
+    expect(body.traffic.requestCount).toBeGreaterThanOrEqual(2);
+    expect(body.traffic.routeCounts).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ path: "/v1/runtime-brief" }),
+        expect.objectContaining({ path: "/v1/benchmark-summary" }),
+      ])
+    );
+    expect(body.benchmark.topStrategy).not.toBeNull();
+    expect(body.recommendations.length).toBeGreaterThanOrEqual(3);
+  });
+
   it("returns benchmark-backed review pack", async () => {
     process.env.GEMINI_API_KEY = "stagepilot-test-key";
     process.env.OPENCLAW_WEBHOOK_URL = "https://example.invalid/webhook";

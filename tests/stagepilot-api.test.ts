@@ -492,6 +492,9 @@ describe("stagepilot api server", () => {
         integrationReady: boolean;
       };
       headline: string;
+      links: {
+        developerOpsPack: string;
+      };
       readinessContract: string;
       reportContract: {
         schema: string;
@@ -506,6 +509,7 @@ describe("stagepilot api server", () => {
     expect(body.reviewFlow.length).toBeGreaterThanOrEqual(3);
     expect(body.routeCount).toBeGreaterThanOrEqual(10);
     expect(body.headline).toContain("orchestration");
+    expect(body.links.developerOpsPack).toBe("/v1/developer-ops-pack");
   });
 
   it("returns runtime scorecard with live route telemetry", async () => {
@@ -576,6 +580,7 @@ describe("stagepilot api server", () => {
     const body = (await response.json()) as {
       links: {
         benchmarkSummary: string;
+        developerOpsPack: string;
         reviewPack: string;
       };
       operatorJourney: Array<{ stage: string }>;
@@ -604,6 +609,7 @@ describe("stagepilot api server", () => {
     expect(
       body.proofBundle.benchmark.improvements.loopVsBaseline
     ).toBeGreaterThan(50);
+    expect(body.links.developerOpsPack).toBe("/v1/developer-ops-pack");
     expect(body.links.benchmarkSummary).toBe("/v1/benchmark-summary");
     expect(body.proofBundle.benchmarkSummarySchema).toBe(
       "stagepilot-benchmark-summary-v1"
@@ -656,6 +662,37 @@ describe("stagepilot api server", () => {
     expect(body.benchmark.weakestStrategy).not.toBeNull();
   });
 
+  it("returns developer ops pack for merge-request and release review lanes", async () => {
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const response = await fetch(
+      `${baseUrl}/v1/developer-ops-pack?lane=release-governor`
+    );
+    expect(response.status).toBe(200);
+
+    const body = (await response.json()) as {
+      lane: string;
+      links: {
+        developerOpsPack: string;
+      };
+      proofRoutes: string[];
+      reviewerNotes: string[];
+      schema: string;
+      selectedLane: {
+        operatorFlow: string[];
+      };
+    };
+
+    expect(body.schema).toBe("stagepilot-developer-ops-pack-v1");
+    expect(body.lane).toBe("release-governor");
+    expect(body.selectedLane.operatorFlow.length).toBeGreaterThanOrEqual(3);
+    expect(body.proofRoutes).toContain("/v1/developer-ops-pack");
+    expect(body.links.developerOpsPack).toBe("/v1/developer-ops-pack");
+    expect(body.reviewerNotes.length).toBeGreaterThanOrEqual(3);
+  });
+
   it("rejects invalid benchmark summary filter", async () => {
     const { baseUrl } = await startServer({
       engine: new StagePilotEngine(),
@@ -672,6 +709,24 @@ describe("stagepilot api server", () => {
     };
     expect(body.ok).toBe(false);
     expect(body.error).toContain("strategy");
+  });
+
+  it("rejects invalid developer ops lane", async () => {
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const response = await fetch(
+      `${baseUrl}/v1/developer-ops-pack?lane=invalid`
+    );
+    expect(response.status).toBe(400);
+
+    const body = (await response.json()) as {
+      error: string;
+      ok: boolean;
+    };
+    expect(body.ok).toBe(false);
+    expect(body.error).toContain("lane");
   });
 
   it("returns plan report schema surface", async () => {

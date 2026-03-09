@@ -105,7 +105,7 @@ if [[ ! -f "${ENV_EXAMPLE_FILE}" ]]; then
 APP_ENV=dev
 PORT=8080
 LOG_LEVEL=info
-HACKATHON_TRACK=social-good
+DEPLOYMENT_TRACK=standard
 
 # Gemini
 GEMINI_API_KEY=
@@ -144,7 +144,7 @@ fi
 prompt_value APP_ENV "APP_ENV" "dev" 0 1
 prompt_value PORT "PORT" "8080" 0 1
 prompt_value LOG_LEVEL "LOG_LEVEL" "info" 0 1
-prompt_value HACKATHON_TRACK "HACKATHON_TRACK" "social-good" 0 1
+prompt_value DEPLOYMENT_TRACK "DEPLOYMENT_TRACK" "standard" 0 1
 
 prompt_value GEMINI_API_KEY "GEMINI_API_KEY" "" 1 1
 prompt_value GEMINI_MODEL "GEMINI_MODEL (AI Studio/Vertex에서 보이는 정확한 모델 ID)" "" 0 1
@@ -182,7 +182,7 @@ prompt_value OPENCLAW_CLI_TIMEOUT_MS "OPENCLAW_CLI_TIMEOUT_MS" "5000" 0 0
   echo "APP_ENV=$(quote_env_value "${APP_ENV}")"
   echo "PORT=$(quote_env_value "${PORT}")"
   echo "LOG_LEVEL=$(quote_env_value "${LOG_LEVEL}")"
-  echo "HACKATHON_TRACK=$(quote_env_value "${HACKATHON_TRACK}")"
+  echo "DEPLOYMENT_TRACK=$(quote_env_value "${DEPLOYMENT_TRACK}")"
   echo
   echo "GEMINI_API_KEY=$(quote_env_value "${GEMINI_API_KEY}")"
   echo "GEMINI_MODEL=$(quote_env_value "${GEMINI_MODEL}")"

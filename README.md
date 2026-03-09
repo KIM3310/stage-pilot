@@ -39,11 +39,11 @@
 
 ![StagePilot Review Pack](docs/review-pack.svg)
 
-## Role-Ready Artifacts
+## Further Reading
 
-- AI engineer: [`docs/solution-architecture.md`](docs/solution-architecture.md)
-- solutions architect: [`docs/solution-architecture.md`](docs/solution-architecture.md)
-- sales / solution consultant: [`docs/executive-one-pager.md`](docs/executive-one-pager.md), [`docs/discovery-guide.md`](docs/discovery-guide.md)
+- Architecture: [`docs/solution-architecture.md`](docs/solution-architecture.md)
+- Overview: [`docs/executive-one-pager.md`](docs/executive-one-pager.md)
+- Discovery notes: [`docs/discovery-guide.md`](docs/discovery-guide.md)
 
 ## References and attribution
 
@@ -118,7 +118,7 @@ Latency note: these numbers come from deterministic in-process benchmark harness
 
 Review-pack surfaces now expose this benchmark delta directly through `/v1/review-pack` so reviewers can inspect the lift without parsing the raw JSON file first.
 
-## Proof Assets
+## Supporting Files
 
 - `docs/review-pack.svg`
 - `docs/DEVELOPER_OPS_PACK.md`

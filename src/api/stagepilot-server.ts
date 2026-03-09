@@ -446,6 +446,7 @@ function createRuntimeTelemetry(): StagePilotRuntimeTelemetry {
 
 function recordRuntimeTelemetry(
   telemetry: StagePilotRuntimeTelemetry,
+  method: string,
   pathname: string,
   statusCode: number
 ): void {
@@ -460,7 +461,7 @@ function recordRuntimeTelemetry(
     telemetry.lastErrorAt = telemetry.lastRequestAt;
   }
   appendStagePilotRuntimeEvent({
-    method: "HTTP",
+    method,
     path: pathname,
     statusCode,
     timestamp: telemetry.lastRequestAt ?? new Date().toISOString(),
@@ -738,6 +739,9 @@ function buildRuntimeScorecardPayload(
       enabled: persisted.enabled,
       path: persisted.path,
       persistedCount: persisted.persistedCount,
+      lastEventAt: persisted.lastEventAt,
+      methodCounts: persisted.methodCounts,
+      statusClasses: persisted.statusClasses,
       recentEvents: persisted.recentEvents,
     },
     operatorAuth: {
@@ -1810,7 +1814,7 @@ async function handleRequest(options: {
   const method = request.method ?? "GET";
   const { pathname } = parseRequestUrl(request.url);
   response.once("finish", () => {
-    recordRuntimeTelemetry(telemetry, pathname, response.statusCode);
+    recordRuntimeTelemetry(telemetry, method, pathname, response.statusCode);
   });
 
   if (

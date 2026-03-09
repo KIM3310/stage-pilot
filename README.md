@@ -35,6 +35,12 @@
 
 ![StagePilot Review Pack](docs/review-pack.svg)
 
+## Role-Ready Artifacts
+
+- AI engineer: [`docs/solution-architecture.md`](docs/solution-architecture.md)
+- solutions architect: [`docs/solution-architecture.md`](docs/solution-architecture.md)
+- sales / solution consultant: [`docs/executive-one-pager.md`](docs/executive-one-pager.md), [`docs/discovery-guide.md`](docs/discovery-guide.md)
+
 ## References and attribution
 
 - Earlier fork / baseline reference: https://github.com/KIM3310/ai-sdk-tool-call-middleware

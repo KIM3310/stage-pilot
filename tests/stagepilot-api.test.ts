@@ -7,10 +7,14 @@ const serversToClose: ReturnType<typeof createStagePilotApiServer>[] = [];
 const BODY_TIMEOUT_ENV_KEY = "STAGEPILOT_REQUEST_BODY_TIMEOUT_MS";
 const GEMINI_API_KEY_ENV_KEY = "GEMINI_API_KEY";
 const GEMINI_TIMEOUT_ENV_KEY = "GEMINI_HTTP_TIMEOUT_MS";
+const OPERATOR_TOKEN_ENV_KEY = "STAGEPILOT_OPERATOR_TOKEN";
+const OPERATOR_ROLES_ENV_KEY = "STAGEPILOT_OPERATOR_ALLOWED_ROLES";
 const OPENCLAW_WEBHOOK_ENV_KEY = "OPENCLAW_WEBHOOK_URL";
 const BODY_TIMEOUT_ENV_SNAPSHOT = process.env[BODY_TIMEOUT_ENV_KEY];
 const GEMINI_API_KEY_ENV_SNAPSHOT = process.env[GEMINI_API_KEY_ENV_KEY];
 const GEMINI_TIMEOUT_ENV_SNAPSHOT = process.env[GEMINI_TIMEOUT_ENV_KEY];
+const OPERATOR_TOKEN_ENV_SNAPSHOT = process.env[OPERATOR_TOKEN_ENV_KEY];
+const OPERATOR_ROLES_ENV_SNAPSHOT = process.env[OPERATOR_ROLES_ENV_KEY];
 const HTTP_STATUS_LINE_REGEX = /^HTTP\/1\.1 (\d{3})/m;
 const OPENCLAW_WEBHOOK_ENV_SNAPSHOT = process.env[OPENCLAW_WEBHOOK_ENV_KEY];
 
@@ -39,6 +43,18 @@ afterEach(async () => {
     delete process.env[GEMINI_API_KEY_ENV_KEY];
   } else {
     process.env[GEMINI_API_KEY_ENV_KEY] = GEMINI_API_KEY_ENV_SNAPSHOT;
+  }
+
+  if (typeof OPERATOR_TOKEN_ENV_SNAPSHOT === "undefined") {
+    delete process.env[OPERATOR_TOKEN_ENV_KEY];
+  } else {
+    process.env[OPERATOR_TOKEN_ENV_KEY] = OPERATOR_TOKEN_ENV_SNAPSHOT;
+  }
+
+  if (typeof OPERATOR_ROLES_ENV_SNAPSHOT === "undefined") {
+    delete process.env[OPERATOR_ROLES_ENV_KEY];
+  } else {
+    process.env[OPERATOR_ROLES_ENV_KEY] = OPERATOR_ROLES_ENV_SNAPSHOT;
   }
 
   if (typeof OPENCLAW_WEBHOOK_ENV_SNAPSHOT === "undefined") {
@@ -890,6 +906,71 @@ describe("stagepilot api server", () => {
 
     expect(body.ok).toBe(true);
     expect(body.result.plan.actions.length).toBeGreaterThanOrEqual(4);
+  });
+
+  it("requires an allowed operator role when runtime mutation roles are configured", async () => {
+    process.env.STAGEPILOT_OPERATOR_TOKEN = "stagepilot-secret";
+    process.env.STAGEPILOT_OPERATOR_ALLOWED_ROLES =
+      "release-manager,case-worker";
+
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const denied = await fetch(`${baseUrl}/v1/plan`, {
+      body: JSON.stringify({
+        caseId: "api-roles-001",
+        district: "Gangbuk-gu",
+        notes: "Rent overdue, food instability",
+        risks: ["housing", "food", "income"],
+        urgencyHint: "high",
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        "x-operator-token": "stagepilot-secret",
+      },
+      method: "POST",
+    });
+
+    expect(denied.status).toBe(403);
+    await expect(denied.json()).resolves.toMatchObject({
+      error: "missing required operator role",
+      ok: false,
+      path: "/v1/plan",
+    });
+
+    const allowed = await fetch(`${baseUrl}/v1/plan`, {
+      body: JSON.stringify({
+        caseId: "api-roles-002",
+        district: "Gangbuk-gu",
+        notes: "Rent overdue, food instability",
+        risks: ["housing", "food", "income"],
+        urgencyHint: "high",
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        "x-operator-token": "stagepilot-secret",
+        "x-operator-role": "release-manager",
+      },
+      method: "POST",
+    });
+
+    expect(allowed.status).toBe(200);
+
+    const scorecard = await fetch(`${baseUrl}/v1/runtime-scorecard`);
+    const scorecardBody = (await scorecard.json()) as {
+      operatorAuth: {
+        requiredRoles: string[];
+        roleHeaders: string[];
+      };
+    };
+
+    expect(scorecard.status).toBe(200);
+    expect(scorecardBody.operatorAuth.requiredRoles).toEqual([
+      "release-manager",
+      "case-worker",
+    ]);
+    expect(scorecardBody.operatorAuth.roleHeaders).toContain("x-operator-role");
   });
 
   it("returns 400 for invalid input body", async () => {

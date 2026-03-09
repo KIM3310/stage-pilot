@@ -1,3 +1,4 @@
+import { createSign, generateKeyPairSync } from "node:crypto";
 import { type AddressInfo, Socket } from "node:net";
 import { afterEach, describe, expect, it } from "vitest";
 import { createStagePilotApiServer } from "../src/api/stagepilot-server";
@@ -9,14 +10,72 @@ const GEMINI_API_KEY_ENV_KEY = "GEMINI_API_KEY";
 const GEMINI_TIMEOUT_ENV_KEY = "GEMINI_HTTP_TIMEOUT_MS";
 const OPERATOR_TOKEN_ENV_KEY = "STAGEPILOT_OPERATOR_TOKEN";
 const OPERATOR_ROLES_ENV_KEY = "STAGEPILOT_OPERATOR_ALLOWED_ROLES";
+const OPERATOR_OIDC_ISSUER_ENV_KEY = "STAGEPILOT_OPERATOR_OIDC_ISSUER";
+const OPERATOR_OIDC_AUDIENCE_ENV_KEY = "STAGEPILOT_OPERATOR_OIDC_AUDIENCE";
+const OPERATOR_OIDC_JWKS_ENV_KEY = "STAGEPILOT_OPERATOR_OIDC_JWKS_JSON";
 const OPENCLAW_WEBHOOK_ENV_KEY = "OPENCLAW_WEBHOOK_URL";
 const BODY_TIMEOUT_ENV_SNAPSHOT = process.env[BODY_TIMEOUT_ENV_KEY];
 const GEMINI_API_KEY_ENV_SNAPSHOT = process.env[GEMINI_API_KEY_ENV_KEY];
 const GEMINI_TIMEOUT_ENV_SNAPSHOT = process.env[GEMINI_TIMEOUT_ENV_KEY];
 const OPERATOR_TOKEN_ENV_SNAPSHOT = process.env[OPERATOR_TOKEN_ENV_KEY];
 const OPERATOR_ROLES_ENV_SNAPSHOT = process.env[OPERATOR_ROLES_ENV_KEY];
+const OPERATOR_OIDC_ISSUER_ENV_SNAPSHOT =
+  process.env[OPERATOR_OIDC_ISSUER_ENV_KEY];
+const OPERATOR_OIDC_AUDIENCE_ENV_SNAPSHOT =
+  process.env[OPERATOR_OIDC_AUDIENCE_ENV_KEY];
+const OPERATOR_OIDC_JWKS_ENV_SNAPSHOT = process.env[OPERATOR_OIDC_JWKS_ENV_KEY];
 const HTTP_STATUS_LINE_REGEX = /^HTTP\/1\.1 (\d{3})/m;
 const OPENCLAW_WEBHOOK_ENV_SNAPSHOT = process.env[OPENCLAW_WEBHOOK_ENV_KEY];
+
+function encodeBase64Url(value: string): string {
+  return Buffer.from(value, "utf8")
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+function createOidcToken(options: {
+  audience: string;
+  issuer: string;
+  roles?: string[];
+}) {
+  const { privateKey, publicKey } = generateKeyPairSync("rsa", {
+    modulusLength: 2048,
+  });
+  const publicJwk = publicKey.export({ format: "jwk" }) as Record<
+    string,
+    string
+  >;
+  const kid = "stagepilot-test-key";
+  const header = encodeBase64Url(
+    JSON.stringify({ alg: "RS256", kid, typ: "JWT" })
+  );
+  const payload = encodeBase64Url(
+    JSON.stringify({
+      iss: options.issuer,
+      aud: options.audience,
+      sub: "stagepilot-operator",
+      exp: Math.floor(Date.now() / 1000) + 60,
+      roles: options.roles ?? [],
+    })
+  );
+  const signer = createSign("RSA-SHA256");
+  signer.update(`${header}.${payload}`);
+  signer.end();
+  const signature = signer
+    .sign(privateKey)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+  return {
+    jwksJson: JSON.stringify({
+      keys: [{ ...publicJwk, alg: "RS256", kid, use: "sig" }],
+    }),
+    token: `${header}.${payload}.${signature}`,
+  };
+}
 
 afterEach(async () => {
   await Promise.all(
@@ -55,6 +114,26 @@ afterEach(async () => {
     delete process.env[OPERATOR_ROLES_ENV_KEY];
   } else {
     process.env[OPERATOR_ROLES_ENV_KEY] = OPERATOR_ROLES_ENV_SNAPSHOT;
+  }
+
+  if (typeof OPERATOR_OIDC_ISSUER_ENV_SNAPSHOT === "undefined") {
+    delete process.env[OPERATOR_OIDC_ISSUER_ENV_KEY];
+  } else {
+    process.env[OPERATOR_OIDC_ISSUER_ENV_KEY] =
+      OPERATOR_OIDC_ISSUER_ENV_SNAPSHOT;
+  }
+
+  if (typeof OPERATOR_OIDC_AUDIENCE_ENV_SNAPSHOT === "undefined") {
+    delete process.env[OPERATOR_OIDC_AUDIENCE_ENV_KEY];
+  } else {
+    process.env[OPERATOR_OIDC_AUDIENCE_ENV_KEY] =
+      OPERATOR_OIDC_AUDIENCE_ENV_SNAPSHOT;
+  }
+
+  if (typeof OPERATOR_OIDC_JWKS_ENV_SNAPSHOT === "undefined") {
+    delete process.env[OPERATOR_OIDC_JWKS_ENV_KEY];
+  } else {
+    process.env[OPERATOR_OIDC_JWKS_ENV_KEY] = OPERATOR_OIDC_JWKS_ENV_SNAPSHOT;
   }
 
   if (typeof OPENCLAW_WEBHOOK_ENV_SNAPSHOT === "undefined") {
@@ -971,6 +1050,58 @@ describe("stagepilot api server", () => {
       "case-worker",
     ]);
     expect(scorecardBody.operatorAuth.roleHeaders).toContain("x-operator-role");
+  });
+
+  it("accepts OIDC bearer tokens with required roles for mutation routes", async () => {
+    delete process.env[OPERATOR_TOKEN_ENV_KEY];
+    process.env[OPERATOR_ROLES_ENV_KEY] = "release-manager";
+    process.env[OPERATOR_OIDC_ISSUER_ENV_KEY] =
+      "https://stagepilot.example/issuer";
+    process.env[OPERATOR_OIDC_AUDIENCE_ENV_KEY] = "stagepilot-api";
+    const { jwksJson, token } = createOidcToken({
+      issuer: "https://stagepilot.example/issuer",
+      audience: "stagepilot-api",
+      roles: ["release-manager"],
+    });
+    process.env[OPERATOR_OIDC_JWKS_ENV_KEY] = jwksJson;
+
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const allowed = await fetch(`${baseUrl}/v1/plan`, {
+      body: JSON.stringify({
+        caseId: "api-oidc-001",
+        district: "Gangbuk-gu",
+        notes: "Two residents need coordinated rent and meal support.",
+        risks: ["housing", "food"],
+      }),
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    });
+
+    expect(allowed.status).toBe(200);
+
+    const scorecard = await fetch(`${baseUrl}/v1/runtime-scorecard`);
+    const scorecardBody = (await scorecard.json()) as {
+      operatorAuth: {
+        mode: string;
+        oidc: {
+          enabled: boolean;
+          issuer: string | null;
+        };
+      };
+    };
+
+    expect(scorecard.status).toBe(200);
+    expect(scorecardBody.operatorAuth.mode).toBe("oidc");
+    expect(scorecardBody.operatorAuth.oidc.enabled).toBe(true);
+    expect(scorecardBody.operatorAuth.oidc.issuer).toBe(
+      "https://stagepilot.example/issuer"
+    );
   });
 
   it("returns 400 for invalid input body", async () => {

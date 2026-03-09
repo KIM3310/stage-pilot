@@ -15,7 +15,7 @@ terraform apply \
   -var="project_id=your-project" \
   -var="image=asia-northeast3-docker.pkg.dev/your-project/apps/stagepilot:latest" \
   -var='env={
-    STAGEPILOT_RUNTIME_STORE_PATH="/app/.runtime/stagepilot-runtime-events.jsonl"
+    STAGEPILOT_RUNTIME_STORE_PATH="/app/.runtime/stagepilot-runtime-events.db"
     STAGEPILOT_OPERATOR_ALLOWED_ROLES="case_manager,reviewer"
   }' \
   -var='secret_env={

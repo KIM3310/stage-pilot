@@ -549,6 +549,8 @@ describe("stagepilot api server", () => {
     expect(body.traffic.requestCount).toBeGreaterThanOrEqual(2);
     expect(body.persistence.enabled).toBe(true);
     expect(typeof body.persistence.persistedCount).toBe("number");
+    expect(body.persistence.methodCounts.GET).toBeGreaterThanOrEqual(1);
+    expect(body.persistence.statusClasses.ok).toBeGreaterThanOrEqual(1);
     expect(body.operatorAuth.enabled).toBe(false);
     expect(body.traffic.routeCounts).toEqual(
       expect.arrayContaining([

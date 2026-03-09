@@ -11,6 +11,8 @@ export const STAGEPILOT_BENCHMARK_SUMMARY_SCHEMA =
   "stagepilot-benchmark-summary-v1";
 export const STAGEPILOT_RUNTIME_SCORECARD_SCHEMA =
   "stagepilot-runtime-scorecard-v1";
+export const STAGEPILOT_DEVELOPER_OPS_PACK_SCHEMA =
+  "stagepilot-developer-ops-pack-v1";
 
 function buildStagePilotProofAssets() {
   return [
@@ -107,6 +109,12 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
       path: "/v1/benchmark-summary",
       purpose:
         "Reviewer summary of benchmark lift, weakest strategy, and promotion posture",
+    },
+    {
+      method: "GET",
+      path: "/v1/developer-ops-pack",
+      purpose:
+        "Developer workflow pack for MR triage, pipeline recovery, and guarded release handoff",
     },
     {
       method: "GET",
@@ -230,6 +238,7 @@ export function buildStagePilotRuntimeBrief(options: {
       reviewPack: "/v1/review-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
       benchmarkSummary: "/v1/benchmark-summary",
+      developerOpsPack: "/v1/developer-ops-pack",
       planSchema: "/v1/schema/plan-report",
     },
   };
@@ -308,8 +317,109 @@ export function buildStagePilotBenchmarkSummary(options: {
       reviewPack: "/v1/review-pack",
       benchmark: "/v1/benchmark",
       benchmarkSummary: "/v1/benchmark-summary",
+      developerOpsPack: "/v1/developer-ops-pack",
       runtimeBrief: "/v1/runtime-brief",
       runtimeScorecard: "/v1/runtime-scorecard",
+    },
+  };
+}
+
+export function buildStagePilotDeveloperOpsPack(options: {
+  benchmarkSnapshot: StagePilotBenchmarkSnapshot;
+  lane?: string | null;
+  service: string;
+}) {
+  const lane =
+    typeof options.lane === "string" && options.lane.trim().length > 0
+      ? options.lane.trim().toLowerCase()
+      : "merge-request";
+  const strategyRows = buildStrategyRows(options.benchmarkSnapshot).sort(
+    (left, right) => (right.successRate ?? 0) - (left.successRate ?? 0)
+  );
+  const topStrategy = strategyRows[0] ?? null;
+  const laneMap = {
+    "merge-request": {
+      headline:
+        "Use parser reliability and contract checks to keep merge-request review deterministic.",
+      operatorFlow: [
+        "Collect MR notes, changed-file summary, and reviewer instructions.",
+        "Run plan generation through the same schema-safe parser surface used in benchmarked routing.",
+        "Keep the final reviewer decision separate from the agent recommendation.",
+      ],
+      guardrails: [
+        "Do not auto-merge on tool output alone.",
+        "Keep report contract stable before exposing results to reviewers.",
+      ],
+    },
+    "pipeline-recovery": {
+      headline:
+        "Treat failing CI or automation as a triage lane with bounded recovery instead of free-form agent improvisation.",
+      operatorFlow: [
+        "Capture failing step context and relevant logs.",
+        "Use benchmark-backed tool-call parsing before producing remediation actions.",
+        "Escalate to a human release owner when confidence or tool output is weak.",
+      ],
+      guardrails: [
+        "Do not rerun or mutate live infrastructure without reviewer approval.",
+        "Persist weakest strategy evidence so regressions stay visible.",
+      ],
+    },
+    "release-governor": {
+      headline:
+        "Keep release automation reviewable by pairing runtime posture, benchmark proof, and explicit handoff gates.",
+      operatorFlow: [
+        "Start with runtime brief and scorecard before allowing release help.",
+        "Check benchmark and developer-ops pack to understand the strongest and weakest automation lanes.",
+        "Require human confirmation for final delivery or release communication.",
+      ],
+      guardrails: [
+        "OpenClaw or downstream delivery is a final confirmed action, not implicit success.",
+        "Review benchmark deltas before promoting any new agent strategy.",
+      ],
+    },
+  } as const;
+  const selectedLane =
+    laneMap[lane as keyof typeof laneMap] ?? laneMap["merge-request"];
+
+  return {
+    service: options.service,
+    status: "ok",
+    generatedAt: new Date().toISOString(),
+    schema: STAGEPILOT_DEVELOPER_OPS_PACK_SCHEMA,
+    lane:
+      lane === "pipeline-recovery" || lane === "release-governor"
+        ? lane
+        : "merge-request",
+    headline:
+      "Developer ops pack that turns benchmarked tool-calling reliability into reviewable MR, pipeline, and release workflows.",
+    lanes: Object.keys(laneMap),
+    selectedLane,
+    benchmark: {
+      caseCount: options.benchmarkSnapshot.caseCount,
+      generatedAt: options.benchmarkSnapshot.generatedAt,
+      topStrategy,
+      strategies: strategyRows,
+    },
+    proofRoutes: [
+      "/v1/runtime-brief",
+      "/v1/runtime-scorecard",
+      "/v1/developer-ops-pack",
+      "/v1/benchmark-summary",
+      "/v1/review-pack",
+      "/v1/schema/plan-report",
+    ],
+    reviewerNotes: [
+      "Use the developer ops pack to explain where agent help stops and human release review begins.",
+      "Benchmark lift matters because developer automation breaks first on malformed tool or workflow output.",
+      "Keep the weakest strategy visible during demo and submission walkthroughs.",
+    ],
+    links: {
+      runtimeBrief: "/v1/runtime-brief",
+      runtimeScorecard: "/v1/runtime-scorecard",
+      developerOpsPack: "/v1/developer-ops-pack",
+      benchmarkSummary: "/v1/benchmark-summary",
+      reviewPack: "/v1/review-pack",
+      planSchema: "/v1/schema/plan-report",
     },
   };
 }
@@ -503,6 +613,7 @@ export function buildStagePilotReviewPack(options: {
       reviewPack: "/v1/review-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
       benchmarkSummary: "/v1/benchmark-summary",
+      developerOpsPack: "/v1/developer-ops-pack",
       planSchema: "/v1/schema/plan-report",
       benchmark: "/v1/benchmark",
       demo: "/demo",

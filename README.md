@@ -21,6 +21,7 @@
 ## Review Pack At A Glance
 
 - StagePilot reviewer API: `GET /v1/runtime-brief`, `GET /v1/review-pack`, `GET /v1/schema/plan-report`
+- StagePilot developer workflow pack: `GET /v1/developer-ops-pack`
 - BenchLab reviewer API: `GET /v1/benchlab/runtime-brief`, `GET /v1/benchlab/review-pack`, `GET /v1/benchlab/schema/job-report`
 - Checked-in benchmark proof: baseline `29.17%` -> middleware `87.50%` -> Ralph loop `100.00%`
 - Checked-in BenchLab claims: runtime compare, variant leaderboard, best artifacts, and failure forensics
@@ -28,10 +29,11 @@
 ## 2-Minute Review Path
 
 1. `GET /v1/runtime-brief` -> confirm orchestration readiness and integration posture.
-2. `GET /v1/review-pack` -> inspect benchmark lift and parser/handoff boundary.
-3. `GET /v1/schema/plan-report` -> verify contract before trusting downstream routing output.
-4. `GET /v1/benchlab/review-pack` -> inspect checked-in runtime and artifact claims.
-5. `docs/review-pack.svg` + `docs/benchmarks/stagepilot-latest.json` -> read the strongest proof assets first.
+2. `GET /v1/developer-ops-pack` -> inspect MR / pipeline / release lanes before demoing automation.
+3. `GET /v1/review-pack` -> inspect benchmark lift and parser/handoff boundary.
+4. `GET /v1/schema/plan-report` -> verify contract before trusting downstream routing output.
+5. `GET /v1/benchlab/review-pack` -> inspect checked-in runtime and artifact claims.
+6. `docs/review-pack.svg` + `docs/benchmarks/stagepilot-latest.json` -> read the strongest proof assets first.
 
 ![StagePilot Review Pack](docs/review-pack.svg)
 
@@ -117,6 +119,7 @@ Review-pack surfaces now expose this benchmark delta directly through `/v1/revie
 ## Proof Assets
 
 - `docs/review-pack.svg`
+- `docs/DEVELOPER_OPS_PACK.md`
 - `docs/benchmarks/stagepilot-latest.json`
 - `docs/STAGEPILOT.md`
 - `docs/benchlab/TOOL_CALLING_GAINS.md`

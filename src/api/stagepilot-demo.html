@@ -810,6 +810,7 @@
         <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">
           <button class="btn-secondary" id="copyReviewBtn" type="button">Copy Review Path</button>
           <button class="btn-secondary" id="copyProofBtn" type="button">Copy Proof Routes</button>
+          <button class="btn-secondary" id="copyClaimBtn" type="button">Copy Claim Snapshot</button>
           <button class="btn-secondary" id="copyPayloadBtn" type="button">Copy Payload</button>
         </div>
       </article>
@@ -1255,6 +1256,36 @@
       }
     }
 
+    async function copyClaimSnapshot() {
+      const steps = Array.from(document.querySelectorAll("#briefReviewFlow li"))
+        .map((item) => item.textContent?.trim())
+        .filter(Boolean)
+        .slice(0, 3);
+      const text = [
+        "StagePilot claim snapshot",
+        `Headline: ${el("briefHeadline").textContent || "-"}`,
+        `Schema: ${el("briefSchema").textContent || "-"}`,
+        `Runtime mode: ${el("briefMode").textContent || "-"}`,
+        `Benchmark lift: ${el("briefBenchmarkDelta").textContent || "-"}`,
+        "",
+        "Strongest proof path",
+        ...(steps.length > 0 ? steps.map((step) => `- ${step}`) : ["- Review flow unavailable"]),
+        "",
+        "Routes",
+        "- /v1/review-pack",
+        "- /v1/benchmark",
+        "- docs/benchmarks/stagepilot-latest.json",
+      ].join("\n");
+
+      try {
+        await copyTextToClipboard(text);
+        flashButtonLabel("copyClaimBtn", "Copy Claim Snapshot", "Copied");
+      } catch (error) {
+        console.warn("copy claim snapshot failed", error);
+        flashButtonLabel("copyClaimBtn", "Copy Claim Snapshot", "Copy failed");
+      }
+    }
+
     async function copyPayloadPreview() {
       try {
         await copyTextToClipboard(JSON.stringify(readPayload(), null, 2));
@@ -1679,6 +1710,7 @@
       el("sampleBtn").addEventListener("click", loadSample);
       el("copyReviewBtn").addEventListener("click", copyReviewPath);
       el("copyProofBtn").addEventListener("click", copyProofRoutes);
+      el("copyClaimBtn").addEventListener("click", copyClaimSnapshot);
       el("copyPayloadBtn").addEventListener("click", copyPayloadPreview);
       if (el("autoDemoBtn")) el("autoDemoBtn").addEventListener("click", runAutoDemo);
     }

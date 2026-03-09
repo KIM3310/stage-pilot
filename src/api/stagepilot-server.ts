@@ -33,6 +33,15 @@ import type {
   RiskType,
   StagePilotResult,
 } from "../stagepilot/types";
+import {
+  hasValidStagePilotOperatorToken,
+  isStagePilotOperatorAuthEnabled,
+  requiresStagePilotOperatorToken,
+} from "./operator-access";
+import {
+  appendStagePilotRuntimeEvent,
+  buildStagePilotRuntimeStoreSummary,
+} from "./runtime-store";
 import { renderStagePilotDemoHtml } from "./stagepilot-demo";
 import {
   buildStagePilotBenchmarkSummary,
@@ -450,6 +459,12 @@ function recordRuntimeTelemetry(
     telemetry.errorCount += 1;
     telemetry.lastErrorAt = telemetry.lastRequestAt;
   }
+  appendStagePilotRuntimeEvent({
+    method: "HTTP",
+    path: pathname,
+    statusCode,
+    timestamp: telemetry.lastRequestAt ?? new Date().toISOString(),
+  });
 }
 
 function buildMetaPayload(): JsonObject {
@@ -691,7 +706,8 @@ function buildBenchmarkSummaryPayload(
 function buildRuntimeScorecardPayload(
   telemetry: StagePilotRuntimeTelemetry
 ): JsonObject {
-  return buildStagePilotRuntimeScorecard({
+  const persisted = buildStagePilotRuntimeStoreSummary(10);
+  const scorecard = buildStagePilotRuntimeScorecard({
     benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
     bodyTimeoutMs: readBodyTimeoutMs(
       process.env.STAGEPILOT_REQUEST_BODY_TIMEOUT_MS
@@ -716,6 +732,26 @@ function buildRuntimeScorecardPayload(
     },
     service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
   });
+  return {
+    ...scorecard,
+    persistence: {
+      enabled: persisted.enabled,
+      path: persisted.path,
+      persistedCount: persisted.persistedCount,
+      recentEvents: persisted.recentEvents,
+    },
+    operatorAuth: {
+      enabled: isStagePilotOperatorAuthEnabled(),
+      protectedRoutes: [
+        "/v1/plan",
+        "/v1/benchmark",
+        "/v1/insights",
+        "/v1/whatif",
+        "/v1/notify",
+        "/v1/openclaw/inbox",
+      ],
+    },
+  };
 }
 
 function buildPlanReportSchemaPayload(): JsonObject {
@@ -1786,6 +1822,18 @@ async function handleRequest(options: {
       telemetry,
     })
   ) {
+    return;
+  }
+
+  if (
+    requiresStagePilotOperatorToken(method, pathname) &&
+    !hasValidStagePilotOperatorToken(request)
+  ) {
+    sendJson(response, 403, {
+      error: "missing or invalid operator token",
+      ok: false,
+      path: pathname,
+    });
     return;
   }
 

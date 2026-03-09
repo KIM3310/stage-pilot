@@ -10,7 +10,7 @@ COPY . .
 ENV NODE_ENV=production
 ENV PORT=8080
 ENV USE_GPU=0
-ENV STAGEPILOT_RUNTIME_STORE_PATH=/app/.runtime/stagepilot-runtime-events.jsonl
+ENV STAGEPILOT_RUNTIME_STORE_PATH=/app/.runtime/stagepilot-runtime-events.db
 
 EXPOSE 8080
 

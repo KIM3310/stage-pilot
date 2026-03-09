@@ -27,7 +27,7 @@
 - Checked-in benchmark proof: baseline `29.17%` -> middleware `87.50%` -> Ralph loop `100.00%`
 - Checked-in BenchLab claims: runtime compare, variant leaderboard, best artifacts, and failure forensics
 
-## Quick Review Path
+## Review Flow
 
 1. `GET /v1/runtime-brief` -> confirm orchestration readiness and integration posture.
 2. `GET /v1/developer-ops-pack` -> inspect MR / pipeline / release lanes before demoing automation.

@@ -562,7 +562,7 @@ describe("stagepilot api server", () => {
     });
 
     const response = await fetch(
-      `${baseUrl}/v1/benchmark-summary?minSuccessRate=80`
+      `${baseUrl}/v1/benchmark-summary?minSuccessRate=80&strategy=middleware`
     );
     expect(response.status).toBe(200);
 
@@ -578,6 +578,7 @@ describe("stagepilot api server", () => {
       };
       filters: {
         minSuccessRate: number | null;
+        strategy: string | null;
       };
       links: {
         benchmarkSummary: string;
@@ -589,9 +590,13 @@ describe("stagepilot api server", () => {
     expect(body.status).toBe("ok");
     expect(body.schema).toBe("stagepilot-benchmark-summary-v1");
     expect(body.filters.minSuccessRate).toBe(80);
+    expect(body.filters.strategy).toBe("middleware");
     expect(body.links.benchmarkSummary).toBe("/v1/benchmark-summary");
     expect(
       body.benchmark.strategies.every((item) => item.successRate >= 80)
+    ).toBe(true);
+    expect(
+      body.benchmark.strategies.every((item) => item.strategy === "middleware")
     ).toBe(true);
     expect(body.benchmark.topStrategy).not.toBeNull();
     expect(body.benchmark.weakestStrategy).not.toBeNull();
@@ -603,7 +608,7 @@ describe("stagepilot api server", () => {
     });
 
     const response = await fetch(
-      `${baseUrl}/v1/benchmark-summary?minSuccessRate=not-a-number`
+      `${baseUrl}/v1/benchmark-summary?strategy=invalid`
     );
     expect(response.status).toBe(400);
 
@@ -612,7 +617,7 @@ describe("stagepilot api server", () => {
       ok: boolean;
     };
     expect(body.ok).toBe(false);
-    expect(body.error).toContain("minSuccessRate");
+    expect(body.error).toContain("strategy");
   });
 
   it("returns plan report schema surface", async () => {

@@ -230,17 +230,27 @@ export function buildStagePilotBenchmarkSummary(options: {
   benchmarkSnapshot: StagePilotBenchmarkSnapshot;
   minSuccessRate?: number | null;
   service: string;
+  strategy?: string | null;
 }) {
   const minSuccessRate =
     typeof options.minSuccessRate === "number" &&
     Number.isFinite(options.minSuccessRate)
       ? Math.max(0, Math.min(100, options.minSuccessRate))
       : null;
+  const strategyFilter =
+    typeof options.strategy === "string" && options.strategy.trim().length > 0
+      ? options.strategy.trim().toLowerCase()
+      : null;
   const strategies = buildStrategyRows(options.benchmarkSnapshot);
-  const filteredStrategies =
-    minSuccessRate === null
-      ? strategies
-      : strategies.filter((item) => (item.successRate ?? 0) >= minSuccessRate);
+  const filteredStrategies = strategies.filter((item) => {
+    if (minSuccessRate !== null && (item.successRate ?? 0) < minSuccessRate) {
+      return false;
+    }
+    if (strategyFilter !== null && item.strategy !== strategyFilter) {
+      return false;
+    }
+    return true;
+  });
   const ranked = [...strategies].sort(
     (left, right) => (right.successRate ?? 0) - (left.successRate ?? 0)
   );
@@ -254,6 +264,7 @@ export function buildStagePilotBenchmarkSummary(options: {
     schema: STAGEPILOT_BENCHMARK_SUMMARY_SCHEMA,
     filters: {
       minSuccessRate,
+      strategy: strategyFilter,
     },
     benchmark: {
       caseCount: options.benchmarkSnapshot.caseCount,
@@ -261,6 +272,12 @@ export function buildStagePilotBenchmarkSummary(options: {
       improvements: options.benchmarkSnapshot.improvements,
       topStrategy,
       weakestStrategy,
+      readyCount: filteredStrategies.filter(
+        (item) => weakestStrategy?.strategy !== item.strategy
+      ).length,
+      attentionCount: filteredStrategies.filter(
+        (item) => weakestStrategy?.strategy === item.strategy
+      ).length,
       strategies: filteredStrategies.map((item) => ({
         ...item,
         deltaFromTop:

@@ -45,6 +45,7 @@ import {
 import { renderStagePilotDemoHtml } from "./stagepilot-demo";
 import {
   buildStagePilotBenchmarkSummary,
+  buildStagePilotDeveloperOpsPack,
   buildStagePilotPlanReportSchema,
   buildStagePilotReviewPack,
   buildStagePilotRouteDescriptors,
@@ -704,6 +705,14 @@ function buildBenchmarkSummaryPayload(
   });
 }
 
+function buildDeveloperOpsPackPayload(lane?: string): JsonObject {
+  return buildStagePilotDeveloperOpsPack({
+    benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
+    lane,
+    service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
+  });
+}
+
 function buildRuntimeScorecardPayload(
   telemetry: StagePilotRuntimeTelemetry
 ): JsonObject {
@@ -1230,6 +1239,16 @@ function handleBenchmarkSummaryRequest(
   );
 }
 
+function handleDeveloperOpsPackRequest(
+  response: ServerResponse,
+  lane?: string,
+  options?: {
+    includeBody?: boolean;
+  }
+) {
+  sendJson(response, 200, buildDeveloperOpsPackPayload(lane), options);
+}
+
 function handleRuntimeScorecardRequest(
   response: ServerResponse,
   telemetry: StagePilotRuntimeTelemetry,
@@ -1238,6 +1257,30 @@ function handleRuntimeScorecardRequest(
   }
 ) {
   sendJson(response, 200, buildRuntimeScorecardPayload(telemetry), options);
+}
+
+function parseDeveloperOpsLane(rawUrl?: string): {
+  error?: string;
+  lane?: string;
+} {
+  const parsed = new URL(rawUrl ?? "/", "http://127.0.0.1");
+  const rawLane = parsed.searchParams.get("lane");
+  const lane =
+    rawLane === null || rawLane.trim().length === 0
+      ? undefined
+      : rawLane.trim().toLowerCase();
+
+  if (
+    typeof lane !== "undefined" &&
+    !["merge-request", "pipeline-recovery", "release-governor"].includes(lane)
+  ) {
+    return {
+      error:
+        "lane must be merge-request, pipeline-recovery, or release-governor",
+    };
+  }
+
+  return { lane };
 }
 
 function handleDemoRequest(
@@ -1692,6 +1735,20 @@ function handleReadonlyRequest(options: {
         return true;
       }
       handleBenchmarkSummaryRequest(response, minSuccessRate, strategy, {
+        includeBody,
+      });
+      return true;
+    }
+    case "/v1/developer-ops-pack": {
+      const laneConfig = parseDeveloperOpsLane(rawUrl);
+      if (laneConfig.error) {
+        sendJson(response, 400, {
+          error: laneConfig.error,
+          ok: false,
+        });
+        return true;
+      }
+      handleDeveloperOpsPackRequest(response, laneConfig.lane, {
         includeBody,
       });
       return true;

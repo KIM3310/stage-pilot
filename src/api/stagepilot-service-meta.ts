@@ -9,6 +9,8 @@ export const STAGEPILOT_PLAN_REPORT_SCHEMA = "stagepilot-plan-report-v1";
 export const STAGEPILOT_REVIEW_PACK_ID = "stagepilot-review-pack-v1";
 export const STAGEPILOT_BENCHMARK_SUMMARY_SCHEMA =
   "stagepilot-benchmark-summary-v1";
+export const STAGEPILOT_RUNTIME_SCORECARD_SCHEMA =
+  "stagepilot-runtime-scorecard-v1";
 
 function buildStagePilotProofAssets() {
   return [
@@ -93,6 +95,12 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
       method: "GET",
       path: "/v1/review-pack",
       purpose: "Benchmark-backed reviewer proof pack",
+    },
+    {
+      method: "GET",
+      path: "/v1/runtime-scorecard",
+      purpose:
+        "Operational scorecard for live traffic, route pressure, and benchmark-backed readiness",
     },
     {
       method: "GET",
@@ -220,6 +228,7 @@ export function buildStagePilotRuntimeBrief(options: {
       meta: "/v1/meta",
       runtimeBrief: "/v1/runtime-brief",
       reviewPack: "/v1/review-pack",
+      runtimeScorecard: "/v1/runtime-scorecard",
       benchmarkSummary: "/v1/benchmark-summary",
       planSchema: "/v1/schema/plan-report",
     },
@@ -300,6 +309,98 @@ export function buildStagePilotBenchmarkSummary(options: {
       benchmark: "/v1/benchmark",
       benchmarkSummary: "/v1/benchmark-summary",
       runtimeBrief: "/v1/runtime-brief",
+      runtimeScorecard: "/v1/runtime-scorecard",
+    },
+  };
+}
+
+export function buildStagePilotRuntimeScorecard(options: {
+  benchmarkSnapshot: StagePilotBenchmarkSnapshot;
+  bodyTimeoutMs: number;
+  geminiHasApiKey: boolean;
+  openClawConfigured: boolean;
+  runtimeTelemetry: {
+    errorCount: number;
+    lastErrorAt: string | null;
+    lastRequestAt: string | null;
+    requestCount: number;
+    routeCounts: Array<{
+      count: number;
+      path: string;
+    }>;
+  };
+  service: string;
+}) {
+  const strategies = buildStrategyRows(options.benchmarkSnapshot).sort(
+    (left, right) => (right.successRate ?? 0) - (left.successRate ?? 0)
+  );
+  const topStrategy = strategies[0] ?? null;
+  const weakestStrategy = strategies.at(-1) ?? null;
+  const traffic =
+    options.runtimeTelemetry.requestCount > 0
+      ? {
+          errorRatePct:
+            Math.round(
+              (options.runtimeTelemetry.errorCount /
+                options.runtimeTelemetry.requestCount) *
+                10_000
+            ) / 100,
+          routeCounts: options.runtimeTelemetry.routeCounts,
+        }
+      : {
+          errorRatePct: 0,
+          routeCounts: [],
+        };
+
+  return {
+    service: options.service,
+    status: "ok",
+    generatedAt: new Date().toISOString(),
+    schema: STAGEPILOT_RUNTIME_SCORECARD_SCHEMA,
+    runtime: {
+      bodyTimeoutMs: options.bodyTimeoutMs,
+      integrationsReady: options.geminiHasApiKey && options.openClawConfigured,
+      geminiReady: options.geminiHasApiKey,
+      openClawReady: options.openClawConfigured,
+      routeCount: buildStagePilotRouteDescriptors().length,
+    },
+    traffic: {
+      requestCount: options.runtimeTelemetry.requestCount,
+      errorCount: options.runtimeTelemetry.errorCount,
+      lastRequestAt: options.runtimeTelemetry.lastRequestAt,
+      lastErrorAt: options.runtimeTelemetry.lastErrorAt,
+      errorRatePct: traffic.errorRatePct,
+      routeCounts: traffic.routeCounts,
+    },
+    benchmark: {
+      caseCount: options.benchmarkSnapshot.caseCount,
+      generatedAt: options.benchmarkSnapshot.generatedAt,
+      topStrategy,
+      weakestStrategy,
+      readyForPromotion:
+        Boolean(options.geminiHasApiKey && options.openClawConfigured) &&
+        typeof topStrategy?.successRate === "number" &&
+        topStrategy.successRate >= 80,
+    },
+    recommendations: [
+      options.geminiHasApiKey
+        ? "Gemini readiness is present. Validate fresh planning runs after any prompt or parser change."
+        : "Configure GEMINI_API_KEY to move from deterministic review surfaces to live synthesis validation.",
+      options.openClawConfigured
+        ? "OpenClaw delivery is configured. Keep notify as a final operator-confirmed step."
+        : "Configure OpenClaw delivery before claiming end-to-end orchestration readiness.",
+      options.runtimeTelemetry.errorCount > 0
+        ? "Investigate failing routes before promoting the service as a stable operator loop."
+        : "Runtime errors are currently absent in this process. Keep benchmark and live plan checks paired.",
+    ],
+    links: {
+      health: "/health",
+      meta: "/v1/meta",
+      runtimeBrief: "/v1/runtime-brief",
+      reviewPack: "/v1/review-pack",
+      runtimeScorecard: "/v1/runtime-scorecard",
+      benchmarkSummary: "/v1/benchmark-summary",
+      planSchema: "/v1/schema/plan-report",
     },
   };
 }
@@ -385,6 +486,7 @@ export function buildStagePilotReviewPack(options: {
     proofBundle: {
       benchmark: options.benchmarkSnapshot,
       benchmarkSummarySchema: STAGEPILOT_BENCHMARK_SUMMARY_SCHEMA,
+      runtimeScorecardSchema: STAGEPILOT_RUNTIME_SCORECARD_SCHEMA,
       integrationsReady: options.geminiHasApiKey && options.openClawConfigured,
       model: options.model,
       openClawHasWebhookUrl: options.openClawHasWebhookUrl,
@@ -399,6 +501,7 @@ export function buildStagePilotReviewPack(options: {
       meta: "/v1/meta",
       runtimeBrief: "/v1/runtime-brief",
       reviewPack: "/v1/review-pack",
+      runtimeScorecard: "/v1/runtime-scorecard",
       benchmarkSummary: "/v1/benchmark-summary",
       planSchema: "/v1/schema/plan-report",
       benchmark: "/v1/benchmark",

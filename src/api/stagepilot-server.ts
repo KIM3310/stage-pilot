@@ -639,12 +639,16 @@ function buildReviewPackPayload(): JsonObject {
   });
 }
 
-function buildBenchmarkSummaryPayload(minSuccessRate?: number): JsonObject {
+function buildBenchmarkSummaryPayload(
+  minSuccessRate?: number,
+  strategy?: string
+): JsonObject {
   const service = process.env.SERVICE_NAME_API ?? "stagepilot-api";
   return buildStagePilotBenchmarkSummary({
     benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
     minSuccessRate,
     service,
+    strategy,
   });
 }
 
@@ -1107,6 +1111,7 @@ function handleReviewPackRequest(
 function handleBenchmarkSummaryRequest(
   response: ServerResponse,
   minSuccessRate?: number,
+  strategy?: string,
   options?: {
     includeBody?: boolean;
   }
@@ -1114,7 +1119,7 @@ function handleBenchmarkSummaryRequest(
   sendJson(
     response,
     200,
-    buildBenchmarkSummaryPayload(minSuccessRate),
+    buildBenchmarkSummaryPayload(minSuccessRate, strategy),
     options
   );
 }
@@ -1536,10 +1541,15 @@ function handleReadonlyRequest(options: {
     case "/v1/benchmark-summary": {
       const parsed = new URL(rawUrl ?? "/", "http://127.0.0.1");
       const rawMinSuccessRate = parsed.searchParams.get("minSuccessRate");
+      const rawStrategy = parsed.searchParams.get("strategy");
       const minSuccessRate =
         rawMinSuccessRate === null
           ? undefined
           : Number.parseFloat(rawMinSuccessRate);
+      const strategy =
+        rawStrategy === null || rawStrategy.trim().length === 0
+          ? undefined
+          : rawStrategy.trim().toLowerCase();
       if (
         typeof minSuccessRate !== "undefined" &&
         (!Number.isFinite(minSuccessRate) || Number.isNaN(minSuccessRate))
@@ -1550,7 +1560,20 @@ function handleReadonlyRequest(options: {
         });
         return true;
       }
-      handleBenchmarkSummaryRequest(response, minSuccessRate, { includeBody });
+      if (
+        typeof strategy !== "undefined" &&
+        !["baseline", "middleware", "middleware+ralph-loop"].includes(strategy)
+      ) {
+        sendJson(response, 400, {
+          error:
+            "strategy must be baseline, middleware, or middleware+ralph-loop",
+          ok: false,
+        });
+        return true;
+      }
+      handleBenchmarkSummaryRequest(response, minSuccessRate, strategy, {
+        includeBody,
+      });
       return true;
     }
     case "/v1/schema/plan-report":

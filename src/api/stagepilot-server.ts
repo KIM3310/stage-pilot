@@ -35,12 +35,9 @@ import type {
   StagePilotResult,
 } from "../stagepilot/types";
 import {
-  getStagePilotAllowedRoles,
-  getStagePilotOperatorRoleHeaders,
-  hasRequiredStagePilotOperatorRole,
-  hasValidStagePilotOperatorToken,
-  isStagePilotOperatorAuthEnabled,
+  getStagePilotOperatorAuthStatus,
   requiresStagePilotOperatorToken,
+  validateStagePilotOperatorAccess,
 } from "./operator-access";
 import {
   appendStagePilotRuntimeEvent,
@@ -760,6 +757,7 @@ function buildRuntimeScorecardPayload(
   return {
     ...scorecard,
     persistence: {
+      backend: persisted.backend,
       enabled: persisted.enabled,
       path: persisted.path,
       persistedCount: persisted.persistedCount,
@@ -770,7 +768,8 @@ function buildRuntimeScorecardPayload(
     },
     workflowRuns,
     operatorAuth: {
-      enabled: isStagePilotOperatorAuthEnabled(),
+      enabled: getStagePilotOperatorAuthStatus().enabled,
+      mode: getStagePilotOperatorAuthStatus().mode,
       protectedRoutes: [
         "/v1/plan",
         "/v1/benchmark",
@@ -779,8 +778,10 @@ function buildRuntimeScorecardPayload(
         "/v1/notify",
         "/v1/openclaw/inbox",
       ],
-      roleHeaders: getStagePilotOperatorRoleHeaders(),
-      requiredRoles: getStagePilotAllowedRoles(),
+      acceptedHeaders: getStagePilotOperatorAuthStatus().acceptedHeaders,
+      roleHeaders: getStagePilotOperatorAuthStatus().roleHeaders,
+      requiredRoles: getStagePilotOperatorAuthStatus().requiredRoles,
+      oidc: getStagePilotOperatorAuthStatus().oidc,
     },
   };
 }
@@ -2004,27 +2005,19 @@ async function handleRequest(options: {
     return;
   }
 
-  if (
-    requiresStagePilotOperatorToken(method, pathname) &&
-    !hasValidStagePilotOperatorToken(request)
-  ) {
-    sendJson(response, 403, {
-      error: "missing or invalid operator token",
-      ok: false,
-      path: pathname,
-    });
-    return;
-  }
-  if (
-    requiresStagePilotOperatorToken(method, pathname) &&
-    !hasRequiredStagePilotOperatorRole(request)
-  ) {
-    sendJson(response, 403, {
-      error: "missing required operator role",
-      ok: false,
-      path: pathname,
-    });
-    return;
+  if (requiresStagePilotOperatorToken(method, pathname)) {
+    const authResult = await validateStagePilotOperatorAccess(request);
+    if (!authResult.ok) {
+      sendJson(response, 403, {
+        error:
+          authResult.reason === "missing-role"
+            ? "missing required operator role"
+            : "missing or invalid operator credential",
+        ok: false,
+        path: pathname,
+      });
+      return;
+    }
   }
 
   if (

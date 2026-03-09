@@ -1,5 +1,6 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
 import path from "node:path";
+import { DatabaseSync } from "node:sqlite";
 
 export interface StagePilotRuntimeEvent {
   method: string;
@@ -9,6 +10,9 @@ export interface StagePilotRuntimeEvent {
   timestamp: string;
 }
 
+type RuntimeStoreBackend = "jsonl" | "sqlite";
+type WorkflowLane = "merge-request" | "pipeline-recovery" | "release-governor";
+
 function resolveStorePath(): string {
   const configured = String(
     process.env.STAGEPILOT_RUNTIME_STORE_PATH || ""
@@ -16,25 +20,59 @@ function resolveStorePath(): string {
   if (configured) {
     return path.resolve(configured);
   }
-  return path.join(
-    process.cwd(),
-    ".runtime",
-    "stagepilot-runtime-events.jsonl"
-  );
+  return path.join(process.cwd(), ".runtime", "stagepilot-runtime-events.db");
 }
 
-export function appendStagePilotRuntimeEvent(
-  event: StagePilotRuntimeEvent
-): void {
-  const targetPath = resolveStorePath();
+function resolveStoreBackend(targetPath: string): RuntimeStoreBackend {
+  const configured = String(process.env.STAGEPILOT_RUNTIME_STORE_BACKEND || "")
+    .trim()
+    .toLowerCase();
+  if (configured === "jsonl" || configured === "sqlite") {
+    return configured;
+  }
+  return targetPath.endsWith(".jsonl") ? "jsonl" : "sqlite";
+}
+
+function ensureSqliteStore(targetPath: string): DatabaseSync {
   mkdirSync(path.dirname(targetPath), { recursive: true });
-  appendFileSync(targetPath, `${JSON.stringify(event)}\n`, "utf8");
+  const database = new DatabaseSync(targetPath);
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS runtime_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      timestamp TEXT NOT NULL,
+      method TEXT NOT NULL,
+      path TEXT NOT NULL,
+      status_code INTEGER NOT NULL,
+      request_id TEXT
+    );
+    CREATE INDEX IF NOT EXISTS idx_stagepilot_runtime_events_timestamp
+      ON runtime_events(timestamp DESC);
+    CREATE INDEX IF NOT EXISTS idx_stagepilot_runtime_events_path
+      ON runtime_events(path);
+  `);
+  return database;
 }
 
-export function buildStagePilotRuntimeStoreSummary(limit = 25) {
-  const targetPath = resolveStorePath();
+function laneForPath(pathname: string): WorkflowLane | null {
+  switch (pathname) {
+    case "/v1/plan":
+    case "/v1/insights":
+      return "merge-request";
+    case "/v1/benchmark":
+    case "/v1/whatif":
+      return "pipeline-recovery";
+    case "/v1/notify":
+    case "/v1/openclaw/inbox":
+      return "release-governor";
+    default:
+      return null;
+  }
+}
+
+function buildJsonlSummary(targetPath: string, limit: number) {
   if (!existsSync(targetPath)) {
     return {
+      backend: "jsonl" as const,
       enabled: true,
       path: targetPath,
       persistedCount: 0,
@@ -88,6 +126,7 @@ export function buildStagePilotRuntimeStoreSummary(limit = 25) {
   }
 
   return {
+    backend: "jsonl" as const,
     enabled: true,
     path: targetPath,
     persistedCount: lines.length,
@@ -98,41 +137,154 @@ export function buildStagePilotRuntimeStoreSummary(limit = 25) {
   };
 }
 
-type WorkflowLane = "merge-request" | "pipeline-recovery" | "release-governor";
+function buildSqliteSummary(targetPath: string, limit: number) {
+  const database = ensureSqliteStore(targetPath);
+  const countRow = database
+    .prepare(
+      "SELECT COUNT(*) as count, MAX(timestamp) as last_event_at FROM runtime_events"
+    )
+    .get() as { count?: number; last_event_at?: string | null };
+  const methodRows = database
+    .prepare(
+      "SELECT method, COUNT(*) as count FROM runtime_events GROUP BY method ORDER BY method ASC"
+    )
+    .all() as Array<{ count?: number; method?: string }>;
+  const statusRow = database
+    .prepare(
+      `SELECT
+        SUM(CASE WHEN status_code < 400 THEN 1 ELSE 0 END) as ok,
+        SUM(CASE WHEN status_code >= 400 AND status_code < 500 THEN 1 ELSE 0 END) as client_error,
+        SUM(CASE WHEN status_code >= 500 THEN 1 ELSE 0 END) as server_error
+      FROM runtime_events`
+    )
+    .get() as {
+    client_error?: number;
+    ok?: number;
+    server_error?: number;
+  };
+  const recentEvents = database
+    .prepare(
+      `SELECT
+        method,
+        path,
+        request_id as requestId,
+        status_code as statusCode,
+        timestamp
+      FROM runtime_events
+      ORDER BY id DESC
+      LIMIT ?`
+    )
+    .all(Math.max(1, limit))
+    .map((row) => ({
+      method: String(row.method || ""),
+      path: String(row.path || ""),
+      requestId: row.requestId ? String(row.requestId) : undefined,
+      statusCode: Number(row.statusCode || 0),
+      timestamp: String(row.timestamp || ""),
+    })) satisfies StagePilotRuntimeEvent[];
 
-function laneForPath(pathname: string): WorkflowLane | null {
-  switch (pathname) {
-    case "/v1/plan":
-    case "/v1/insights":
-      return "merge-request";
-    case "/v1/benchmark":
-    case "/v1/whatif":
-      return "pipeline-recovery";
-    case "/v1/notify":
-    case "/v1/openclaw/inbox":
-      return "release-governor";
-    default:
-      return null;
-  }
+  return {
+    backend: "sqlite" as const,
+    enabled: true,
+    path: targetPath,
+    persistedCount: Number(countRow.count || 0),
+    lastEventAt: countRow.last_event_at || null,
+    methodCounts: Object.fromEntries(
+      methodRows.map((row) => [
+        String(row.method || "UNKNOWN").toUpperCase(),
+        Number(row.count || 0),
+      ])
+    ),
+    statusClasses: {
+      ok: Number(statusRow.ok || 0),
+      clientError: Number(statusRow.client_error || 0),
+      serverError: Number(statusRow.server_error || 0),
+    },
+    recentEvents: recentEvents.reverse(),
+  };
 }
 
-function readRuntimeEvents(): StagePilotRuntimeEvent[] {
+function readAllRuntimeEvents(): StagePilotRuntimeEvent[] {
   const targetPath = resolveStorePath();
-  if (!existsSync(targetPath)) {
-    return [];
+  const backend = resolveStoreBackend(targetPath);
+
+  if (backend === "jsonl") {
+    if (!existsSync(targetPath)) {
+      return [];
+    }
+    return readFileSync(targetPath, "utf8")
+      .split("\n")
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        try {
+          return JSON.parse(line) as StagePilotRuntimeEvent;
+        } catch {
+          return null;
+        }
+      })
+      .filter((item): item is StagePilotRuntimeEvent => item !== null);
   }
-  return readFileSync(targetPath, "utf8")
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      try {
-        return JSON.parse(line) as StagePilotRuntimeEvent;
-      } catch {
-        return null;
-      }
-    })
-    .filter((item): item is StagePilotRuntimeEvent => item !== null);
+
+  const database = ensureSqliteStore(targetPath);
+  return database
+    .prepare(
+      `SELECT
+        method,
+        path,
+        request_id as requestId,
+        status_code as statusCode,
+        timestamp
+      FROM runtime_events
+      ORDER BY id ASC`
+    )
+    .all()
+    .map((row) => ({
+      method: String(row.method || ""),
+      path: String(row.path || ""),
+      requestId: row.requestId ? String(row.requestId) : undefined,
+      statusCode: Number(row.statusCode || 0),
+      timestamp: String(row.timestamp || ""),
+    })) satisfies StagePilotRuntimeEvent[];
+}
+
+export function appendStagePilotRuntimeEvent(
+  event: StagePilotRuntimeEvent
+): void {
+  const targetPath = resolveStorePath();
+  const backend = resolveStoreBackend(targetPath);
+  if (backend === "jsonl") {
+    mkdirSync(path.dirname(targetPath), { recursive: true });
+    appendFileSync(targetPath, `${JSON.stringify(event)}\n`, "utf8");
+    return;
+  }
+
+  const database = ensureSqliteStore(targetPath);
+  database
+    .prepare(
+      `INSERT INTO runtime_events (
+        timestamp,
+        method,
+        path,
+        status_code,
+        request_id
+      ) VALUES (?, ?, ?, ?, ?)`
+    )
+    .run(
+      event.timestamp,
+      event.method,
+      event.path,
+      event.statusCode,
+      event.requestId ?? null
+    );
+}
+
+export function buildStagePilotRuntimeStoreSummary(limit = 25) {
+  const targetPath = resolveStorePath();
+  const backend = resolveStoreBackend(targetPath);
+  return backend === "jsonl"
+    ? buildJsonlSummary(targetPath, limit)
+    : buildSqliteSummary(targetPath, limit);
 }
 
 export function buildStagePilotWorkflowRunList(options?: {
@@ -141,7 +293,7 @@ export function buildStagePilotWorkflowRunList(options?: {
 }) {
   const limit = Math.max(1, Math.min(Math.trunc(options?.limit ?? 10), 25));
   const laneFilter = options?.lane;
-  const events = readRuntimeEvents().filter((event) => {
+  const events = readAllRuntimeEvents().filter((event) => {
     if (event.method.toUpperCase() !== "POST") {
       return false;
     }
@@ -189,7 +341,7 @@ export function buildStagePilotWorkflowRunList(options?: {
 }
 
 export function buildStagePilotWorkflowRunDetail(requestId: string) {
-  const events = readRuntimeEvents()
+  const events = readAllRuntimeEvents()
     .filter((event) => event.requestId === requestId)
     .sort((left, right) => left.timestamp.localeCompare(right.timestamp));
   if (events.length === 0) {

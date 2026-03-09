@@ -14,6 +14,7 @@ Core routes:
 - `/v1/runtime-brief`
 - `/v1/runtime-scorecard`
 - `/v1/developer-ops-pack`
+- `/v1/workflow-runs`
 - `/v1/benchmark-summary`
 - `/v1/review-pack`
 - `/v1/schema/plan-report`

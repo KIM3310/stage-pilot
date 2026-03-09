@@ -50,9 +50,9 @@
 
 This repo keeps attribution explicit while treating `stage-pilot` as the canonical working surface for new development.
 
-## Hackathon context
+## Project context
 
-Built at the Gemini 3 Seoul Hackathon with a focus on tool-calling reliability, benchmarked success-rate improvement, and operational handoff readiness.
+This repo focuses on tool-calling reliability, benchmarked success-rate improvement, and operational handoff readiness.
 
 If API integration is needed, you can connect and use it immediately through the provided API endpoints (`/v1/plan`, `/v1/benchmark`, `/v1/insights`, `/v1/whatif`, `/v1/notify`), either locally or on Cloud Run.
 

@@ -35,6 +35,7 @@ import type {
 } from "../stagepilot/types";
 import { renderStagePilotDemoHtml } from "./stagepilot-demo";
 import {
+  buildStagePilotBenchmarkSummary,
   buildStagePilotPlanReportSchema,
   buildStagePilotReviewPack,
   buildStagePilotRouteDescriptors,
@@ -638,6 +639,15 @@ function buildReviewPackPayload(): JsonObject {
   });
 }
 
+function buildBenchmarkSummaryPayload(minSuccessRate?: number): JsonObject {
+  const service = process.env.SERVICE_NAME_API ?? "stagepilot-api";
+  return buildStagePilotBenchmarkSummary({
+    benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
+    minSuccessRate,
+    service,
+  });
+}
+
 function buildPlanReportSchemaPayload(): JsonObject {
   return {
     service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
@@ -1094,6 +1104,21 @@ function handleReviewPackRequest(
   sendJson(response, 200, buildReviewPackPayload(), options);
 }
 
+function handleBenchmarkSummaryRequest(
+  response: ServerResponse,
+  minSuccessRate?: number,
+  options?: {
+    includeBody?: boolean;
+  }
+) {
+  sendJson(
+    response,
+    200,
+    buildBenchmarkSummaryPayload(minSuccessRate),
+    options
+  );
+}
+
 function handleDemoRequest(
   response: ServerResponse,
   options?: { includeBody?: boolean }
@@ -1483,9 +1508,10 @@ async function handleOpenClawInboxRequest(options: {
 function handleReadonlyRequest(options: {
   method: string;
   pathname: string;
+  rawUrl?: string;
   response: ServerResponse;
 }) {
-  const { method, pathname, response } = options;
+  const { method, pathname, rawUrl, response } = options;
   if (method !== "GET" && method !== "HEAD") {
     return false;
   }
@@ -1507,6 +1533,26 @@ function handleReadonlyRequest(options: {
     case "/v1/review-pack":
       handleReviewPackRequest(response, { includeBody });
       return true;
+    case "/v1/benchmark-summary": {
+      const parsed = new URL(rawUrl ?? "/", "http://127.0.0.1");
+      const rawMinSuccessRate = parsed.searchParams.get("minSuccessRate");
+      const minSuccessRate =
+        rawMinSuccessRate === null
+          ? undefined
+          : Number.parseFloat(rawMinSuccessRate);
+      if (
+        typeof minSuccessRate !== "undefined" &&
+        (!Number.isFinite(minSuccessRate) || Number.isNaN(minSuccessRate))
+      ) {
+        sendJson(response, 400, {
+          error: "minSuccessRate must be a finite number",
+          ok: false,
+        });
+        return true;
+      }
+      handleBenchmarkSummaryRequest(response, minSuccessRate, { includeBody });
+      return true;
+    }
     case "/v1/schema/plan-report":
       handlePlanReportSchemaRequest(response, { includeBody });
       return true;
@@ -1623,7 +1669,9 @@ async function handleRequest(options: {
   const method = request.method ?? "GET";
   const { pathname } = parseRequestUrl(request.url);
 
-  if (handleReadonlyRequest({ method, pathname, response })) {
+  if (
+    handleReadonlyRequest({ method, pathname, rawUrl: request.url, response })
+  ) {
     return;
   }
 

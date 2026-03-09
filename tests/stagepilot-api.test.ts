@@ -1052,6 +1052,75 @@ describe("stagepilot api server", () => {
     expect(scorecardBody.operatorAuth.roleHeaders).toContain("x-operator-role");
   });
 
+  it("boots an operator session cookie and reuses it for protected mutation routes", async () => {
+    process.env.STAGEPILOT_OPERATOR_TOKEN = "stagepilot-session-secret";
+    process.env.STAGEPILOT_OPERATOR_ALLOWED_ROLES = "release-manager";
+
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const sessionResponse = await fetch(`${baseUrl}/v1/auth/session`, {
+      body: JSON.stringify({
+        authMode: "token",
+        credential: "stagepilot-session-secret",
+        roles: ["release-manager"],
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    });
+    const sessionCookie = String(
+      sessionResponse.headers.get("set-cookie") || ""
+    )
+      .split(";")[0]
+      .trim();
+    const sessionBody = (await sessionResponse.json()) as {
+      active: boolean;
+      session: { roles: string[] };
+    };
+
+    expect(sessionResponse.status).toBe(200);
+    expect(sessionCookie).toContain("stagepilot_operator_session=");
+    expect(sessionBody.active).toBe(true);
+    expect(sessionBody.session.roles).toContain("release-manager");
+
+    const planned = await fetch(`${baseUrl}/v1/plan`, {
+      body: JSON.stringify({
+        caseId: "api-session-001",
+        district: "Mapo-gu",
+        notes: "Need food and rent support after missed shifts.",
+        risks: ["food", "income"],
+      }),
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: sessionCookie,
+      },
+      method: "POST",
+    });
+    expect(planned.status).toBe(200);
+
+    const currentSession = await fetch(`${baseUrl}/v1/auth/session`, {
+      headers: {
+        Cookie: sessionCookie,
+      },
+    });
+    const currentSessionBody = (await currentSession.json()) as {
+      active: boolean;
+      validation: { ok: boolean };
+    };
+    expect(currentSession.status).toBe(200);
+    expect(currentSessionBody.active).toBe(true);
+    expect(currentSessionBody.validation.ok).toBe(true);
+
+    const cleared = await fetch(`${baseUrl}/v1/auth/session`, {
+      method: "DELETE",
+    });
+    expect(cleared.status).toBe(200);
+    expect(cleared.headers.get("set-cookie")).toContain("Max-Age=0");
+  });
+
   it("accepts OIDC bearer tokens with required roles for mutation routes", async () => {
     delete process.env[OPERATOR_TOKEN_ENV_KEY];
     process.env[OPERATOR_ROLES_ENV_KEY] = "release-manager";

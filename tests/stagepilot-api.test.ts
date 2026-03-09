@@ -494,6 +494,7 @@ describe("stagepilot api server", () => {
       headline: string;
       links: {
         developerOpsPack: string;
+        workflowRuns: string;
       };
       readinessContract: string;
       reportContract: {
@@ -510,6 +511,7 @@ describe("stagepilot api server", () => {
     expect(body.routeCount).toBeGreaterThanOrEqual(10);
     expect(body.headline).toContain("orchestration");
     expect(body.links.developerOpsPack).toBe("/v1/developer-ops-pack");
+    expect(body.links.workflowRuns).toBe("/v1/workflow-runs");
   });
 
   it("returns runtime scorecard with live route telemetry", async () => {
@@ -533,6 +535,7 @@ describe("stagepilot api server", () => {
       links: {
         runtimeScorecard: string;
       };
+      live?: never;
       recommendations: string[];
       runtime: {
         integrationsReady: boolean;
@@ -545,6 +548,18 @@ describe("stagepilot api server", () => {
           path: string;
         }>;
       };
+      persistence: {
+        enabled: boolean;
+        methodCounts: Record<string, number>;
+        persistedCount: number;
+        statusClasses: { ok: number };
+      };
+      workflowRuns: {
+        schema: string;
+      };
+      operatorAuth: {
+        enabled: boolean;
+      };
     };
 
     expect(body.schema).toBe("stagepilot-runtime-scorecard-v1");
@@ -555,6 +570,7 @@ describe("stagepilot api server", () => {
     expect(typeof body.persistence.persistedCount).toBe("number");
     expect(body.persistence.methodCounts.GET).toBeGreaterThanOrEqual(1);
     expect(body.persistence.statusClasses.ok).toBeGreaterThanOrEqual(1);
+    expect(body.workflowRuns.schema).toBe("stagepilot-workflow-runs-v1");
     expect(body.operatorAuth.enabled).toBe(false);
     expect(body.traffic.routeCounts).toEqual(
       expect.arrayContaining([
@@ -582,6 +598,7 @@ describe("stagepilot api server", () => {
         benchmarkSummary: string;
         developerOpsPack: string;
         reviewPack: string;
+        workflowRuns: string;
       };
       operatorJourney: Array<{ stage: string }>;
       proofAssets: Array<{ label: string }>;
@@ -610,6 +627,7 @@ describe("stagepilot api server", () => {
       body.proofBundle.benchmark.improvements.loopVsBaseline
     ).toBeGreaterThan(50);
     expect(body.links.developerOpsPack).toBe("/v1/developer-ops-pack");
+    expect(body.links.workflowRuns).toBe("/v1/workflow-runs");
     expect(body.links.benchmarkSummary).toBe("/v1/benchmark-summary");
     expect(body.proofBundle.benchmarkSummarySchema).toBe(
       "stagepilot-benchmark-summary-v1"
@@ -689,8 +707,83 @@ describe("stagepilot api server", () => {
     expect(body.lane).toBe("release-governor");
     expect(body.selectedLane.operatorFlow.length).toBeGreaterThanOrEqual(3);
     expect(body.proofRoutes).toContain("/v1/developer-ops-pack");
+    expect(body.proofRoutes).toContain("/v1/workflow-runs");
     expect(body.links.developerOpsPack).toBe("/v1/developer-ops-pack");
+    expect(body.links.workflowRuns).toBe("/v1/workflow-runs");
     expect(body.reviewerNotes.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("returns workflow run history for developer workflow replay", async () => {
+    const { baseUrl } = await startServer({
+      benchmarkRunner: () =>
+        Promise.resolve({
+          caseCount: 2,
+          generatedAt: "2026-02-28T00:00:00.000Z",
+          improvements: {
+            loopVsBaseline: 20,
+            loopVsMiddleware: 10,
+            middlewareVsBaseline: 10,
+          },
+          seed: 1,
+          strategies: [],
+        }),
+      engine: new StagePilotEngine(),
+    });
+
+    await fetch(`${baseUrl}/v1/plan`, {
+      body: JSON.stringify({
+        caseId: "workflow-001",
+        district: "Gangbuk-gu",
+        notes: "Needs triage",
+        risks: ["food"],
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    });
+
+    const benchmark = await fetch(`${baseUrl}/v1/benchmark`, {
+      body: JSON.stringify({ caseCount: 2 }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+    });
+    const benchmarkRequestId = benchmark.headers.get("x-request-id");
+    expect(benchmarkRequestId).toBeTruthy();
+
+    const list = await fetch(
+      `${baseUrl}/v1/workflow-runs?lane=pipeline-recovery`
+    );
+    expect(list.status).toBe(200);
+    const listBody = (await list.json()) as {
+      items: Array<{ requestId: string | null }>;
+      schema: string;
+      summary: { totalRuns: number };
+    };
+    expect(listBody.schema).toBe("stagepilot-workflow-runs-v1");
+    expect(listBody.summary.totalRuns).toBeGreaterThanOrEqual(1);
+    expect(
+      listBody.items.some((item) => item.requestId === benchmarkRequestId)
+    ).toBe(true);
+
+    const detail = await fetch(
+      `${baseUrl}/v1/workflow-runs/${benchmarkRequestId}`
+    );
+    expect(detail.status).toBe(200);
+    const detailBody = (await detail.json()) as {
+      lane: string | null;
+      links: { workflowRuns: string };
+      schema: string;
+      timeline: Array<{ path: string }>;
+    };
+    expect(detailBody.schema).toBe("stagepilot-workflow-run-detail-v1");
+    expect(detailBody.lane).toBe("pipeline-recovery");
+    expect(
+      detailBody.timeline.some((item) => item.path === "/v1/benchmark")
+    ).toBe(true);
+    expect(detailBody.links.workflowRuns).toBe("/v1/workflow-runs");
   });
 
   it("rejects invalid benchmark summary filter", async () => {
@@ -719,6 +812,22 @@ describe("stagepilot api server", () => {
     const response = await fetch(
       `${baseUrl}/v1/developer-ops-pack?lane=invalid`
     );
+    expect(response.status).toBe(400);
+
+    const body = (await response.json()) as {
+      error: string;
+      ok: boolean;
+    };
+    expect(body.ok).toBe(false);
+    expect(body.error).toContain("lane");
+  });
+
+  it("rejects invalid workflow runs lane", async () => {
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const response = await fetch(`${baseUrl}/v1/workflow-runs?lane=invalid`);
     expect(response.status).toBe(400);
 
     const body = (await response.json()) as {

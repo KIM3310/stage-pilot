@@ -40,6 +40,7 @@ import {
   buildStagePilotReviewPack,
   buildStagePilotRouteDescriptors,
   buildStagePilotRuntimeBrief,
+  buildStagePilotRuntimeScorecard,
   type StagePilotRouteDescriptor,
 } from "./stagepilot-service-meta";
 
@@ -78,6 +79,14 @@ type TwinSimulator = (options: {
   result: StagePilotResult;
   scenario?: StagePilotTwinScenarioInput;
 }) => StagePilotTwinResult;
+
+interface StagePilotRuntimeTelemetry {
+  errorCount: number;
+  lastErrorAt: string | null;
+  lastRequestAt: string | null;
+  requestCount: number;
+  routeCounts: Map<string, number>;
+}
 
 interface NotifyRequestOptions {
   dryRun?: boolean;
@@ -416,6 +425,33 @@ function buildRouteDescriptors(): StagePilotRouteDescriptor[] {
   return buildStagePilotRouteDescriptors();
 }
 
+function createRuntimeTelemetry(): StagePilotRuntimeTelemetry {
+  return {
+    errorCount: 0,
+    lastErrorAt: null,
+    lastRequestAt: null,
+    requestCount: 0,
+    routeCounts: new Map(),
+  };
+}
+
+function recordRuntimeTelemetry(
+  telemetry: StagePilotRuntimeTelemetry,
+  pathname: string,
+  statusCode: number
+): void {
+  telemetry.requestCount += 1;
+  telemetry.lastRequestAt = new Date().toISOString();
+  telemetry.routeCounts.set(
+    pathname,
+    (telemetry.routeCounts.get(pathname) ?? 0) + 1
+  );
+  if (statusCode >= 400) {
+    telemetry.errorCount += 1;
+    telemetry.lastErrorAt = telemetry.lastRequestAt;
+  }
+}
+
 function buildMetaPayload(): JsonObject {
   const geminiTimeoutMs = readGeminiHttpTimeoutMs(
     process.env.GEMINI_HTTP_TIMEOUT_MS
@@ -649,6 +685,36 @@ function buildBenchmarkSummaryPayload(
     minSuccessRate,
     service,
     strategy,
+  });
+}
+
+function buildRuntimeScorecardPayload(
+  telemetry: StagePilotRuntimeTelemetry
+): JsonObject {
+  return buildStagePilotRuntimeScorecard({
+    benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
+    bodyTimeoutMs: readBodyTimeoutMs(
+      process.env.STAGEPILOT_REQUEST_BODY_TIMEOUT_MS
+    ),
+    geminiHasApiKey:
+      typeof process.env.GEMINI_API_KEY === "string" &&
+      process.env.GEMINI_API_KEY.trim().length > 0,
+    openClawConfigured:
+      Boolean(toNonEmptyString(process.env.OPENCLAW_WEBHOOK_URL)) ||
+      Boolean(toNonEmptyString(process.env.OPENCLAW_CMD)),
+    runtimeTelemetry: {
+      errorCount: telemetry.errorCount,
+      lastErrorAt: telemetry.lastErrorAt,
+      lastRequestAt: telemetry.lastRequestAt,
+      requestCount: telemetry.requestCount,
+      routeCounts: [...telemetry.routeCounts.entries()]
+        .map(([path, count]) => ({ path, count }))
+        .sort(
+          (left, right) =>
+            right.count - left.count || left.path.localeCompare(right.path)
+        ),
+    },
+    service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
   });
 }
 
@@ -1124,6 +1190,16 @@ function handleBenchmarkSummaryRequest(
   );
 }
 
+function handleRuntimeScorecardRequest(
+  response: ServerResponse,
+  telemetry: StagePilotRuntimeTelemetry,
+  options?: {
+    includeBody?: boolean;
+  }
+) {
+  sendJson(response, 200, buildRuntimeScorecardPayload(telemetry), options);
+}
+
 function handleDemoRequest(
   response: ServerResponse,
   options?: { includeBody?: boolean }
@@ -1515,8 +1591,9 @@ function handleReadonlyRequest(options: {
   pathname: string;
   rawUrl?: string;
   response: ServerResponse;
+  telemetry: StagePilotRuntimeTelemetry;
 }) {
-  const { method, pathname, rawUrl, response } = options;
+  const { method, pathname, rawUrl, response, telemetry } = options;
   if (method !== "GET" && method !== "HEAD") {
     return false;
   }
@@ -1537,6 +1614,9 @@ function handleReadonlyRequest(options: {
       return true;
     case "/v1/review-pack":
       handleReviewPackRequest(response, { includeBody });
+      return true;
+    case "/v1/runtime-scorecard":
+      handleRuntimeScorecardRequest(response, telemetry, { includeBody });
       return true;
     case "/v1/benchmark-summary": {
       const parsed = new URL(rawUrl ?? "/", "http://127.0.0.1");
@@ -1677,6 +1757,7 @@ async function handleRequest(options: {
   openClawNotifier: StagePilotOpenClawNotifier;
   request: IncomingMessage;
   response: ServerResponse;
+  telemetry: StagePilotRuntimeTelemetry;
   twinSimulator: TwinSimulator;
 }) {
   const {
@@ -1687,13 +1768,23 @@ async function handleRequest(options: {
     openClawNotifier,
     request,
     response,
+    telemetry,
     twinSimulator,
   } = options;
   const method = request.method ?? "GET";
   const { pathname } = parseRequestUrl(request.url);
+  response.once("finish", () => {
+    recordRuntimeTelemetry(telemetry, pathname, response.statusCode);
+  });
 
   if (
-    handleReadonlyRequest({ method, pathname, rawUrl: request.url, response })
+    handleReadonlyRequest({
+      method,
+      pathname,
+      rawUrl: request.url,
+      response,
+      telemetry,
+    })
   ) {
     return;
   }
@@ -1745,6 +1836,7 @@ export function createStagePilotApiServer(
     options.openClawNotifier ?? createStagePilotOpenClawNotifierFromEnv();
   const twinSimulator: TwinSimulator = simulateStagePilotTwin;
   const logger = options.logger ?? console;
+  const telemetry = createRuntimeTelemetry();
 
   return createServer((request, response) => {
     const pending = handleRequest({
@@ -1755,6 +1847,7 @@ export function createStagePilotApiServer(
       openClawNotifier,
       request,
       response,
+      telemetry,
       twinSimulator,
     });
     pending.catch((error) => {

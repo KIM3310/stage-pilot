@@ -1,6 +1,6 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
-import { DatabaseSync } from "node:sqlite";
 
 export interface StagePilotRuntimeEvent {
   method: string;
@@ -12,6 +12,33 @@ export interface StagePilotRuntimeEvent {
 
 type RuntimeStoreBackend = "jsonl" | "sqlite";
 type WorkflowLane = "merge-request" | "pipeline-recovery" | "release-governor";
+type SqliteRow = Record<string, unknown>;
+interface SqliteStatement {
+  all(...params: unknown[]): SqliteRow[];
+  get(...params: unknown[]): SqliteRow;
+  run(...params: unknown[]): void;
+}
+interface SqliteDatabase {
+  exec(sql: string): void;
+  prepare(sql: string): SqliteStatement;
+}
+type DatabaseSyncCtor = new (targetPath: string) => SqliteDatabase;
+
+const require = createRequire(import.meta.url);
+let cachedDatabaseSyncCtor: DatabaseSyncCtor | null | undefined;
+
+function getDatabaseSyncCtor(): DatabaseSyncCtor | null {
+  if (cachedDatabaseSyncCtor !== undefined) {
+    return cachedDatabaseSyncCtor;
+  }
+  try {
+    cachedDatabaseSyncCtor = require("node:sqlite")
+      .DatabaseSync as DatabaseSyncCtor;
+  } catch {
+    cachedDatabaseSyncCtor = null;
+  }
+  return cachedDatabaseSyncCtor;
+}
 
 function resolveStorePath(): string {
   const configured = String(
@@ -28,12 +55,21 @@ function resolveStoreBackend(targetPath: string): RuntimeStoreBackend {
     .trim()
     .toLowerCase();
   if (configured === "jsonl" || configured === "sqlite") {
-    return configured;
+    return configured === "sqlite" && getDatabaseSyncCtor() === null
+      ? "jsonl"
+      : configured;
   }
-  return targetPath.endsWith(".jsonl") ? "jsonl" : "sqlite";
+  const preferredBackend = targetPath.endsWith(".jsonl") ? "jsonl" : "sqlite";
+  return preferredBackend === "sqlite" && getDatabaseSyncCtor() === null
+    ? "jsonl"
+    : preferredBackend;
 }
 
-function ensureSqliteStore(targetPath: string): DatabaseSync {
+function ensureSqliteStore(targetPath: string): SqliteDatabase {
+  const DatabaseSync = getDatabaseSyncCtor();
+  if (DatabaseSync === null) {
+    throw new Error("node:sqlite is unavailable in this runtime");
+  }
   mkdirSync(path.dirname(targetPath), { recursive: true });
   const database = new DatabaseSync(targetPath);
   database.exec(`

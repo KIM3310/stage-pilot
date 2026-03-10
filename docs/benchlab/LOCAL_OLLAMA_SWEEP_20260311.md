@@ -71,3 +71,25 @@ Regression pilot controls live under:
 
 - `experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-gemma3-4b-3-minimal/`
 - `experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-qwen2-5-1-5b-3-minimal/`
+
+
+## Llama 3.2 latest follow-up variant hunt
+
+사용자 요청대로 **Llama 최신 로컬 라인(`llama3.2:latest`)** 에 대해 variant를 더 넓게 다시 돌렸습니다.
+
+### Search sweep (3 cases / category)
+
+| Variant | Baseline | RALPH | Delta (pp) | Outcome |
+|---|---:|---:|---:|---|
+| `schema-lock` | 7.50 | 8.33 | +0.83 | improved |
+| `parallel-safe` | 7.50 | 7.50 | +0.00 | flat |
+| `coverage` | 7.50 | 7.50 | +0.00 | flat |
+| `strict` | 7.50 | 7.50 | +0.00 | flat |
+| `call-count` | 7.50 | 7.50 | +0.00 | flat |
+| `compact` | 7.50 | 7.50 | +0.00 | flat |
+
+### Follow-up read
+
+- 현재 로컬 최신 Llama 라인에서는 `schema-lock`만 유의미한 gain을 만들었습니다.
+- `parallel-safe`, `coverage`, `strict`, `call-count`, `compact`는 이번 샘플에서는 모두 flat이었습니다.
+- 즉, 적어도 지금의 BFCL prompt-mode 범위에서는 **Llama 계열은 broad prompt보다 schema locking이 더 직접적인 이득**을 주는 쪽으로 보입니다.

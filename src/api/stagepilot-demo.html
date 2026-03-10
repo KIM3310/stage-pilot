@@ -1,49 +1,41 @@
-<!-- biome-ignore-all lint: this is a static judge demo template with inline script/style -->
+<!-- biome-ignore-all lint: static StagePilot reviewer console -->
 <!doctype html>
 <html lang="en">
 
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>StagePilot Judge Console</title>
+  <title>StagePilot Review Console</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
     rel="stylesheet" />
   <style>
     :root {
-      --bg-main: #0B0E14;
-      /* Deep dark blue/black */
-      --bg-panel: rgba(18, 23, 34, 0.65);
-      /* Glass panel */
-      --bg-card: rgba(26, 33, 48, 0.5);
-      /* Glass card */
-      --ink: #F0F4F8;
-      /* Light text */
-      --ink-muted: #8B9BB4;
-      /* Muted text */
-      --line: rgba(255, 255, 255, 0.08);
-      /* Subtle border */
-      --primary: #00E5FF;
-      /* Cyan accent */
-      --primary-glow: rgba(0, 229, 255, 0.3);
-      --secondary: #B084E6;
-      /* Purple accent */
-      --warn: #FFB347;
-      /* Orange/Yellow */
-      --warn-soft: rgba(255, 179, 71, 0.15);
-      --ok: #00E676;
-      /* Green */
-      --ok-soft: rgba(0, 230, 118, 0.15);
-      --bad: #FF3D00;
-      /* Red */
-      --bad-soft: rgba(255, 61, 0, 0.15);
-      --radius-lg: 24px;
-      --radius-md: 16px;
-      --radius-sm: 8px;
-      --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-      --backdrop-blur: blur(12px);
+      --bg: #f6f2ea;
+      --panel: rgba(255, 253, 249, 0.88);
+      --panel-strong: rgba(255, 255, 255, 0.94);
+      --surface: rgba(255, 255, 255, 0.8);
+      --line: rgba(24, 28, 36, 0.12);
+      --ink: #15181c;
+      --ink-soft: #58606f;
+      --ink-faint: #747c8b;
+      --brand: #165dff;
+      --brand-soft: rgba(22, 93, 255, 0.1);
+      --ok: #157347;
+      --ok-soft: rgba(21, 115, 71, 0.12);
+      --warn: #b96a00;
+      --warn-soft: rgba(185, 106, 0, 0.12);
+      --danger: #b42318;
+      --danger-soft: rgba(180, 35, 24, 0.12);
+      --shadow: 0 18px 48px rgba(31, 41, 55, 0.08);
+      --radius-xl: 26px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --display: "Space Grotesk", sans-serif;
+      --sans: "IBM Plex Sans", sans-serif;
+      --mono: "IBM Plex Mono", monospace;
     }
 
     * {
@@ -53,223 +45,242 @@
     body {
       margin: 0;
       color: var(--ink);
-      font-family: "Outfit", sans-serif;
-      background-color: var(--bg-main);
-      /* Premium Animated Background */
-      background-image:
-        radial-gradient(circle at 15% 50%, rgba(0, 229, 255, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 85% 30%, rgba(176, 132, 230, 0.15) 0%, transparent 50%),
-        url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2547&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
-      /* High quality abstract tech wavy background */
-      background-size: cover;
-      background-position: center;
-      background-attachment: fixed;
+      font-family: var(--sans);
+      background:
+        radial-gradient(circle at top left, rgba(22, 93, 255, 0.14), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(185, 106, 0, 0.14), transparent 28%),
+        linear-gradient(180deg, #fbf7ef 0%, #f3ede2 100%);
       min-height: 100vh;
-      overflow-x: hidden;
     }
 
-    /* Animated Grain Overlay */
     body::before {
       content: "";
       position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-image: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Dissolve_Noise_Texture.png');
-      opacity: 0.03;
-      mix-blend-mode: overlay;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 0, 0, 0.025) 1px, transparent 1px);
+      background-size: 28px 28px;
       pointer-events: none;
-      z-index: 999;
+      opacity: 0.4;
     }
 
     .shell {
-      max-width: 1600px;
-      margin: 0 auto;
-      padding: 40px 32px;
       position: relative;
       z-index: 1;
+      max-width: 1520px;
+      margin: 0 auto;
+      padding: 28px 22px 44px;
+    }
+
+    .hero,
+    .main-grid,
+    .secondary-grid,
+    .tertiary-grid,
+    .metric-strip {
+      animation: rise 540ms ease;
     }
 
     .hero {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      margin-bottom: 40px;
-      animation: fadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      display: grid;
+      grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.78fr);
+      gap: 20px;
+      margin-bottom: 18px;
     }
 
-    .title-container {
-      display: flex;
-      align-items: center;
-      gap: 16px;
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-xl);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
     }
 
-    .title {
-      margin: 0;
-      font-size: 2.5rem;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      background: linear-gradient(135deg, #FFF 0%, #A5B4CB 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+    .hero-main,
+    .hero-side,
+    .panel {
+      padding: 24px;
     }
 
-    .subtitle {
-      margin: 8px 0 0;
-      font-size: 1rem;
-      color: var(--ink-muted);
-      font-weight: 300;
-    }
-
-    .kicker {
+    .eyebrow,
+    .chip,
+    .status-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 16px;
+      min-height: 34px;
+      padding: 0 14px;
       border-radius: 999px;
-      background: rgba(0, 229, 255, 0.1);
-      border: 1px solid rgba(0, 229, 255, 0.2);
-      color: var(--primary);
-      font-weight: 500;
-      font-size: 0.85rem;
-      box-shadow: 0 0 20px var(--primary-glow);
-      backdrop-filter: blur(4px);
+      font-size: 0.82rem;
+      font-weight: 700;
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: 320px 1fr 380px;
-      gap: 24px;
-      align-items: start;
+    .eyebrow {
+      background: #111419;
+      color: #fff8ef;
+      font-family: var(--mono);
     }
 
-    .brief-strip {
-      display: grid;
-      grid-template-columns: 1.2fr repeat(4, minmax(0, 1fr));
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
-    .brief-item {
-      padding: 18px;
+    .chip {
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--ink-soft);
       border: 1px solid var(--line);
-      border-radius: var(--radius-md);
-      background: rgba(16, 21, 31, 0.72);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
     }
 
-    .brief-label {
+    .status-pill.live {
+      background: var(--brand-soft);
+      color: var(--brand);
+    }
+
+    .status-pill.ok {
+      background: var(--ok-soft);
+      color: var(--ok);
+    }
+
+    .status-pill.warn {
+      background: var(--warn-soft);
+      color: var(--warn);
+    }
+
+    .title {
+      margin: 12px 0 10px;
+      font-family: var(--display);
+      font-size: clamp(2.3rem, 4vw, 4rem);
+      line-height: 0.98;
+      letter-spacing: -0.05em;
+    }
+
+    .lede {
+      max-width: 840px;
+      margin: 0;
+      color: var(--ink-soft);
+      line-height: 1.7;
+      font-size: 1.02rem;
+    }
+
+    .hero-tags,
+    .inline-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .hero-tags {
+      margin-top: 18px;
+    }
+
+    .warm-status {
+      margin-top: 16px;
+      padding: 14px 15px;
+      border-radius: var(--radius-md);
+      background: var(--brand-soft);
+      border: 1px solid rgba(22, 93, 255, 0.16);
+      color: var(--brand);
+      font-weight: 600;
+      line-height: 1.55;
+    }
+
+    .warm-status.warn {
+      background: var(--warn-soft);
+      border-color: rgba(185, 106, 0, 0.18);
+      color: var(--warn);
+    }
+
+    .warm-status.danger {
+      background: var(--danger-soft);
+      border-color: rgba(180, 35, 24, 0.18);
+      color: var(--danger);
+    }
+
+    .stack,
+    .metric-strip,
+    .scenario-list,
+    .summary-list,
+    .route-list,
+    .raw-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .metric-strip {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .metric-card,
+    .card {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.82);
+      padding: 16px;
+    }
+
+    .metric-card label,
+    .section-label,
+    .field label,
+    .small-label {
       display: block;
       margin-bottom: 8px;
-      color: var(--ink-muted);
-      font-size: 0.75rem;
+      color: var(--ink-faint);
+      font-size: 0.74rem;
+      font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
 
-    .brief-value {
-      font-size: 1rem;
-      color: #fff;
-    }
-
-    .brief-headline {
-      font-size: 0.92rem;
-      color: var(--ink-muted);
-      line-height: 1.5;
-    }
-
-    .brief-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 14px;
-      margin-bottom: 10px;
-      border-radius: 999px;
-      background: rgba(0, 229, 255, 0.1);
-      border: 1px solid rgba(0, 229, 255, 0.2);
-      color: var(--primary);
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-
-    .brief-list {
-      margin: 12px 0 0;
-      padding-left: 18px;
-      color: var(--ink-muted);
-      font-size: 0.82rem;
-      line-height: 1.55;
-    }
-
-    .panel {
-      background: var(--bg-panel);
-      border: 1px solid var(--line);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow);
-      backdrop-filter: var(--backdrop-blur);
-      -webkit-backdrop-filter: var(--backdrop-blur);
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      opacity: 0;
-    }
-
-    .panel:nth-child(1) {
-      animation-delay: 0.1s;
-    }
-
-    .panel:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-
-    .panel:nth-child(3) {
-      animation-delay: 0.3s;
-    }
-
-    .panel:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
-      border-color: rgba(255, 255, 255, 0.15);
-    }
-
-    .panel-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 8px;
-    }
-
-    .panel-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.05);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2rem;
-    }
-
-    .panel h2 {
-      margin: 0;
-      font-size: 1.25rem;
-      font-weight: 600;
-      letter-spacing: -0.01em;
-    }
-
-    .panel>small {
-      color: var(--ink-muted);
-      font-size: 0.85rem;
+    .metric-card strong {
       display: block;
-      margin-top: -12px;
-      margin-bottom: 8px;
+      font-family: var(--display);
+      font-size: 1.14rem;
+      letter-spacing: -0.04em;
+    }
+
+    .metric-card span,
+    .card p,
+    .panel p {
+      color: var(--ink-soft);
+      line-height: 1.55;
+      font-size: 0.9rem;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 350px minmax(0, 1fr) 340px;
+      gap: 18px;
+      align-items: start;
+      margin-bottom: 18px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .section-head h2,
+    .section-head h3,
+    .summary-card h3 {
+      margin: 0;
+      font-family: var(--display);
+      letter-spacing: -0.03em;
+    }
+
+    .field-grid,
+    .summary-grid,
+    .secondary-grid,
+    .tertiary-grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .field-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .field {
@@ -278,498 +289,332 @@
       gap: 8px;
     }
 
-    .field label {
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: var(--ink-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    input,
-    select,
-    textarea {
+    .field input,
+    .field textarea,
+    .field select {
       width: 100%;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: var(--radius-sm);
-      padding: 12px 16px;
-      font-size: 0.95rem;
-      font-family: inherit;
+      padding: 13px 14px;
+      border-radius: 14px;
+      border: 1px solid rgba(24, 28, 36, 0.16);
+      background: rgba(255, 255, 255, 0.96);
       color: var(--ink);
-      background: rgba(0, 0, 0, 0.2);
-      transition: all 0.2s ease;
-    }
-
-    input:focus,
-    select:focus,
-    textarea:focus {
+      font: inherit;
       outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.15);
-      background: rgba(0, 0, 0, 0.3);
+      transition: border-color 160ms ease, box-shadow 160ms ease;
     }
 
-    textarea {
+    .field textarea {
+      min-height: 120px;
       resize: vertical;
-      min-height: 100px;
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
-    /* Custom Range Slider */
-    input[type="range"] {
-      -webkit-appearance: none;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-      padding: 0;
-      border: none;
+    .field input:focus,
+    .field textarea:focus,
+    .field select:focus {
+      border-color: rgba(22, 93, 255, 0.4);
+      box-shadow: 0 0 0 4px rgba(22, 93, 255, 0.08);
     }
 
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: var(--primary);
-      cursor: pointer;
-      box-shadow: 0 0 10px var(--primary-glow);
-      transition: transform 0.2s ease;
+    .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
     }
 
-    input[type="range"]::-webkit-slider-thumb:hover {
-      transform: scale(1.2);
+    .risk-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+      padding: 0 12px;
+      border-radius: 13px;
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.8);
+      color: var(--ink-soft);
+      font-size: 0.84rem;
+      font-weight: 600;
     }
 
-    .risk-wrap {
+    .risk-option input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--brand);
+    }
+
+    .button-row {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
     }
 
-    .risk-item {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 14px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(0, 0, 0, 0.2);
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      user-select: none;
-    }
-
-    .risk-item:hover {
-      background: rgba(255, 255, 255, 0.05);
-    }
-
-    .risk-item input:checked+span {
-      color: var(--primary);
-      font-weight: 600;
-      text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
-    }
-
-    .risk-item input {
-      display: none;
-    }
-
-    /* Custom Checkbox Indicator */
-    .risk-item span::before {
-      content: '';
-      display: inline-block;
-      width: 14px;
-      height: 14px;
-      border-radius: 4px;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      margin-right: 8px;
-      vertical-align: middle;
-      transition: all 0.2s ease;
-    }
-
-    .risk-item input:checked+span::before {
-      background: var(--primary);
-      border-color: var(--primary);
-      box-shadow: 0 0 8px var(--primary-glow);
-    }
-
-
-    .actions {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 8px;
-    }
-
     button {
       appearance: none;
       border: 0;
-      border-radius: var(--radius-sm);
+      border-radius: 14px;
+      min-height: 46px;
+      padding: 0 16px;
+      font: inherit;
+      font-weight: 700;
       cursor: pointer;
-      font-family: inherit;
-      font-weight: 600;
-      font-size: 0.95rem;
-      padding: 14px 20px;
-      transition: all 0.2s ease;
-      position: relative;
-      overflow: hidden;
+      transition: transform 150ms ease, opacity 150ms ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      opacity: 0.72;
+      cursor: wait;
+      transform: none;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #00E5FF 0%, #0088CC 100%);
-      color: #000;
-      box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 229, 255, 0.4);
-    }
-
-    .btn-primary::after {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.3), transparent);
-      transform: rotate(45deg);
-      animation: shine 3s infinite;
-    }
-
-    @keyframes shine {
-      0% {
-        left: -100%;
-      }
-
-      20% {
-        left: 100%;
-      }
-
-      100% {
-        left: 100%;
-      }
+      background: #111418;
+      color: #fffaf2;
+      box-shadow: 0 14px 30px rgba(17, 20, 24, 0.16);
     }
 
     .btn-secondary {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.9);
       color: var(--ink);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(255, 255, 255, 0.2);
-    }
-
-    .mono {
-      font-family: "JetBrains Mono", monospace;
-      font-size: 0.8rem;
-    }
-
-    .card {
       border: 1px solid var(--line);
+    }
+
+    .btn-brand {
+      background: var(--brand);
+      color: white;
+      box-shadow: 0 12px 24px rgba(22, 93, 255, 0.18);
+    }
+
+    .scenario-card,
+    .summary-card,
+    .route-card,
+    .result-item {
       border-radius: var(--radius-md);
-      background: var(--bg-card);
-      padding: 16px;
-      backdrop-filter: blur(8px);
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.84);
+      padding: 14px 15px;
     }
 
-    /* Glowing borders for specific cards */
-    .card.glow {
-      border-color: rgba(0, 229, 255, 0.3);
-      box-shadow: inset 0 0 20px rgba(0, 229, 255, 0.05);
+    .scenario-card {
+      cursor: pointer;
+      transition: border-color 150ms ease, transform 150ms ease;
     }
 
-    .status-row {
+    .scenario-card:hover,
+    .scenario-card.active {
+      border-color: rgba(22, 93, 255, 0.26);
+      transform: translateY(-1px);
+    }
+
+    .scenario-card strong,
+    .summary-card strong,
+    .route-card strong,
+    .result-item strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.98rem;
+      letter-spacing: -0.02em;
+    }
+
+    .payload-box,
+    .raw-box {
+      border-radius: 14px;
+      background: #111318;
+      color: #d9e1ec;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.55;
+      padding: 15px;
+      min-height: 160px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .workspace-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .summary-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .summary-hero {
       display: grid;
-      grid-template-columns: 80px 1fr;
-      gap: 16px;
-      align-items: center;
-      padding: 12px 16px;
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      background: rgba(0, 0, 0, 0.2);
-      margin-bottom: 8px;
-      transition: all 0.3s ease;
+      grid-template-columns: 1.1fr repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      background: linear-gradient(145deg, #111419, #20252c);
+      color: white;
     }
 
-    .status-row:last-child {
-      margin-bottom: 0;
+    .summary-hero label {
+      color: rgba(255, 255, 255, 0.6);
+      margin-bottom: 6px;
     }
 
-    .status-tag {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 6px;
-      font-size: 0.75rem;
+    .summary-hero strong {
+      font-family: var(--display);
+      font-size: 1.9rem;
+      letter-spacing: -0.05em;
+    }
+
+    .summary-hero p {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.78);
+      line-height: 1.6;
+      font-size: 0.94rem;
+    }
+
+    .summary-metric {
+      padding-left: 12px;
+      border-left: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .inline-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .dual-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      color: var(--ink-faint);
+      font-size: 0.76rem;
       font-weight: 700;
-      padding: 6px 10px;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
     }
 
-    .status-wait {
-      background: rgba(255, 255, 255, 0.1);
-      color: #A5B4CB;
+    .secondary-grid {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+      margin-bottom: 18px;
     }
 
-    .status-run {
-      background: var(--warn-soft);
-      color: var(--warn);
-      box-shadow: 0 0 10px var(--warn-soft);
-      animation: pulseWarn 1.5s infinite;
+    .tertiary-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
-    .status-ok {
-      background: var(--ok-soft);
-      color: var(--ok);
-      box-shadow: 0 0 10px var(--ok-soft);
-    }
-
-    .status-err {
-      background: var(--bad-soft);
-      color: var(--bad);
-      box-shadow: 0 0 10px var(--bad-soft);
-    }
-
-    @keyframes pulseWarn {
-      0% {
-        box-shadow: 0 0 0 0 rgba(255, 179, 71, 0.4);
-      }
-
-      70% {
-        box-shadow: 0 0 0 6px rgba(255, 179, 71, 0);
-      }
-
-      100% {
-        box-shadow: 0 0 0 0 rgba(255, 179, 71, 0);
-      }
-    }
-
-    .metric-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+    .bar-list {
+      display: flex;
+      flex-direction: column;
       gap: 12px;
     }
 
-    .metric {
-      border-radius: var(--radius-sm);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(0, 0, 0, 0.2) 100%);
-      padding: 16px 12px;
-      text-align: center;
+    .bar-row {
+      display: grid;
+      grid-template-columns: 150px 1fr 84px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .bar {
       position: relative;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(17, 24, 39, 0.08);
       overflow: hidden;
     }
 
-    .metric::before {
-      content: '';
+    .bar > span {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      inset: 0 auto 0 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #165dff, #0b46ce);
     }
 
-    .metric small {
-      display: block;
-      color: var(--ink-muted);
-      font-size: 0.75rem;
+    .bar.warn > span {
+      background: linear-gradient(90deg, #d97706, #b96a00);
+    }
+
+    .route-path {
+      font-family: var(--mono);
+      color: var(--brand);
+      font-size: 0.78rem;
+      background: var(--brand-soft);
+      border-radius: 999px;
+      padding: 7px 10px;
+    }
+
+    .route-method {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--ink-faint);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 8px;
+      letter-spacing: 0.08em;
+      font-weight: 700;
     }
 
-    .metric strong {
-      display: block;
-      font-size: 1.5rem;
-      font-weight: 300;
-      color: #FFF;
+    .empty-state {
+      color: var(--ink-faint);
+      line-height: 1.65;
+      font-size: 0.9rem;
     }
 
-    .whatif-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-
-    .delta-up {
-      color: var(--bad);
-      text-shadow: 0 0 10px rgba(255, 61, 0, 0.3);
-    }
-
-    .delta-down {
-      color: var(--ok);
-      text-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
-    }
-
-    .route-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-      margin-top: 12px;
-    }
-
-    .route-table th,
-    .route-table td {
-      padding: 12px 8px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      text-align: left;
-    }
-
-    .route-table th {
-      color: var(--ink-muted);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      font-weight: 600;
-    }
-
-    .route-table tbody tr {
-      transition: background 0.2s;
-    }
-
-    .route-table tbody tr:hover {
-      background: rgba(255, 255, 255, 0.03);
-    }
-
-    .range-row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items: center;
-      margin-bottom: 12px;
-    }
-
-    .range-row label {
-      font-size: 0.85rem;
-      color: var(--ink-muted);
-    }
-
-    .range-row output {
-      min-width: 48px;
-      text-align: right;
-      font-size: 0.85rem;
-      color: var(--primary);
-      font-family: "JetBrains Mono", monospace;
-      background: rgba(0, 229, 255, 0.1);
-      padding: 2px 6px;
-      border-radius: 4px;
-    }
-
-    .profile-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 12px;
-    }
-
-    /* Custom scrollbar for pre tags */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.2);
-      border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    #payloadPreview {
-      font-size: 0.75rem;
-      color: #A5B4CB;
-      max-height: 200px;
-      overflow-y: auto;
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-
-    #insightText {
-      color: #E2E8F0;
-      line-height: 1.6;
-      background: rgba(0, 0, 0, 0.2);
-      padding: 12px;
-      border-radius: 8px;
-    }
-
-    ol#actionList {
-      padding-left: 20px;
-      margin: 0;
-      color: #E2E8F0;
-    }
-
-    ol#actionList li {
-      margin-bottom: 8px;
-      line-height: 1.4;
-    }
-
-    ol#actionList li::marker {
-      color: var(--primary);
-      font-weight: bold;
-    }
-
-    @keyframes fadeInDown {
+    @keyframes rise {
       from {
         opacity: 0;
-        transform: translateY(-20px);
+        transform: translateY(10px);
       }
-
       to {
         opacity: 1;
         transform: translateY(0);
       }
     }
 
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
+    @media (max-width: 1320px) {
+      .hero,
+      .main-grid,
+      .secondary-grid,
+      .tertiary-grid {
+        grid-template-columns: 1fr;
       }
 
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    @media (max-width: 1300px) {
-      .brief-strip {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .grid {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .panel:nth-child(3) {
-        grid-column: 1 / -1;
+      .metric-strip {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
     }
 
     @media (max-width: 900px) {
-      .brief-strip {
+      .shell {
+        padding: 18px 14px 34px;
+      }
+
+      .metric-strip,
+      .field-grid,
+      .summary-grid,
+      .summary-hero {
         grid-template-columns: 1fr;
       }
 
-      .grid {
+      .risk-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .metric-strip,
+      .risk-grid {
         grid-template-columns: 1fr;
       }
 
-      .hero {
+      .button-row {
         flex-direction: column;
-        align-items: flex-start;
+      }
+
+      button {
+        width: 100%;
       }
     }
   </style>
@@ -777,1070 +622,975 @@
 
 <body>
   <main class="shell">
-    <header class="hero">
-      <div class="title-container">
-        <!-- GIF Icon next to title -->
-        <img
-          src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3ZtMTM1aHVrMzFkOWMyZHV2eGMyMnVpZGQxZHU3b3B1cXNpY2FjMiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/L8K62iDadb194QYQe8/giphy.gif"
-          alt="AI Core"
-          style="width: 50px; height: 50px; border-radius: 50%; mix-blend-mode: screen; filter: hue-rotate(180deg);" />
-        <div>
-          <h1 class="title">StagePilot Nexus</h1>
-          <p class="subtitle">
-            Intelligent intake, orchestration, ontology insights & digital twin simulation
-          </p>
+    <section class="hero">
+      <article class="panel hero-main">
+        <div class="hero-tags">
+          <span class="eyebrow">StagePilot Judge Console</span>
+          <span class="chip">@ai-sdk-tool/parser</span>
+          <span class="chip">review-first orchestration</span>
+          <span class="chip">benchmark-backed demo</span>
         </div>
-      </div>
-      <div class="kicker">
-        <span
-          style="display:inline-block; width:8px; height:8px; background:var(--primary); border-radius:50%; box-shadow:0 0 8px var(--primary); margin-right:4px;"></span>
-        Google-only | Gemini + Built-in Twin
-      </div>
-    </header>
+        <h1 class="title">StagePilot Review Console</h1>
+        <p class="lede">
+          This is a calmer, review-first surface for StagePilot. It does not invent a new product layer.
+          It simply makes the existing benchmark, runtime, workflow, and orchestration outputs easier to read
+          in the way a recruiter, hiring manager, or technical reviewer would actually scan them.
+        </p>
+      </article>
 
-    <section class="brief-strip">
-      <article class="brief-item">
-        <div class="brief-badge" id="briefBadge">stagepilot-review-pack</div>
-        <div class="brief-headline" id="briefHeadline">
-          Loading benchmark-backed reviewer surface...
+      <aside class="panel hero-side">
+        <div class="section-head">
+          <div>
+            <label class="section-label">Reviewer Warm Start</label>
+            <h2 style="margin: 0;">What matters first</h2>
+          </div>
+          <span id="heroState" class="status-pill live">Booting</span>
         </div>
-        <ul class="brief-list" id="briefReviewFlow">
-          <li>Fetching review pack.</li>
-        </ul>
-        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:12px;">
-          <button class="btn-secondary" id="copyReviewBtn" type="button">Copy Review Path</button>
-          <button class="btn-secondary" id="copyProofBtn" type="button">Copy Proof Routes</button>
-          <button class="btn-secondary" id="copyClaimBtn" type="button">Copy Claim Snapshot</button>
-          <button class="btn-secondary" id="copyPayloadBtn" type="button">Copy Payload</button>
+        <div id="warmStatus" class="warm-status">
+          Loading benchmark-backed reviewer surface.
         </div>
-      </article>
-      <article class="brief-item">
-        <span class="brief-label">Schema</span>
-        <div class="brief-value" id="briefSchema">-</div>
-      </article>
-      <article class="brief-item">
-        <span class="brief-label">Runtime Mode</span>
-        <div class="brief-value" id="briefMode">-</div>
-      </article>
-      <article class="brief-item">
-        <span class="brief-label">Benchmark Lift</span>
-        <div class="brief-value" id="briefBenchmarkDelta">-</div>
-      </article>
-      <article class="brief-item">
-        <span class="brief-label">Route Count</span>
-        <div class="brief-value" id="briefRouteCount">-</div>
-      </article>
+        <div id="warmChecklist" class="stack"></div>
+      </aside>
     </section>
 
-    <section class="grid">
-      <!-- Panel 1: Intake -->
-      <article class="panel">
-        <div class="panel-header">
-          <div class="panel-icon">📥</div>
-          <h2>1. Signal Intake</h2>
-        </div>
-        <small>Configure case parameters for live evaluation</small>
+    <section id="metricStrip" class="metric-strip"></section>
 
-        <div class="field">
-          <label for="geminiKey">Gemini API Key (Optional)</label>
-          <input id="geminiKey" type="password" placeholder="AI Studio Key for Insight Actions" />
+    <section class="main-grid">
+      <aside class="panel">
+        <div class="section-head">
+          <div>
+            <label class="section-label">Mission Intake</label>
+            <h2 style="margin: 0;">Demo Scenarios</h2>
+          </div>
+          <span class="status-pill live">Editable</span>
         </div>
 
-        <div class="field">
-          <label for="caseId">Case Identifier</label>
-          <input id="caseId" value="nexus-live-001" />
+        <div id="scenarioList" class="scenario-list"></div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="caseId">Case Identifier</label>
+            <input id="caseId" type="text" value="demo-live-001" />
+          </div>
+          <div class="field">
+            <label for="district">District</label>
+            <input id="district" type="text" value="Gangbuk-gu" />
+          </div>
+          <div class="field">
+            <label for="contactWindow">Contact Window</label>
+            <input id="contactWindow" type="text" value="18:00-21:00" />
+          </div>
+          <div class="field">
+            <label for="urgencyHint">Priority Level</label>
+            <select id="urgencyHint">
+              <option value="high">High</option>
+              <option value="medium" selected>Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
         </div>
 
         <div class="field">
-          <label for="district">Operational Zone</label>
-          <select id="district">
-            <option value="Gangbuk-gu">Sector Alpha (Gangbuk-gu)</option>
-            <option value="Jungnang-gu">Sector Beta (Jungnang-gu)</option>
-            <option value="Seocho-gu">Sector Gamma (Seocho-gu)</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="urgency">Priority Level</label>
-          <select id="urgency">
-            <option value="high">Critical (High)</option>
-            <option value="medium" selected>Standard (Medium)</option>
-            <option value="low">Routine (Low)</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="notes">Situation Briefing</label>
-          <textarea
-            id="notes">Target reports resource depletion, systemic isolation, and requires structural intervention. Route to appropriate support node.</textarea>
+          <label for="notes">Situation Brief</label>
+          <textarea id="notes">Target reports resource depletion, delayed response, and an urgent need for a routed intervention before the next contact window closes.</textarea>
         </div>
 
         <div class="field">
           <label>Risk Vectors</label>
-          <div class="risk-wrap" id="riskWrap"></div>
-        </div>
-
-        <div class="actions">
-          <button class="btn-primary" id="runBtn">Initialize Orchestration</button>
-          <div style="display: flex; gap: 8px;">
-            <button class="btn-secondary" id="notifyBtn" type="button" style="flex:1;">Relay to OpenClaw</button>
-            <button class="btn-secondary" id="sampleBtn" type="button" style="flex:1;">Load Template</button>
+          <div class="risk-grid" id="riskGrid">
+            <label class="risk-option"><input type="checkbox" value="housing" /> Housing</label>
+            <label class="risk-option"><input type="checkbox" value="food" checked /> Food</label>
+            <label class="risk-option"><input type="checkbox" value="income" checked /> Income</label>
+            <label class="risk-option"><input type="checkbox" value="isolation" /> Isolation</label>
+            <label class="risk-option"><input type="checkbox" value="care" /> Care</label>
+            <label class="risk-option"><input type="checkbox" value="other" /> Other</label>
           </div>
-          <button class="btn-secondary" id="autoDemoBtn" type="button"
-            style="margin-top: 8px; border-color: var(--primary); color: var(--primary); font-weight: bold; font-family: 'Outfit';">▶️
-            Start Auto Demo (TTS)</button>
         </div>
 
-        <div style="margin-top: 10px;">
-          <label
-            style="font-size:0.75rem; color: var(--ink-muted); text-transform:uppercase; margin-bottom: 4px; display:block;">Live
-            Payload Stream</label>
-          <div class="card mono" id="payloadPreview"></div>
+        <div class="field-grid">
+          <div class="field">
+            <label for="staffingDeltaPct">Staffing Delta %</label>
+            <input id="staffingDeltaPct" type="number" value="-12" />
+          </div>
+          <div class="field">
+            <label for="demandDeltaPct">Demand Delta %</label>
+            <input id="demandDeltaPct" type="number" value="20" />
+          </div>
+          <div class="field">
+            <label for="contactRateDeltaPct">Contact Rate Delta %</label>
+            <input id="contactRateDeltaPct" type="number" value="-8" />
+          </div>
+          <div class="field">
+            <label for="benchmarkCases">Benchmark Cases</label>
+            <input id="benchmarkCases" type="number" value="24" />
+          </div>
         </div>
+
+        <div class="button-row">
+          <button id="planButton" class="btn-primary" type="button">Run Plan</button>
+          <button id="insightsButton" class="btn-secondary" type="button">Run Insights</button>
+          <button id="whatIfButton" class="btn-secondary" type="button">Run What-if</button>
+          <button id="notifyButton" class="btn-brand" type="button">Notify</button>
+        </div>
+
+        <div>
+          <label class="section-label">Envelope Preview</label>
+          <pre id="payloadPreview" class="payload-box"></pre>
+        </div>
+      </aside>
+
+      <section class="panel">
+        <div class="workspace-header">
+          <div>
+            <label class="section-label">Mission Output</label>
+            <h2 style="margin: 0;">Current Result</h2>
+          </div>
+          <div id="workspaceState" class="inline-tags">
+            <span class="chip">Awaiting run</span>
+          </div>
+        </div>
+
+        <section id="summaryHero" class="summary-hero">
+          <div>
+            <label class="small-label">Summary</label>
+            <strong>Idle</strong>
+            <p>No orchestration output yet. Use the mission form on the left to run the existing StagePilot endpoints.</p>
+          </div>
+          <div class="summary-metric">
+            <label>Judge Score</label>
+            <strong>--</strong>
+          </div>
+          <div class="summary-metric">
+            <label>SLA Minutes</label>
+            <strong>--</strong>
+          </div>
+          <div class="summary-metric">
+            <label>Referrals</label>
+            <strong>--</strong>
+          </div>
+        </section>
+
+        <section class="summary-grid">
+          <article class="summary-card">
+            <h3>Actions</h3>
+            <div id="actionList" class="summary-list">
+              <p class="empty-state">Action blueprint appears here after <span class="route-path">/v1/plan</span>.</p>
+            </div>
+          </article>
+
+          <article class="summary-card">
+            <h3>Referrals</h3>
+            <div id="referralList" class="summary-list">
+              <p class="empty-state">Referral routing appears here after the plan resolves.</p>
+            </div>
+          </article>
+
+          <article class="summary-card">
+            <h3>Judge Notes</h3>
+            <div id="judgeList" class="summary-list">
+              <p class="empty-state">Judge strengths, weaknesses, and fallback route appear here.</p>
+            </div>
+          </article>
+
+          <article class="summary-card">
+            <h3>What-if Result</h3>
+            <div id="twinList" class="summary-list">
+              <p class="empty-state">Simulation output appears here after <span class="route-path">/v1/whatif</span>.</p>
+            </div>
+          </article>
+
+          <article class="summary-card">
+            <h3>Insights</h3>
+            <div id="insightList" class="summary-list">
+              <p class="empty-state">Narrative insights appear here after <span class="route-path">/v1/insights</span>.</p>
+            </div>
+          </article>
+
+          <article class="summary-card">
+            <h3>Notify</h3>
+            <div id="notifyList" class="summary-list">
+              <p class="empty-state">Delivery outcome appears here after <span class="route-path">/v1/notify</span>.</p>
+            </div>
+          </article>
+        </section>
+      </section>
+
+      <aside class="panel">
+        <div class="section-head">
+          <div>
+            <label class="section-label">Review Surfaces</label>
+            <h2 style="margin: 0;">What to inspect</h2>
+          </div>
+          <button id="benchmarkButton" class="btn-secondary" type="button">Run Benchmark</button>
+        </div>
+
+        <div id="reviewSummary" class="stack"></div>
+
+        <div>
+          <label class="section-label">Recent Workflow Runs</label>
+          <div id="workflowRuns" class="stack"></div>
+        </div>
+
+        <div>
+          <label class="section-label">Proof Assets</label>
+          <div id="proofAssets" class="stack"></div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="secondary-grid">
+      <article class="panel">
+        <div class="section-head">
+          <div>
+            <label class="section-label">Benchmark Readout</label>
+            <h2 style="margin: 0;">Reliability Ladder</h2>
+          </div>
+          <span id="benchmarkState" class="status-pill live">Snapshot</span>
+        </div>
+        <div id="benchmarkLadder" class="bar-list"></div>
       </article>
 
-      <!-- Panel 2: Twin Controls -->
       <article class="panel">
-        <div class="panel-header">
-          <div class="panel-icon">🎛️</div>
-          <h2>2. Digital Twin Ops Matrix</h2>
-        </div>
-        <small>Real-time parameter manipulation & environment calibration</small>
-
-        <div class="card glow">
-          <strong
-            style="display:block; margin-bottom:12px; color:var(--primary); font-size: 0.9rem; text-transform: uppercase;">Environmental
-            Stressors</strong>
-          <div class="range-row">
-            <label for="staffingDelta">Staffing Variance (%)</label>
-            <output id="staffingOut">0%</output>
+        <div class="section-head">
+          <div>
+            <label class="section-label">Developer Ops</label>
+            <h2 style="margin: 0;">Lane Playbook</h2>
           </div>
-          <input type="range" id="staffingDelta" min="-80" max="80" step="1" value="0" />
-
-          <div class="range-row" style="margin-top: 16px;">
-            <label for="demandDelta">Demand Matrix (%)</label>
-            <output id="demandOut">0%</output>
-          </div>
-          <input type="range" id="demandDelta" min="-80" max="80" step="1" value="0" />
-
-          <div class="range-row" style="margin-top: 16px;">
-            <label for="contactDelta">Contact Efficacy (%)</label>
-            <output id="contactOut">0%</output>
-          </div>
-          <input type="range" id="contactDelta" min="-80" max="80" step="1" value="0" />
-        </div>
-
-        <div class="card">
-          <strong style="display:block; margin-bottom:4px; font-size: 0.9rem; color:#fff;">Zone Calibration</strong>
-          <small style="color:var(--ink-muted); font-size:0.75rem; display:block; margin-bottom:12px;">Base operational
-            metrics</small>
-          <div class="profile-grid">
-            <div class="field">
-              <label for="avgHandleMinutes">Avg Handle (m)</label>
-              <input id="avgHandleMinutes" type="number" step="1" />
-            </div>
-            <div class="field">
-              <label for="backlogCases">Queue Depth</label>
-              <input id="backlogCases" type="number" step="1" />
-            </div>
-            <div class="field">
-              <label for="caseWorkers">Active Agents</label>
-              <input id="caseWorkers" type="number" step="1" />
-            </div>
-            <div class="field">
-              <label for="demandPerHour">Ingest/hr</label>
-              <input id="demandPerHour" type="number" step="0.1" />
-            </div>
-            <div class="field" style="grid-column:1 / -1">
-              <label for="contactSuccessRate">Connection Probability (0-1)</label>
-              <input id="contactSuccessRate" type="number" step="0.01" min="0" max="1" />
-            </div>
+          <div class="field" style="min-width: 210px;">
+            <label for="laneSelect">Lane</label>
+            <select id="laneSelect">
+              <option value="merge-request">merge-request</option>
+              <option value="pipeline-recovery">pipeline-recovery</option>
+              <option value="release-governor">release-governor</option>
+            </select>
           </div>
         </div>
+        <div id="opsPack" class="stack"></div>
+      </article>
+    </section>
 
-        <div class="card">
-          <strong style="display:block; margin-bottom:12px; font-size: 0.9rem; color:#fff;">Dispatch
-            Configuration</strong>
-          <div class="profile-grid">
-            <div class="field">
-              <label for="notifyChannel">Comms Channel</label>
-              <input id="notifyChannel" value="telegram" />
-            </div>
-            <div class="field">
-              <label for="notifyTarget">Target Node</label>
-              <input id="notifyTarget" value="@welfare-ops" />
-            </div>
+    <section class="tertiary-grid">
+      <article class="panel">
+        <div class="section-head">
+          <div>
+            <label class="section-label">Route Directory</label>
+            <h2 style="margin: 0;">Available Endpoints</h2>
           </div>
-          <label class="risk-item" style="margin-top:12px; width: 100%; border-color: rgba(255,179,71,0.3);">
-            <input id="notifyDryRun" type="checkbox" checked />
-            <span style="font-size: 0.8rem;">Safety Lock (Dry run simulation)</span>
-          </label>
         </div>
-
+        <div id="routeList" class="route-list"></div>
       </article>
 
-      <!-- Panel 3: Output -->
       <article class="panel">
-        <div class="panel-header">
-          <div class="panel-icon">🧠</div>
-          <h2>3. Synthesis & Telemetry</h2>
-        </div>
-        <small>Orchestration results and simulation deltas</small>
-
-        <div class="card">
-          <strong
-            style="display:block; margin-bottom:12px; font-size: 0.85rem; color:var(--ink-muted); text-transform:uppercase;">Execution
-            State</strong>
-          <div id="statusStack" style="display:flex; flex-direction:column; gap:0;"></div>
-        </div>
-
-        <div style="margin-top: 8px;">
-          <strong
-            style="display:block; margin-bottom:8px; font-size: 0.85rem; color:var(--ink-muted); text-transform:uppercase;">Core
-            Vitals</strong>
-          <div class="metric-grid" id="metricGrid">
-            <!-- Placeholder metrics until run -->
-            <div class="metric"><small>Judge Score</small><strong>--</strong></div>
-            <div class="metric"><small>Referrals</small><strong>--</strong></div>
-            <div class="metric"><small>SLA target</small><strong>--</strong></div>
+        <div class="section-head">
+          <div>
+            <label class="section-label">Reviewer Sequence</label>
+            <h2 style="margin: 0;">Read this order</h2>
           </div>
         </div>
+        <div id="reviewSequence" class="stack"></div>
+      </article>
 
-        <div class="card glow">
-          <strong style="display:block; margin-bottom:8px; font-size: 0.9rem; color:var(--primary);">Twin Impact
-            Analysis</strong>
-          <div class="whatifGrid whatif-grid" id="whatifGrid">
-            <div class="metric"><small>First Contact</small><strong style="font-size: 1.1rem;">--</strong></div>
-            <div class="metric"><small>SLA Breach</small><strong style="font-size: 1.1rem;">--</strong></div>
-            <div class="metric"><small>Coverage</small><strong style="font-size: 1.1rem;">--</strong></div>
+      <article class="panel">
+        <div class="section-head">
+          <div>
+            <label class="section-label">Raw Output</label>
+            <h2 style="margin: 0;">JSON Capture</h2>
           </div>
+          <button id="copyJsonButton" class="btn-secondary" type="button">Copy JSON</button>
         </div>
-
-        <div class="card">
-          <strong style="display:block; margin-bottom:12px; font-size: 0.9rem; color:#fff;">Action Blueprint</strong>
-          <ol id="actionList" style="font-size:0.85rem">
-            <li style="list-style-type: none; margin-left: -20px; color: var(--ink-muted);">Awaiting initialization...
-            </li>
-          </ol>
-        </div>
-
-        <div class="card">
-          <strong style="display:block; margin-bottom:12px; font-size: 0.9rem; color:#fff;">Deep Insights
-            (Gemini)</strong>
-          <pre id="insightText" class="mono"
-            style="white-space:pre-wrap; margin:0; font-size:0.8rem; color:var(--ink-muted);">Standby for analysis stream...</pre>
-        </div>
-
-        <div class="card">
-          <strong style="display:block; margin-bottom:8px; font-size: 0.9rem; color:#fff;">Routing Intelligence</strong>
-          <div id="recommendText" class="mono" style="color:var(--primary); font-size:0.85rem; margin-bottom:12px;">No
-            active vectors.</div>
-          <div style="overflow-x: auto;">
-            <table class="route-table" id="routeTable">
-              <thead>
-                <tr>
-                  <th>Agency</th>
-                  <th>Phone</th>
-                  <th>Wait</th>
-                  <th>Breach</th>
-                  <th>Score</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td colspan="5" style="text-align:center; color:var(--ink-muted);">--</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+        <div class="raw-list">
+          <pre id="rawOutput" class="raw-box">No mission response yet.</pre>
         </div>
       </article>
     </section>
   </main>
 
   <script>
-    const RISK_TYPES = ["housing", "food", "income", "isolation", "care", "other"];
-    const DISTRICT_PROFILES = {
-      "Gangbuk-gu": { avgHandleMinutes: 34, backlogCases: 42, caseWorkers: 10, demandPerHour: 8.4, contactSuccessRate: 0.74 },
-      "Jungnang-gu": { avgHandleMinutes: 36, backlogCases: 47, caseWorkers: 11, demandPerHour: 8.8, contactSuccessRate: 0.72 },
-      "Seocho-gu": { avgHandleMinutes: 38, backlogCases: 30, caseWorkers: 9, demandPerHour: 6.9, contactSuccessRate: 0.76 },
+    const API = {
+      benchmark: "/v1/benchmark",
+      benchmarkSummary: "/v1/benchmark-summary",
+      developerOpsPack: "/v1/developer-ops-pack",
+      insights: "/v1/insights",
+      notify: "/v1/notify",
+      plan: "/v1/plan",
+      reviewPack: "/v1/review-pack",
+      runtimeBrief: "/v1/runtime-brief",
+      runtimeScorecard: "/v1/runtime-scorecard",
+      whatIf: "/v1/whatif",
+      workflowRuns: "/v1/workflow-runs",
     };
 
-    const el = (id) => document.getElementById(id);
-    const statusKeys = ["plan", "insights", "whatif", "notify"];
-    const statusLabel = { plan: "PLAN", insights: "INSIGHT", whatif: "TWIN", notify: "NOTIFY" };
-    const API_REQUEST_TIMEOUT_MS = 15000;
-    const TTS_UTTERANCE_TIMEOUT_MS = 12000;
-    let flowInFlight = false;
-    let notifyInFlight = false;
-
-    function canUseSpeechSynthesis() {
-      return (
-        "speechSynthesis" in window &&
-        typeof SpeechSynthesisUtterance !== "undefined"
-      );
-    }
-
-    function scrollToPanel(panelIndex, block = "center") {
-      const panel = document.querySelector(`.panel:nth-child(${panelIndex})`);
-      if (!panel || typeof panel.scrollIntoView !== "function") {
-        return;
-      }
-      panel.scrollIntoView({ behavior: "smooth", block });
-    }
-
-    function setButtonBusy(buttonId, isBusy, busyLabel) {
-      const button = el(buttonId);
-      if (!button) return;
-      if (!button.dataset.idleLabel) {
-        button.dataset.idleLabel = button.textContent || "";
-      }
-      if (isBusy) {
-        button.disabled = true;
-        button.textContent = busyLabel;
-        return;
-      }
-      button.disabled = false;
-      button.textContent = button.dataset.idleLabel || "";
-    }
-
-    function mkStatusRow(key) {
-      const row = document.createElement("div");
-      row.className = "status-row";
-      const tag = document.createElement("span");
-      tag.className = "status-tag status-wait";
-      tag.textContent = statusLabel[key];
-      const msg = document.createElement("div");
-      msg.textContent = "Awaiting execution";
-      msg.style.fontSize = "0.85rem";
-      row.append(tag, msg);
-      return { tag, msg, row };
-    }
-
-    const statusMap = {
-      plan: mkStatusRow("plan"),
-      insights: mkStatusRow("insights"),
-      whatif: mkStatusRow("whatif"),
-      notify: mkStatusRow("notify"),
-    };
-
-    function setStatus(key, type, text) {
-      const item = statusMap[key];
-      item.tag.className = `status-tag status-${type}`;
-      item.msg.textContent = text;
-    }
-
-    function bootstrapStatusStack() {
-      const root = el("statusStack");
-      root.innerHTML = "";
-      for (const key of statusKeys) {
-        root.append(statusMap[key].row);
-        setStatus(key, "wait", "Awaiting execution");
-      }
-    }
-
-    function buildRiskTags() {
-      const wrap = el("riskWrap");
-      wrap.innerHTML = "";
-      for (const risk of RISK_TYPES) {
-        const label = document.createElement("label");
-        label.className = "risk-item";
-        const box = document.createElement("input");
-        box.type = "checkbox";
-        box.value = risk;
-        box.checked = ["housing", "food", "income"].includes(risk);
-        const text = document.createElement("span");
-        text.textContent = risk.toUpperCase();
-        label.append(box, text);
-        wrap.append(label);
-      }
-    }
-
-    function selectedRisks() {
-      const checked = document.querySelectorAll("#riskWrap input[type='checkbox']:checked");
-      return Array.from(checked).map((node) => node.value);
-    }
-
-    function toNumber(value, fallback = 0) {
-      const parsed = Number(value);
-      return Number.isFinite(parsed) ? parsed : fallback;
-    }
-
-    function previewPayload(payload) {
-      el("payloadPreview").textContent = JSON.stringify(payload, null, 2);
-    }
-
-    function renderBriefList(items) {
-      const root = el("briefReviewFlow");
-      if (!root) return;
-      root.innerHTML = "";
-      const values = Array.isArray(items) && items.length > 0
-        ? items
-        : ["Runtime brief is unavailable."];
-      for (const item of values) {
-        const li = document.createElement("li");
-        li.textContent = item;
-        root.append(li);
-      }
-    }
-
-    async function copyTextToClipboard(text) {
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(text);
-        return;
-      }
-
-      const helper = document.createElement("textarea");
-      helper.value = text;
-      helper.setAttribute("readonly", "true");
-      helper.style.position = "absolute";
-      helper.style.left = "-9999px";
-      document.body.append(helper);
-      helper.select();
-      document.execCommand("copy");
-      helper.remove();
-    }
-
-    function flashButtonLabel(buttonId, idleLabel, nextLabel) {
-      const button = el(buttonId);
-      if (!button) return;
-      button.textContent = nextLabel;
-      window.setTimeout(() => {
-        button.textContent = idleLabel;
-      }, 1400);
-    }
-
-    async function copyReviewPath() {
-      const steps = Array.from(document.querySelectorAll("#briefReviewFlow li"))
-        .map((item) => item.textContent?.trim())
-        .filter(Boolean);
-      const text = [
-        "StagePilot reviewer path",
-        `Headline: ${el("briefHeadline").textContent || "-"}`,
-        `Schema: ${el("briefSchema").textContent || "-"}`,
-        `Runtime mode: ${el("briefMode").textContent || "-"}`,
-        `Benchmark lift: ${el("briefBenchmarkDelta").textContent || "-"}`,
-        `Route count: ${el("briefRouteCount").textContent || "-"}`,
-        "",
-        "Review flow",
-        ...(steps.length > 0 ? steps.map((step) => `- ${step}`) : ["- Review flow unavailable"]),
-      ].join("\n");
-
-      try {
-        await copyTextToClipboard(text);
-        flashButtonLabel("copyReviewBtn", "Copy Review Path", "Copied");
-      } catch (error) {
-        console.warn("copy review path failed", error);
-        flashButtonLabel("copyReviewBtn", "Copy Review Path", "Copy failed");
-      }
-    }
-
-    async function copyProofRoutes() {
-      const text = [
-        "StagePilot proof routes",
-        `Benchmark lift: ${el("briefBenchmarkDelta").textContent || "-"}`,
-        "- /health",
-        "- /v1/runtime-brief",
-        "- /v1/review-pack",
-        "- /v1/schema/plan-report",
-        "- docs/benchmarks/stagepilot-latest.json",
-        "- docs/review-pack.svg",
-      ].join("\n");
-
-      try {
-        await copyTextToClipboard(text);
-        flashButtonLabel("copyProofBtn", "Copy Proof Routes", "Copied");
-      } catch (error) {
-        console.warn("copy proof routes failed", error);
-        flashButtonLabel("copyProofBtn", "Copy Proof Routes", "Copy failed");
-      }
-    }
-
-    async function copyClaimSnapshot() {
-      const steps = Array.from(document.querySelectorAll("#briefReviewFlow li"))
-        .map((item) => item.textContent?.trim())
-        .filter(Boolean)
-        .slice(0, 3);
-      const text = [
-        "StagePilot claim snapshot",
-        `Headline: ${el("briefHeadline").textContent || "-"}`,
-        `Schema: ${el("briefSchema").textContent || "-"}`,
-        `Runtime mode: ${el("briefMode").textContent || "-"}`,
-        `Benchmark lift: ${el("briefBenchmarkDelta").textContent || "-"}`,
-        "",
-        "Strongest proof path",
-        ...(steps.length > 0 ? steps.map((step) => `- ${step}`) : ["- Review flow unavailable"]),
-        "",
-        "Routes",
-        "- /v1/review-pack",
-        "- /v1/benchmark",
-        "- docs/benchmarks/stagepilot-latest.json",
-      ].join("\n");
-
-      try {
-        await copyTextToClipboard(text);
-        flashButtonLabel("copyClaimBtn", "Copy Claim Snapshot", "Copied");
-      } catch (error) {
-        console.warn("copy claim snapshot failed", error);
-        flashButtonLabel("copyClaimBtn", "Copy Claim Snapshot", "Copy failed");
-      }
-    }
-
-    async function copyPayloadPreview() {
-      try {
-        await copyTextToClipboard(JSON.stringify(readPayload(), null, 2));
-        flashButtonLabel("copyPayloadBtn", "Copy Payload", "Copied");
-      } catch (error) {
-        console.warn("copy payload failed", error);
-        flashButtonLabel("copyPayloadBtn", "Copy Payload", "Copy failed");
-      }
-    }
-
-    async function loadRuntimeBrief() {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), API_REQUEST_TIMEOUT_MS);
-      try {
-        const response = await fetch("/v1/runtime-brief", {
-          method: "GET",
-          signal: controller.signal,
-        });
-        const payload = await response.json();
-        if (!response.ok) {
-          throw new Error(payload?.error || "runtime brief unavailable");
-        }
-        el("briefMode").textContent = payload.diagnostics?.integrationReady
-          ? "ready"
-          : (payload.diagnostics?.missingIntegrations || ["degraded"]).join(", ");
-        if (el("briefSchema").textContent === "-") {
-          el("briefSchema").textContent = payload.reportContract?.schema || "-";
-        }
-        if (el("briefRouteCount").textContent === "-") {
-          el("briefRouteCount").textContent = String(payload.routeCount || 0);
-        }
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "runtime brief unavailable";
-        if (el("briefMode").textContent === "-") {
-          el("briefMode").textContent = "degraded";
-        }
-        if (el("briefRouteCount").textContent === "-") {
-          el("briefRouteCount").textContent = "0";
-        }
-        console.warn("runtime brief unavailable", message);
-      } finally {
-        clearTimeout(timeoutId);
-      }
-    }
-
-    async function loadReviewPack() {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), API_REQUEST_TIMEOUT_MS);
-      try {
-        const response = await fetch("/v1/review-pack", {
-          method: "GET",
-          signal: controller.signal,
-        });
-        const payload = await response.json();
-        if (!response.ok) {
-          throw new Error(payload?.error || "review pack unavailable");
-        }
-
-        const benchmarkDelta = payload.proofBundle?.benchmark?.improvements?.loopVsBaseline;
-        el("briefBadge").textContent = payload.reviewPackId || "stagepilot-review-pack";
-        el("briefHeadline").textContent = payload.headline || "No review-pack headline available.";
-        el("briefSchema").textContent = payload.proofBundle?.planSchema || "-";
-        el("briefMode").textContent = payload.proofBundle?.integrationsReady
-          ? "ready"
-          : "check runtime";
-        el("briefBenchmarkDelta").textContent =
-          typeof benchmarkDelta === "number" ? `+${benchmarkDelta.toFixed(2)}pp` : "unavailable";
-        el("briefRouteCount").textContent = String(payload.proofBundle?.routeCount || 0);
-        renderBriefList(payload.reviewSequence);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : "review pack unavailable";
-        el("briefBadge").textContent = "review-pack-error";
-        el("briefHeadline").textContent = `Reviewer proof fetch failed: ${message}`;
-        el("briefBenchmarkDelta").textContent = "unavailable";
-        renderBriefList(["Check /health, /v1/meta, and /v1/runtime-brief before trusting a live run."]);
-      } finally {
-        clearTimeout(timeoutId);
-      }
-    }
-
-    function readPayload() {
-      // We ensure fallback values in case inputs are missing or invalid
-      const payload = {
-        caseId: (el("caseId").value || "demo-001").trim(),
-        district: el("district").value || "Gangbuk-gu",
-        notes: (el("notes").value || "demo notes").trim(),
-        risks: selectedRisks().length > 0 ? selectedRisks() : ["other"],
-        urgencyHint: el("urgency").value || "medium",
-        scenario: {
-          staffingDeltaPct: toNumber(el("staffingDelta").value, 0),
-          demandDeltaPct: toNumber(el("demandDelta").value, 0),
-          contactRateDeltaPct: toNumber(el("contactDelta").value, 0),
+    const SCENARIOS = [
+      {
+        id: "food-bridge",
+        label: "After-hours food bridge",
+        notes: "Household missed wages this week, food budget is exhausted, and the contact window closes tonight.",
+        risks: ["food", "income"],
+        district: "Gangbuk-gu",
+        urgencyHint: "high",
+        contactWindow: "20:00-22:00",
+        whatIf: {
+          staffingDeltaPct: -15,
+          demandDeltaPct: 22,
+          contactRateDeltaPct: -8,
         },
-        profile: {
-          avgHandleMinutes: toNumber(el("avgHandleMinutes").value, 30),
-          backlogCases: toNumber(el("backlogCases").value, 10),
-          caseWorkers: toNumber(el("caseWorkers").value, 5),
-          demandPerHour: toNumber(el("demandPerHour").value, 5.0),
-          contactSuccessRate: toNumber(el("contactSuccessRate").value, 0.7),
+      },
+      {
+        id: "housing-escalation",
+        label: "Housing escalation",
+        notes: "Resident received an eviction warning and needs a fallback route if the first outreach misses.",
+        risks: ["housing", "income"],
+        district: "Mapo-gu",
+        urgencyHint: "high",
+        contactWindow: "09:00-12:00",
+        whatIf: {
+          staffingDeltaPct: -10,
+          demandDeltaPct: 18,
+          contactRateDeltaPct: -5,
+        },
+      },
+      {
+        id: "care-coordination",
+        label: "Care coordination",
+        notes: "Elder resident living alone missed two wellness check-ins and needs coordinated support.",
+        risks: ["care", "isolation"],
+        district: "Songpa-gu",
+        urgencyHint: "medium",
+        contactWindow: "13:00-16:00",
+        whatIf: {
+          staffingDeltaPct: -6,
+          demandDeltaPct: 10,
+          contactRateDeltaPct: -4,
+        },
+      },
+    ];
+
+    const state = {
+      benchmarkSummary: null,
+      latestMission: null,
+      opsPack: null,
+      reviewPack: null,
+      runtimeBrief: null,
+      runtimeScorecard: null,
+      selectedScenarioId: SCENARIOS[0].id,
+      workflowRuns: null,
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+
+    const elements = {
+      actionList: $("#actionList"),
+      benchmarkButton: $("#benchmarkButton"),
+      benchmarkCases: $("#benchmarkCases"),
+      benchmarkLadder: $("#benchmarkLadder"),
+      benchmarkState: $("#benchmarkState"),
+      caseId: $("#caseId"),
+      contactRateDeltaPct: $("#contactRateDeltaPct"),
+      contactWindow: $("#contactWindow"),
+      copyJsonButton: $("#copyJsonButton"),
+      demandDeltaPct: $("#demandDeltaPct"),
+      district: $("#district"),
+      heroState: $("#heroState"),
+      insightList: $("#insightList"),
+      insightsButton: $("#insightsButton"),
+      laneSelect: $("#laneSelect"),
+      metricStrip: $("#metricStrip"),
+      notes: $("#notes"),
+      notifyButton: $("#notifyButton"),
+      notifyList: $("#notifyList"),
+      opsPack: $("#opsPack"),
+      payloadPreview: $("#payloadPreview"),
+      planButton: $("#planButton"),
+      proofAssets: $("#proofAssets"),
+      rawOutput: $("#rawOutput"),
+      referralList: $("#referralList"),
+      reviewSequence: $("#reviewSequence"),
+      reviewSummary: $("#reviewSummary"),
+      riskGrid: $("#riskGrid"),
+      routeList: $("#routeList"),
+      scenarioList: $("#scenarioList"),
+      staffingDeltaPct: $("#staffingDeltaPct"),
+      summaryHero: $("#summaryHero"),
+      twinList: $("#twinList"),
+      urgencyHint: $("#urgencyHint"),
+      warmChecklist: $("#warmChecklist"),
+      warmStatus: $("#warmStatus"),
+      whatIfButton: $("#whatIfButton"),
+      workflowRuns: $("#workflowRuns"),
+      workspaceState: $("#workspaceState"),
+      judgeList: $("#judgeList"),
+    };
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function formatPercent(value) {
+      if (typeof value !== "number" || !Number.isFinite(value)) {
+        return "--";
+      }
+      return `${Math.round(value * 100) / 100}%`;
+    }
+
+    function formatNumber(value) {
+      if (typeof value !== "number" || !Number.isFinite(value)) {
+        return "--";
+      }
+      return Intl.NumberFormat("en-US").format(value);
+    }
+
+    function setWarmStatus(message, tone) {
+      elements.warmStatus.textContent = message;
+      elements.warmStatus.className = `warm-status ${tone || ""}`.trim();
+    }
+
+    function setHeroState(label, tone) {
+      elements.heroState.className = `status-pill ${tone || "live"}`.trim();
+      elements.heroState.textContent = label;
+    }
+
+    function readRisks() {
+      return Array.from(elements.riskGrid.querySelectorAll("input:checked")).map((node) => node.value);
+    }
+
+    function buildPayload() {
+      return {
+        caseId: elements.caseId.value.trim() || "demo-live-001",
+        contactWindow: elements.contactWindow.value.trim(),
+        district: elements.district.value.trim(),
+        notes: elements.notes.value.trim(),
+        risks: readRisks(),
+        urgencyHint: elements.urgencyHint.value,
+      };
+    }
+
+    function buildWhatIfBody() {
+      return {
+        ...buildPayload(),
+        scenario: {
+          staffingDeltaPct: Number(elements.staffingDeltaPct.value),
+          demandDeltaPct: Number(elements.demandDeltaPct.value),
+          contactRateDeltaPct: Number(elements.contactRateDeltaPct.value),
         },
       };
-      previewPayload(payload);
+    }
+
+    function refreshPayloadPreview() {
+      elements.payloadPreview.textContent = JSON.stringify(buildWhatIfBody(), null, 2);
+    }
+
+    async function fetchJson(url, options) {
+      const response = await fetch(url, options);
+      const text = await response.text();
+      const payload = text ? JSON.parse(text) : {};
+      if (!response.ok) {
+        throw new Error(payload.error || `request failed (${response.status})`);
+      }
       return payload;
     }
 
-    async function postJson(path, body) {
-      const headers = { "Content-Type": "application/json" };
-      const apiKey = el("geminiKey")?.value?.trim();
-      if (apiKey) {
-        headers["x-gemini-api-key"] = apiKey;
-      }
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), API_REQUEST_TIMEOUT_MS);
-      let response;
-      try {
-        response = await fetch(path, {
-          method: "POST",
-          headers,
-          body: JSON.stringify(body),
-          signal: controller.signal,
-        });
-      } catch (error) {
-        if (error && typeof error === "object" && error.name === "AbortError") {
-          throw new Error(`${path}: request timeout (${API_REQUEST_TIMEOUT_MS}ms)`);
-        }
-        throw error;
-      } finally {
-        clearTimeout(timeoutId);
-      }
+    function renderScenarios() {
+      elements.scenarioList.innerHTML = SCENARIOS.map((scenario) => `
+        <article class="scenario-card ${scenario.id === state.selectedScenarioId ? "active" : ""}" data-scenario-id="${escapeHtml(scenario.id)}">
+          <strong>${escapeHtml(scenario.label)}</strong>
+          <p>${escapeHtml(scenario.notes)}</p>
+        </article>
+      `).join("");
 
-      let data;
-      try {
-        data = await response.json();
-      } catch {
-        throw new Error(`${path} [${response.status}]: invalid JSON response`);
-      }
-      if (!response.ok || !data.ok) {
-        const message = data && typeof data.error === "string" ? data.error : "Request failed on server end";
-        throw new Error(`${path} [${response.status}]: ${message}`);
-      }
-      return data;
+      elements.scenarioList.querySelectorAll("[data-scenario-id]").forEach((node) => {
+        node.addEventListener("click", () => applyScenario(node.getAttribute("data-scenario-id")));
+      });
     }
 
-    function metricCard(label, value, tone) {
-      const box = document.createElement("div");
-      box.className = "metric";
-      const name = document.createElement("small");
-      name.textContent = label;
-      const strong = document.createElement("strong");
-      if (tone) strong.className = tone;
-      strong.textContent = value;
-      box.append(name, strong);
-      return box;
+    function applyRiskSelection(risks) {
+      const selected = new Set(risks);
+      elements.riskGrid.querySelectorAll("input").forEach((node) => {
+        node.checked = selected.has(node.value);
+      });
     }
 
-    function renderOutput(planData, insightsData, whatifData) {
-      const metricGrid = el("metricGrid");
-      metricGrid.innerHTML = "";
-      metricGrid.append(
-        metricCard("Judge Score", String(planData.result.judge.score)),
-        metricCard("Referrals", String(planData.result.eligibility.referrals.length)),
-        metricCard("SLA Target", `${planData.result.safety.slaMinutes}m`)
-      );
-
-      const actionList = el("actionList");
-      actionList.innerHTML = "";
-      for (const action of planData.result.plan.actions) {
-        const li = document.createElement("li");
-        const title = document.createElement("strong");
-        title.textContent = `${action.step}:`;
-        const details = document.createTextNode(` ${action.details} `);
-        const due = document.createElement("span");
-        due.style.color = "var(--warn)";
-        due.textContent = `(T-${action.dueInHours}h)`;
-        li.append(title, details, due);
-        actionList.append(li);
-      }
-
-      if (insightsData && insightsData.insights) {
-        const insightRoot = el("insightText");
-        insightRoot.innerHTML = "";
-        const narrative = document.createElement("span");
-        narrative.style.color = "#fff";
-        narrative.textContent = insightsData.insights.narrative;
-        const source = document.createElement("span");
-        source.style.color = "var(--primary)";
-        source.style.fontSize = "0.7rem";
-        source.textContent = `[SOURCE: ${insightsData.insights.source.toUpperCase()}]`;
-        insightRoot.append(narrative, document.createTextNode("\n\n"), source);
-      }
-
-      if (whatifData && whatifData.twin) {
-        const twin = whatifData.twin;
-        const breachDelta = twin.delta.slaBreachProbability;
-        const contactDelta = twin.delta.expectedFirstContactMinutes;
-        const whatifGrid = el("whatifGrid");
-        whatifGrid.innerHTML = "";
-        whatifGrid.append(
-          metricCard(
-            "First Contact",
-            `${Math.round(twin.simulated.expectedFirstContactMinutes)}m`,
-            contactDelta > 0 ? "delta-up" : "delta-down"
-          ),
-          metricCard(
-            "SLA Breach",
-            `${Math.round(twin.simulated.slaBreachProbability * 100)}%`,
-            breachDelta > 0 ? "delta-up" : "delta-down"
-          ),
-          metricCard(
-            "Coverage",
-            `${twin.simulated.coverageScore}`,
-            twin.delta.coverageScore < 0 ? "delta-up" : "delta-down"
-          )
-        );
-
-        if (twin.recommendation) {
-          const recommendRoot = el("recommendText");
-          recommendRoot.innerHTML = "";
-          const prefix = document.createTextNode("Optimal Route: ");
-          const agencyName = document.createElement("strong");
-          agencyName.textContent = twin.recommendation.agencyName;
-          const lineOneSuffix = document.createTextNode(
-            ` (${twin.recommendation.phone})`
-          );
-          const lineBreak = document.createElement("br");
-          const lineTwo = document.createTextNode(
-            `Est. Wait: ${Math.round(twin.recommendation.expectedWaitMinutes)}m | Node Score: ${Math.round(twin.recommendation.score)}`
-          );
-          recommendRoot.append(
-            prefix,
-            agencyName,
-            lineOneSuffix,
-            lineBreak,
-            lineTwo
-          );
-        } else {
-          el("recommendText").textContent = "No valid recommendations derived from current constraints.";
-        }
-
-        const routeTable = el("routeTable");
-        routeTable.innerHTML = "";
-        const thead = document.createElement("thead");
-        const trh = document.createElement("tr");
-        for (const title of ["Node Agency", "Comms", "Est.Wait", "Breach%", "Score"]) {
-          const th = document.createElement("th");
-          th.textContent = title;
-          trh.append(th);
-        }
-        thead.append(trh);
-        const tbody = document.createElement("tbody");
-        for (const alt of twin.alternatives) {
-          const tr = document.createElement("tr");
-          for (const value of [
-            alt.agencyName,
-            alt.phone,
-            `${Math.round(alt.expectedWaitMinutes)}m`,
-            `${Math.round(alt.slaBreachProbability * 100)}%`,
-            Math.round(alt.score),
-          ]) {
-            const td = document.createElement("td");
-            td.textContent = value;
-            tr.append(td);
-          }
-          tbody.append(tr);
-        }
-        routeTable.append(thead, tbody);
-      }
-    }
-
-    function setRangeOutputs() {
-      el("staffingOut").textContent = `${el("staffingDelta").value > 0 ? '+' : ''}${el("staffingDelta").value}%`;
-      el("demandOut").textContent = `${el("demandDelta").value > 0 ? '+' : ''}${el("demandDelta").value}%`;
-      el("contactOut").textContent = `${el("contactDelta").value > 0 ? '+' : ''}${el("contactDelta").value}%`;
-    }
-
-    function setProfileFromDistrict() {
-      const district = el("district").value;
-      const profile = DISTRICT_PROFILES[district] || DISTRICT_PROFILES["Seocho-gu"];
-      el("avgHandleMinutes").value = profile.avgHandleMinutes;
-      el("backlogCases").value = profile.backlogCases;
-      el("caseWorkers").value = profile.caseWorkers;
-      el("demandPerHour").value = profile.demandPerHour;
-      el("contactSuccessRate").value = profile.contactSuccessRate;
-    }
-
-    function loadSample() {
-      el("caseId").value = "nexus-sim-alpha-99";
-      el("district").value = "Jungnang-gu";
-      el("urgency").value = "high";
-      el("notes").value = "Subject isolated, exhibiting critical resource deficiency (nutrition/finance). Immediate socio-economic stabilization required.";
-
-      const checkboxes = document.querySelectorAll("#riskWrap input[type='checkbox']");
-      for (const box of checkboxes) {
-        box.checked = ["food", "isolation", "care"].includes(box.value);
-      }
-
-      el("staffingDelta").value = "-25";
-      el("demandDelta").value = "40";
-      el("contactDelta").value = "10";
-      setRangeOutputs();
-      setProfileFromDistrict();
-      previewPayload(readPayload());
-
-      // Add subtle flash effect to indicate load
-      document.querySelector('.shell').style.animation = 'none';
-      void document.querySelector('.shell').offsetWidth; // trigger reflow
-      document.querySelector('.shell').style.animation = 'fadeInUp 0.5s ease-out';
-    }
-
-    async function runFlow() {
-      if (flowInFlight) {
-        setStatus("plan", "wait", "Plan request already running");
+    function applyScenario(id) {
+      const scenario = SCENARIOS.find((item) => item.id === id);
+      if (!scenario) {
         return;
       }
-      flowInFlight = true;
-      setButtonBusy("runBtn", true, "Running...");
-      try {
-        const payload = readPayload();
-        // Reset UI
-        el("insightText").innerHTML = '<span style="color:var(--warn); animation: pulseWarn 1.5s infinite;">Processing telemetry...</span>';
+      state.selectedScenarioId = id;
+      elements.caseId.value = `demo-${scenario.id}`;
+      elements.contactWindow.value = scenario.contactWindow;
+      elements.district.value = scenario.district;
+      elements.notes.value = scenario.notes;
+      elements.urgencyHint.value = scenario.urgencyHint;
+      elements.staffingDeltaPct.value = String(scenario.whatIf.staffingDeltaPct);
+      elements.demandDeltaPct.value = String(scenario.whatIf.demandDeltaPct);
+      elements.contactRateDeltaPct.value = String(scenario.whatIf.contactRateDeltaPct);
+      applyRiskSelection(scenario.risks);
+      refreshPayloadPreview();
+      renderScenarios();
+    }
 
-        setStatus("plan", "run", "Executing StagePilot /v1/plan");
-        const planData = await postJson("/v1/plan", payload);
-        setStatus("plan", "ok", "Plan synthesized successfully");
+    function renderMetricStrip() {
+      const benchmark = state.benchmarkSummary?.benchmark;
+      const runtimeScorecard = state.runtimeScorecard;
+      const runtimeBrief = state.runtimeBrief;
+      const items = [
+        {
+          label: "Top Strategy",
+          value: benchmark?.topStrategy?.strategy || "--",
+          note: benchmark?.topStrategy?.successRate != null ? formatPercent(benchmark.topStrategy.successRate) : "No benchmark yet",
+        },
+        {
+          label: "Weakest Strategy",
+          value: benchmark?.weakestStrategy?.strategy || "--",
+          note: benchmark?.weakestStrategy?.successRate != null ? formatPercent(benchmark.weakestStrategy.successRate) : "No weakest strategy yet",
+        },
+        {
+          label: "Runtime",
+          value: runtimeBrief?.diagnostics?.integrationReady ? "Ready" : "Review",
+          note: runtimeBrief ? `${runtimeBrief.routeCount} routes` : "No runtime brief yet",
+        },
+        {
+          label: "Requests",
+          value: runtimeScorecard ? formatNumber(runtimeScorecard.traffic.requestCount) : "--",
+          note: runtimeScorecard ? `${formatPercent(runtimeScorecard.traffic.errorRatePct)} error rate` : "No traffic yet",
+        },
+        {
+          label: "Workflow Runs",
+          value: runtimeScorecard?.workflowRuns?.summary ? formatNumber(runtimeScorecard.workflowRuns.summary.totalRuns) : "--",
+          note: "Recent developer workflow history",
+        },
+        {
+          label: "Notify Posture",
+          value: runtimeBrief?.integrations?.openClaw?.configured ? "Configured" : "Local only",
+          note: "Explicit final operator step",
+        },
+      ];
 
-        setStatus("insights", "run", "Querying Gemini Ontology");
-        setStatus("whatif", "run", "Running Digital Twin Simulation");
+      elements.metricStrip.innerHTML = items.map((item) => `
+        <article class="metric-card">
+          <label>${escapeHtml(item.label)}</label>
+          <strong>${escapeHtml(item.value)}</strong>
+          <span>${escapeHtml(item.note)}</span>
+        </article>
+      `).join("");
+    }
 
-        const [insightsData, whatifData] = await Promise.all([
-          postJson("/v1/insights", payload),
-          postJson("/v1/whatif", payload),
-        ]);
+    function renderWarmStart() {
+      const checklist = [
+        {
+          title: "Runtime brief",
+          detail: state.runtimeBrief?.diagnostics?.integrationReady
+            ? "Live integrations look configured."
+            : "Live integrations are incomplete, so use this as an honest bounded demo.",
+        },
+        {
+          title: "Benchmark floor",
+          detail: state.benchmarkSummary?.benchmark?.weakestStrategy
+            ? `Weakest strategy is ${state.benchmarkSummary.benchmark.weakestStrategy.strategy}. Keep it visible.`
+            : "Benchmark floor is not available yet.",
+        },
+        {
+          title: "Workflow history",
+          detail: state.runtimeScorecard?.workflowRuns?.summary
+            ? `${state.runtimeScorecard.workflowRuns.summary.totalRuns} workflow events are recorded.`
+            : "Workflow history is not populated yet.",
+        },
+      ];
 
-        setStatus("insights", "ok", `Intelligence retrieved [${insightsData.insights.source}]`);
-        setStatus("whatif", "ok", "Simulations converged");
+      elements.warmChecklist.innerHTML = checklist.map((item) => `
+        <article class="card">
+          <strong>${escapeHtml(item.title)}</strong>
+          <p>${escapeHtml(item.detail)}</p>
+        </article>
+      `).join("");
 
-        renderOutput(planData, insightsData, whatifData);
-      } catch (error) {
-        console.error(error);
-        const message = error instanceof Error ? error.message : "System Exception";
-        for (const key of statusKeys) {
-          if (statusMap[key].tag.className.includes("status-run")) {
-            setStatus(key, "err", `FAULT: ${message}`);
-          }
-        }
-      } finally {
-        flowInFlight = false;
-        setButtonBusy("runBtn", false, "Running...");
+      if (state.runtimeBrief?.diagnostics?.integrationReady) {
+        setHeroState("Ready", "ok");
+        setWarmStatus("Runtime brief, review pack, and benchmark surfaces loaded successfully.", "");
+      } else {
+        setHeroState("Review", "warn");
+        setWarmStatus("Loading benchmark-backed reviewer surface. Live integrations are still bounded, which is okay for a portfolio demo.", "warn");
       }
     }
 
-    async function notifyOpenClaw() {
-      if (notifyInFlight) {
-        setStatus("notify", "wait", "Notify request already running");
+    function renderReviewSummary() {
+      const items = [
+        {
+          title: "Runtime brief",
+          detail: state.runtimeBrief?.headline || "Runtime posture not loaded.",
+        },
+        {
+          title: "Review pack",
+          detail: state.reviewPack?.headline || "Review pack not loaded.",
+        },
+        {
+          title: "Operator next step",
+          detail: state.runtimeBrief?.diagnostics?.nextAction || "No next action available.",
+        },
+      ];
+
+      elements.reviewSummary.innerHTML = items.map((item) => `
+        <article class="card">
+          <strong>${escapeHtml(item.title)}</strong>
+          <p>${escapeHtml(item.detail)}</p>
+        </article>
+      `).join("");
+    }
+
+    function renderWorkflowRuns() {
+      const items = state.runtimeScorecard?.workflowRuns?.items || [];
+      elements.workflowRuns.innerHTML = items.length > 0
+        ? items.map((item) => `
+          <article class="card">
+            <strong>${escapeHtml(item.lane || "workflow")}</strong>
+            <p>${escapeHtml(`${item.path} | ${item.statusCode} | ${item.timestamp}`)}</p>
+          </article>
+        `).join("")
+        : `<p class="empty-state">No workflow run history available yet.</p>`;
+    }
+
+    function renderProofAssets() {
+      const assets = state.reviewPack?.proofAssets || [];
+      elements.proofAssets.innerHTML = assets.map((asset) => `
+        <article class="card">
+          <strong>${escapeHtml(asset.label)}</strong>
+          <p>${escapeHtml(asset.path)}</p>
+        </article>
+      `).join("");
+    }
+
+    function renderBenchmarkLadder() {
+      const strategies = state.benchmarkSummary?.benchmark?.strategies || [];
+      elements.benchmarkLadder.innerHTML = strategies.map((item) => `
+        <div class="bar-row">
+          <strong>${escapeHtml(item.strategy)}</strong>
+          <div class="bar ${item.status === "attention" ? "warn" : ""}">
+            <span style="width:${Math.max(4, Math.min(item.successRate || 0, 100))}%"></span>
+          </div>
+          <span class="route-method">${escapeHtml(formatPercent(item.successRate))}</span>
+        </div>
+      `).join("");
+    }
+
+    function renderOpsPack() {
+      if (!state.opsPack) {
+        elements.opsPack.innerHTML = `<p class="empty-state">No developer ops pack loaded.</p>`;
         return;
       }
-      notifyInFlight = true;
-      setButtonBusy("notifyBtn", true, "Dispatching...");
-      try {
-        const payload = readPayload();
-        const notifyPayload = {
-          ...payload,
+
+      elements.opsPack.innerHTML = `
+        <article class="card">
+          <strong>${escapeHtml(state.opsPack.selectedLane.headline)}</strong>
+          <p>${escapeHtml(state.opsPack.headline)}</p>
+        </article>
+        <article class="card">
+          <strong>Operator Flow</strong>
+          <p>${escapeHtml(state.opsPack.selectedLane.operatorFlow.join(" | "))}</p>
+        </article>
+        <article class="card">
+          <strong>Guardrails</strong>
+          <p>${escapeHtml(state.opsPack.selectedLane.guardrails.join(" | "))}</p>
+        </article>
+      `;
+    }
+
+    function renderRouteList() {
+      const routes = state.runtimeBrief?.routes || [];
+      elements.routeList.innerHTML = routes.map((route) => `
+        <article class="route-card">
+          <strong>${escapeHtml(route.purpose)}</strong>
+          <p><span class="route-path">${escapeHtml(route.path)}</span> <span class="route-method">${escapeHtml(route.method)}</span></p>
+        </article>
+      `).join("");
+    }
+
+    function renderReviewSequence() {
+      const items = state.reviewPack?.reviewSequence || [];
+      elements.reviewSequence.innerHTML = items.map((item, index) => `
+        <article class="card">
+          <strong>Step ${index + 1}</strong>
+          <p>${escapeHtml(item)}</p>
+        </article>
+      `).join("");
+    }
+
+    function setWorkspaceState(labels) {
+      elements.workspaceState.innerHTML = labels.map((label) => `<span class="chip">${escapeHtml(label)}</span>`).join("");
+    }
+
+    function renderMissionSummary(payload, phaseLabel) {
+      const result = payload?.result;
+      if (!result) {
+        return;
+      }
+
+      state.latestMission = payload;
+      elements.rawOutput.textContent = JSON.stringify(payload, null, 2);
+      elements.summaryHero.innerHTML = `
+        <div>
+          <label class="small-label">Summary</label>
+          <strong>${escapeHtml(result.plan.summary)}</strong>
+          <p>Case ${escapeHtml(result.intake.caseId)} in ${escapeHtml(result.intake.district)}.</p>
+        </div>
+        <div class="summary-metric">
+          <label>Judge Score</label>
+          <strong>${escapeHtml(String(result.judge.score))}</strong>
+        </div>
+        <div class="summary-metric">
+          <label>SLA Minutes</label>
+          <strong>${escapeHtml(String(result.safety.slaMinutes))}</strong>
+        </div>
+        <div class="summary-metric">
+          <label>Referrals</label>
+          <strong>${escapeHtml(String(result.eligibility.referrals.length))}</strong>
+        </div>
+      `;
+
+      elements.actionList.innerHTML = result.plan.actions.map((action) => `
+        <article class="result-item">
+          <strong>${escapeHtml(action.step)}</strong>
+          <div class="dual-line">
+            <span>${escapeHtml(action.channel)}</span>
+            <span>${escapeHtml(action.owner)}</span>
+            <span>${escapeHtml(String(action.dueInHours))}h</span>
+          </div>
+          <p>${escapeHtml(action.details)}</p>
+        </article>
+      `).join("");
+
+      elements.referralList.innerHTML = result.eligibility.referrals.map((referral) => `
+        <article class="result-item">
+          <strong>${escapeHtml(referral.agencyName)}</strong>
+          <div class="dual-line">
+            <span>${escapeHtml(referral.programName)}</span>
+            <span>${escapeHtml(referral.phone)}</span>
+            <span>Priority ${escapeHtml(String(referral.priority))}</span>
+          </div>
+          <p>${escapeHtml(referral.reason)}</p>
+        </article>
+      `).join("") || `<p class="empty-state">No referrals returned.</p>`;
+
+      elements.judgeList.innerHTML = `
+        <article class="result-item">
+          <strong>Strengths</strong>
+          <p>${escapeHtml(result.judge.strengths.join(" | "))}</p>
+        </article>
+        <article class="result-item">
+          <strong>Weaknesses</strong>
+          <p>${escapeHtml(result.judge.weaknesses.join(" | "))}</p>
+        </article>
+        <article class="result-item">
+          <strong>Fallback Route</strong>
+          <p>${escapeHtml(result.plan.fallbackRoute)}</p>
+        </article>
+      `;
+
+      setWorkspaceState([phaseLabel, "Plan available", payload.insights ? "Insights attached" : "Insights pending", payload.twin ? "What-if attached" : "What-if pending"]);
+    }
+
+    function renderInsights(payload) {
+      if (!payload?.insights) {
+        elements.insightList.innerHTML = `<p class="empty-state">No insight payload returned.</p>`;
+        return;
+      }
+      elements.insightList.innerHTML = `
+        <article class="result-item">
+          <strong>${escapeHtml(payload.insights.source || "insight")}</strong>
+          <p>${escapeHtml(payload.insights.narrative || "No narrative returned.")}</p>
+        </article>
+      `;
+    }
+
+    function renderTwin(payload) {
+      if (!payload?.twin) {
+        elements.twinList.innerHTML = `<p class="empty-state">No what-if payload returned.</p>`;
+        return;
+      }
+      const recommendation = payload.twin.recommendation;
+      elements.twinList.innerHTML = `
+        <article class="result-item">
+          <strong>Recommendation</strong>
+          <p>${escapeHtml(recommendation ? `${recommendation.agencyName} | wait ${recommendation.expectedWaitMinutes}m | breach ${formatPercent(recommendation.slaBreachProbability * 100)}` : "No recommendation available.")}</p>
+        </article>
+        <article class="result-item">
+          <strong>Scenario Deltas</strong>
+          <p>${escapeHtml(`Staffing ${payload.twin.scenario.staffingDeltaPct}% | demand ${payload.twin.scenario.demandDeltaPct}% | contact ${payload.twin.scenario.contactRateDeltaPct}%`)}</p>
+        </article>
+      `;
+    }
+
+    function renderNotify(payload) {
+      const delivery = payload?.delivery;
+      if (!delivery) {
+        elements.notifyList.innerHTML = `<p class="empty-state">No delivery payload returned.</p>`;
+        return;
+      }
+      elements.notifyList.innerHTML = `
+        <article class="result-item">
+          <strong>${escapeHtml(delivery.status || "notify")}</strong>
+          <p>${escapeHtml(delivery.message || "Notify completed.")}</p>
+        </article>
+      `;
+    }
+
+    async function loadSummaries() {
+      const [runtimeBrief, reviewPack, benchmarkSummary, runtimeScorecard, workflowRuns] = await Promise.all([
+        fetchJson(API.runtimeBrief),
+        fetchJson(API.reviewPack),
+        fetchJson(API.benchmarkSummary),
+        fetchJson(API.runtimeScorecard),
+        fetchJson(API.workflowRuns),
+      ]);
+      state.runtimeBrief = runtimeBrief;
+      state.reviewPack = reviewPack;
+      state.benchmarkSummary = benchmarkSummary;
+      state.runtimeScorecard = runtimeScorecard;
+      state.workflowRuns = workflowRuns;
+      renderMetricStrip();
+      renderWarmStart();
+      renderReviewSummary();
+      renderWorkflowRuns();
+      renderProofAssets();
+      renderBenchmarkLadder();
+      renderRouteList();
+      renderReviewSequence();
+    }
+
+    async function loadOpsPack(lane) {
+      state.opsPack = await fetchJson(`${API.developerOpsPack}?lane=${encodeURIComponent(lane)}`);
+      renderOpsPack();
+    }
+
+    async function runPlan() {
+      const payload = await fetchJson(API.plan, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildPayload()),
+      });
+      renderMissionSummary(payload, "Plan");
+      setWarmStatus("Plan generated. Review actions, referrals, and judge notes before moving to delivery.", "");
+    }
+
+    async function runInsights() {
+      const payload = await fetchJson(API.insights, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildPayload()),
+      });
+      renderMissionSummary(payload, "Insights");
+      renderInsights(payload);
+      setWarmStatus("Narrative insights attached. Keep them grounded in the plan output, not as standalone truth.", "");
+    }
+
+    async function runWhatIf() {
+      const payload = await fetchJson(API.whatIf, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(buildWhatIfBody()),
+      });
+      renderMissionSummary(payload, "What-if");
+      renderTwin(payload);
+      setWarmStatus("What-if simulation completed. Compare recommendation quality with the original plan before claiming robustness.", "");
+    }
+
+    async function runNotify() {
+      const payload = await fetchJson(API.notify, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...buildWhatIfBody(),
           delivery: {
-            channel: el("notifyChannel").value.trim() || undefined,
-            dryRun: el("notifyDryRun").checked,
-            target: el("notifyTarget").value.trim() || undefined,
+            dryRun: true,
+            message: "Reviewer-controlled notify step",
+            target: {
+              channel: "openclaw-demo",
+              target: "review-pack",
+            },
           },
-        };
-
-        setStatus("notify", "run", "Broadcasting to OpenClaw Node");
-        const response = await postJson("/v1/notify", notifyPayload);
-        const delivery = response.delivery || {};
-
-        if (delivery.delivered) {
-          setStatus("notify", "ok", `Broadcast Success [${delivery.mode}]: ${delivery.detail}`);
-        } else {
-          setStatus("notify", "wait", `Dispatch Held [${delivery.mode}]: ${delivery.detail}`);
-        }
-      } catch (error) {
-        console.error(error);
-        const message = error instanceof Error ? error.message : "Broadcast Failure";
-        setStatus("notify", "err", `COMM FAULT: ${message}`);
-      } finally {
-        notifyInFlight = false;
-        setButtonBusy("notifyBtn", false, "Dispatching...");
-      }
-    }
-
-    function bindEvents() {
-      for (const id of ["staffingDelta", "demandDelta", "contactDelta"]) {
-        el(id).addEventListener("input", () => {
-          setRangeOutputs();
-          previewPayload(readPayload());
-        });
-      }
-
-      for (const id of [
-        "caseId",
-        "district",
-        "urgency",
-        "notes",
-        "avgHandleMinutes",
-        "backlogCases",
-        "caseWorkers",
-        "demandPerHour",
-        "contactSuccessRate",
-      ]) {
-        el(id).addEventListener("input", () => {
-          if (id === "district") {
-            setProfileFromDistrict();
-          }
-          previewPayload(readPayload());
-        });
-      }
-
-      el("riskWrap").addEventListener("input", () => {
-        previewPayload(readPayload());
+        }),
       });
-
-      el("runBtn").addEventListener("click", runFlow);
-      el("notifyBtn").addEventListener("click", notifyOpenClaw);
-      el("sampleBtn").addEventListener("click", loadSample);
-      el("copyReviewBtn").addEventListener("click", copyReviewPath);
-      el("copyProofBtn").addEventListener("click", copyProofRoutes);
-      el("copyClaimBtn").addEventListener("click", copyClaimSnapshot);
-      el("copyPayloadBtn").addEventListener("click", copyPayloadPreview);
-      if (el("autoDemoBtn")) el("autoDemoBtn").addEventListener("click", runAutoDemo);
+      renderMissionSummary(payload, "Notify");
+      renderTwin(payload);
+      renderNotify(payload);
+      setWarmStatus("Notify stays an explicit final operator action, separate from plan success.", "");
     }
 
-    async function speakKorean(text) {
-      if (!canUseSpeechSynthesis()) {
-        return;
-      }
+    async function runBenchmark() {
+      const payload = await fetchJson(API.benchmark, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          caseCount: Number(elements.benchmarkCases.value) || 24,
+          maxLoopAttempts: 2,
+        }),
+      });
+      elements.rawOutput.textContent = JSON.stringify(payload, null, 2);
+      setWarmStatus(`Fresh benchmark completed over ${payload.report.caseCount} cases. Use this result carefully because it reflects live rerun output, not just the checked-in snapshot.`, "");
+      elements.benchmarkState.textContent = "Live rerun";
+      elements.benchmarkState.className = "status-pill ok";
+    }
 
-      return new Promise(resolve => {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'ko-KR';
-        const voices = window.speechSynthesis.getVoices();
-        const koVoice = voices.find(v => v.lang.includes('ko'));
-        if (koVoice) utterance.voice = koVoice;
-        utterance.rate = 1.05; // Slightly upbeat
-        let settled = false;
-        const timeoutId = setTimeout(() => {
-          if (settled) return;
-          settled = true;
-          window.speechSynthesis.cancel();
-          resolve();
-        }, TTS_UTTERANCE_TIMEOUT_MS);
-
-        const finish = () => {
-          if (settled) return;
-          settled = true;
-          clearTimeout(timeoutId);
-          resolve();
-        };
-
-        utterance.onend = finish;
-        utterance.onerror = finish;
-
+    function wrapBusy(button, task) {
+      return async () => {
+        const original = button.textContent;
+        button.disabled = true;
+        button.textContent = "Working...";
         try {
-          window.speechSynthesis.speak(utterance);
-        } catch {
-          finish();
+          await task();
+        } catch (error) {
+          setWarmStatus(error instanceof Error ? error.message : "Unexpected error", "danger");
+        } finally {
+          button.disabled = false;
+          button.textContent = original;
         }
-      });
-    }
-
-    const delay = ms => new Promise(res => setTimeout(res, ms));
-
-    async function runAutoDemo() {
-      const btn = el('autoDemoBtn');
-      if (flowInFlight || notifyInFlight) {
-        setStatus("notify", "wait", "Wait for active operation to complete");
-        return;
-      }
-      if (!btn || btn.disabled) return;
-      setButtonBusy("autoDemoBtn", true, "Running Demo...");
-
-      try {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        // Guarantee voices are loaded and clear any stale queue when TTS is supported.
-        if (canUseSpeechSynthesis()) {
-          window.speechSynthesis.cancel();
-          window.speechSynthesis.getVoices();
-        } else {
-          setStatus("notify", "wait", "TTS unavailable, running silent demo");
-        }
-
-        await speakKorean("안녕하세요. 스테이지파일럿 넥서스의 자동화 데모를 시작하겠습니다.");
-        await delay(500);
-
-        await speakKorean("첫번째 단계로, 실시간 접수된 위기 가구의 복지 데이터를 시스템에 로드합니다.");
-        el('sampleBtn').style.boxShadow = "0 0 20px #00E5FF";
-        await delay(500);
-        el('sampleBtn').click();
-        await delay(500);
-        el('sampleBtn').style.boxShadow = "none";
-
-        scrollToPanel(2, "center");
-        await speakKorean("이어서 디지털 트윈 매트릭스를 조작하여 현장의 인력과 수요 변화를 시뮬레이션 환경에 반영합니다. 여기서는 긴급 수요를 늘려보겠습니다.");
-        el('demandDelta').value = 50;
-        el('demandDelta').dispatchEvent(new Event('input'));
-        setRangeOutputs();
-        await delay(1000);
-
-        scrollToPanel(1, "center");
-        await speakKorean("모든 환경 준비가 완료되었습니다. 이제 구글 제미나이와 연결된 오케스트레이션 엔진을 시작하겠습니다.");
-        el('runBtn').style.boxShadow = "0 0 20px #00E5FF";
-        await delay(500);
-        const flowPromise = runFlow();
-        el('runBtn').style.boxShadow = "none";
-
-        scrollToPanel(3, "start");
-        await delay(1500);
-        await speakKorean("A I가 실시간으로 데이터를 분석하고, 최상의 라우팅 경로와 액션 플랜을 도출하고 있습니다.");
-
-        await flowPromise;
-        await delay(1000);
-        await speakKorean("분석이 완료되었습니다. 화면에서 확인할 수 있듯이 최적의 지원 기관 매칭 결과와 시뮬레이션된 예상 지표들이 산출되었습니다.");
-        await delay(1500);
-
-        await speakKorean("마지막으로, 도출된 솔루션을 실제 담당 기관에 전송하기 위해 오픈클로 네트워크로 브로드캐스트 합니다.");
-        el('notifyBtn').style.boxShadow = "0 0 20px #B084E6";
-        await delay(500);
-        await notifyOpenClaw();
-        await delay(500);
-        el('notifyBtn').style.boxShadow = "none";
-
-        await delay(2500);
-
-        await speakKorean("모든 프로세스가 성공적으로 처리되었습니다. 이상으로 스테이지파일럿 넥서스의 시연을 마칩니다. 감사합니다.");
-      } catch (error) {
-        console.error(error);
-        const message = error instanceof Error ? error.message : "Auto demo failed";
-        setStatus("notify", "err", `DEMO FAULT: ${message}`);
-      } finally {
-        setButtonBusy("autoDemoBtn", false, "Running Demo...");
-        el('sampleBtn').style.boxShadow = "none";
-        el('runBtn').style.boxShadow = "none";
-        el('notifyBtn').style.boxShadow = "none";
-      }
+      };
     }
 
     async function boot() {
-      buildRiskTags();
-      bootstrapStatusStack();
-      setRangeOutputs();
-      setProfileFromDistrict();
-      bindEvents();
-      previewPayload(readPayload());
-      await loadRuntimeBrief();
-      await loadReviewPack();
+      renderScenarios();
+      applyScenario(state.selectedScenarioId);
+      refreshPayloadPreview();
+
+      document.querySelectorAll("input, textarea, select").forEach((node) => {
+        node.addEventListener("input", refreshPayloadPreview);
+        node.addEventListener("change", refreshPayloadPreview);
+      });
+
+      await Promise.all([
+        loadSummaries(),
+        loadOpsPack(elements.laneSelect.value),
+      ]);
+
+      elements.planButton.addEventListener("click", wrapBusy(elements.planButton, runPlan));
+      elements.insightsButton.addEventListener("click", wrapBusy(elements.insightsButton, runInsights));
+      elements.whatIfButton.addEventListener("click", wrapBusy(elements.whatIfButton, runWhatIf));
+      elements.notifyButton.addEventListener("click", wrapBusy(elements.notifyButton, runNotify));
+      elements.benchmarkButton.addEventListener("click", wrapBusy(elements.benchmarkButton, runBenchmark));
+      elements.laneSelect.addEventListener("change", async () => {
+        try {
+          await loadOpsPack(elements.laneSelect.value);
+        } catch (error) {
+          setWarmStatus(error instanceof Error ? error.message : "Failed to load developer ops pack.", "danger");
+        }
+      });
+      elements.copyJsonButton.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(JSON.stringify(state.latestMission || {}, null, 2));
+          setWarmStatus("Latest mission JSON copied to clipboard.", "");
+        } catch {
+          setWarmStatus("Clipboard write failed.", "danger");
+        }
+      });
     }
 
-    boot();
+    boot().catch((error) => {
+      setHeroState("Error", "warn");
+      setWarmStatus(error instanceof Error ? error.message : "Failed to boot reviewer console.", "danger");
+    });
   </script>
 </body>
 

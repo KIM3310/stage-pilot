@@ -12,6 +12,16 @@
 2. `StagePilot`: a multi-agent orchestration vertical with benchmark, API, demo UI, and Cloud Run path.
 3. `BenchLab`: prompt-mode BFCL experiment tooling, forensics, and local operator APIs.
 
+## Portfolio posture
+- Treat this repo as a benchmark and protocol-proof repo; the Pages site is the summary layer, not the runtime itself.
+- Benchmark artifacts, runtime brief, review pack, and eval/test surfaces are the evidence base for performance claims.
+
+
+## Role signals
+- **AI engineer:** benchmark discipline, parser middleware, and tool-calling reliability are the core signals.
+- **Solution architect:** package, API, benchmark, and review surfaces are separated enough to discuss production posture honestly.
+- **Field / solutions engineer:** the repo gives you a fast benchmark walkthrough with proof artifacts instead of vague model claims.
+
 ## Project links
 
 - GitHub profile: https://github.com/KIM3310

@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import sys
 import time
+import argparse
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -84,6 +85,70 @@ class Candidate:
 def log(message: str) -> None:
     timestamp = datetime.now(KST).strftime("%Y-%m-%d %H:%M:%S KST")
     print(f"[{timestamp}] {message}", flush=True)
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Search BFCL prompt-mode RALPH variants for local or service-backed models."
+    )
+    parser.add_argument(
+        "--runtime-root",
+        type=Path,
+        default=OVERNIGHT_ROOT,
+        help="Output directory for matrix runs and hunt status.",
+    )
+    parser.add_argument(
+        "--local-only",
+        action="store_true",
+        help="Skip Gemini CLI candidates and search only local Ollama-backed models.",
+    )
+    parser.add_argument(
+        "--families",
+        type=str,
+        default="",
+        help="Optional comma-separated candidate family filter (for example qwen3.5-4b,gemma3-4b).",
+    )
+    parser.add_argument(
+        "--phase1-cases",
+        type=int,
+        default=3,
+        help="Cases per category for the first search phase.",
+    )
+    parser.add_argument(
+        "--phase2-cases",
+        type=int,
+        default=3,
+        help="Cases per category for the second search phase.",
+    )
+    parser.add_argument(
+        "--validation5-cases",
+        type=int,
+        default=5,
+        help="Cases per category for the first validation phase.",
+    )
+    parser.add_argument(
+        "--validation10-cases",
+        type=int,
+        default=10,
+        help="Cases per category for the second validation phase.",
+    )
+    parser.add_argument(
+        "--min-improvement-pp",
+        type=float,
+        default=MIN_IMPROVEMENT_PP,
+        help="Minimum overall delta in percentage points required to keep a winner.",
+    )
+    parser.add_argument(
+        "--skip-phase-two",
+        action="store_true",
+        help="Skip the second search phase even if phase one produces no winner for some families.",
+    )
+    parser.add_argument(
+        "--skip-validation10",
+        action="store_true",
+        help="Skip the larger validation pass.",
+    )
+    return parser.parse_args()
 
 
 def now_kst() -> datetime:
@@ -281,6 +346,14 @@ def build_phase_one_candidates(
     return candidates
 
 
+def filter_candidates(
+    candidates: list[Candidate], allowed_families: set[str]
+) -> list[Candidate]:
+    if not allowed_families:
+        return candidates
+    return [candidate for candidate in candidates if candidate.family in allowed_families]
+
+
 def build_phase_two_candidates(
     families_without_win: set[str], available_locals: set[str]
 ) -> list[Candidate]:
@@ -442,31 +515,48 @@ def write_status(path: Path, payload: dict[str, Any]) -> None:
 
 
 def main() -> None:
+    args = parse_args()
     if not BFCL_PYTHON.exists():
         raise SystemExit(f"BFCL python not found: {BFCL_PYTHON}")
 
     deadline = compute_deadline()
-    OVERNIGHT_ROOT.mkdir(parents=True, exist_ok=True)
-    status_path = OVERNIGHT_ROOT / "overnight_status.json"
+    runtime_root = args.runtime_root
+    runtime_root.mkdir(parents=True, exist_ok=True)
+    status_path = runtime_root / "overnight_status.json"
 
-    log(f"Overnight RALPH hunt root: {OVERNIGHT_ROOT}")
+    allowed_families = {
+        item.strip()
+        for item in args.families.split(",")
+        if item.strip()
+    }
+
+    log(f"Overnight RALPH hunt root: {runtime_root}")
     log(f"Deadline set to: {deadline.isoformat()}")
 
     installed_locals = installed_target_locals()
-    gemini_cli_path = find_gemini_cli()
+    gemini_cli_path = None if args.local_only else find_gemini_cli()
     if not gemini_cli_path:
-        log("Gemini CLI not found; skipping Gemini service-backed search")
+        log("Gemini CLI unavailable or disabled; skipping Gemini service-backed search")
     phase_one_candidates = build_phase_one_candidates(
         installed_locals,
         gemini_cli_path=gemini_cli_path,
     )
+    phase_one_candidates = filter_candidates(phase_one_candidates, allowed_families)
 
     status: dict[str, Any] = {
         "started_at": now_kst().isoformat(),
         "deadline": deadline.isoformat(),
+        "runtime_root": str(runtime_root),
+        "local_only": args.local_only,
+        "families": sorted(allowed_families),
         "installed_ollama_targets": sorted(installed_locals),
         "gemini_cli_available": gemini_cli_path is not None,
         "gemini_cli_path": gemini_cli_path,
+        "phase1_cases": args.phase1_cases,
+        "phase2_cases": args.phase2_cases,
+        "validation5_cases": args.validation5_cases,
+        "validation10_cases": args.validation10_cases,
+        "min_improvement_pp": args.min_improvement_pp,
         "phase_one_candidates": [candidate.entry_id for candidate in phase_one_candidates],
         "phase_one_winners": [],
         "phase_two_candidates": [],
@@ -488,8 +578,8 @@ def main() -> None:
         phase_one_records = run_matrix_phase(
             phase_name="phase1-search",
             candidates=phase_one_candidates,
-            cases_per_category=3,
-            runtime_root=OVERNIGHT_ROOT,
+            cases_per_category=args.phase1_cases,
+            runtime_root=runtime_root,
         )
     except Exception as exc:
         status["errors"].append(f"phase1-search failed: {exc}")
@@ -498,29 +588,30 @@ def main() -> None:
     phase_one_winners = best_improved_by_family(
         phase_one_candidates,
         phase_one_records,
-        min_improvement_pp=MIN_IMPROVEMENT_PP,
+        min_improvement_pp=args.min_improvement_pp,
     )
     status["phase_one_winners"] = [candidate.entry_id for candidate in phase_one_winners]
     write_status(status_path, status)
 
     remaining_families = families_without_win(phase_one_candidates, phase_one_winners)
     phase_two_candidates = build_phase_two_candidates(remaining_families, installed_locals)
+    phase_two_candidates = filter_candidates(phase_two_candidates, allowed_families)
     status["phase_two_candidates"] = [candidate.entry_id for candidate in phase_two_candidates]
     write_status(status_path, status)
 
     phase_two_winners: list[Candidate] = []
-    if phase_two_candidates and seconds_left(deadline) > 5400:
+    if (not args.skip_phase_two) and phase_two_candidates and seconds_left(deadline) > 5400:
         try:
             phase_two_records = run_matrix_phase(
                 phase_name="phase2-search",
                 candidates=phase_two_candidates,
-                cases_per_category=3,
-                runtime_root=OVERNIGHT_ROOT,
+                cases_per_category=args.phase2_cases,
+                runtime_root=runtime_root,
             )
             phase_two_winners = best_improved_by_family(
                 phase_two_candidates,
                 phase_two_records,
-                min_improvement_pp=MIN_IMPROVEMENT_PP,
+                min_improvement_pp=args.min_improvement_pp,
             )
             status["phase_two_winners"] = [
                 candidate.entry_id for candidate in phase_two_winners
@@ -546,13 +637,13 @@ def main() -> None:
             validation5_records = run_validation_phase(
                 phase_name="validation-5",
                 winners=validation_candidates,
-                cases_per_category=5,
-                runtime_root=OVERNIGHT_ROOT,
+                cases_per_category=args.validation5_cases,
+                runtime_root=runtime_root,
             )
             validation5_winners = best_improved_by_family(
                 validation_candidates,
                 validation5_records,
-                min_improvement_pp=MIN_IMPROVEMENT_PP,
+                min_improvement_pp=args.min_improvement_pp,
             )
             status["validation5_winners"] = [
                 candidate.entry_id for candidate in validation5_winners
@@ -562,18 +653,22 @@ def main() -> None:
             status["errors"].append(f"validation-5 failed: {exc}")
             write_status(status_path, status)
 
-    if validation5_winners and seconds_left(deadline) > 7200:
+    if (
+        (not args.skip_validation10)
+        and validation5_winners
+        and seconds_left(deadline) > 7200
+    ):
         try:
             validation10_records = run_validation_phase(
                 phase_name="validation-10",
                 winners=validation5_winners,
-                cases_per_category=10,
-                runtime_root=OVERNIGHT_ROOT,
+                cases_per_category=args.validation10_cases,
+                runtime_root=runtime_root,
             )
             validation10_winners = best_improved_by_family(
                 validation5_winners,
                 validation10_records,
-                min_improvement_pp=MIN_IMPROVEMENT_PP,
+                min_improvement_pp=args.min_improvement_pp,
             )
             status["validation10_winners"] = [
                 candidate.entry_id for candidate in validation10_winners

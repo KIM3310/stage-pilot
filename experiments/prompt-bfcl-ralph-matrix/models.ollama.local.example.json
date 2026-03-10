@@ -1,0 +1,88 @@
+{
+  "models": [
+    {
+      "id": "ollama-llama3-1-8b-schema-lock",
+      "label": "Ollama Meta Llama 3.1 8B [schema-lock]",
+      "kind": "openai-compatible",
+      "enabled": true,
+      "provider_name": "Ollama",
+      "provider_docs_url": "http://127.0.0.1:11434",
+      "provider_license": "Custom",
+      "model_name": "llama3.1:8b",
+      "base_url": "http://127.0.0.1:11434/v1",
+      "api_key": "dummy",
+      "skip_model_check": true,
+      "ralph_variant": "schema-lock"
+    },
+    {
+      "id": "ollama-llama3-2-latest-schema-lock",
+      "label": "Ollama Meta Llama 3.2 [schema-lock]",
+      "kind": "openai-compatible",
+      "enabled": true,
+      "provider_name": "Ollama",
+      "provider_docs_url": "http://127.0.0.1:11434",
+      "provider_license": "Custom",
+      "model_name": "llama3.2:latest",
+      "base_url": "http://127.0.0.1:11434/v1",
+      "api_key": "dummy",
+      "skip_model_check": true,
+      "ralph_variant": "schema-lock"
+    },
+    {
+      "id": "ollama-qwen3-5-4b-minimal",
+      "label": "Ollama Qwen 3.5 4B [minimal]",
+      "kind": "openai-compatible",
+      "enabled": true,
+      "provider_name": "Ollama",
+      "provider_docs_url": "http://127.0.0.1:11434",
+      "provider_license": "Custom",
+      "model_name": "qwen3.5:4b",
+      "base_url": "http://127.0.0.1:11434/v1",
+      "api_key": "dummy",
+      "skip_model_check": true,
+      "ralph_variant": "minimal"
+    },
+    {
+      "id": "ollama-phi3-latest-coverage",
+      "label": "Ollama Phi-3 [coverage]",
+      "kind": "openai-compatible",
+      "enabled": true,
+      "provider_name": "Ollama",
+      "provider_docs_url": "http://127.0.0.1:11434",
+      "provider_license": "Custom",
+      "model_name": "phi3:latest",
+      "base_url": "http://127.0.0.1:11434/v1",
+      "api_key": "dummy",
+      "skip_model_check": true,
+      "ralph_variant": "coverage"
+    },
+    {
+      "id": "ollama-gemma3-4b-coverage",
+      "label": "Ollama Gemma 3 4B [coverage]",
+      "kind": "openai-compatible",
+      "enabled": true,
+      "provider_name": "Ollama",
+      "provider_docs_url": "http://127.0.0.1:11434",
+      "provider_license": "Custom",
+      "model_name": "gemma3:4b",
+      "base_url": "http://127.0.0.1:11434/v1",
+      "api_key": "dummy",
+      "skip_model_check": true,
+      "ralph_variant": "coverage"
+    },
+    {
+      "id": "ollama-qwen2-5-1-5b-coverage",
+      "label": "Ollama Qwen 2.5 1.5B [coverage]",
+      "kind": "openai-compatible",
+      "enabled": true,
+      "provider_name": "Ollama",
+      "provider_docs_url": "http://127.0.0.1:11434",
+      "provider_license": "Custom",
+      "model_name": "qwen2.5:1.5b",
+      "base_url": "http://127.0.0.1:11434/v1",
+      "api_key": "dummy",
+      "skip_model_check": true,
+      "ralph_variant": "coverage"
+    }
+  ]
+}

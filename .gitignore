@@ -42,8 +42,10 @@ yarn-error.log*
 .DS_Store
 *.pem
 .demo-output
-experiments/**/artifacts/
+experiments/**/runtime*/
 experiments/**/*.local.json
+experiments/**/artifacts/**/stdout.log
+experiments/**/artifacts/**/stderr.log
 
 # ai agent tool
 .opencode

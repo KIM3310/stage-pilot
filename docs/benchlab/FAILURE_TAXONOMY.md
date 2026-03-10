@@ -1,39 +1,40 @@
 # Failure Taxonomy Snapshot
 
-This document summarizes checked-in `error_forensics.json` artifacts in this repository.
-It is intentionally limited to versioned benchmark claims, not untracked runtime folders.
+이 문서는 **현재 이 브랜치에 체크인된 local/no-key BFCL artifact** 기준으로
+실패/flat/regression 신호를 요약합니다.
 
 ## Snapshot
 
-Current checked-in snapshot as of 2026-03-07:
+Current checked-in snapshot as of 2026-03-11:
 
 - `6` claim artifacts include `error_forensics.json`.
-- `1` claim currently has populated error buckets.
-- The dominant tracked bucket is `timeout`.
-- Strongest tracked reduction: `qwen3.5:4b` minimal reduced recorded timeout errors from `6 -> 0` in the checked-in snapshot (baseline coverage: `40` eval items).
+- `3` improved claims, `1` flat control, `2` regressed pilots are checked in.
+- 현재 체크인된 artifact들은 모두 `error_items = 0` 이라서, **score delta 비교용**으로는 좋지만
+  bucket-level failure analysis용으로는 아직 backfill이 필요합니다.
 
 Why this matters:
 
-- Score deltas and failure deltas are separate signals.
-- A gain is more credible when the repo also shows which failure mode moved.
-- Coverage gaps are explicit when a claim has score evidence but no populated error buckets.
+- score delta와 failure bucket은 다른 신호다.
+- improvement claim만 남기면 과장처럼 보일 수 있다.
+- flat/regressed control을 같이 남겨야 어떤 variant가 어디서 안 먹히는지 설명하기 쉽다.
 
 ## Current Checked-In Claims
 
 | Claim | Model | Outcome | Delta (pp) | Error signal |
 |---|---|---|---:|---|
-| `claim-11.1` | `grok-4-latest` | improved | +0.83 | zero recorded error buckets |
-| `claim-gemini-cli-2-5-flash-lite-3-minimal` | `gemini-cli-2-5-flash-lite` | flat | +0.00 | zero recorded error buckets |
-| `claim-ollama-llama3-1-8b-20-schema-lock` | `llama3.1:8b` | improved | +0.08 | zero recorded error buckets |
-| `claim-ollama-llama3-2-20` | `llama3.2:latest` | improved | +0.12 | zero recorded error buckets |
-| `claim-ollama-llama3-2-20-schema-lock` | `llama3.2:latest` | improved | +0.12 | zero recorded error buckets |
-| `claim-ollama-qwen3-5-4b-10-minimal` | `qwen3.5:4b` | improved | +1.25 | `timeout` bucket, baseline `6/40`, no RALPH-side error bucket recorded |
+| `claim-ollama-llama3-1-8b-5-schema-lock` | `llama3.1:8b` | improved | +0.50 | zero recorded error buckets |
+| `claim-ollama-llama3-2-5-schema-lock` | `llama3.2:latest` | improved | +0.50 | zero recorded error buckets |
+| `claim-ollama-qwen3-5-4b-5-minimal` | `qwen3.5:4b` | improved | +0.50 | zero recorded error buckets |
+| `claim-ollama-phi3-latest-5-coverage` | `phi3:latest` | flat | +0.00 | zero recorded error buckets |
+| `claim-ollama-gemma3-4b-3-minimal` | `gemma3:4b` | regressed | -1.67 | zero recorded error buckets |
+| `claim-ollama-qwen2-5-1-5b-3-minimal` | `qwen2.5:1.5b` | regressed | -0.83 | zero recorded error buckets |
 
 ## Interpretation
 
-- The checked-in artifact set currently proves that this repo tracks failure shape, not just accuracy deltas.
-- The evidence is intentionally sparse rather than inflated: only one checked-in claim currently has non-zero error buckets.
-- This is still useful because it shows the repository can separate `score gain` from `failure-mode gain` and can surface where coverage needs backfill.
+- `schema-lock`는 `llama3.1:8b`, `llama3.2:latest`에서 현재 가장 안정적인 no-key variant로 보인다.
+- `minimal`은 `qwen3.5:4b`에서는 이득이 있었지만, `gemma3:4b`와 `qwen2.5:1.5b`에서는 오히려 손해였다.
+- `coverage`는 `phi3:latest`에서 최소한 성능을 해치지 않는 flat control로 남았다.
+- 즉, RALPH는 모델마다 다르게 먹히고, 작은 로컬 모델일수록 variant 선택이 더 중요하다.
 
 ## Local Inspection
 

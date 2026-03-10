@@ -36,6 +36,7 @@
 - BenchLab reviewer API: `GET /v1/benchlab/runtime-brief`, `GET /v1/benchlab/review-pack`, `GET /v1/benchlab/schema/job-report`
 - Checked-in benchmark proof: baseline `29.17%` -> middleware `87.50%` -> Ralph loop `100.00%`
 - Checked-in BenchLab claims: runtime compare, variant leaderboard, best artifacts, and failure forensics
+- Latest no-key local validation: `llama3.1:8b`, `llama3.2:latest`, `qwen3.5:4b` all moved from `7.83` to `8.33` with tuned RALPH variants on a `5` cases/category sweep
 
 ## Review Flow
 
@@ -54,6 +55,7 @@
 - Architecture: [`docs/solution-architecture.md`](docs/solution-architecture.md)
 - Overview: [`docs/executive-one-pager.md`](docs/executive-one-pager.md)
 - Discovery notes: [`docs/discovery-guide.md`](docs/discovery-guide.md)
+- Local no-key sweep: [`docs/benchlab/LOCAL_OLLAMA_SWEEP_20260311.md`](docs/benchlab/LOCAL_OLLAMA_SWEEP_20260311.md)
 
 ## References and attribution
 

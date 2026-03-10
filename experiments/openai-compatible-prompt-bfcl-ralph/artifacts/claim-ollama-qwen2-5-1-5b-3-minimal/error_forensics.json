@@ -1,0 +1,17 @@
+{
+  "registries": {
+    "qwen2.5:1.5b-prompt-baseline": {
+      "total_items": 12,
+      "error_items": 0,
+      "error_rate_percent": 0.0,
+      "error_reasons": []
+    },
+    "qwen2.5:1.5b-prompt-ralph-loop-minimal": {
+      "total_items": 12,
+      "error_items": 0,
+      "error_rate_percent": 0.0,
+      "error_reasons": []
+    }
+  },
+  "updated_at_utc": "2026-03-10T15:25:23.660653+00:00"
+}

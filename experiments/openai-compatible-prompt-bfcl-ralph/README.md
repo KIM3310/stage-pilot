@@ -8,36 +8,44 @@ BFCL v4에서 **OpenAI-compatible prompt mode** 기준으로 baseline prompt와 
 
 여러 모델을 한 번에 돌리고 분류하려면 `../prompt-bfcl-ralph-matrix`를 사용합니다.
 
-## Checked-In Success Snapshot
+## Checked-In No-Key Local Validation (2026-03-11)
 
-- `llama3.1:8b` on Ollama with `schema-lock` RALPH (`20` cases/category): `7.67 -> 7.75`, `+0.08pp`, `+1.04%` relative
-- Evidence:
-  - `artifacts/claim-ollama-llama3-1-8b-20-schema-lock/summary.json`
-  - `artifacts/claim-ollama-llama3-1-8b-20-schema-lock/benchmark_report.md`
-  - `artifacts/claim-ollama-llama3-1-8b-20-schema-lock/data_overall.csv`
-  - `artifacts/claim-ollama-llama3-1-8b-20-schema-lock/error_forensics.json`
+이 섹션은 **API key 없이 Ollama 로컬 모델로 다시 돌린 validation 결과**만 정리합니다.
 
-![Meta Llama 3.1 8B Prompt-Mode BFCL Improvement](https://raw.githubusercontent.com/KIM3310/ai-sdk-tool-calling-lab/main/experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-llama3-1-8b-20-schema-lock/benchmark-ollama-llama3-1-8b-20-schema-lock.svg)
+- `llama3.1:8b` on Ollama with `schema-lock` RALPH (`5` cases/category): `7.83 -> 8.33`, `+0.50pp`, `+6.39%` relative
+  - `artifacts/claim-ollama-llama3-1-8b-5-schema-lock/summary.json`
+  - `artifacts/claim-ollama-llama3-1-8b-5-schema-lock/benchmark_report.md`
+  - `artifacts/claim-ollama-llama3-1-8b-5-schema-lock/data_overall.csv`
+  - `artifacts/claim-ollama-llama3-1-8b-5-schema-lock/benchmark-ollama-llama3-1-8b-5-schema-lock.svg`
 
-- `llama3.2:latest` on Ollama with `schema-lock` RALPH (`20` cases/category): `7.50 -> 7.62`, `+0.12pp`, `+1.60%` relative
-- Evidence:
-  - `artifacts/claim-ollama-llama3-2-20-schema-lock/summary.json`
-  - `artifacts/claim-ollama-llama3-2-20-schema-lock/benchmark_report.md`
-  - `artifacts/claim-ollama-llama3-2-20-schema-lock/data_overall.csv`
-  - `artifacts/claim-ollama-llama3-2-20-schema-lock/error_forensics.json`
+![Meta Llama 3.1 8B Prompt-Mode BFCL Gain](artifacts/claim-ollama-llama3-1-8b-5-schema-lock/benchmark-ollama-llama3-1-8b-5-schema-lock.svg)
 
-![Meta Llama 3.2 Prompt-Mode BFCL Improvement](https://raw.githubusercontent.com/KIM3310/ai-sdk-tool-calling-lab/main/experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-llama3-2-20-schema-lock/benchmark-ollama-llama3-2-20-schema-lock.svg)
+- `llama3.2:latest` on Ollama with `schema-lock` RALPH (`5` cases/category): `7.83 -> 8.33`, `+0.50pp`, `+6.39%` relative
+  - `artifacts/claim-ollama-llama3-2-5-schema-lock/summary.json`
+  - `artifacts/claim-ollama-llama3-2-5-schema-lock/benchmark_report.md`
+  - `artifacts/claim-ollama-llama3-2-5-schema-lock/data_overall.csv`
+  - `artifacts/claim-ollama-llama3-2-5-schema-lock/benchmark-ollama-llama3-2-5-schema-lock.svg`
 
-- `qwen3.5:4b` on Ollama with `minimal` RALPH (`10` cases/category): `6.08 -> 7.33`, `+1.25pp`, `+20.56%` relative
-- Evidence:
-  - `artifacts/claim-ollama-qwen3-5-4b-10-minimal/summary.json`
-  - `artifacts/claim-ollama-qwen3-5-4b-10-minimal/benchmark_report.md`
-  - `artifacts/claim-ollama-qwen3-5-4b-10-minimal/data_overall.csv`
-  - `artifacts/claim-ollama-qwen3-5-4b-10-minimal/error_forensics.json`
+![Meta Llama 3.2 Prompt-Mode BFCL Gain](artifacts/claim-ollama-llama3-2-5-schema-lock/benchmark-ollama-llama3-2-5-schema-lock.svg)
 
-![Qwen 3.5 4B Prompt-Mode BFCL Improvement](https://raw.githubusercontent.com/KIM3310/ai-sdk-tool-calling-lab/main/experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-qwen3-5-4b-10-minimal/benchmark-ollama-qwen3-5-4b-10-minimal.svg)
+- `qwen3.5:4b` on Ollama with `minimal` RALPH (`5` cases/category): `7.83 -> 8.33`, `+0.50pp`, `+6.39%` relative
+  - `artifacts/claim-ollama-qwen3-5-4b-5-minimal/summary.json`
+  - `artifacts/claim-ollama-qwen3-5-4b-5-minimal/benchmark_report.md`
+  - `artifacts/claim-ollama-qwen3-5-4b-5-minimal/data_overall.csv`
+  - `artifacts/claim-ollama-qwen3-5-4b-5-minimal/benchmark-ollama-qwen3-5-4b-5-minimal.svg`
+
+![Qwen 3.5 4B Prompt-Mode BFCL Gain](artifacts/claim-ollama-qwen3-5-4b-5-minimal/benchmark-ollama-qwen3-5-4b-5-minimal.svg)
+
+Flat / regression controls kept on purpose:
+
+- `phi3:latest` + `coverage` (`5` cases/category): `6.33 -> 6.33`, flat
+- `gemma3:4b` + `minimal` (`3` cases/category): `5.00 -> 3.33`, regressed
+- `qwen2.5:1.5b` + `minimal` (`3` cases/category): `7.50 -> 6.67`, regressed
 
 ## Required Environment
+
+Hosted OpenAI-compatible providers need the variables below.
+For local Ollama runs, use `api_key=dummy`, `--base-url http://127.0.0.1:11434/v1`, and `--skip-model-check` instead.
 
 ```bash
 export REPO_ROOT="$(git rev-parse --show-toplevel)"

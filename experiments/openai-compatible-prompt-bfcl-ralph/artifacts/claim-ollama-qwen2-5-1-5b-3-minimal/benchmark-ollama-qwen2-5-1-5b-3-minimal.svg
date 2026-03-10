@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-label="Qwen 2.5 1.5B Prompt-Mode BFCL Pilot">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8fbff"/>
+      <stop offset="100%" stop-color="#edf4ff"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="1200" height="720" fill="url(#bg)"/>
+
+  <text x="80" y="88" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="700" fill="#102a43">
+    Qwen 2.5 1.5B Prompt-Mode BFCL Pilot
+  </text>
+  <text x="80" y="128" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#334e68">
+    Ollama local · minimal RALPH · 3 cases/category
+  </text>
+
+  <line x1="120" y1="590" x2="1080" y2="590" stroke="#9fb3c8" stroke-width="2"/>
+  <line x1="120" y1="180" x2="120" y2="590" stroke="#9fb3c8" stroke-width="2"/>
+
+  <text x="76" y="595" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#486581">0</text><text x="76" y="513" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#486581">2</text><text x="76" y="431" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#486581">4</text><text x="76" y="349" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#486581">6</text><text x="76" y="267" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#486581">8</text><text x="76" y="185" font-family="Arial, Helvetica, sans-serif" font-size="16" fill="#486581">10</text>
+
+  <rect x="300" y="282.50" width="220" height="307.50" rx="12" fill="#6c7a89"/>
+  <text x="410" y="272" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#334e68">7.50</text>
+  <text x="410" y="630" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#334e68">Baseline</text>
+
+  <rect x="700" y="316.53" width="220" height="273.47" rx="12" fill="#c92a2a"/>
+  <text x="810" y="307" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#9b2226">6.67</text>
+  <text x="810" y="630" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#9b2226">RALPH Loop</text>
+
+  <rect x="430" y="150" width="380" height="58" rx="29" fill="#fde8e8" stroke="#f08c8c"/>
+  <text x="620" y="188" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#9b2226">
+    -0.83pp | -11.1% relative
+  </text>
+
+  <text x="80" y="682" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#627d98">
+    Source: BFCL v4 prompt mode · Ollama qwen2.5:1.5b · phase1 search
+  </text>
+</svg>

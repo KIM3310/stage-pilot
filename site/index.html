@@ -240,8 +240,9 @@
               separately from the core parser package.
             </li>
             <li>
-              A free static site can still explain trust boundaries, benchmark
-              lift, and adoption posture.
+              A static reviewer surface can still explain trust boundaries,
+              benchmark lift, and adoption posture without pretending to host
+              the full runtime.
             </li>
           </ul>
         </article>
@@ -314,7 +315,7 @@
       <section class="panel quick-actions">
         <h2>Benchmark handoff bar</h2>
         <p class="hint">
-          Shortcut keys: C review path · B reviewer brief · L launch deck · ?
+          Shortcut keys: C review path · B benchmark brief · L launch deck · ?
           help
         </p>
         <div class="action-row">
@@ -330,7 +331,7 @@
         </div>
         <p id="quickActionStatus" class="hint">
           Use this bar when you need the benchmark story, not the whole repo
-          tour. Shortcut keys: C review path · B reviewer brief · L launch deck
+          tour. Shortcut keys: C review path · B benchmark brief · L launch deck
           · ? help
         </p>
       </section>
@@ -379,7 +380,7 @@
       reviewerBrief: {
         buttonId: "copyReviewerBriefBtn",
         payload:
-          "StagePilot reviewer brief\nHeadline: Reliable tool calling for non-native models.\nBaseline: 29.17%\nMiddleware: 87.50%\nRalph loop: 100.00%\nStatic site posture: reviewer-first Pages surface, backend hosted separately.",
+          "StagePilot reviewer brief\nHeadline: Reliable tool calling for non-native models.\nBaseline: 29.17%\nMiddleware: 87.50%\nRalph loop: 100.00%\nStatic site posture: reviewer-first Pages surface, runtime hosted separately.",
         successLabel: "Reviewer brief copied.",
         failureLabel: "Failed to copy reviewer brief.",
       },
@@ -439,7 +440,7 @@
       if (key === "?") {
         event.preventDefault();
         updateQuickActionStatus(
-          "Shortcut keys: C review path · B reviewer brief · L launch deck · ? help"
+          "Shortcut keys: C review path · B benchmark brief · L launch deck · ? help"
         );
         return;
       }

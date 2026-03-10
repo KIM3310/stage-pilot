@@ -1,0 +1,49 @@
+version: 2
+updates:
+  # Root package dependencies (pnpm workspace)
+  # This covers all workspace packages in apps/*, packages/*, and internals/*
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    groups:
+      npm-all-updates:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
+      - "automated"
+      - "npm"
+    commit-message:
+      prefix: "dependabot:"
+      include: "scope"
+    ignore:
+      # Aliased packages for AI SDK v5 compatibility - manually managed
+      - dependency-name: "ai-v5"
+      - dependency-name: "ai-v6"
+      - dependency-name: "@ai-sdk/provider-v5"
+      - dependency-name: "@ai-sdk/provider-v6"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "09:00"
+      timezone: "Asia/Seoul"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+    labels:
+      - "dependencies"
+      - "automated"
+      - "github-actions"
+    commit-message:
+      prefix: "dependabot:"
+      include: "scope"

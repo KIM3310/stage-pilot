@@ -133,7 +133,7 @@ export REPO_ROOT="$(git rev-parse --show-toplevel)"
 ```bash
 /Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python \
   "$REPO_ROOT/experiments/prompt-bfcl-ralph-matrix/run_prompt_bfcl_ralph_matrix.py" \
-  --models-file "$REPO_ROOT/experiments/prompt-bfcl-ralph-matrix/models.ollama.local.json" \
+  --models-file "$REPO_ROOT/experiments/prompt-bfcl-ralph-matrix/models.ollama.local.example.json" \
   --runtime-root "$REPO_ROOT/experiments/prompt-bfcl-ralph-matrix/runtime-ollama" \
   --cases-per-category 5
 ```
@@ -167,8 +167,8 @@ export REPO_ROOT="$(git rev-parse --show-toplevel)"
 - 기본 제공 `models.example.json`은 비용 방지를 위해 전부 `enabled: false`입니다.
 - 서비스형 예시 묶음은 `models.service-backed.example.json`에 들어 있습니다.
 - 실제 라이브 실행용 설정은 보통 `models.local.json`처럼 로컬 파일로 두고, API 키와 로컬 엔드포인트를 붙여서 돌립니다.
-- 돈을 쓰지 않는 점검용 예시는 `models.zero-cost.local.json`에 들어 있습니다. 이 파일은 `Kiro preflight + Ollama local models` 조합만 포함합니다.
-- 실제 무료 로컬 벤치마크 전용 구성은 `models.ollama.local.json`에 들어 있습니다.
+- 돈을 쓰지 않는 점검용 예시는 `models.zero-cost.local.example.json`에 들어 있습니다. 이 파일은 로컬 Ollama winner 후보만 남긴 시작점입니다.
+- 실제 무료 로컬 벤치마크 전용 시작점은 `models.ollama.local.example.json`에 들어 있습니다.
 - Ollama 로컬 구성은 실제 인증이 필요 없어서 `api_key: "dummy"`를 직접 넣어 두었습니다.
 - 현재 무과금 로컬 예시에는 `llama3.2`, `llama3.1:8b`, `qwen2.5:1.5b`, `qwen3.5:4b`, `phi3`, `gemma3:4b`가 들어 있습니다.
 - 이 프로젝트는 live API 호출이 들어갈 수 있으므로, 어떤 모델을 켤지 먼저 정해서 돌리는 게 맞습니다.
@@ -177,3 +177,17 @@ export REPO_ROOT="$(git rev-parse --show-toplevel)"
 - `Claude CLI`는 CLI가 설치돼 있어도 계정/조직에 Claude Code access가 없으면 preflight에서 실패합니다.
 - `OpenAI`와 `Mistral`은 `openai-compatible` kind로 설정하면 됩니다.
 - 매트릭스 runner는 이제 child runner가 결과 파일 생성 후 멈추는 경우 `eval-only salvage`를 시도합니다.
+
+## Local-only hunt
+
+로컬 Ollama만으로 variant search를 돌리려면:
+
+```bash
+/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python \
+  scripts/run_overnight_ralph_hunt.py \
+  --local-only \
+  --runtime-root experiments/prompt-bfcl-ralph-matrix/runtime-local-hunt \
+  --skip-validation10
+```
+
+특정 family만 다시 보고 싶으면 `--families qwen3.5-4b,phi3-latest` 처럼 줄일 수 있습니다.

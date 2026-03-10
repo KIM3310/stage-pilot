@@ -1,0 +1,17 @@
+{
+  "registries": {
+    "llama3.2:latest-prompt-baseline": {
+      "total_items": 20,
+      "error_items": 0,
+      "error_rate_percent": 0.0,
+      "error_reasons": []
+    },
+    "llama3.2:latest-prompt-ralph-loop-schema-lock": {
+      "total_items": 20,
+      "error_items": 0,
+      "error_rate_percent": 0.0,
+      "error_reasons": []
+    }
+  },
+  "updated_at_utc": "2026-03-10T16:02:26.548748+00:00"
+}

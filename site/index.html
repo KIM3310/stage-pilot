@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta
+      name="description"
+      content="Reliable tool calling for non-native models: parser middleware, StagePilot orchestration, and BenchLab prompt-mode eval tooling."
+    >
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="StagePilot">
+    <meta
+      property="og:description"
+      content="Reliable tool calling for non-native models: parser middleware, StagePilot orchestration, and BenchLab prompt-mode eval tooling."
+    >
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="StagePilot">
+    <meta
+      name="twitter:description"
+      content="Reliable tool calling for non-native models: parser middleware, StagePilot orchestration, and BenchLab prompt-mode eval tooling."
+    >
+    <title>StagePilot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    >
+    <style>
+    :root {
+      --bg: #f5f2eb;
+      --panel: #fffdfa;
+      --ink: #16181d;
+      --muted: #5f6774;
+      --line: #d8d4cb;
+      --accent: #165dff;
+      --soft: #eaf1ff;
+    }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: "IBM Plex Sans", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #faf7f0 0, #f1ece1 100%);
+    }
+    .shell {
+      max-width: 1100px;
+      padding: 32px 20px 56px;
+      margin: 0 auto;
+    }
+    .panel {
+      padding: 24px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.06);
+    }
+    .hero {
+      display: grid;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+    .eyebrow,
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 8px 12px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      border-radius: 999px;
+    }
+    .eyebrow {
+      color: #fff;
+      background: #111318;
+    }
+    .chip {
+      color: var(--accent);
+      background: var(--soft);
+    }
+    h1,
+    h2 {
+      margin: 0;
+      font-family: "Space Grotesk", sans-serif;
+      letter-spacing: -0.04em;
+    }
+    .hero h1 {
+      font-size: clamp(2.6rem, 5vw, 4.8rem);
+      line-height: 0.95;
+    }
+    .lede {
+      max-width: 820px;
+      margin: 0;
+      font-size: 1.02rem;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+    .metrics {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin: 18px 0;
+    }
+    .card {
+      padding: 18px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+    }
+    .label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .value {
+      font-family: "Space Grotesk", sans-serif;
+      font-size: 1.35rem;
+    }
+    .two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 18px;
+    }
+    .list {
+      padding-left: 18px;
+      margin: 0;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+    .links a {
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .links li {
+      margin: 0 0 8px;
+    }
+    .quick-actions {
+      margin-top: 18px;
+    }
+    .quick-actions .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .quick-actions .action-btn {
+      padding: 10px 14px;
+      font: inherit;
+      font-weight: 600;
+      color: var(--ink);
+      cursor: pointer;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      transition:
+        transform 0.12s ease,
+        box-shadow 0.12s ease,
+        border-color 0.12s ease;
+    }
+    .quick-actions .action-btn:hover {
+      border-color: var(--accent);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+      transform: translateY(-1px);
+    }
+    .quick-actions .hint {
+      margin: 10px 0 0;
+      font-size: 0.92rem;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+    @media (max-width: 900px) {
+      .metrics,
+      .two {
+        grid-template-columns: 1fr;
+      }
+    }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <section class="panel hero">
+        <div>
+          <span class="eyebrow">StagePilot</span>
+          <span class="chip">@ai-sdk-tool/parser</span>
+        </div>
+        <h1>Reliable tool calling for non-native models.</h1>
+        <p class="lede">
+          StagePilot is the canonical public surface for parser hardening,
+          bounded retry orchestration, and benchmark-backed reviewer proof. This
+          Pages site is intentionally static and free to host; the live API and
+          orchestration runtime remain a separate service concern.
+        </p>
+      </section>
+
+      <section class="grid metrics">
+        <article class="card">
+          <span class="label">Baseline</span>
+          <div class="value">29.17%</div>
+          <p>
+            Unchecked parse/plan success from the checked-in benchmark snapshot.
+          </p>
+        </article>
+        <article class="card">
+          <span class="label">Middleware</span>
+          <div class="value">87.50%</div>
+          <p>Schema-safe parser middleware recovers malformed tool outputs.</p>
+        </article>
+        <article class="card">
+          <span class="label">Ralph Loop</span>
+          <div class="value">100.00%</div>
+          <p>
+            One bounded retry closes the remaining gap in the current benchmark
+            set.
+          </p>
+        </article>
+      </section>
+
+      <section class="grid two">
+        <article class="panel">
+          <h2>What this repo proves</h2>
+          <ul class="list">
+            <li>
+              Parser middleware can make loose tool-call text safe enough for
+              real workflows.
+            </li>
+            <li>
+              Reliability claims are tied to checked-in benchmark artifacts, not
+              vague anecdotes.
+            </li>
+            <li>
+              Operator review surfaces and developer-ops lanes can be documented
+              separately from the core parser package.
+            </li>
+            <li>
+              A static reviewer surface can still explain trust boundaries,
+              benchmark lift, and adoption posture without pretending to host
+              the full runtime.
+            </li>
+          </ul>
+        </article>
+        <article class="panel">
+          <h2>Why this Pages version exists</h2>
+          <ul class="list">
+            <li>
+              Free and static: easy to keep online without paying for backend
+              uptime.
+            </li>
+            <li>
+              Reviewer-first: benchmark, docs, and proof assets stay readable
+              without running the API.
+            </li>
+            <li>
+              Service-ready later: the full runtime still maps naturally to
+              Cloud Run or another API host when needed.
+            </li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="grid two">
+        <article class="panel links">
+          <h2>Read first</h2>
+          <ul class="list">
+            <li>
+              <a
+                href="https://github.com/KIM3310/stage-pilot/blob/main/README.md"
+                >README</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/KIM3310/stage-pilot/blob/main/docs/executive-one-pager.md"
+                >Executive one-pager</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/KIM3310/stage-pilot/blob/main/docs/solution-architecture.md"
+                >Solution architecture</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/KIM3310/stage-pilot/blob/main/docs/STAGEPILOT.md"
+                >Operator runbook</a
+              >
+            </li>
+            <li>
+              <a
+                href="https://github.com/KIM3310/stage-pilot/blob/main/docs/benchmarks/stagepilot-latest.json"
+                >Latest benchmark artifact</a
+              >
+            </li>
+          </ul>
+        </article>
+        <article class="panel">
+          <h2>Current deployment posture</h2>
+          <ul class="list">
+            <li>Frontend: this static Pages microsite</li>
+            <li>Backend: not hosted on Pages by design</li>
+            <li>Recommended live runtime: Cloud Run or equivalent API host</li>
+            <li>Canonical repo: <code>KIM3310/stage-pilot</code></li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="panel quick-actions">
+        <h2>Benchmark handoff bar</h2>
+        <p class="hint">
+          Shortcut keys: C review path · B benchmark brief · L launch deck · ?
+          help
+        </p>
+        <div class="action-row">
+          <button id="copyReviewPathBtn" class="action-btn" type="button">
+            Copy Review Path
+          </button>
+          <button id="copyReviewerBriefBtn" class="action-btn" type="button">
+            Copy Benchmark Brief
+          </button>
+          <button id="copyLaunchDeckBtn" class="action-btn" type="button">
+            Copy Launch Deck
+          </button>
+        </div>
+        <p id="quickActionStatus" class="hint">
+          Use this bar when you need the benchmark story, not the whole repo
+          tour. Shortcut keys: C review path · B benchmark brief · L launch deck
+          · ? help
+        </p>
+      </section>
+    </main>
+
+    <script>
+    "use strict";
+
+    async function copyQuickActionText(text) {
+      if (!text) {
+        return false;
+      }
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+          return true;
+        }
+      } catch (_error) {
+        // Fallback below.
+      }
+      try {
+        const helper = document.createElement("textarea");
+        helper.value = text;
+        helper.style.position = "fixed";
+        helper.style.opacity = "0";
+        document.body.appendChild(helper);
+        helper.focus();
+        helper.select();
+        const ok = document.execCommand("copy");
+        document.body.removeChild(helper);
+        return Boolean(ok);
+      } catch (_error) {
+        return false;
+      }
+    }
+
+    const quickActionStatus = document.getElementById("quickActionStatus");
+    const quickActions = {
+      reviewPath: {
+        buttonId: "copyReviewPathBtn",
+        payload:
+          "StagePilot review path\n- Read the executive one-pager for the benchmark claim.\n- Open solution architecture for runtime boundaries.\n- Check the latest benchmark artifact before repeating the lift numbers.\n- Use the operator runbook only when the hosted runtime is actually involved.",
+        successLabel: "Review path copied.",
+        failureLabel: "Failed to copy review path.",
+      },
+      reviewerBrief: {
+        buttonId: "copyReviewerBriefBtn",
+        payload:
+          "StagePilot benchmark brief\nHeadline: Reliable tool calling for non-native models.\nBaseline: 29.17%\nMiddleware: 87.50%\nRalph loop: 100.00%\nStatic site posture: reviewer-first Pages surface, runtime hosted separately.",
+        successLabel: "Benchmark brief copied.",
+        failureLabel: "Failed to copy benchmark brief.",
+      },
+      launchDeck: {
+        buttonId: "copyLaunchDeckBtn",
+        payload:
+          "StagePilot launch deck\n- npm install\n- npm run build\n- npm run check\n- npm run exercise:runtime\n- Review benchmark and benchlab proof before hosted launch claims.",
+        successLabel: "Launch deck copied.",
+        failureLabel: "Failed to copy launch deck.",
+      },
+    };
+
+    function updateQuickActionStatus(message) {
+      if (quickActionStatus) {
+        quickActionStatus.textContent = message;
+      }
+    }
+
+    async function runQuickCopy(actionKey) {
+      const action = quickActions[actionKey];
+      if (!action) {
+        return;
+      }
+      const ok = await copyQuickActionText(action.payload);
+      updateQuickActionStatus(ok ? action.successLabel : action.failureLabel);
+    }
+
+    for (const [actionKey, action] of Object.entries(quickActions)) {
+      document
+        .getElementById(action.buttonId)
+        ?.addEventListener("click", () => {
+          runQuickCopy(actionKey).catch(() => {
+            updateQuickActionStatus(action.failureLabel);
+          });
+        });
+    }
+
+    window.addEventListener("keydown", (event) => {
+      if (
+        event.defaultPrevented ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey
+      ) {
+        return;
+      }
+      const target = event.target;
+      if (
+        target &&
+        (target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.isContentEditable)
+      ) {
+        return;
+      }
+      const key = String(event.key || "").toLowerCase();
+      if (key === "?") {
+        event.preventDefault();
+        updateQuickActionStatus(
+          "Shortcut keys: C review path · B benchmark brief · L launch deck · ? help"
+        );
+        return;
+      }
+      const keyToAction = {
+        c: "reviewPath",
+        b: "reviewerBrief",
+        l: "launchDeck",
+      };
+      const actionKey = keyToAction[key];
+      if (!(actionKey && quickActions[actionKey])) {
+        return;
+      }
+      event.preventDefault();
+      runQuickCopy(actionKey).catch(() => {
+        updateQuickActionStatus(quickActions[actionKey].failureLabel);
+      });
+    });
+    </script>
+  </body>
+</html>

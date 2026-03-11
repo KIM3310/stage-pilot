@@ -662,6 +662,12 @@ describe("benchlab api", () => {
           dominantBucket: "missing_args",
           modelName: "gemma3:4b",
           nextVariantsToTry: expect.arrayContaining(["schema-lock"]),
+          suggestedMatrixCommand: expect.stringContaining(
+            '--model-ids "ollama-gemma3-4b-schema-lock"'
+          ),
+          suggestedModelEntryJson: expect.stringContaining(
+            '"ralph_variant": "schema-lock"'
+          ),
         }),
       ])
     );

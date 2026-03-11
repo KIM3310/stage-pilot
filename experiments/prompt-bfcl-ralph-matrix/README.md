@@ -16,11 +16,11 @@
 
 ## What It Runs
 
-- `grok` kind: [../grok-prompt-bfcl-ralph/run_grok_prompt_bfcl_ralph.py](/Users/kim/github_repos/ai-sdk-tool-calling-lab/experiments/grok-prompt-bfcl-ralph/run_grok_prompt_bfcl_ralph.py)
-- `openai-compatible` kind: [../openai-compatible-prompt-bfcl-ralph/run_openai_compatible_prompt_bfcl_ralph.py](/Users/kim/github_repos/ai-sdk-tool-calling-lab/experiments/openai-compatible-prompt-bfcl-ralph/run_openai_compatible_prompt_bfcl_ralph.py)
-- `kiro-cli` kind: [../kiro-cli-prompt-bfcl-ralph/run_kiro_cli_prompt_bfcl_ralph.py](/Users/kim/github_repos/ai-sdk-tool-calling-lab/experiments/kiro-cli-prompt-bfcl-ralph/run_kiro_cli_prompt_bfcl_ralph.py)
-- `gemini-cli` kind: [../gemini-cli-prompt-bfcl-ralph/run_gemini_cli_prompt_bfcl_ralph.py](/Users/kim/github_repos/ai-sdk-tool-calling-lab/experiments/gemini-cli-prompt-bfcl-ralph/run_gemini_cli_prompt_bfcl_ralph.py)
-- `claude-cli` kind: [../claude-cli-prompt-bfcl-ralph/run_claude_cli_prompt_bfcl_ralph.py](/Users/kim/github_repos/ai-sdk-tool-calling-lab/experiments/claude-cli-prompt-bfcl-ralph/run_claude_cli_prompt_bfcl_ralph.py)
+- `grok` kind: [run_grok_prompt_bfcl_ralph.py](../grok-prompt-bfcl-ralph/run_grok_prompt_bfcl_ralph.py)
+- `openai-compatible` kind: [run_openai_compatible_prompt_bfcl_ralph.py](../openai-compatible-prompt-bfcl-ralph/run_openai_compatible_prompt_bfcl_ralph.py)
+- `kiro-cli` kind: [run_kiro_cli_prompt_bfcl_ralph.py](../kiro-cli-prompt-bfcl-ralph/run_kiro_cli_prompt_bfcl_ralph.py)
+- `gemini-cli` kind: [run_gemini_cli_prompt_bfcl_ralph.py](../gemini-cli-prompt-bfcl-ralph/run_gemini_cli_prompt_bfcl_ralph.py)
+- `claude-cli` kind: [run_claude_cli_prompt_bfcl_ralph.py](../claude-cli-prompt-bfcl-ralph/run_claude_cli_prompt_bfcl_ralph.py)
 
 ## Config
 

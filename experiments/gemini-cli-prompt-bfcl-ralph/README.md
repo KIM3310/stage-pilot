@@ -11,8 +11,8 @@
 
 ## Runner
 
-- [run_gemini_cli_prompt_bfcl_ralph.py](/Users/kim/github_repos/ai-sdk-tool-calling-lab/experiments/gemini-cli-prompt-bfcl-ralph/run_gemini_cli_prompt_bfcl_ralph.py)
-- [test_run_gemini_cli_prompt_bfcl_ralph.py](/Users/kim/github_repos/ai-sdk-tool-calling-lab/experiments/gemini-cli-prompt-bfcl-ralph/test_run_gemini_cli_prompt_bfcl_ralph.py)
+- [run_gemini_cli_prompt_bfcl_ralph.py](./run_gemini_cli_prompt_bfcl_ralph.py)
+- [test_run_gemini_cli_prompt_bfcl_ralph.py](./test_run_gemini_cli_prompt_bfcl_ralph.py)
 
 ## Checked-In Benchmark Snapshot
 
@@ -41,4 +41,4 @@
 
 - 이 러너는 `GEMINI_API_KEY` 없이도 `gemini` CLI 로그인 세션이 살아 있으면 돌릴 수 있습니다.
 - 결과 문자열은 BFCL AST 디코더가 읽을 수 있도록 함수 호출만 추출/정규화합니다.
-- 대량 변형 탐색은 [../prompt-bfcl-ralph-matrix/README.md](/Users/kim/github_repos/ai-sdk-tool-calling-lab/experiments/prompt-bfcl-ralph-matrix/README.md)에서 `gemini-cli` kind로 실행합니다.
+- 대량 변형 탐색은 [prompt-bfcl-ralph-matrix README](../prompt-bfcl-ralph-matrix/README.md)에서 `gemini-cli` kind로 실행합니다.

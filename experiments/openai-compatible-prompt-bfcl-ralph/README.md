@@ -28,7 +28,6 @@ BFCL v4에서 **OpenAI-compatible prompt mode** 기준으로 baseline prompt와 
 
 ![Meta Llama 3.2 Prompt-Mode BFCL Gain](artifacts/claim-ollama-llama3-2-5-schema-lock/benchmark-ollama-llama3-2-5-schema-lock.svg)
 
-- `qwen3.5:4b` on Ollama with `minimal` RALPH (`5` cases/category): `7.83 -> 8.33`, `+0.50pp`, `+6.39%` relative
 - `llama3.2:latest` on Ollama with `schema-lock` RALPH (`10` cases/category): `7.50 -> 7.75`, `+0.25pp`, `+3.33%` relative
   - `artifacts/claim-ollama-llama3-2-10-schema-lock/summary.json`
   - `artifacts/claim-ollama-llama3-2-10-schema-lock/benchmark_report.md`
@@ -37,6 +36,7 @@ BFCL v4에서 **OpenAI-compatible prompt mode** 기준으로 baseline prompt와 
 
 ![Meta Llama 3.2 Prompt-Mode BFCL Follow-up](artifacts/claim-ollama-llama3-2-10-schema-lock/benchmark-ollama-llama3-2-10-schema-lock.svg)
 
+- `qwen3.5:4b` on Ollama with `minimal` RALPH (`5` cases/category): `7.83 -> 8.33`, `+0.50pp`, `+6.39%` relative
   - `artifacts/claim-ollama-qwen3-5-4b-5-minimal/summary.json`
   - `artifacts/claim-ollama-qwen3-5-4b-5-minimal/benchmark_report.md`
   - `artifacts/claim-ollama-qwen3-5-4b-5-minimal/data_overall.csv`

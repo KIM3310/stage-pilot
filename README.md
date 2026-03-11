@@ -19,7 +19,7 @@
 
 ## Role signals
 - **AI engineer:** benchmark discipline, parser middleware, and tool-calling reliability are the core signals.
-- **Solution architect:** package, API, benchmark, and review surfaces are separated enough to discuss production posture honestly.
+- **Solution / cloud architect:** package, API, benchmark, and review surfaces are separated enough to discuss production posture honestly.
 - **Field / solutions engineer:** the repo gives you a fast benchmark walkthrough with proof artifacts instead of vague model claims.
 
 ## Project links

@@ -93,3 +93,17 @@ Regression pilot controls live under:
 - 현재 로컬 최신 Llama 라인에서는 `schema-lock`만 유의미한 gain을 만들었습니다.
 - `parallel-safe`, `coverage`, `strict`, `call-count`, `compact`는 이번 샘플에서는 모두 flat이었습니다.
 - 즉, 적어도 지금의 BFCL prompt-mode 범위에서는 **Llama 계열은 broad prompt보다 schema locking이 더 직접적인 이득**을 주는 쪽으로 보입니다.
+
+
+## Llama 3.2 stronger replay (10 cases / category)
+
+`llama3.2:latest + schema-lock`를 더 넓은 샘플로 다시 돌렸습니다.
+
+| Model | Variant | Baseline | RALPH | Delta (pp) | Relative delta | Outcome |
+|---|---|---:|---:|---:|---:|---|
+| `llama3.2:latest` | `schema-lock` | 7.50 | 7.75 | +0.25 | +3.33% | improved |
+
+읽는 포인트:
+- 3-case search에서 보인 `+0.83pp`보다 gain 폭은 줄었지만,
+- 더 넓은 `10` cases/category에서도 **양수 delta를 유지**했다.
+- 즉 `schema-lock`는 Llama 최신 로컬 라인에서 여전히 가장 믿을 만한 variant다.

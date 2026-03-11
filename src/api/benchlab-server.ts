@@ -220,7 +220,9 @@ interface BenchLabVariantRecommendation {
   providerName: string | null;
   recommendedCasesPerCategory: number;
   stage: string;
+  suggestedMatrixCommand: string | null;
   suggestedModelEntry: BenchLabSuggestedModelEntry | null;
+  suggestedModelEntryJson: string | null;
   testedVariants: string[];
 }
 
@@ -1855,6 +1857,12 @@ function buildVariantRecommendation(group: {
     group.providerName,
     nextVariantsToTry[0] ?? null
   );
+  const suggestedModelEntryJson =
+    formatSuggestedModelEntryJson(suggestedModelEntry);
+  const suggestedMatrixCommand = buildSuggestedMatrixCommand(
+    suggestedModelEntry,
+    recommendedCasesPerCategory
+  );
 
   return {
     bestCasesPerCategory,
@@ -1868,6 +1876,8 @@ function buildVariantRecommendation(group: {
     recommendedCasesPerCategory,
     stage,
     suggestedModelEntry,
+    suggestedModelEntryJson,
+    suggestedMatrixCommand,
     testedVariants,
   };
 }
@@ -1888,6 +1898,32 @@ function buildSuggestedModelEntry(
     provider_name: providerName,
     ralph_variant: variant,
   };
+}
+
+function formatSuggestedModelEntryJson(
+  suggestedModelEntry: BenchLabSuggestedModelEntry | null
+): string | null {
+  if (!suggestedModelEntry) {
+    return null;
+  }
+  return JSON.stringify(suggestedModelEntry, null, 2);
+}
+
+function buildSuggestedMatrixCommand(
+  suggestedModelEntry: BenchLabSuggestedModelEntry | null,
+  casesPerCategory: number
+): string | null {
+  if (!suggestedModelEntry) {
+    return null;
+  }
+
+  return [
+    'export REPO_ROOT="$(git rev-parse --show-toplevel)"',
+    'python3 "$REPO_ROOT/experiments/prompt-bfcl-ralph-matrix/run_prompt_bfcl_ralph_matrix.py" \\',
+    '  --models-file "$REPO_ROOT/experiments/prompt-bfcl-ralph-matrix/models.local.json" \\',
+    `  --model-ids "${suggestedModelEntry.id}" \\`,
+    `  --cases-per-category ${casesPerCategory}`,
+  ].join("\n");
 }
 
 function determineVariantStage(

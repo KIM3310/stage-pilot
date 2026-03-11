@@ -660,6 +660,14 @@
                 >historical recommendations</span
               >
             </div>
+            <div class="pill-row" style="margin-bottom: 12px">
+              <button class="ghost" id="copy-next-config-button" type="button">
+                Copy Next Config
+              </button>
+              <button class="ghost" id="copy-next-command-button" type="button">
+                Copy Matrix Command
+              </button>
+            </div>
             <div class="meta-grid" id="variant-meta"></div>
             <pre
               id="variant-body"
@@ -784,6 +792,10 @@ Loading checked-in artifact failure taxonomy.</pre
       compareMeta: document.querySelector("#compare-meta"),
       compareRight: document.querySelector("#compare-right"),
       compareTitle: document.querySelector("#compare-title"),
+      copyNextCommandButton: document.querySelector(
+        "#copy-next-command-button"
+      ),
+      copyNextConfigButton: document.querySelector("#copy-next-config-button"),
       copyPayloadButton: document.querySelector("#copy-payload-button"),
       copyProofButton: document.querySelector("#copy-proof-button"),
       copyReviewButton: document.querySelector("#copy-review-button"),
@@ -1419,7 +1431,16 @@ Loading checked-in artifact failure taxonomy.</pre
             item.nextVariantsToTry.length > 0
               ? item.nextVariantsToTry.join(", ")
               : "promote / validate current best";
-          return `${item.modelName || "-"} [${item.stage}] best=${item.bestVariant || "-"} ${formatSignedMetric(item.bestDeltaPp)} pp next=${nextText}`;
+          const copyHints = [];
+          if (item.suggestedModelEntryJson) {
+            copyHints.push("config ready");
+          }
+          if (item.suggestedMatrixCommand) {
+            copyHints.push("command ready");
+          }
+          const hintText =
+            copyHints.length > 0 ? ` · ${copyHints.join(" / ")}` : "";
+          return `${item.modelName || "-"} [${item.stage}] best=${item.bestVariant || "-"} ${formatSignedMetric(item.bestDeltaPp)} pp next=${nextText}${hintText}`;
         });
       els.variantBody.textContent = [
         ["[variant leaderboard]", ...variantLines].join("\n"),
@@ -2062,6 +2083,75 @@ Loading checked-in artifact failure taxonomy.</pre
       }
     }
 
+    function getPrimaryVariantRecommendation() {
+      const recommendations = state.variantSearch?.recommendations;
+      if (!Array.isArray(recommendations)) {
+        return null;
+      }
+      return (
+        recommendations.find(
+          (item) =>
+            item?.suggestedModelEntryJson || item?.suggestedMatrixCommand
+        ) || null
+      );
+    }
+
+    async function handleCopyNextConfig() {
+      const recommendation = getPrimaryVariantRecommendation();
+      const payload = recommendation?.suggestedModelEntryJson;
+      if (!payload) {
+        flashButtonLabel(
+          els.copyNextConfigButton,
+          "Copy Next Config",
+          "No config"
+        );
+        return;
+      }
+      try {
+        await copyTextToClipboard(payload);
+        flashButtonLabel(
+          els.copyNextConfigButton,
+          "Copy Next Config",
+          "Copied"
+        );
+      } catch (error) {
+        console.warn("copy next config failed", error);
+        flashButtonLabel(
+          els.copyNextConfigButton,
+          "Copy Next Config",
+          "Copy failed"
+        );
+      }
+    }
+
+    async function handleCopyNextCommand() {
+      const recommendation = getPrimaryVariantRecommendation();
+      const payload = recommendation?.suggestedMatrixCommand;
+      if (!payload) {
+        flashButtonLabel(
+          els.copyNextCommandButton,
+          "Copy Matrix Command",
+          "No command"
+        );
+        return;
+      }
+      try {
+        await copyTextToClipboard(payload);
+        flashButtonLabel(
+          els.copyNextCommandButton,
+          "Copy Matrix Command",
+          "Copied"
+        );
+      } catch (error) {
+        console.warn("copy next command failed", error);
+        flashButtonLabel(
+          els.copyNextCommandButton,
+          "Copy Matrix Command",
+          "Copy failed"
+        );
+      }
+    }
+
     async function submitJob(modeOverride) {
       els.launchButton.disabled = true;
       els.preflightButton.disabled = true;
@@ -2123,6 +2213,14 @@ Loading checked-in artifact failure taxonomy.</pre
 
     els.copyPayloadButton.addEventListener("click", async () => {
       await handleCopyPayload();
+    });
+
+    els.copyNextConfigButton.addEventListener("click", async () => {
+      await handleCopyNextConfig();
+    });
+
+    els.copyNextCommandButton.addEventListener("click", async () => {
+      await handleCopyNextCommand();
     });
 
     els.jobsList.addEventListener("click", async (event) => {

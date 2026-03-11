@@ -22,6 +22,7 @@ BFCL prompt-mode 향상 사례만 모아둡니다.
 | `llama3.1:8b` | Ollama | 5 | `schema-lock` | 7.83 | 8.33 | +0.50 | +6.39% |
 | `llama3.2:latest` | Ollama | 5 | `schema-lock` | 7.83 | 8.33 | +0.50 | +6.39% |
 | `qwen3.5:4b` | Ollama | 5 | `minimal` | 7.83 | 8.33 | +0.50 | +6.39% |
+| `llama3.2:latest` | Ollama | 10 | `schema-lock` | 7.50 | 7.75 | +0.25 | +3.33% |
 
 ## Flat / regressed local pilots
 
@@ -42,11 +43,16 @@ BFCL prompt-mode 향상 사례만 모아둡니다.
   - Report: `experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-llama3-1-8b-5-schema-lock/benchmark_report.md`
   - CSV: `experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-llama3-1-8b-5-schema-lock/data_overall.csv`
   - Chart: `experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-llama3-1-8b-5-schema-lock/benchmark-ollama-llama3-1-8b-5-schema-lock.svg`
-- Meta Llama 3.2
+- Meta Llama 3.2 (validation5)
   - Summary: `experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-llama3-2-5-schema-lock/summary.json`
   - Report: `experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-llama3-2-5-schema-lock/benchmark_report.md`
   - CSV: `experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-llama3-2-5-schema-lock/data_overall.csv`
   - Chart: `experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-llama3-2-5-schema-lock/benchmark-ollama-llama3-2-5-schema-lock.svg`
+- Meta Llama 3.2 (validation10 follow-up)
+  - Summary: `experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-llama3-2-10-schema-lock/summary.json`
+  - Report: `experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-llama3-2-10-schema-lock/benchmark_report.md`
+  - CSV: `experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-llama3-2-10-schema-lock/data_overall.csv`
+  - Chart: `experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-llama3-2-10-schema-lock/benchmark-ollama-llama3-2-10-schema-lock.svg`
 - Qwen 3.5 4B
   - Summary: `experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-qwen3-5-4b-5-minimal/summary.json`
   - Report: `experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-qwen3-5-4b-5-minimal/benchmark_report.md`
@@ -73,7 +79,13 @@ BFCL prompt-mode 향상 사례만 모아둡니다.
 
 ### Meta Llama 3.2
 
+Validation 5:
+
 ![Meta Llama 3.2 prompt-mode BFCL gain](../../experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-llama3-2-5-schema-lock/benchmark-ollama-llama3-2-5-schema-lock.svg)
+
+Validation 10 follow-up:
+
+![Meta Llama 3.2 prompt-mode BFCL follow-up](../../experiments/openai-compatible-prompt-bfcl-ralph/artifacts/claim-ollama-llama3-2-10-schema-lock/benchmark-ollama-llama3-2-10-schema-lock.svg)
 
 ### Qwen 3.5 4B
 

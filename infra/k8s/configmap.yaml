@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: stagepilot-config
+  namespace: stagepilot
+  labels:
+    app: stagepilot-api
+data:
+  APP_ENV: "production"
+  LOG_LEVEL: "info"
+  DEPLOYMENT_TRACK: "standard"
+  USE_GPU: "0"
+  BENCHMARK_CASES: "40"
+  SLA_URGENT_MINUTES: "120"
+  SLA_NORMAL_HOURS: "24"
+  STAGEPILOT_REQUEST_BODY_TIMEOUT_MS: "10000"
+
+  # GCP (set project-specific values here)
+  GCP_REGION: "asia-northeast3"
+  FIRESTORE_DATABASE: "(default)"
+  SERVICE_NAME_API: "stagepilot-api"
+  ARTIFACT_REPO: "stagepilot"
+
+  # AWS (optional multi-cloud)
+  AWS_REGION: "us-east-1"
+  AWS_CLOUDWATCH_NAMESPACE: "StagePilot"
+
+  # Monitoring
+  OTEL_EXPORTER_OTLP_ENDPOINT: ""
+  DD_ENV: "production"
+  DD_SERVICE: "stagepilot-api"

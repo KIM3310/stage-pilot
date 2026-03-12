@@ -410,3 +410,54 @@ export function buildStagePilotWorkflowRunDetail(requestId: string) {
     },
   };
 }
+
+export function buildStagePilotWorkflowReplay(options?: {
+  lane?: WorkflowLane;
+  limit?: number;
+}) {
+  const list = buildStagePilotWorkflowRunList(options);
+  const items = list.items.map((item) => {
+    const detail = item.requestId
+      ? buildStagePilotWorkflowRunDetail(item.requestId)
+      : null;
+    return {
+      requestId: item.requestId,
+      lane: item.lane,
+      path: item.path,
+      status: item.status,
+      statusCode: item.statusCode,
+      timestamp: item.timestamp,
+      proofRoutes: detail
+        ? [
+            detail.links.runtimeBrief,
+            detail.links.runtimeScorecard,
+            detail.links.developerOpsPack,
+            detail.links.reviewPack,
+          ]
+        : [],
+      timelineCount: detail?.timeline.length ?? 0,
+    };
+  });
+
+  return {
+    ok: true,
+    service: "stagepilot-workflow-replay",
+    generatedAt: new Date().toISOString(),
+    schema: "stagepilot-workflow-replay-v1",
+    filters: list.filters,
+    summary: {
+      totalRuns: list.summary.totalRuns,
+      visibleRuns: items.length,
+      attentionRuns: items.filter((item) => item.status === "attention").length,
+      lanes: list.summary.lanes,
+    },
+    items,
+    links: {
+      workflowReplay: "/v1/workflow-run-replay",
+      workflowRuns: "/v1/workflow-runs",
+      runtimeBrief: "/v1/runtime-brief",
+      runtimeScorecard: "/v1/runtime-scorecard",
+      reviewPack: "/v1/review-pack",
+    },
+  };
+}

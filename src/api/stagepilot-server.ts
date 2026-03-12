@@ -51,6 +51,7 @@ import {
 import {
   appendStagePilotRuntimeEvent,
   buildStagePilotRuntimeStoreSummary,
+  buildStagePilotWorkflowReplay,
   buildStagePilotWorkflowRunDetail,
   buildStagePilotWorkflowRunList,
 } from "./runtime-store";
@@ -1465,6 +1466,35 @@ function handleWorkflowRunDetailRequest(
   sendJson(response, 200, detail, options);
 }
 
+function handleWorkflowReplayReadonly(
+  response: ServerResponse,
+  rawUrl: string | undefined,
+  options: { includeBody?: boolean }
+) {
+  const parsed = new URL(rawUrl ?? "/", "http://127.0.0.1");
+  const rawLane = parsed.searchParams.get("lane");
+  const rawLimit = parsed.searchParams.get("limit");
+  const lane =
+    rawLane === "merge-request" ||
+    rawLane === "pipeline-recovery" ||
+    rawLane === "release-governor"
+      ? rawLane
+      : undefined;
+  const limit =
+    rawLimit == null || rawLimit.trim().length === 0
+      ? undefined
+      : Number.parseInt(rawLimit, 10);
+  sendJson(
+    response,
+    200,
+    buildStagePilotWorkflowReplay({
+      lane,
+      limit,
+    }),
+    options
+  );
+}
+
 function handleBenchmarkSummaryReadonly(
   response: ServerResponse,
   rawUrl: string | undefined,
@@ -2097,6 +2127,9 @@ function handleReadonlyRequest(options: {
       return true;
     case "/v1/workflow-runs":
       handleWorkflowRunsReadonly(response, rawUrl, { includeBody });
+      return true;
+    case "/v1/workflow-run-replay":
+      handleWorkflowReplayReadonly(response, rawUrl, { includeBody });
       return true;
     case "/v1/schema/plan-report":
       handlePlanReportSchemaRequest(response, { includeBody });

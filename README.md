@@ -13,7 +13,7 @@
 3. `BenchLab`: prompt-mode BFCL experiment tooling, forensics, and local operator APIs.
 
 ## Portfolio posture
-- Treat this repo as a reliability proof lab for tool calling, not as a general-purpose model demo.
+- Read this repo like a reliability proof lab for tool calling, not like a general-purpose model demo.
 - Benchmark artifacts, parser middleware, review pack, and eval/test surfaces are the real basis for the claims here.
 
 

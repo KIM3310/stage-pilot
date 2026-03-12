@@ -22,6 +22,12 @@
 - **Solution / cloud architect:** package, API, benchmark, and review surfaces are separated enough to discuss production posture honestly.
 - **Field / solutions engineer:** the repo gives you a fast benchmark walkthrough with proof artifacts instead of vague model claims.
 
+
+## Portfolio context
+- **Portfolio family:** AI reliability and incident systems
+- **This repo's role:** flagship reliability / tool-calling proof lab in the portfolio.
+- **Related repos:** `AegisOps`, `Aegis-Air`, `ogx`
+
 ## Project links
 
 - GitHub profile: https://github.com/KIM3310

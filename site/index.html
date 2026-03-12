@@ -63,6 +63,12 @@
       gap: 18px;
       margin-bottom: 18px;
     }
+    .proof-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 4px;
+    }
     .eyebrow,
     .chip {
       display: inline-flex;
@@ -189,32 +195,36 @@
       <section class="panel hero">
         <div>
           <span class="eyebrow">StagePilot</span>
-          <span class="chip">@ai-sdk-tool/parser</span>
+          <span class="chip">benchmarked parser safety</span>
         </div>
         <h1>Reliable tool calling for non-native models.</h1>
         <p class="lede">
-          StagePilot is the canonical public surface for parser hardening,
-          bounded retry orchestration, and benchmark-backed reviewer proof. This
-          Pages site is intentionally static and free to host; the live API and
-          orchestration runtime remain a separate service concern.
+          Start here if you want proof that non-native models can still call
+          tools safely. StagePilot turns malformed tool text into schema-safe
+          output, shows the benchmark lift, and keeps the reviewer story honest
+          with a static proof surface instead of a fake hosted runtime.
         </p>
+        <div class="proof-strip">
+          <span class="chip">raw benchmark → middleware → recovery loop</span>
+          <span class="chip">copy-ready reviewer path</span>
+        </div>
       </section>
 
       <section class="grid metrics">
         <article class="card">
-          <span class="label">Baseline</span>
+          <span class="label">Raw pass rate</span>
           <div class="value">29.17%</div>
           <p>
             Unchecked parse/plan success from the checked-in benchmark snapshot.
           </p>
         </article>
         <article class="card">
-          <span class="label">Middleware</span>
+          <span class="label">Parser recovery</span>
           <div class="value">87.50%</div>
           <p>Schema-safe parser middleware recovers malformed tool outputs.</p>
         </article>
         <article class="card">
-          <span class="label">Ralph Loop</span>
+          <span class="label">Recovery loop</span>
           <div class="value">100.00%</div>
           <p>
             One bounded retry closes the remaining gap in the current benchmark
@@ -247,15 +257,17 @@
           </ul>
         </article>
         <article class="panel">
-          <h2>Why this Pages version exists</h2>
+          <h2>30-second reviewer path</h2>
           <ul class="list">
             <li>
-              Free and static: easy to keep online without paying for backend
-              uptime.
+              Check the raw pass rate first so the middleware lift is concrete.
             </li>
             <li>
-              Reviewer-first: benchmark, docs, and proof assets stay readable
-              without running the API.
+              Open the README and benchmark assets before touching the runtime.
+            </li>
+            <li>
+              Use the copy bar below when you need a short handoff instead of a
+              long docs walk.
             </li>
             <li>
               Service-ready later: the full runtime still maps naturally to

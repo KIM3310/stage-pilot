@@ -931,7 +931,12 @@ describe("stagepilot api server", () => {
 
     expect(body.schema).toBe("stagepilot-workflow-replay-v1");
     expect(body.summary.visibleRuns).toBeGreaterThanOrEqual(2);
-    expect(body.items.some((item) => typeof item.requestId === "string" && item.requestId.length > 0)).toBe(true);
+    expect(
+      body.items.some(
+        (item) =>
+          typeof item.requestId === "string" && item.requestId.length > 0
+      )
+    ).toBe(true);
     expect(body.items[0].proofRoutes).toContain("/v1/runtime-scorecard");
     expect(body.items[0].timelineCount).toBeGreaterThanOrEqual(1);
     expect(body.links.workflowReplay).toBe("/v1/workflow-run-replay");

@@ -607,6 +607,7 @@ describe("stagepilot api server", () => {
     expect(body.headline).toContain("orchestration");
     expect(body.links.developerOpsPack).toBe("/v1/developer-ops-pack");
     expect(body.links.workflowRuns).toBe("/v1/workflow-runs");
+    expect(body.links.workflowReplay).toBe("/v1/workflow-run-replay");
   });
 
   it("returns runtime scorecard with live route telemetry", async () => {
@@ -666,6 +667,7 @@ describe("stagepilot api server", () => {
     expect(body.persistence.methodCounts.GET).toBeGreaterThanOrEqual(1);
     expect(body.persistence.statusClasses.ok).toBeGreaterThanOrEqual(1);
     expect(body.workflowRuns.schema).toBe("stagepilot-workflow-runs-v1");
+    expect(body.links.workflowReplay).toBe("/v1/workflow-run-replay");
     expect(body.operatorAuth.enabled).toBe(false);
     expect(body.traffic.routeCounts).toEqual(
       expect.arrayContaining([
@@ -723,6 +725,7 @@ describe("stagepilot api server", () => {
     ).toBeGreaterThan(50);
     expect(body.links.developerOpsPack).toBe("/v1/developer-ops-pack");
     expect(body.links.workflowRuns).toBe("/v1/workflow-runs");
+    expect(body.links.workflowReplay).toBe("/v1/workflow-run-replay");
     expect(body.links.benchmarkSummary).toBe("/v1/benchmark-summary");
     expect(body.proofBundle.benchmarkSummarySchema).toBe(
       "stagepilot-benchmark-summary-v1"
@@ -879,6 +882,60 @@ describe("stagepilot api server", () => {
       detailBody.timeline.some((item) => item.path === "/v1/benchmark")
     ).toBe(true);
     expect(detailBody.links.workflowRuns).toBe("/v1/workflow-runs");
+  });
+
+  it("returns workflow replay surface with proof routes after execution", async () => {
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    await fetch(`${baseUrl}/v1/plan`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        caseId: "runtime-replay-001",
+        district: "Gangbuk-gu",
+        notes: "Parser drift and delivery proof need review",
+        risks: ["housing", "food", "income"],
+        urgencyHint: "high",
+      }),
+    });
+
+    const benchmark = await fetch(`${baseUrl}/v1/benchmark`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        caseId: "runtime-replay-001",
+        baselineStrategy: "prompt-only",
+        candidateStrategy: "middleware",
+      }),
+    });
+    const benchmarkRequestId = benchmark.headers.get("x-request-id");
+    expect(benchmarkRequestId).toBeTruthy();
+
+    const response = await fetch(
+      `${baseUrl}/v1/workflow-run-replay?lane=pipeline-recovery`
+    );
+    expect(response.status).toBe(200);
+
+    const body = (await response.json()) as {
+      schema: string;
+      summary: { visibleRuns: number };
+      items: Array<{
+        requestId: string | null;
+        proofRoutes: string[];
+        timelineCount: number;
+      }>;
+      links: { workflowReplay: string; workflowRuns: string };
+    };
+
+    expect(body.schema).toBe("stagepilot-workflow-replay-v1");
+    expect(body.summary.visibleRuns).toBeGreaterThanOrEqual(2);
+    expect(body.items.some((item) => item.requestId === benchmarkRequestId)).toBe(true);
+    expect(body.items[0].proofRoutes).toContain("/v1/runtime-scorecard");
+    expect(body.items[0].timelineCount).toBeGreaterThanOrEqual(1);
+    expect(body.links.workflowReplay).toBe("/v1/workflow-run-replay");
+    expect(body.links.workflowRuns).toBe("/v1/workflow-runs");
   });
 
   it("rejects invalid benchmark summary filter", async () => {

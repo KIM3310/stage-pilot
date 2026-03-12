@@ -13,8 +13,8 @@
 3. `BenchLab`: prompt-mode BFCL experiment tooling, forensics, and local operator APIs.
 
 ## Portfolio posture
-- Treat this repo as a benchmark and protocol-proof repo; the Pages site is the summary layer, not the runtime itself.
-- Benchmark artifacts, runtime brief, review pack, and eval/test surfaces are the evidence base for performance claims.
+- Treat this repo as a reliability proof lab for tool calling, not as a general-purpose model demo.
+- Benchmark artifacts, parser middleware, review pack, and eval/test surfaces are the real basis for the claims here.
 
 
 ## Role signals

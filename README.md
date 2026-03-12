@@ -33,6 +33,7 @@
 - StagePilot reviewer API: `GET /v1/runtime-brief`, `GET /v1/review-pack`, `GET /v1/schema/plan-report`
 - StagePilot developer workflow pack: `GET /v1/developer-ops-pack`
 - StagePilot workflow history: `GET /v1/workflow-runs`, `GET /v1/workflow-runs/:requestId`
+- StagePilot workflow replay surface: `GET /v1/workflow-run-replay`
 - BenchLab reviewer API: `GET /v1/benchlab/runtime-brief`, `GET /v1/benchlab/review-pack`, `GET /v1/benchlab/schema/job-report`
 - Checked-in benchmark proof: baseline `29.17%` -> middleware `87.50%` -> Ralph loop `100.00%`
 - Checked-in BenchLab claims: runtime compare, variant leaderboard, best artifacts, and failure forensics
@@ -43,11 +44,12 @@
 
 1. `GET /v1/runtime-brief` -> confirm orchestration readiness and integration posture.
 2. `GET /v1/developer-ops-pack` -> inspect MR / pipeline / release lanes before demoing automation.
-3. `GET /v1/workflow-runs` -> verify recent developer workflow runs and reviewer-replay posture.
-4. `GET /v1/review-pack` -> inspect benchmark lift and parser/handoff boundary.
-5. `GET /v1/schema/plan-report` -> verify contract before trusting downstream routing output.
-6. `GET /v1/benchlab/review-pack` -> inspect checked-in runtime and artifact claims.
-7. `docs/review-pack.svg` + `docs/benchmarks/stagepilot-latest.json` -> read the strongest proof assets first.
+3. `GET /v1/workflow-runs` -> verify recent developer workflow runs.
+4. `GET /v1/workflow-run-replay` -> inspect replay-ready proof routes and recent workflow timeline.
+5. `GET /v1/review-pack` -> inspect benchmark lift and parser/handoff boundary.
+6. `GET /v1/schema/plan-report` -> verify contract before trusting downstream routing output.
+7. `GET /v1/benchlab/review-pack` -> inspect checked-in runtime and artifact claims.
+8. `docs/review-pack.svg` + `docs/benchmarks/stagepilot-latest.json` -> read the strongest proof assets first.
 
 ![StagePilot Review Pack](docs/review-pack.svg)
 

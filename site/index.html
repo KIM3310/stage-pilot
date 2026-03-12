@@ -69,6 +69,45 @@
       gap: 10px;
       margin-top: 4px;
     }
+    .lens-panel {
+      margin-top: 18px;
+    }
+    .lens-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .lens-tab {
+      padding: 10px 14px;
+      font: inherit;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+    }
+    .lens-tab.active {
+      color: var(--ink);
+      background: var(--soft);
+      border-color: var(--accent);
+    }
+    .lens-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .lens-card {
+      padding: 16px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+    }
+    .lens-card strong {
+      display: block;
+      margin-bottom: 8px;
+    }
     .eyebrow,
     .chip {
       display: inline-flex;
@@ -184,7 +223,8 @@
     }
     @media (max-width: 900px) {
       .metrics,
-      .two {
+      .two,
+      .lens-grid {
         grid-template-columns: 1fr;
       }
     }
@@ -275,6 +315,45 @@
             </li>
           </ul>
         </article>
+      </section>
+
+      <section class="panel lens-panel">
+        <div class="lens-tabs" role="tablist" aria-label="stagepilot lens">
+          <button id="lensRecruiterBtn" class="lens-tab active" type="button">
+            Recruiter
+          </button>
+          <button id="lensReviewerBtn" class="lens-tab" type="button">
+            Reviewer
+          </button>
+          <button id="lensPlatformBtn" class="lens-tab" type="button">
+            Platform
+          </button>
+        </div>
+        <h2 id="lensHeadline">Recruiter-first proof path</h2>
+        <p id="lensSummary" class="hint">
+          Start with benchmark lift, then show the parser recovery story, then
+          end with the copyable review path.
+        </p>
+        <div id="lensGrid" class="lens-grid">
+          <article class="lens-card">
+            <strong>01 · Raw baseline</strong>
+            <p>Show the unprotected pass rate before talking about any fix.</p>
+          </article>
+          <article class="lens-card">
+            <strong>02 · Parser recovery</strong>
+            <p>
+              Use the middleware lift as the real product proof, not as a side
+              note.
+            </p>
+          </article>
+          <article class="lens-card">
+            <strong>03 · Reviewer handoff</strong>
+            <p>
+              Copy the review path once the benchmark story is already easy to
+              repeat.
+            </p>
+          </article>
+        </div>
       </section>
 
       <section class="grid two">
@@ -381,6 +460,12 @@
     }
 
     const quickActionStatus = document.getElementById("quickActionStatus");
+    const lensHeadline = document.getElementById("lensHeadline");
+    const lensSummary = document.getElementById("lensSummary");
+    const lensGrid = document.getElementById("lensGrid");
+    const lensRecruiterBtn = document.getElementById("lensRecruiterBtn");
+    const lensReviewerBtn = document.getElementById("lensReviewerBtn");
+    const lensPlatformBtn = document.getElementById("lensPlatformBtn");
     const quickActions = {
       reviewPath: {
         buttonId: "copyReviewPathBtn",
@@ -404,6 +489,93 @@
         failureLabel: "Failed to copy launch deck.",
       },
     };
+    let currentLens = "recruiter";
+    const lensConfig = {
+      recruiter: {
+        headline: "Recruiter-first proof path",
+        summary:
+          "Start with benchmark lift, then show the parser recovery story, then end with the copyable review path.",
+        cards: [
+          [
+            "01 · Raw baseline",
+            "Show the unprotected pass rate before talking about any fix.",
+          ],
+          [
+            "02 · Parser recovery",
+            "Use the middleware lift as the real product proof, not as a side note.",
+          ],
+          [
+            "03 · Reviewer handoff",
+            "Copy the review path once the benchmark story is already easy to repeat.",
+          ],
+        ],
+      },
+      reviewer: {
+        headline: "Reviewer lens",
+        summary:
+          "Use this when the audience cares more about benchmark rigor, checked-in artifacts, and trust boundary than the parser headline alone.",
+        cards: [
+          [
+            "01 · Benchmark asset",
+            "Open the benchmark and docs before claiming the middleware works.",
+          ],
+          [
+            "02 · Recovery loop",
+            "Explain the bounded retry as a deliberate reliability step, not magic.",
+          ],
+          [
+            "03 · Proof path",
+            "Use the copy bar after the benchmark story is grounded.",
+          ],
+        ],
+      },
+      platform: {
+        headline: "Platform lens",
+        summary:
+          "Use this when the reviewer wants to know how the parser package, API surface, and hosted wrapper fit together.",
+        cards: [
+          [
+            "01 · Package first",
+            "Keep the parser package as the core product, not the hosted shell.",
+          ],
+          [
+            "02 · Hosted wrapper",
+            "Explain the wrapper as optional review infrastructure.",
+          ],
+          [
+            "03 · Repeatable route",
+            "Use the doctor deck and review path to keep the runtime story reproducible.",
+          ],
+        ],
+      },
+    };
+
+    function renderLensGrid() {
+      const config = lensConfig[currentLens];
+      if (!config) {
+        return;
+      }
+      lensHeadline.textContent = config.headline;
+      lensSummary.textContent = config.summary;
+      lensGrid.innerHTML = config.cards
+        .map(
+          ([title, body]) =>
+            `<article class="lens-card"><strong>${title}</strong><p>${body}</p></article>`
+        )
+        .join("");
+      for (const btn of [lensRecruiterBtn, lensReviewerBtn, lensPlatformBtn]) {
+        btn?.classList.remove("active");
+      }
+      if (currentLens === "recruiter") {
+        lensRecruiterBtn?.classList.add("active");
+      }
+      if (currentLens === "reviewer") {
+        lensReviewerBtn?.classList.add("active");
+      }
+      if (currentLens === "platform") {
+        lensPlatformBtn?.classList.add("active");
+      }
+    }
 
     function updateQuickActionStatus(message) {
       if (quickActionStatus) {
@@ -429,6 +601,20 @@
           });
         });
     }
+
+    lensRecruiterBtn?.addEventListener("click", () => {
+      currentLens = "recruiter";
+      renderLensGrid();
+    });
+    lensReviewerBtn?.addEventListener("click", () => {
+      currentLens = "reviewer";
+      renderLensGrid();
+    });
+    lensPlatformBtn?.addEventListener("click", () => {
+      currentLens = "platform";
+      renderLensGrid();
+    });
+    renderLensGrid();
 
     window.addEventListener("keydown", (event) => {
       if (

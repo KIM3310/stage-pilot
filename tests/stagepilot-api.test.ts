@@ -709,6 +709,7 @@ describe("stagepilot api server", () => {
         };
         benchmarkSummarySchema: string;
         reviewerPosture: {
+          claimTier: string;
           claimRule: string;
           docsOnlySurfaces: string[];
         };
@@ -737,6 +738,9 @@ describe("stagepilot api server", () => {
     );
     expect(body.proofBundle.reviewerPosture.docsOnlySurfaces).toContain(
       "site/"
+    );
+    expect(body.proofBundle.reviewerPosture.claimTier).toMatch(
+      /runtime-backed-review-ready|bounded-review-demo/
     );
     expect(body.proofBundle.reviewerPosture.claimRule).toContain(
       "reviewer aids"

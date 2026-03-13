@@ -657,6 +657,9 @@ export function buildStagePilotReviewPack(options: {
         runtimeSourceOfTruth:
           "@ai-sdk-tool/parser package plus /v1/runtime-brief and /v1/review-pack",
         docsOnlySurfaces: ["docs/review-pack.svg", "site/"],
+        claimTier: benchmarkReadyForPromotion
+          ? "runtime-backed-review-ready"
+          : "bounded-review-demo",
         claimRule:
           "Treat static/docs surfaces as reviewer aids, then repeat runtime claims only after the benchmark and live review-pack surfaces agree.",
       },

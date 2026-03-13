@@ -1175,6 +1175,13 @@
           note: runtimeBrief ? `${runtimeBrief.routeCount} routes` : "No runtime brief yet",
         },
         {
+          label: "Claim Tier",
+          value: state.reviewPack?.proofBundle?.reviewerPosture?.claimTier === "runtime-backed-review-ready"
+            ? "Runtime-backed"
+            : "Bounded demo",
+          note: "Docs stay reviewer aids",
+        },
+        {
           label: "Requests",
           value: runtimeScorecard ? formatNumber(runtimeScorecard.traffic.requestCount) : "--",
           note: runtimeScorecard ? `${formatPercent(runtimeScorecard.traffic.errorRatePct)} error rate` : "No traffic yet",
@@ -1207,6 +1214,17 @@
           detail: state.runtimeBrief?.diagnostics?.integrationReady
             ? "Live integrations look configured."
             : "Live integrations are incomplete, so use this as an honest bounded demo.",
+        },
+        {
+          title: "Claim tier",
+          detail: state.reviewPack?.proofBundle?.reviewerPosture?.claimTier === "runtime-backed-review-ready"
+            ? "Benchmark and integrations support runtime-backed reviewer claims."
+            : "Keep the story premium but bounded: benchmark-backed proof, no oversized hosted-runtime promise.",
+        },
+        {
+          title: "Runtime/source split",
+          detail: state.reviewPack?.proofBundle?.reviewerPosture?.claimRule
+            || "Load the review pack to pin docs-only posture before repeating claims.",
         },
         {
           title: "Benchmark floor",

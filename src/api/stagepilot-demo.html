@@ -827,6 +827,17 @@
         <div id="reviewSummary" class="stack"></div>
 
         <div>
+          <div class="section-head">
+            <div>
+              <label class="section-label">Runtime Reality Check</label>
+              <h3 style="margin: 0;">Live vs bounded demo</h3>
+            </div>
+            <button id="copyRuntimeHandoffButton" class="btn-secondary" type="button">Copy Handoff</button>
+          </div>
+          <div id="runtimeReality" class="stack"></div>
+        </div>
+
+        <div>
           <label class="section-label">Recent Workflow Runs</label>
           <div id="workflowRuns" class="stack"></div>
         </div>
@@ -1006,6 +1017,7 @@
       referralList: $("#referralList"),
       reviewSequence: $("#reviewSequence"),
       reviewSummary: $("#reviewSummary"),
+      runtimeReality: $("#runtimeReality"),
       riskGrid: $("#riskGrid"),
       routeList: $("#routeList"),
       scenarioList: $("#scenarioList"),
@@ -1019,6 +1031,7 @@
       workflowRuns: $("#workflowRuns"),
       workspaceState: $("#workspaceState"),
       judgeList: $("#judgeList"),
+      copyRuntimeHandoffButton: $("#copyRuntimeHandoffButton"),
     };
 
     function escapeHtml(value) {
@@ -1241,6 +1254,55 @@
       `).join("");
     }
 
+    function buildRuntimeRealityItems() {
+      const missing = state.runtimeBrief?.diagnostics?.missingIntegrations || [];
+      const errorRate = state.runtimeScorecard?.traffic?.errorRatePct;
+      const workflowCount = state.runtimeScorecard?.workflowRuns?.summary?.totalRuns;
+      return [
+        {
+          title: "Planning posture",
+          detail: missing.includes("gemini_api_key")
+            ? "Gemini is not configured, so keep this in bounded-review mode and avoid overselling live narrative synthesis."
+            : "Gemini is configured, so live planning and insight enrichment are available for real reviewer runs.",
+        },
+        {
+          title: "Notify posture",
+          detail: missing.includes("openclaw_delivery")
+            ? "Notify remains local-only because OpenClaw delivery is not configured."
+            : "Notify is wired for OpenClaw delivery, so the final operator step can be demonstrated honestly.",
+        },
+        {
+          title: "Freshness signal",
+          detail: typeof workflowCount === "number"
+            ? `${workflowCount} workflow events are recorded${typeof errorRate === "number" ? ` with ${formatPercent(errorRate)} error rate.` : "."}`
+            : "Workflow history is still empty, so use the console as a guided surface rather than a proof of sustained traffic.",
+        },
+      ];
+    }
+
+    function renderRuntimeReality() {
+      const items = buildRuntimeRealityItems();
+      elements.runtimeReality.innerHTML = items.map((item) => `
+        <article class="card">
+          <strong>${escapeHtml(item.title)}</strong>
+          <p>${escapeHtml(item.detail)}</p>
+        </article>
+      `).join("");
+    }
+
+    async function copyRuntimeHandoff() {
+      const missing = state.runtimeBrief?.diagnostics?.missingIntegrations || [];
+      const handoff = [
+        "StagePilot runtime handoff",
+        `- Planning posture: ${missing.includes("gemini_api_key") ? "bounded demo only" : "live-ready"}`,
+        `- Notify posture: ${missing.includes("openclaw_delivery") ? "local only" : "OpenClaw configured"}`,
+        `- Next action: ${state.runtimeBrief?.diagnostics?.nextAction || "Load runtime brief first."}`,
+        `- Reviewer route: ${(state.reviewPack?.reviewSequence || []).join(" | ") || "Load review pack first."}`,
+      ].join("\\n");
+      await navigator.clipboard.writeText(handoff);
+      setWarmStatus("Runtime handoff copied. Use it to explain whether the console is live-ready or intentionally bounded.", "");
+    }
+
     function renderWorkflowRuns() {
       const items = state.runtimeScorecard?.workflowRuns?.items || [];
       elements.workflowRuns.innerHTML = items.length > 0
@@ -1453,6 +1515,7 @@
       renderMetricStrip();
       renderWarmStart();
       renderReviewSummary();
+      renderRuntimeReality();
       renderWorkflowRuns();
       renderProofAssets();
       renderBenchmarkLadder();
@@ -1581,6 +1644,13 @@
         try {
           await navigator.clipboard.writeText(JSON.stringify(state.latestMission || {}, null, 2));
           setWarmStatus("Latest mission JSON copied to clipboard.", "");
+        } catch {
+          setWarmStatus("Clipboard write failed.", "danger");
+        }
+      });
+      elements.copyRuntimeHandoffButton.addEventListener("click", async () => {
+        try {
+          await copyRuntimeHandoff();
         } catch {
           setWarmStatus("Clipboard write failed.", "danger");
         }

@@ -735,7 +735,9 @@ describe("stagepilot api server", () => {
     expect(body.proofBundle.benchmarkSummarySchema).toBe(
       "stagepilot-benchmark-summary-v1"
     );
-    expect(body.proofBundle.reviewerPosture.docsOnlySurfaces).toContain("site/");
+    expect(body.proofBundle.reviewerPosture.docsOnlySurfaces).toContain(
+      "site/"
+    );
     expect(body.proofBundle.reviewerPosture.claimRule).toContain(
       "reviewer aids"
     );

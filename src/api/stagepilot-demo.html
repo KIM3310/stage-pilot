@@ -819,7 +819,7 @@
         <div class="section-head">
           <div>
             <label class="section-label">Review Surfaces</label>
-            <h2 style="margin: 0;">What to inspect</h2>
+            <h2 style="margin: 0;">Review control tower</h2>
           </div>
           <button id="benchmarkButton" class="btn-secondary" type="button">Run Benchmark</button>
         </div>
@@ -1231,13 +1231,14 @@
     }
 
     function renderReviewSummary() {
+      const reviewRoute = (state.reviewPack?.reviewSequence || []).slice(0, 3).join(" → ");
       const items = [
         {
-          title: "Runtime brief",
-          detail: state.runtimeBrief?.headline || "Runtime posture not loaded.",
+          title: "Start here",
+          detail: reviewRoute || "Load the review pack to reveal the recommended reviewer route.",
         },
         {
-          title: "Review pack",
+          title: "What this proves",
           detail: state.reviewPack?.headline || "Review pack not loaded.",
         },
         {
@@ -1258,24 +1259,31 @@
       const missing = state.runtimeBrief?.diagnostics?.missingIntegrations || [];
       const errorRate = state.runtimeScorecard?.traffic?.errorRatePct;
       const workflowCount = state.runtimeScorecard?.workflowRuns?.summary?.totalRuns;
+      const benchmark = state.benchmarkSummary?.benchmark;
       return [
         {
-          title: "Planning posture",
+          title: "Planning utility",
           detail: missing.includes("gemini_api_key")
             ? "Gemini is not configured, so keep this in bounded-review mode and avoid overselling live narrative synthesis."
             : "Gemini is configured, so live planning and insight enrichment are available for real reviewer runs.",
         },
         {
-          title: "Notify posture",
+          title: "Delivery utility",
           detail: missing.includes("openclaw_delivery")
             ? "Notify remains local-only because OpenClaw delivery is not configured."
             : "Notify is wired for OpenClaw delivery, so the final operator step can be demonstrated honestly.",
         },
         {
-          title: "Freshness signal",
+          title: "Proof freshness",
           detail: typeof workflowCount === "number"
             ? `${workflowCount} workflow events are recorded${typeof errorRate === "number" ? ` with ${formatPercent(errorRate)} error rate.` : "."}`
             : "Workflow history is still empty, so use the console as a guided surface rather than a proof of sustained traffic.",
+        },
+        {
+          title: "Benchmark anchor",
+          detail: benchmark?.topStrategy
+            ? `${benchmark.topStrategy.strategy} is the strongest visible strategy at ${formatPercent(benchmark.topStrategy.successRate)}.`
+            : "Run the benchmark when the reviewer wants a reliability anchor before runtime details.",
         },
       ];
     }
@@ -1294,8 +1302,8 @@
       const missing = state.runtimeBrief?.diagnostics?.missingIntegrations || [];
       const handoff = [
         "StagePilot runtime handoff",
-        `- Planning posture: ${missing.includes("gemini_api_key") ? "bounded demo only" : "live-ready"}`,
-        `- Notify posture: ${missing.includes("openclaw_delivery") ? "local only" : "OpenClaw configured"}`,
+        `- Planning utility: ${missing.includes("gemini_api_key") ? "bounded demo only" : "live-ready"}`,
+        `- Delivery utility: ${missing.includes("openclaw_delivery") ? "local only" : "OpenClaw configured"}`,
         `- Next action: ${state.runtimeBrief?.diagnostics?.nextAction || "Load runtime brief first."}`,
         `- Reviewer route: ${(state.reviewPack?.reviewSequence || []).join(" | ") || "Load review pack first."}`,
       ].join("\\n");

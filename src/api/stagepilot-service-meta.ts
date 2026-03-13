@@ -654,7 +654,8 @@ export function buildStagePilotReviewPack(options: {
       benchmark: options.benchmarkSnapshot,
       benchmarkSummarySchema: STAGEPILOT_BENCHMARK_SUMMARY_SCHEMA,
       reviewerPosture: {
-        runtimeSourceOfTruth: "@ai-sdk-tool/parser package plus /v1/runtime-brief and /v1/review-pack",
+        runtimeSourceOfTruth:
+          "@ai-sdk-tool/parser package plus /v1/runtime-brief and /v1/review-pack",
         docsOnlySurfaces: ["docs/review-pack.svg", "site/"],
         claimRule:
           "Treat static/docs surfaces as reviewer aids, then repeat runtime claims only after the benchmark and live review-pack surfaces agree.",

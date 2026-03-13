@@ -150,6 +150,10 @@
       grid-template-columns: repeat(3, minmax(0, 1fr));
       margin: 18px 0;
     }
+    .continuity-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin-bottom: 18px;
+    }
     .card {
       padding: 18px;
       background: #fff;
@@ -223,6 +227,7 @@
     }
     @media (max-width: 900px) {
       .metrics,
+      .continuity-grid,
       .two,
       .lens-grid {
         grid-template-columns: 1fr;
@@ -271,6 +276,37 @@
             set.
           </p>
         </article>
+      </section>
+
+      <section class="panel">
+        <h2>How the benchmark turns into a real deployment story</h2>
+        <div class="grid continuity-grid" style="margin-top: 16px">
+          <article class="card">
+            <span class="label">01 · Checked-in proof</span>
+            <div class="value">Artifacts first</div>
+            <p>
+              Start with the saved benchmark JSON and the parser recovery lift
+              so the reviewer sees evidence before architecture language.
+            </p>
+          </article>
+          <article class="card">
+            <span class="label">02 · Parser contract</span>
+            <div class="value">Schema-safe by design</div>
+            <p>
+              Show the middleware and recovery loop as the actual product core,
+              not as a decorative layer on top of a hosted demo.
+            </p>
+          </article>
+          <article class="card">
+            <span class="label">03 · Hosted handoff</span>
+            <div class="value">Runtime later, not hidden</div>
+            <p>
+              Only after the benchmark story lands should you open the launch
+              deck and explain how the same parser package maps to a real API
+              runtime.
+            </p>
+          </article>
+        </div>
       </section>
 
       <section class="grid two">

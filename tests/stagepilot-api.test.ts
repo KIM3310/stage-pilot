@@ -25,6 +25,8 @@ const OPERATOR_OIDC_AUDIENCE_ENV_SNAPSHOT =
   process.env[OPERATOR_OIDC_AUDIENCE_ENV_KEY];
 const OPERATOR_OIDC_JWKS_ENV_SNAPSHOT = process.env[OPERATOR_OIDC_JWKS_ENV_KEY];
 const HTTP_STATUS_LINE_REGEX = /^HTTP\/1\.1 (\d{3})/m;
+const REVIEWER_CLAIM_TIER_REGEX =
+  /runtime-backed-review-ready|bounded-review-demo/;
 const OPENCLAW_WEBHOOK_ENV_SNAPSHOT = process.env[OPENCLAW_WEBHOOK_ENV_KEY];
 
 function encodeBase64Url(value: string): string {
@@ -740,7 +742,7 @@ describe("stagepilot api server", () => {
       "site/"
     );
     expect(body.proofBundle.reviewerPosture.claimTier).toMatch(
-      /runtime-backed-review-ready|bounded-review-demo/
+      REVIEWER_CLAIM_TIER_REGEX
     );
     expect(body.proofBundle.reviewerPosture.claimRule).toContain(
       "reviewer aids"

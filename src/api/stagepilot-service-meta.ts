@@ -14,6 +14,32 @@ export const STAGEPILOT_RUNTIME_SCORECARD_SCHEMA =
 export const STAGEPILOT_DEVELOPER_OPS_PACK_SCHEMA =
   "stagepilot-developer-ops-pack-v1";
 
+function buildStagePilotOperationalPosture(options: {
+  benchmarkReadyForPromotion?: boolean;
+  geminiHasApiKey: boolean;
+  openClawConfigured: boolean;
+}) {
+  const blockers: string[] = [];
+  if (!options.geminiHasApiKey) {
+    blockers.push("gemini_api_key");
+  }
+  if (!options.openClawConfigured) {
+    blockers.push("openclaw_delivery");
+  }
+  if (options.benchmarkReadyForPromotion === false) {
+    blockers.push("benchmark_floor");
+  }
+
+  const liveReady = blockers.length === 0;
+  return {
+    blockers,
+    mode: liveReady ? "live-ready" : "bounded-demo",
+    summary: liveReady
+      ? "Live integrations and benchmark floor support real reviewer runs."
+      : `Keep this as a bounded reviewer demo until ${blockers[0]} is cleared.`,
+  };
+}
+
 function buildStagePilotProofAssets() {
   return [
     {
@@ -182,13 +208,13 @@ export function buildStagePilotRuntimeBrief(options: {
   openClawHasWebhookUrl: boolean;
   service: string;
 }) {
-  const missingIntegrations: string[] = [];
-  if (!options.geminiHasApiKey) {
-    missingIntegrations.push("gemini_api_key");
-  }
-  if (!options.openClawConfigured) {
-    missingIntegrations.push("openclaw_delivery");
-  }
+  const operationalPosture = buildStagePilotOperationalPosture({
+    geminiHasApiKey: options.geminiHasApiKey,
+    openClawConfigured: options.openClawConfigured,
+  });
+  const missingIntegrations = operationalPosture.blockers.filter(
+    (blocker) => blocker === "gemini_api_key" || blocker === "openclaw_delivery"
+  );
 
   return {
     service: options.service,
@@ -226,6 +252,7 @@ export function buildStagePilotRuntimeBrief(options: {
     diagnostics: {
       integrationReady: missingIntegrations.length === 0,
       missingIntegrations,
+      operationalPosture,
       nextAction:
         missingIntegrations.length === 0
           ? "Run POST /v1/plan or POST /v1/benchmark to validate live flows."
@@ -453,6 +480,15 @@ export function buildStagePilotRuntimeScorecard(options: {
   );
   const topStrategy = strategies[0] ?? null;
   const weakestStrategy = strategies.at(-1) ?? null;
+  const readyForPromotion =
+    Boolean(options.geminiHasApiKey && options.openClawConfigured) &&
+    typeof topStrategy?.successRate === "number" &&
+    topStrategy.successRate >= 80;
+  const operationalPosture = buildStagePilotOperationalPosture({
+    benchmarkReadyForPromotion: readyForPromotion,
+    geminiHasApiKey: options.geminiHasApiKey,
+    openClawConfigured: options.openClawConfigured,
+  });
   const traffic =
     options.runtimeTelemetry.requestCount > 0
       ? {
@@ -494,11 +530,9 @@ export function buildStagePilotRuntimeScorecard(options: {
       generatedAt: options.benchmarkSnapshot.generatedAt,
       topStrategy,
       weakestStrategy,
-      readyForPromotion:
-        Boolean(options.geminiHasApiKey && options.openClawConfigured) &&
-        typeof topStrategy?.successRate === "number" &&
-        topStrategy.successRate >= 80,
+      readyForPromotion,
     },
+    operationalPosture,
     recommendations: [
       options.geminiHasApiKey
         ? "Gemini readiness is present. Validate fresh planning runs after any prompt or parser change."
@@ -532,6 +566,21 @@ export function buildStagePilotReviewPack(options: {
   openClawHasWebhookUrl: boolean;
   service: string;
 }) {
+  const strategyRows = buildStrategyRows(options.benchmarkSnapshot);
+  const benchmarkReadyForPromotion =
+    options.geminiHasApiKey &&
+    options.openClawConfigured &&
+    strategyRows.some(
+      (item) =>
+        item.strategy === "middleware+ralph-loop" &&
+        typeof item.successRate === "number" &&
+        item.successRate >= 80
+    );
+  const operationalPosture = buildStagePilotOperationalPosture({
+    benchmarkReadyForPromotion,
+    geminiHasApiKey: options.geminiHasApiKey,
+    openClawConfigured: options.openClawConfigured,
+  });
   return {
     service: options.service,
     status: "ok",
@@ -606,6 +655,7 @@ export function buildStagePilotReviewPack(options: {
       benchmarkSummarySchema: STAGEPILOT_BENCHMARK_SUMMARY_SCHEMA,
       runtimeScorecardSchema: STAGEPILOT_RUNTIME_SCORECARD_SCHEMA,
       integrationsReady: options.geminiHasApiKey && options.openClawConfigured,
+      operationalPosture,
       model: options.model,
       openClawHasWebhookUrl: options.openClawHasWebhookUrl,
       packageSurface: "@ai-sdk-tool/parser",

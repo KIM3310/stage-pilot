@@ -417,6 +417,7 @@ describe("stagepilot api server", () => {
     expect(html).toContain("StagePilot Judge Console");
     expect(html).toContain("/v1/whatif");
     expect(html).toContain("Loading benchmark-backed reviewer surface");
+    expect(html).toContain("Static/docs surfaces stay reviewer aids");
   });
 
   it("supports HEAD for desktop demo page", async () => {
@@ -707,6 +708,10 @@ describe("stagepilot api server", () => {
           };
         };
         benchmarkSummarySchema: string;
+        reviewerPosture: {
+          claimRule: string;
+          docsOnlySurfaces: string[];
+        };
       };
       reviewPackId: string;
       reviewSequence: string[];
@@ -729,6 +734,10 @@ describe("stagepilot api server", () => {
     expect(body.links.benchmarkSummary).toBe("/v1/benchmark-summary");
     expect(body.proofBundle.benchmarkSummarySchema).toBe(
       "stagepilot-benchmark-summary-v1"
+    );
+    expect(body.proofBundle.reviewerPosture.docsOnlySurfaces).toContain("site/");
+    expect(body.proofBundle.reviewerPosture.claimRule).toContain(
+      "reviewer aids"
     );
   });
 

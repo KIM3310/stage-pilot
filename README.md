@@ -34,6 +34,13 @@
 - GitHub repository: https://github.com/KIM3310/stage-pilot
 - Demo video: https://youtu.be/6trgTH1vX4M
 
+## Choose Your First Lane
+
+- **Parser package (real shipping surface):** start in `src/` + `package.json`; this is the npm/runtime path that actually hardens tool-call parsing.
+- **StagePilot runtime/API (real runtime surface):** start with `/v1/runtime-brief` and `/v1/review-pack`, then trace the implementation in `src/stagepilot/` and `src/api/`.
+- **BenchLab proof surface:** use `docs/benchmarks/`, `docs/benchlab/`, and `/v1/benchlab/*` for checked-in experiment evidence.
+- **Static/docs-only helpers:** `docs/review-pack.svg`, `site/`, and narrative docs are reviewer aids, not the benchmark or runtime source of truth.
+
 ## Review Pack At A Glance
 
 - StagePilot reviewer API: `GET /v1/runtime-brief`, `GET /v1/review-pack`, `GET /v1/schema/plan-report`

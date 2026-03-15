@@ -398,6 +398,12 @@
           <ul class="list">
             <li>
               <a
+                href="https://github.com/KIM3310/stage-pilot/blob/main/docs/reviewer-proof-guide.md"
+                >Reviewer proof guide</a
+              >
+            </li>
+            <li>
+              <a
                 href="https://github.com/KIM3310/stage-pilot/blob/main/README.md"
                 >README</a
               >
@@ -506,7 +512,7 @@
       reviewPath: {
         buttonId: "copyReviewPathBtn",
         payload:
-          "StagePilot review path\n- Read the executive one-pager for the benchmark claim.\n- Open solution architecture for runtime boundaries.\n- Check the latest benchmark artifact before repeating the lift numbers.\n- Use the operator runbook only when the hosted runtime is actually involved.",
+          "StagePilot review path\n- Read the reviewer proof guide for the fastest grounded walkthrough.\n- Read the executive one-pager for the benchmark claim.\n- Open solution architecture for runtime boundaries.\n- Check the latest benchmark artifact before repeating the lift numbers.\n- Use the operator runbook only when the hosted runtime is actually involved.",
         successLabel: "Review path copied.",
         failureLabel: "Failed to copy review path.",
       },
@@ -520,7 +526,7 @@
       launchDeck: {
         buttonId: "copyLaunchDeckBtn",
         payload:
-          "StagePilot launch deck\n- npm install\n- npm run build\n- npm run check\n- npm run exercise:runtime\n- Review benchmark and benchlab proof before hosted launch claims.",
+          "StagePilot launch deck\n- pnpm install\n- pnpm review:proof\n- pnpm build\n- pnpm check\n- pnpm exercise:runtime\n- Review benchmark and benchlab proof before hosted launch claims.",
         successLabel: "Launch deck copied.",
         failureLabel: "Failed to copy launch deck.",
       },

@@ -43,6 +43,11 @@ function buildStagePilotOperationalPosture(options: {
 function buildStagePilotProofAssets() {
   return [
     {
+      label: "Reviewer proof guide",
+      path: "docs/reviewer-proof-guide.md",
+      kind: "doc",
+    },
+    {
       label: "Review pack diagram",
       path: "docs/review-pack.svg",
       kind: "diagram",

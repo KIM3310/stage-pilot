@@ -7,6 +7,18 @@
     "type": "git",
     "url": "https://github.com/KIM3310/stage-pilot"
   },
+  "homepage": "https://github.com/KIM3310/stage-pilot#readme",
+  "bugs": {
+    "url": "https://github.com/KIM3310/stage-pilot/issues"
+  },
+  "keywords": [
+    "ai-sdk",
+    "tool-calling",
+    "llm-reliability",
+    "parser",
+    "stagepilot",
+    "benchmark"
+  ],
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -53,6 +65,8 @@
     "check:biome": "biome check",
     "check:types": "tsc --noEmit",
     "check": "run-p check:*",
+    "verify": "pnpm check && pnpm test && pnpm build",
+    "review:proof": "node scripts/review-proof.mjs",
     "fmt:biome": "biome check --write",
     "fmt": "run-p fmt:*",
     "changeset": "changeset",
@@ -97,7 +111,8 @@
   },
   "packageManager": "pnpm@9.14.4",
   "engines": {
-    "node": ">=18"
+    "node": ">=18",
+    "pnpm": ">=9"
   },
   "license": "Apache-2.0"
 }

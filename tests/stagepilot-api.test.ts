@@ -701,7 +701,7 @@ describe("stagepilot api server", () => {
         workflowRuns: string;
       };
       operatorJourney: Array<{ stage: string }>;
-      proofAssets: Array<{ label: string }>;
+      proofAssets: Array<{ label: string; path: string }>;
       proofBundle: {
         benchmark: {
           caseCount: number;
@@ -726,7 +726,14 @@ describe("stagepilot api server", () => {
     expect(body.operatorJourney).toHaveLength(4);
     expect(body.reviewSequence.length).toBeGreaterThanOrEqual(3);
     expect(body.twoMinuteReview.length).toBe(4);
-    expect(body.proofAssets.length).toBeGreaterThanOrEqual(4);
+    expect(body.proofAssets.length).toBeGreaterThanOrEqual(5);
+    expect(body.proofAssets).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          path: "docs/reviewer-proof-guide.md",
+        }),
+      ])
+    );
     expect(body.proofBundle.benchmark.caseCount).toBeGreaterThanOrEqual(20);
     expect(
       body.proofBundle.benchmark.improvements.loopVsBaseline

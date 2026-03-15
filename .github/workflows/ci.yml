@@ -75,6 +75,8 @@ jobs:
     name: Build Artifact
     runs-on: ubuntu-latest
     needs: [test]
+    env:
+      DO_NOT_TRACK: true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -88,8 +90,15 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm build
+      - name: Generate benchmark proof artifact
+        run: pnpm bench:stagepilot
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist
+      - name: Upload benchmark proof artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: stagepilot-benchmark-proof
+          path: docs/benchmarks/stagepilot-latest.json

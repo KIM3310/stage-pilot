@@ -4,7 +4,6 @@
 
 [![npm - parser](https://img.shields.io/npm/v/@ai-sdk-tool/parser)](https://www.npmjs.com/package/@ai-sdk-tool/parser)
 [![npm downloads - parser](https://img.shields.io/npm/dt/@ai-sdk-tool/parser)](https://www.npmjs.com/package/@ai-sdk-tool/parser)
-[![codecov](https://codecov.io/gh/minpeter/ai-sdk-tool-call-middleware/branch/main/graph/badge.svg)](https://codecov.io/gh/minpeter/ai-sdk-tool-call-middleware)
 
 `StagePilot` is the canonical repo for three connected surfaces:
 
@@ -34,6 +33,21 @@
 - GitHub repository: https://github.com/KIM3310/stage-pilot
 - Demo video: https://youtu.be/6trgTH1vX4M
 
+## 60-second reviewer start
+
+```bash
+pnpm install
+pnpm review:proof
+pnpm api:stagepilot
+# open http://127.0.0.1:8080/demo
+```
+
+Then read, in order:
+- [`docs/reviewer-proof-guide.md`](docs/reviewer-proof-guide.md)
+- [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json)
+- [`docs/executive-one-pager.md`](docs/executive-one-pager.md)
+- [`docs/solution-architecture.md`](docs/solution-architecture.md)
+
 ## Choose Your First Lane
 
 - **Parser package (real shipping surface):** start in `src/` + `package.json`; this is the npm/runtime path that actually hardens tool-call parsing.
@@ -47,6 +61,7 @@
 - StagePilot developer workflow pack: `GET /v1/developer-ops-pack`
 - StagePilot workflow history: `GET /v1/workflow-runs`, `GET /v1/workflow-runs/:requestId`
 - StagePilot workflow replay surface: `GET /v1/workflow-run-replay`
+- Local reviewer summary: `pnpm review:proof`
 - BenchLab reviewer API: `GET /v1/benchlab/runtime-brief`, `GET /v1/benchlab/review-pack`, `GET /v1/benchlab/schema/job-report`
 - Checked-in benchmark proof: baseline `29.17%` -> middleware `87.50%` -> Ralph loop `100.00%`
 - Checked-in BenchLab claims: runtime compare, variant leaderboard, best artifacts, and failure forensics
@@ -62,12 +77,13 @@
 5. `GET /v1/review-pack` -> inspect benchmark lift and parser/handoff boundary.
 6. `GET /v1/schema/plan-report` -> verify contract before trusting downstream routing output.
 7. `GET /v1/benchlab/review-pack` -> inspect checked-in runtime and artifact claims.
-8. `docs/review-pack.svg` + `docs/benchmarks/stagepilot-latest.json` -> read the strongest proof assets first.
+8. `docs/reviewer-proof-guide.md` + `docs/review-pack.svg` + `docs/benchmarks/stagepilot-latest.json` -> read the strongest proof assets first.
 
 ![StagePilot Review Pack](docs/review-pack.svg)
 
 ## Further Reading
 
+- Reviewer guide: [`docs/reviewer-proof-guide.md`](docs/reviewer-proof-guide.md)
 - Architecture: [`docs/solution-architecture.md`](docs/solution-architecture.md)
 - Overview: [`docs/executive-one-pager.md`](docs/executive-one-pager.md)
 - Discovery notes: [`docs/discovery-guide.md`](docs/discovery-guide.md)
@@ -148,6 +164,7 @@ Review-pack surfaces now expose this benchmark delta directly through `/v1/revie
 
 ## Supporting Files
 
+- `docs/reviewer-proof-guide.md`
 - `docs/review-pack.svg`
 - `docs/DEVELOPER_OPS_PACK.md`
 - `docs/benchmarks/stagepilot-latest.json`
@@ -160,32 +177,38 @@ Review-pack surfaces now expose this benchmark delta directly through `/v1/revie
 ### 1) Install
 
 ```bash
-npm install
+pnpm install
 ```
 
-### 2) Run StagePilot demo flow
+### 2) Print the reviewer proof summary
 
 ```bash
-npm run demo:stagepilot
+pnpm review:proof
 ```
 
-### 3) Run local API + judge demo UI
+### 3) Run StagePilot demo flow
 
 ```bash
-npm run api:stagepilot
+pnpm demo:stagepilot
+```
+
+### 4) Run local API + judge demo UI
+
+```bash
+pnpm api:stagepilot
 # open http://127.0.0.1:8080/demo
 ```
 
-### 4) Reproduce benchmark
+### 5) Reproduce benchmark
 
 ```bash
-npm run bench:stagepilot
+pnpm bench:stagepilot
 ```
 
 Optional benchmark knobs:
 
 ```bash
-BENCHMARK_CASES=24 BENCHMARK_SEED=20260228 BENCHMARK_LOOP_ATTEMPTS=2 npm run bench:stagepilot
+BENCHMARK_CASES=24 BENCHMARK_SEED=20260228 BENCHMARK_LOOP_ATTEMPTS=2 pnpm bench:stagepilot
 ```
 
 ## BenchLab quick start
@@ -193,7 +216,7 @@ BENCHMARK_CASES=24 BENCHMARK_SEED=20260228 BENCHMARK_LOOP_ATTEMPTS=2 npm run ben
 Run the local BenchLab operator API:
 
 ```bash
-npm run api:benchlab
+pnpm api:benchlab
 # open http://127.0.0.1:8090/benchlab
 ```
 
@@ -241,7 +264,7 @@ Core files:
 Run API:
 
 ```bash
-npm run api:stagepilot
+pnpm api:stagepilot
 ```
 
 Endpoints:
@@ -270,19 +293,19 @@ See full behavior and payload examples in [`docs/STAGEPILOT.md`](docs/STAGEPILOT
 BenchLab API entrypoint:
 
 ```bash
-npm run api:benchlab
+pnpm api:benchlab
 ```
 
 ## Cloud Run deployment (Google-only)
 
 ```bash
-npm run deploy:stagepilot
+pnpm deploy:stagepilot
 ```
 
 Post-deploy smoke test:
 
 ```bash
-STAGEPILOT_BASE_URL="https://<your-cloud-run-url>" npm run smoke:stagepilot
+STAGEPILOT_BASE_URL="https://<your-cloud-run-url>" pnpm smoke:stagepilot
 ```
 
 Runtime notes:
@@ -361,10 +384,16 @@ Fact-checked from this repo `CHANGELOG.md` and npm metadata (as of 2026-02-18).
 ## Local development
 
 ```bash
-npm run fmt:biome
-npm run check
-npm test
-npm run build
+pnpm fmt:biome
+pnpm check
+pnpm test
+pnpm build
+```
+
+One-command verification:
+
+```bash
+pnpm verify
 ```
 
 If `pnpm` is not available:
@@ -376,6 +405,7 @@ corepack prepare pnpm@9.14.4 --activate
 
 ## Docs map
 
+- Reviewer guide: [`docs/reviewer-proof-guide.md`](docs/reviewer-proof-guide.md)
 - StagePilot guide: [`docs/STAGEPILOT.md`](docs/STAGEPILOT.md)
 - Latest benchmark artifact: [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json)
 - BenchLab gains: [`docs/benchlab/TOOL_CALLING_GAINS.md`](docs/benchlab/TOOL_CALLING_GAINS.md)
@@ -391,10 +421,16 @@ Apache-2.0
 ## Local Verification
 ```bash
 pnpm install
-pnpm run check
-pnpm run typecheck
-pnpm run test
-pnpm run build
+pnpm verify
+```
+
+Expanded form:
+
+```bash
+pnpm check
+pnpm typecheck
+pnpm test
+pnpm build
 ```
 
 ## Repository Hygiene

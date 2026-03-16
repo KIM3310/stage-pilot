@@ -1,6 +1,10 @@
 # StagePilot reviewer proof guide
 
-Use this when you want the fastest credible read of the repo for Big Tech / frontier LLM / solutions-architect style review.
+Use this when you want the fastest credible read of the repo for AI engineer, frontier LLM runtime reliability, or Big Tech platform review. Treat solutions-architect review as a secondary lens, not the headline.
+
+## Hiring signal to anchor
+
+This repo should read first as: **tool-calling reliability proof for frontier/runtime teams**. The recruiter-safe takeaway is that the work is benchmarked, bounded, and reviewable.
 
 ## What to believe first
 
@@ -46,7 +50,7 @@ Start here when you want the runtime-backed reviewer surface instead of reading 
 
 The most defensible repo headline is not "hosted agent platform." It is:
 
-> reliable tool calling for non-native models, grounded in checked-in benchmark lift and reviewer-ready API/docs surfaces
+> reliable tool calling for non-native models, grounded in checked-in benchmark lift, replayable traces, and reviewer-ready API/docs surfaces
 
 Current checked-in benchmark snapshot:
 - baseline: `29.17%`

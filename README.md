@@ -1,9 +1,11 @@
 <img width="3168" height="1344" alt="AI SDK Tool monorepo banner" src="https://github.com/user-attachments/assets/9a002988-e535-42ac-8baf-56ec8754410f" />
 
-# StagePilot: Reliable Tool Calling for Non-Native Models
+# StagePilot: Frontier Tool-Calling Reliability Proof Lab
 
 [![npm - parser](https://img.shields.io/npm/v/@ai-sdk-tool/parser)](https://www.npmjs.com/package/@ai-sdk-tool/parser)
 [![npm downloads - parser](https://img.shields.io/npm/dt/@ai-sdk-tool/parser)](https://www.npmjs.com/package/@ai-sdk-tool/parser)
+
+`StagePilot` is the flagship repo I would put in front of an AI engineer, frontier LLM runtime, or reliability reviewer first. It packages parser middleware, benchmark evidence, replayable review surfaces, and a bounded runtime API into one proof-oriented repo instead of a vague agent demo.
 
 `StagePilot` is the canonical repo for three connected surfaces:
 
@@ -12,14 +14,14 @@
 3. `BenchLab`: prompt-mode BFCL experiment tooling, forensics, and local operator APIs.
 
 ## Portfolio posture
-- Read this repo like a reliability proof lab for tool calling, not like a general-purpose model demo.
-- Benchmark artifacts, parser middleware, review pack, and eval/test surfaces are the real basis for the claims here.
-
+- Read this repo as a reliability review packet for tool-calling systems, not as a generic chatbot demo.
+- The strongest evidence is checked-in benchmark lift, parser middleware behavior, replayable review APIs, and explicit regression/perf surfaces.
+- The primary story is **AI engineer / frontier LLM runtime reliability**; solutions-architect value is real but secondary.
 
 ## Role signals
-- **AI engineer:** benchmark discipline, parser middleware, and tool-calling reliability are the core signals.
-- **Solution / cloud architect:** package, API, benchmark, and review surfaces are separated enough to discuss production posture honestly.
-- **Field / solutions engineer:** the repo gives you a fast benchmark walkthrough with proof artifacts instead of vague model claims.
+- **Primary AI engineer / frontier runtime signal:** parser hardening, benchmark discipline, explicit failure classes, replayable traces, and bounded retry posture.
+- **Secondary platform / solutions architect signal:** package, API, benchmark, and review surfaces are separated enough to discuss production posture honestly.
+- **Hiring manager / recruiter signal:** this is the repo that most quickly proves I can turn messy model behavior into reviewable runtime evidence.
 
 
 ## Portfolio context
@@ -63,6 +65,8 @@ Then read, in order:
 - [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json)
 - [`docs/executive-one-pager.md`](docs/executive-one-pager.md)
 - [`docs/solution-architecture.md`](docs/solution-architecture.md)
+
+If you only want the flagship story: treat this repo as the public proof that I can evaluate unreliable tool calls, harden the parser/runtime boundary, and present the results in a reviewer-safe way.
 
 ## Reviewer Front Door
 

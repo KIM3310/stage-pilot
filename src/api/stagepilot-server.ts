@@ -58,19 +58,19 @@ import {
 import { renderStagePilotDemoHtml } from "./stagepilot-demo";
 import {
   buildStagePilotBenchmarkSummary,
-  buildStagePilotFailureTaxonomy,
   buildStagePilotDeveloperOpsPack,
-  STAGEPILOT_LIVE_REVIEW_SCHEMA,
+  buildStagePilotFailureTaxonomy,
   buildStagePilotPerfEvidencePack,
   buildStagePilotPlanReportSchema,
-  buildStagePilotProviderBenchmarkScorecard,
   buildStagePilotProtocolMatrix,
+  buildStagePilotProviderBenchmarkScorecard,
   buildStagePilotRegressionGatePack,
   buildStagePilotReviewPack,
   buildStagePilotRouteDescriptors,
   buildStagePilotRuntimeBrief,
   buildStagePilotRuntimeScorecard,
   buildStagePilotTraceObservabilityPack,
+  STAGEPILOT_LIVE_REVIEW_SCHEMA,
   type StagePilotRouteDescriptor,
 } from "./stagepilot-service-meta";
 
@@ -169,7 +169,7 @@ type StagePilotDeploymentMode =
   | "public-capped-live"
   | "review-only-live";
 
-type StagePilotLiveScenario = {
+interface StagePilotLiveScenario {
   concern: string;
   estimatedCostUsd: number;
   failureMode: string;
@@ -178,18 +178,18 @@ type StagePilotLiveScenario = {
   prompt: string;
   title: string;
   toolRegistry: string[];
-};
+}
 
-type StagePilotOpenAiConfig = {
+interface StagePilotOpenAiConfig {
   apiKey: string;
   dailyBudgetUsd: number;
   killSwitch: boolean;
-  moderationEnabled: boolean;
   modelPublic: string;
   modelRefresh: string;
+  moderationEnabled: boolean;
   monthlyBudgetUsd: number;
   publicRpm: number;
-};
+}
 
 const STAGEPILOT_LIVE_SCENARIOS: Record<string, StagePilotLiveScenario> = {
   "parser-drift-recovery": {
@@ -206,7 +206,8 @@ const STAGEPILOT_LIVE_SCENARIOS: Record<string, StagePilotLiveScenario> = {
   "bounded-handoff-release": {
     id: "bounded-handoff-release",
     title: "Bounded handoff release",
-    concern: "Runtime reliability is strong, but downstream delivery still needs explicit human confirmation.",
+    concern:
+      "Runtime reliability is strong, but downstream delivery still needs explicit human confirmation.",
     failureMode: "handoff-boundary",
     nextReviewPath: "/v1/review-pack",
     toolRegistry: ["build_plan_report", "score_risk", "notify_operator"],
@@ -353,12 +354,63 @@ function isStagePilotReviewOnlyMode(): boolean {
 
 function getStagePilotLiveRequestKey(request: IncomingMessage): string {
   const forwarded = request.headers["x-forwarded-for"];
-  const value = Array.isArray(forwarded)
-    ? forwarded[0]
-    : typeof forwarded === "string"
-    ? forwarded.split(",")[0]
-    : request.socket.remoteAddress;
+  let value: string | undefined;
+  if (Array.isArray(forwarded)) {
+    value = forwarded[0];
+  } else if (typeof forwarded === "string") {
+    value = forwarded.split(",")[0];
+  } else {
+    value = request.socket.remoteAddress;
+  }
   return String(value || "anonymous").trim() || "anonymous";
+}
+
+function mapStagePilotTraceHotspot(item: Record<string, unknown>) {
+  return {
+    attentionCount:
+      typeof item.attentionCount === "number" ? item.attentionCount : 0,
+    providerFamily:
+      typeof item.providerFamily === "string" ? item.providerFamily : "unknown",
+    risk: typeof item.risk === "string" ? item.risk : "unknown",
+  };
+}
+
+function mapStagePilotTraceRecord(item: Record<string, unknown>) {
+  return {
+    durationMs: typeof item.durationMs === "number" ? item.durationMs : null,
+    failureClass:
+      typeof item.failureClass === "string" ? item.failureClass : "unknown",
+    operatorHandoff:
+      typeof item.operatorHandoff === "string"
+        ? item.operatorHandoff
+        : "review required",
+    protocolFamily:
+      typeof item.protocolFamily === "string" ? item.protocolFamily : "unknown",
+    providerFamily:
+      typeof item.providerFamily === "string" ? item.providerFamily : "unknown",
+    regressionGate:
+      typeof item.regressionGate === "string" ? item.regressionGate : "watch",
+    reviewerSurface:
+      typeof item.reviewerSurface === "string"
+        ? item.reviewerSurface
+        : "/v1/review-pack",
+    scenario:
+      typeof item.scenario === "string"
+        ? item.scenario
+        : "unspecified scenario",
+    traceId: typeof item.traceId === "string" ? item.traceId : randomUUID(),
+  };
+}
+
+function mapStagePilotRegressionGate(item: Record<string, unknown>) {
+  return {
+    decision: typeof item.decision === "string" ? item.decision : "watch",
+    focus: typeof item.focus === "string" ? item.focus : "unknown",
+    gate: typeof item.gate === "string" ? item.gate : "unknown",
+    owner: typeof item.owner === "string" ? item.owner : "runtime",
+    signal:
+      typeof item.signal === "string" ? item.signal : "No signal recorded.",
+  };
 }
 
 function enforceStagePilotLiveRateLimit(
@@ -386,7 +438,10 @@ async function callOpenAiModeration(options: {
   input: string;
 }): Promise<void> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), OPENAI_PUBLIC_TIMEOUT_MS);
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    OPENAI_PUBLIC_TIMEOUT_MS
+  );
   try {
     const response = await fetch(`${OPENAI_BASE_URL}/moderations`, {
       method: "POST",
@@ -436,7 +491,10 @@ async function callOpenAiStructuredJson(options: {
   userPrompt: string;
 }): Promise<Record<string, unknown>> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), OPENAI_PUBLIC_TIMEOUT_MS);
+  const timeoutId = setTimeout(
+    () => controller.abort(),
+    OPENAI_PUBLIC_TIMEOUT_MS
+  );
   try {
     const response = await fetch(`${OPENAI_BASE_URL}/chat/completions`, {
       method: "POST",
@@ -467,7 +525,10 @@ async function callOpenAiStructuredJson(options: {
     };
     const content = String(payload.choices?.[0]?.message?.content || "").trim();
     if (!content) {
-      throw new HttpError(502, "OpenAI response did not include message content");
+      throw new HttpError(
+        502,
+        "OpenAI response did not include message content"
+      );
     }
     const parsed = JSON.parse(content) as Record<string, unknown>;
     return parsed;
@@ -942,6 +1003,17 @@ function buildMetaPayload(): JsonObject {
     service,
   });
 
+  let nextAction: string;
+  if (runtimeBrief.publicLiveApi) {
+    nextAction =
+      "Run POST /v1/live-review-run with a fixed scenarioId to validate the bounded reviewer lane.";
+  } else if (missingIntegrations.length === 0) {
+    nextAction =
+      "Run POST /v1/plan or POST /v1/benchmark to validate live flows.";
+  } else {
+    nextAction = `Configure ${missingIntegrations[0]} to unlock live planning diagnostics.`;
+  }
+
   return {
     benchmarkDefaults: {
       caseCount:
@@ -993,12 +1065,7 @@ function buildMetaPayload(): JsonObject {
     diagnostics: {
       integrationReady: missingIntegrations.length === 0,
       missingIntegrations,
-      nextAction:
-        runtimeBrief.publicLiveApi
-          ? "Run POST /v1/live-review-run with a fixed scenarioId to validate the bounded reviewer lane."
-          : missingIntegrations.length === 0
-          ? "Run POST /v1/plan or POST /v1/benchmark to validate live flows."
-          : `Configure ${missingIntegrations[0]} to unlock live planning diagnostics.`,
+      nextAction,
       requestBodyTimeoutMs: bodyTimeoutMs,
     },
     ops_contract: {
@@ -1176,7 +1243,9 @@ function readStagePilotPerfEvidenceArtifact() {
 
     return {
       baseUrl:
-        typeof payload.baseUrl === "string" ? payload.baseUrl : fallback.baseUrl,
+        typeof payload.baseUrl === "string"
+          ? payload.baseUrl
+          : fallback.baseUrl,
       environment:
         typeof payload.environment === "string"
           ? payload.environment
@@ -1216,12 +1285,9 @@ function readStagePilotPerfEvidenceArtifact() {
                     ? (item as Record<string, unknown>)
                     : null;
                 return {
-                  path:
-                    typeof record?.path === "string" ? record.path : "",
+                  path: typeof record?.path === "string" ? record.path : "",
                   sharePct:
-                    typeof record?.sharePct === "number"
-                      ? record.sharePct
-                      : -1,
+                    typeof record?.sharePct === "number" ? record.sharePct : -1,
                 };
               })
               .filter((item) => item.path.length > 0 && item.sharePct >= 0)
@@ -1303,28 +1369,18 @@ function readStagePilotTraceObservabilityArtifact() {
       )
     ) as {
       generatedAt?: unknown;
-      hotspots?: Array<Record<string, unknown>>;
+      hotspots?: Record<string, unknown>[];
       regressionGate?: Record<string, unknown>;
       reviewerTier?: unknown;
       tool?: unknown;
-      traces?: Array<Record<string, unknown>>;
+      traces?: Record<string, unknown>[];
     };
 
     return {
       generatedAt:
         typeof payload.generatedAt === "string" ? payload.generatedAt : null,
       hotspots: Array.isArray(payload.hotspots)
-        ? payload.hotspots.map((item) => ({
-            attentionCount:
-              typeof item.attentionCount === "number"
-                ? item.attentionCount
-                : 0,
-            providerFamily:
-              typeof item.providerFamily === "string"
-                ? item.providerFamily
-                : "unknown",
-            risk: typeof item.risk === "string" ? item.risk : "unknown",
-          }))
+        ? payload.hotspots.map(mapStagePilotTraceHotspot)
         : fallback.hotspots,
       regressionGate: {
         failCount:
@@ -1352,43 +1408,9 @@ function readStagePilotTraceObservabilityArtifact() {
         typeof payload.reviewerTier === "string"
           ? payload.reviewerTier
           : fallback.reviewerTier,
-      tool:
-        typeof payload.tool === "string" ? payload.tool : fallback.tool,
+      tool: typeof payload.tool === "string" ? payload.tool : fallback.tool,
       traces: Array.isArray(payload.traces)
-        ? payload.traces.map((item) => ({
-            durationMs:
-              typeof item.durationMs === "number" ? item.durationMs : null,
-            failureClass:
-              typeof item.failureClass === "string"
-                ? item.failureClass
-                : "unknown",
-            operatorHandoff:
-              typeof item.operatorHandoff === "string"
-                ? item.operatorHandoff
-                : "review required",
-            protocolFamily:
-              typeof item.protocolFamily === "string"
-                ? item.protocolFamily
-                : "unknown",
-            providerFamily:
-              typeof item.providerFamily === "string"
-                ? item.providerFamily
-                : "unknown",
-            regressionGate:
-              typeof item.regressionGate === "string"
-                ? item.regressionGate
-                : "watch",
-            reviewerSurface:
-              typeof item.reviewerSurface === "string"
-                ? item.reviewerSurface
-                : "/v1/review-pack",
-            scenario:
-              typeof item.scenario === "string"
-                ? item.scenario
-                : "unspecified scenario",
-            traceId:
-              typeof item.traceId === "string" ? item.traceId : randomUUID(),
-          }))
+        ? payload.traces.map(mapStagePilotTraceRecord)
         : fallback.traces,
     };
   } catch {
@@ -1399,13 +1421,13 @@ function readStagePilotTraceObservabilityArtifact() {
 function readStagePilotRegressionGateArtifact() {
   const fallback = {
     generatedAt: null,
-    gates: [] as Array<{
+    gates: [] as {
       decision: string;
       focus: string;
       gate: string;
       owner: string;
       signal: string;
-    }>,
+    }[],
     releaseRecommendation: {
       nextStep: "No checked-in regression gate artifact found.",
       posture: "unknown",
@@ -1430,7 +1452,7 @@ function readStagePilotRegressionGateArtifact() {
       )
     ) as {
       generatedAt?: unknown;
-      gates?: Array<Record<string, unknown>>;
+      gates?: Record<string, unknown>[];
       releaseRecommendation?: Record<string, unknown>;
       scoreSummary?: Record<string, unknown>;
       tool?: unknown;
@@ -1440,17 +1462,7 @@ function readStagePilotRegressionGateArtifact() {
       generatedAt:
         typeof payload.generatedAt === "string" ? payload.generatedAt : null,
       gates: Array.isArray(payload.gates)
-        ? payload.gates.map((item) => ({
-            decision:
-              typeof item.decision === "string" ? item.decision : "watch",
-            focus: typeof item.focus === "string" ? item.focus : "unknown",
-            gate: typeof item.gate === "string" ? item.gate : "unknown",
-            owner: typeof item.owner === "string" ? item.owner : "runtime",
-            signal:
-              typeof item.signal === "string"
-                ? item.signal
-                : "No signal recorded.",
-          }))
+        ? payload.gates.map(mapStagePilotRegressionGate)
         : fallback.gates,
       releaseRecommendation: {
         nextStep:
@@ -1480,8 +1492,7 @@ function readStagePilotRegressionGateArtifact() {
             ? payload.scoreSummary.watchCount
             : null,
       },
-      tool:
-        typeof payload.tool === "string" ? payload.tool : fallback.tool,
+      tool: typeof payload.tool === "string" ? payload.tool : fallback.tool,
     };
   } catch {
     return fallback;
@@ -2108,7 +2119,9 @@ function handleRuntimeBriefRequest(
 function readStagePilotLiveScenario(body: unknown): StagePilotLiveScenario {
   const record =
     body && typeof body === "object" ? (body as Record<string, unknown>) : {};
-  const scenarioId = String(record.scenarioId || "").trim().toLowerCase();
+  const scenarioId = String(record.scenarioId || "")
+    .trim()
+    .toLowerCase();
   const scenario = STAGEPILOT_LIVE_SCENARIOS[scenarioId];
   if (!scenario) {
     throw new HttpError(
@@ -3101,10 +3114,7 @@ async function handlePostRequest(options: {
     return false;
   }
 
-  if (
-    isStagePilotReviewOnlyMode() &&
-    pathname !== "/v1/live-review-run"
-  ) {
+  if (isStagePilotReviewOnlyMode() && pathname !== "/v1/live-review-run") {
     sendJson(response, 403, {
       error:
         "review-only mode keeps public mutation routes disabled; use POST /v1/live-review-run instead.",

@@ -60,6 +60,7 @@ import {
   buildStagePilotBenchmarkSummary,
   buildStagePilotFailureTaxonomy,
   buildStagePilotDeveloperOpsPack,
+  buildStagePilotPerfEvidencePack,
   buildStagePilotPlanReportSchema,
   buildStagePilotProviderBenchmarkScorecard,
   buildStagePilotProtocolMatrix,
@@ -806,6 +807,140 @@ function readStagePilotBenchmarkSnapshot() {
   }
 }
 
+function readStagePilotPerfEvidenceArtifact() {
+  const fallback = {
+    baseUrl: "http://127.0.0.1:8788",
+    environment: "local-review-harness",
+    generatedAt: null,
+    observed: {
+      avgDurationMs: null,
+      checksPassRatePct: null,
+      httpReqFailedRatePct: null,
+      maxDurationMs: null,
+      p95DurationMs: null,
+      requestCount: null,
+      routeMix: [] as Array<{ path: string; sharePct: number }>,
+    },
+    scenario: {
+      executor: "shared-iterations",
+      iterations: null,
+      maxDuration: "60s",
+      vus: null,
+    },
+    thresholds: {
+      httpReqDurationP95: "p(95)<3000",
+      httpReqFailed: "rate<0.05",
+    },
+    tool: "k6",
+  };
+
+  try {
+    const payload = JSON.parse(
+      readFileSync(
+        new URL(
+          "../../docs/benchmarks/stagepilot-runtime-load-latest.json",
+          import.meta.url
+        ),
+        "utf8"
+      )
+    ) as {
+      baseUrl?: unknown;
+      environment?: unknown;
+      generatedAt?: unknown;
+      observed?: Record<string, unknown>;
+      scenario?: Record<string, unknown>;
+      thresholds?: Record<string, unknown>;
+      tool?: unknown;
+    };
+
+    return {
+      baseUrl:
+        typeof payload.baseUrl === "string" ? payload.baseUrl : fallback.baseUrl,
+      environment:
+        typeof payload.environment === "string"
+          ? payload.environment
+          : fallback.environment,
+      generatedAt:
+        typeof payload.generatedAt === "string" ? payload.generatedAt : null,
+      observed: {
+        avgDurationMs:
+          typeof payload.observed?.avgDurationMs === "number"
+            ? payload.observed.avgDurationMs
+            : null,
+        checksPassRatePct:
+          typeof payload.observed?.checksPassRatePct === "number"
+            ? payload.observed.checksPassRatePct
+            : null,
+        httpReqFailedRatePct:
+          typeof payload.observed?.httpReqFailedRatePct === "number"
+            ? payload.observed.httpReqFailedRatePct
+            : null,
+        maxDurationMs:
+          typeof payload.observed?.maxDurationMs === "number"
+            ? payload.observed.maxDurationMs
+            : null,
+        p95DurationMs:
+          typeof payload.observed?.p95DurationMs === "number"
+            ? payload.observed.p95DurationMs
+            : null,
+        requestCount:
+          typeof payload.observed?.requestCount === "number"
+            ? payload.observed.requestCount
+            : null,
+        routeMix: Array.isArray(payload.observed?.routeMix)
+          ? payload.observed.routeMix
+              .map((item) => {
+                const record =
+                  item && typeof item === "object"
+                    ? (item as Record<string, unknown>)
+                    : null;
+                return {
+                  path:
+                    typeof record?.path === "string" ? record.path : "",
+                  sharePct:
+                    typeof record?.sharePct === "number"
+                      ? record.sharePct
+                      : -1,
+                };
+              })
+              .filter((item) => item.path.length > 0 && item.sharePct >= 0)
+          : fallback.observed.routeMix,
+      },
+      scenario: {
+        executor:
+          typeof payload.scenario?.executor === "string"
+            ? payload.scenario.executor
+            : fallback.scenario.executor,
+        iterations:
+          typeof payload.scenario?.iterations === "number"
+            ? payload.scenario.iterations
+            : null,
+        maxDuration:
+          typeof payload.scenario?.maxDuration === "string"
+            ? payload.scenario.maxDuration
+            : fallback.scenario.maxDuration,
+        vus:
+          typeof payload.scenario?.vus === "number"
+            ? payload.scenario.vus
+            : null,
+      },
+      thresholds: {
+        httpReqDurationP95:
+          typeof payload.thresholds?.httpReqDurationP95 === "string"
+            ? payload.thresholds.httpReqDurationP95
+            : fallback.thresholds.httpReqDurationP95,
+        httpReqFailed:
+          typeof payload.thresholds?.httpReqFailed === "string"
+            ? payload.thresholds.httpReqFailed
+            : fallback.thresholds.httpReqFailed,
+      },
+      tool: typeof payload.tool === "string" ? payload.tool : fallback.tool,
+    };
+  } catch {
+    return fallback;
+  }
+}
+
 function buildReviewPackPayload(): JsonObject {
   const runtimeBrief = buildRuntimeBriefPayload() as ReturnType<
     typeof buildStagePilotRuntimeBrief
@@ -863,6 +998,14 @@ function buildProtocolMatrixPayload(): JsonObject {
 function buildProviderBenchmarkScorecardPayload(): JsonObject {
   return buildStagePilotProviderBenchmarkScorecard({
     benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
+    service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
+  });
+}
+
+function buildPerfEvidencePackPayload(): JsonObject {
+  return buildStagePilotPerfEvidencePack({
+    benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
+    perfArtifact: readStagePilotPerfEvidenceArtifact(),
     service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
   });
 }
@@ -1467,6 +1610,15 @@ function handleProviderBenchmarkScorecardRequest(
   }
 ) {
   sendJson(response, 200, buildProviderBenchmarkScorecardPayload(), options);
+}
+
+function handlePerfEvidencePackRequest(
+  response: ServerResponse,
+  options?: {
+    includeBody?: boolean;
+  }
+) {
+  sendJson(response, 200, buildPerfEvidencePackPayload(), options);
 }
 
 function parseStagePilotLane(rawUrl?: string): {
@@ -2196,6 +2348,9 @@ function handleReadonlyRequest(options: {
       return true;
     case "/v1/provider-benchmark-scorecard":
       handleProviderBenchmarkScorecardRequest(response, { includeBody });
+      return true;
+    case "/v1/perf-evidence-pack":
+      handlePerfEvidencePackRequest(response, { includeBody });
       return true;
     case "/v1/benchmark-summary":
       handleBenchmarkSummaryReadonly(response, rawUrl, { includeBody });

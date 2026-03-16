@@ -565,6 +565,10 @@ describe("stagepilot api server", () => {
           method: "GET",
           path: "/v1/trace-observability-pack",
         }),
+        expect.objectContaining({
+          method: "GET",
+          path: "/v1/regression-gate-pack",
+        }),
         expect.objectContaining({ method: "POST", path: "/v1/plan" }),
       ])
     );
@@ -608,6 +612,7 @@ describe("stagepilot api server", () => {
         perfEvidencePack: string;
         providerBenchmarkScorecard: string;
         protocolMatrix: string;
+        regressionGatePack: string;
         traceObservabilityPack: string;
         workflowRuns: string;
       };
@@ -631,6 +636,7 @@ describe("stagepilot api server", () => {
       "/v1/provider-benchmark-scorecard"
     );
     expect(body.links.protocolMatrix).toBe("/v1/protocol-matrix");
+    expect(body.links.regressionGatePack).toBe("/v1/regression-gate-pack");
     expect(body.links.traceObservabilityPack).toBe(
       "/v1/trace-observability-pack"
     );
@@ -820,6 +826,52 @@ describe("stagepilot api server", () => {
     expect(body.reviewPath.length).toBeGreaterThanOrEqual(4);
   });
 
+  it("returns regression gate pack for frontier promotion review", async () => {
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const response = await fetch(`${baseUrl}/v1/regression-gate-pack`);
+    expect(response.status).toBe(200);
+
+    const body = (await response.json()) as {
+      gates: Array<{
+        decision: string;
+        gate: string;
+      }>;
+      headline: string;
+      links: {
+        regressionGatePack: string;
+        traceObservabilityPack: string;
+      };
+      releaseRecommendation: {
+        posture: string;
+      };
+      reviewPath: string[];
+      schema: string;
+      summary: {
+        gateCount: number;
+        topStrategy: { strategy: string } | null;
+      };
+    };
+
+    expect(body.schema).toBe("stagepilot-regression-gate-pack-v1");
+    expect(body.headline).toContain("Regression gate pack");
+    expect(body.summary.topStrategy).not.toBeNull();
+    expect(body.summary.gateCount).toBeGreaterThanOrEqual(5);
+    expect(body.releaseRecommendation.posture).toBe(
+      "review-ready-with-watch-items"
+    );
+    expect(
+      body.gates.some((item) => item.gate === "mixed-format-regression-watch")
+    ).toBe(true);
+    expect(body.links.regressionGatePack).toBe("/v1/regression-gate-pack");
+    expect(body.links.traceObservabilityPack).toBe(
+      "/v1/trace-observability-pack"
+    );
+    expect(body.reviewPath.length).toBeGreaterThanOrEqual(4);
+  });
+
   it("returns runtime scorecard with live route telemetry", async () => {
     process.env.GEMINI_API_KEY = "stagepilot-test-key";
     process.env.OPENCLAW_WEBHOOK_URL = "https://example.invalid/webhook";
@@ -971,6 +1023,7 @@ describe("stagepilot api server", () => {
         benchmarkSummary: string;
         developerOpsPack: string;
         providerBenchmarkScorecard: string;
+        regressionGatePack: string;
         reviewPack: string;
         traceObservabilityPack: string;
         workflowRuns: string;
@@ -985,6 +1038,7 @@ describe("stagepilot api server", () => {
           };
         };
         benchmarkSummarySchema: string;
+        regressionGatePackSchema: string;
         traceObservabilityPackSchema: string;
         reviewerPosture: {
           claimTier: string;
@@ -1018,6 +1072,7 @@ describe("stagepilot api server", () => {
     expect(body.links.providerBenchmarkScorecard).toBe(
       "/v1/provider-benchmark-scorecard"
     );
+    expect(body.links.regressionGatePack).toBe("/v1/regression-gate-pack");
     expect(body.links.traceObservabilityPack).toBe(
       "/v1/trace-observability-pack"
     );
@@ -1029,6 +1084,9 @@ describe("stagepilot api server", () => {
     );
     expect(body.proofBundle.traceObservabilityPackSchema).toBe(
       "stagepilot-trace-observability-pack-v1"
+    );
+    expect(body.proofBundle.regressionGatePackSchema).toBe(
+      "stagepilot-regression-gate-pack-v1"
     );
     expect(body.proofBundle.reviewerPosture.docsOnlySurfaces).toContain(
       "site/"

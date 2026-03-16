@@ -23,6 +23,8 @@ export const STAGEPILOT_PERF_EVIDENCE_PACK_SCHEMA =
   "stagepilot-perf-evidence-pack-v1";
 export const STAGEPILOT_TRACE_OBSERVABILITY_PACK_SCHEMA =
   "stagepilot-trace-observability-pack-v1";
+export const STAGEPILOT_REGRESSION_GATE_PACK_SCHEMA =
+  "stagepilot-regression-gate-pack-v1";
 
 function buildStagePilotOperationalPosture(options: {
   benchmarkReadyForPromotion?: boolean;
@@ -75,6 +77,11 @@ function buildStagePilotProofAssets() {
     {
       label: "Trace observability evidence",
       path: "docs/benchmarks/stagepilot-trace-observability-latest.json",
+      kind: "report",
+    },
+    {
+      label: "Regression gate evidence",
+      path: "docs/benchmarks/stagepilot-regression-gate-latest.json",
       kind: "report",
     },
     {
@@ -168,6 +175,28 @@ interface StagePilotTraceObservabilityArtifact {
   }>;
 }
 
+interface StagePilotRegressionGateArtifact {
+  generatedAt: string | null;
+  gates: Array<{
+    decision: string;
+    focus: string;
+    gate: string;
+    owner: string;
+    signal: string;
+  }>;
+  releaseRecommendation: {
+    nextStep: string;
+    posture: string;
+    summary: string;
+  };
+  scoreSummary: {
+    failCount: number | null;
+    passCount: number | null;
+    watchCount: number | null;
+  };
+  tool: string;
+}
+
 function buildStrategyRows(snapshot: StagePilotBenchmarkSnapshot) {
   return [
     {
@@ -247,6 +276,12 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
       path: "/v1/trace-observability-pack",
       purpose:
         "Checked-in trace bundle for frontier failure replay, regression gates, and operator-facing escalation posture",
+    },
+    {
+      method: "GET",
+      path: "/v1/regression-gate-pack",
+      purpose:
+        "Checked-in gate board for frontier promotion posture, reviewer-visible release decisions, and eval discipline",
     },
     {
       method: "GET",
@@ -384,6 +419,7 @@ export function buildStagePilotRuntimeBrief(options: {
       runtimeScorecard: "/v1/runtime-scorecard",
       perfEvidencePack: "/v1/perf-evidence-pack",
       traceObservabilityPack: "/v1/trace-observability-pack",
+      regressionGatePack: "/v1/regression-gate-pack",
       failureTaxonomy: "/v1/failure-taxonomy",
       protocolMatrix: "/v1/protocol-matrix",
       providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
@@ -788,6 +824,7 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
       protocolMatrix: "/v1/protocol-matrix",
       perfEvidencePack: "/v1/perf-evidence-pack",
       traceObservabilityPack: "/v1/trace-observability-pack",
+      regressionGatePack: "/v1/regression-gate-pack",
       benchmarkSummary: "/v1/benchmark-summary",
       failureTaxonomy: "/v1/failure-taxonomy",
       runtimeScorecard: "/v1/runtime-scorecard",
@@ -888,6 +925,7 @@ export function buildStagePilotPerfEvidencePack(options: {
       protocolMatrix: "/v1/protocol-matrix",
       providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
       traceObservabilityPack: "/v1/trace-observability-pack",
+      regressionGatePack: "/v1/regression-gate-pack",
       benchmarkSummary: "/v1/benchmark-summary",
       developerOpsPack: "/v1/developer-ops-pack",
       reviewPack: "/v1/review-pack",
@@ -966,7 +1004,77 @@ export function buildStagePilotTraceObservabilityPack(options: {
       protocolMatrix: "/v1/protocol-matrix",
       perfEvidencePack: "/v1/perf-evidence-pack",
       failureTaxonomy: "/v1/failure-taxonomy",
+      regressionGatePack: "/v1/regression-gate-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
+      reviewPack: "/v1/review-pack",
+    },
+  };
+}
+
+export function buildStagePilotRegressionGatePack(options: {
+  benchmarkSnapshot: StagePilotBenchmarkSnapshot;
+  regressionArtifact: StagePilotRegressionGateArtifact;
+  service: string;
+}) {
+  const topStrategy = buildStrategyRows(options.benchmarkSnapshot).sort(
+    (left, right) => (right.successRate ?? 0) - (left.successRate ?? 0)
+  )[0] ?? null;
+  const attentionCount = options.regressionArtifact.gates.filter(
+    (item) => item.decision !== "pass"
+  ).length;
+
+  return {
+    service: options.service,
+    status: "ok",
+    generatedAt: new Date().toISOString(),
+    schema: STAGEPILOT_REGRESSION_GATE_PACK_SCHEMA,
+    headline:
+      "Regression gate pack that compresses frontier promotion posture, release decisions, and reviewer-visible eval discipline into one checked-in surface.",
+    summary: {
+      attentionCount,
+      failCount: options.regressionArtifact.scoreSummary.failCount,
+      gateCount: options.regressionArtifact.gates.length,
+      passCount: options.regressionArtifact.scoreSummary.passCount,
+      releasePosture: options.regressionArtifact.releaseRecommendation.posture,
+      topStrategy,
+      watchCount: options.regressionArtifact.scoreSummary.watchCount,
+    },
+    releaseRecommendation: options.regressionArtifact.releaseRecommendation,
+    gates: options.regressionArtifact.gates,
+    reviewPath: [
+      "Start with /v1/regression-gate-pack to explain what would block or allow StagePilot promotion into a stronger frontier-runtime claim tier.",
+      "Pair it with /v1/trace-observability-pack so each gate stays grounded in replay evidence instead of generic scorekeeping.",
+      "Use /v1/perf-evidence-pack and /v1/provider-benchmark-scorecard to show that gate posture still matches runtime pressure and provider-family tradeoffs.",
+      "Finish on /v1/review-pack before summarizing the strongest public frontier signal.",
+    ],
+    reviewerNotes: [
+      "This is a checked-in release board, not a substitute for live production SLO ownership.",
+      "The value is explicit promotion logic: what would make a reviewer claim stronger, weaker, or blocked.",
+      "Use this pack when an interviewer asks how you decide whether a reliability surface is ready to be trusted more broadly.",
+    ],
+    proofAssets: [
+      {
+        label: "Latest regression gate artifact",
+        path: "docs/benchmarks/stagepilot-regression-gate-latest.json",
+        kind: "report",
+      },
+      {
+        label: "Latest trace observability artifact",
+        path: "docs/benchmarks/stagepilot-trace-observability-latest.json",
+        kind: "report",
+      },
+      {
+        label: "Latest benchmark snapshot",
+        path: "docs/benchmarks/stagepilot-latest.json",
+        kind: "report",
+      },
+    ],
+    links: {
+      regressionGatePack: "/v1/regression-gate-pack",
+      traceObservabilityPack: "/v1/trace-observability-pack",
+      providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
+      perfEvidencePack: "/v1/perf-evidence-pack",
+      benchmarkSummary: "/v1/benchmark-summary",
       reviewPack: "/v1/review-pack",
     },
   };
@@ -1339,9 +1447,9 @@ export function buildStagePilotReviewPack(options: {
       },
       {
         step: "3. Contract boundary",
-        surface: "/v1/schema/plan-report",
+        surface: "/v1/regression-gate-pack -> /v1/schema/plan-report",
         proof:
-          "Check report sections and operator rules before handing output to downstream tools.",
+          "Check promotion posture, report sections, and operator rules before handing output to downstream tools.",
       },
       {
         step: "4. Operator proof",
@@ -1368,6 +1476,7 @@ export function buildStagePilotReviewPack(options: {
       runtimeScorecardSchema: STAGEPILOT_RUNTIME_SCORECARD_SCHEMA,
       perfEvidencePackSchema: STAGEPILOT_PERF_EVIDENCE_PACK_SCHEMA,
       traceObservabilityPackSchema: STAGEPILOT_TRACE_OBSERVABILITY_PACK_SCHEMA,
+      regressionGatePackSchema: STAGEPILOT_REGRESSION_GATE_PACK_SCHEMA,
       integrationsReady: options.geminiHasApiKey && options.openClawConfigured,
       operationalPosture,
       model: options.model,
@@ -1386,6 +1495,7 @@ export function buildStagePilotReviewPack(options: {
       runtimeScorecard: "/v1/runtime-scorecard",
       perfEvidencePack: "/v1/perf-evidence-pack",
       traceObservabilityPack: "/v1/trace-observability-pack",
+      regressionGatePack: "/v1/regression-gate-pack",
       failureTaxonomy: "/v1/failure-taxonomy",
       protocolMatrix: "/v1/protocol-matrix",
       providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",

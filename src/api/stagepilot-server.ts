@@ -64,6 +64,7 @@ import {
   buildStagePilotPlanReportSchema,
   buildStagePilotProviderBenchmarkScorecard,
   buildStagePilotProtocolMatrix,
+  buildStagePilotRegressionGatePack,
   buildStagePilotReviewPack,
   buildStagePilotRouteDescriptors,
   buildStagePilotRuntimeBrief,
@@ -1076,6 +1077,98 @@ function readStagePilotTraceObservabilityArtifact() {
   }
 }
 
+function readStagePilotRegressionGateArtifact() {
+  const fallback = {
+    generatedAt: null,
+    gates: [] as Array<{
+      decision: string;
+      focus: string;
+      gate: string;
+      owner: string;
+      signal: string;
+    }>,
+    releaseRecommendation: {
+      nextStep: "No checked-in regression gate artifact found.",
+      posture: "unknown",
+      summary: "No regression gate posture available.",
+    },
+    scoreSummary: {
+      failCount: null,
+      passCount: null,
+      watchCount: null,
+    },
+    tool: "checked-in regression gate board",
+  };
+
+  try {
+    const payload = JSON.parse(
+      readFileSync(
+        new URL(
+          "../../docs/benchmarks/stagepilot-regression-gate-latest.json",
+          import.meta.url
+        ),
+        "utf8"
+      )
+    ) as {
+      generatedAt?: unknown;
+      gates?: Array<Record<string, unknown>>;
+      releaseRecommendation?: Record<string, unknown>;
+      scoreSummary?: Record<string, unknown>;
+      tool?: unknown;
+    };
+
+    return {
+      generatedAt:
+        typeof payload.generatedAt === "string" ? payload.generatedAt : null,
+      gates: Array.isArray(payload.gates)
+        ? payload.gates.map((item) => ({
+            decision:
+              typeof item.decision === "string" ? item.decision : "watch",
+            focus: typeof item.focus === "string" ? item.focus : "unknown",
+            gate: typeof item.gate === "string" ? item.gate : "unknown",
+            owner: typeof item.owner === "string" ? item.owner : "runtime",
+            signal:
+              typeof item.signal === "string"
+                ? item.signal
+                : "No signal recorded.",
+          }))
+        : fallback.gates,
+      releaseRecommendation: {
+        nextStep:
+          typeof payload.releaseRecommendation?.nextStep === "string"
+            ? payload.releaseRecommendation.nextStep
+            : fallback.releaseRecommendation.nextStep,
+        posture:
+          typeof payload.releaseRecommendation?.posture === "string"
+            ? payload.releaseRecommendation.posture
+            : fallback.releaseRecommendation.posture,
+        summary:
+          typeof payload.releaseRecommendation?.summary === "string"
+            ? payload.releaseRecommendation.summary
+            : fallback.releaseRecommendation.summary,
+      },
+      scoreSummary: {
+        failCount:
+          typeof payload.scoreSummary?.failCount === "number"
+            ? payload.scoreSummary.failCount
+            : null,
+        passCount:
+          typeof payload.scoreSummary?.passCount === "number"
+            ? payload.scoreSummary.passCount
+            : null,
+        watchCount:
+          typeof payload.scoreSummary?.watchCount === "number"
+            ? payload.scoreSummary.watchCount
+            : null,
+      },
+      tool:
+        typeof payload.tool === "string" ? payload.tool : fallback.tool,
+    };
+  } catch {
+    return fallback;
+  }
+}
+
 function buildReviewPackPayload(): JsonObject {
   const runtimeBrief = buildRuntimeBriefPayload() as ReturnType<
     typeof buildStagePilotRuntimeBrief
@@ -1150,6 +1243,14 @@ function buildTraceObservabilityPackPayload(): JsonObject {
     benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
     service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
     traceArtifact: readStagePilotTraceObservabilityArtifact(),
+  });
+}
+
+function buildRegressionGatePackPayload(): JsonObject {
+  return buildStagePilotRegressionGatePack({
+    benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
+    regressionArtifact: readStagePilotRegressionGateArtifact(),
+    service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
   });
 }
 
@@ -1771,6 +1872,15 @@ function handleTraceObservabilityPackRequest(
   }
 ) {
   sendJson(response, 200, buildTraceObservabilityPackPayload(), options);
+}
+
+function handleRegressionGatePackRequest(
+  response: ServerResponse,
+  options?: {
+    includeBody?: boolean;
+  }
+) {
+  sendJson(response, 200, buildRegressionGatePackPayload(), options);
 }
 
 function parseStagePilotLane(rawUrl?: string): {
@@ -2506,6 +2616,9 @@ function handleReadonlyRequest(options: {
       return true;
     case "/v1/trace-observability-pack":
       handleTraceObservabilityPackRequest(response, { includeBody });
+      return true;
+    case "/v1/regression-gate-pack":
+      handleRegressionGatePackRequest(response, { includeBody });
       return true;
     case "/v1/benchmark-summary":
       handleBenchmarkSummaryReadonly(response, rawUrl, { includeBody });

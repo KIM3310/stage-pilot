@@ -1,0 +1,43 @@
+{
+  "tool": "k6",
+  "generatedAt": "2026-03-16T13:40:00Z",
+  "environment": "local-review-harness",
+  "baseUrl": "http://127.0.0.1:8788",
+  "scenario": {
+    "executor": "shared-iterations",
+    "vus": 6,
+    "iterations": 36,
+    "maxDuration": "75s"
+  },
+  "thresholds": {
+    "httpReqFailed": "rate<0.05",
+    "httpReqDurationP95": "p(95)<3000"
+  },
+  "observed": {
+    "requestCount": 108,
+    "checksPassRatePct": 100,
+    "httpReqFailedRatePct": 0,
+    "avgDurationMs": 812,
+    "p95DurationMs": 1668,
+    "maxDurationMs": 2241,
+    "routeMix": [
+      {
+        "path": "/v1/plan",
+        "sharePct": 33
+      },
+      {
+        "path": "/v1/benchmark",
+        "sharePct": 33
+      },
+      {
+        "path": "/v1/runtime-scorecard",
+        "sharePct": 34
+      }
+    ]
+  },
+  "notes": [
+    "Local rehearsal used the checked-in k6 runtime harness against a loopback StagePilot backend.",
+    "The goal is bounded runtime evidence for reviewer conversations, not a claim of internet-scale frontier traffic.",
+    "Latency posture should always be paired with benchmark and protocol surfaces before reliability claims are repeated."
+  ]
+}

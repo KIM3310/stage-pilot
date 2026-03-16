@@ -1,0 +1,60 @@
+StagePilot Benchmark Run — 2026-03-19
+======================================
+
+Environment:
+  Runner: vitest v4.0.18
+  Platform: darwin (macOS)
+  Node.js: >=18
+  Package: @ai-sdk-tool/parser v4.1.3
+
+Full Test Suite:
+  Test Files: 184 passed (184)
+  Tests: 1,713 passed (1,713)
+  Type Errors: no errors
+  Start: 10:31:25
+  Duration: 4.51s (transform 2.77s, setup 0ms, import 8.78s, tests 9.75s, environment 12ms)
+
+Benchmark Data (from stagepilot-latest.json):
+  Case count: 24
+  Seed: 20260228
+  Generated: 2026-03-15T17:25:10.459Z
+
+  Strategy: baseline
+    Success rate: 29.17%
+    Parse success: 7/24
+    Avg latency: 0.02ms
+    p95 latency: 0.05ms
+    Failed cases: bench-2, bench-3, bench-4, bench-5, bench-6, bench-9, bench-10, bench-11, bench-12, bench-13, bench-16, bench-17, bench-18, bench-19, bench-20, bench-23, bench-24
+
+  Strategy: middleware
+    Success rate: 87.50%
+    Parse success: 21/24
+    Avg latency: 0.16ms
+    p95 latency: 0.44ms
+    Failed cases: bench-4, bench-11, bench-18
+
+  Strategy: middleware+ralph-loop
+    Success rate: 100.00%
+    Parse success: 24/24
+    Avg latency: 0.05ms
+    p95 latency: 0.10ms
+    Failed cases: (none)
+
+Load Test (from stagepilot-runtime-load-latest.json):
+  Tool: k6
+  VUs: 6
+  Iterations: 36
+  Requests: 108
+  Check pass rate: 100%
+  HTTP failure rate: 0%
+  Avg duration: 812ms
+  p95 duration: 1668ms
+  Max duration: 2241ms
+
+Regression Gate Board:
+  provider-contract-coverage: pass
+  trace-replay-discipline: pass
+  mixed-format-regression-watch: watch
+  xml-boundary-repair-watch: watch
+  bounded-load-posture: pass
+  Overall: review-ready-with-watch-items

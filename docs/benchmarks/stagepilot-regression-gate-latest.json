@@ -1,0 +1,51 @@
+{
+  "generatedAt": "2026-03-16T12:05:00.000Z",
+  "tool": "checked-in regression gate board",
+  "scoreSummary": {
+    "passCount": 3,
+    "watchCount": 2,
+    "failCount": 0
+  },
+  "releaseRecommendation": {
+    "posture": "review-ready-with-watch-items",
+    "summary": "StagePilot is strong enough for frontier review conversations as long as watch items stay explicit and bounded.",
+    "nextStep": "Promote provider, trace, and perf evidence together; keep mixed-format multiline outputs and XML boundary repair as watch areas."
+  },
+  "gates": [
+    {
+      "gate": "provider-contract-coverage",
+      "signal": "Provider scorecard plus protocol matrix cover openai-compatible, anthropic-xml-style, gemini-hybrid, and local-oss families.",
+      "decision": "pass",
+      "focus": "frontier credibility",
+      "owner": "runtime"
+    },
+    {
+      "gate": "trace-replay-discipline",
+      "signal": "Trace observability artifact has four replayable traces and zero failed gates.",
+      "decision": "pass",
+      "focus": "debuggability",
+      "owner": "runtime"
+    },
+    {
+      "gate": "mixed-format-regression-watch",
+      "signal": "Gemini-hybrid multiline indentation drift is bounded but still deserves visible watch status.",
+      "decision": "watch",
+      "focus": "contract drift",
+      "owner": "evals"
+    },
+    {
+      "gate": "xml-boundary-repair-watch",
+      "signal": "Anthropic-style XML close-tag repair is stable enough for review but should remain explicit before stronger production claims.",
+      "decision": "watch",
+      "focus": "stream repair",
+      "owner": "runtime"
+    },
+    {
+      "gate": "bounded-load-posture",
+      "signal": "k6 perf artifact and route guardrails stay consistent with the current benchmark-backed story.",
+      "decision": "pass",
+      "focus": "runtime pressure",
+      "owner": "platform"
+    }
+  ]
+}

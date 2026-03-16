@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" fill="none">
+  <rect width="960" height="540" fill="#0B0E14"/>
+  <rect x="24" y="24" width="912" height="492" rx="24" fill="#111827" stroke="#2A3444"/>
+  <text x="48" y="62" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="26" font-weight="700">StagePilot Summary Pack</text>
+  <text x="48" y="90" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="14">parser -&gt; stagepilot orchestration -&gt; benchlab evidence</text>
+
+  <rect x="48" y="126" width="268" height="132" rx="16" fill="#121B2A" stroke="#00E5FF"/>
+  <text x="68" y="154" fill="#67E8F9" font-family="Arial, sans-serif" font-size="12" letter-spacing="1.5">PARSER SURFACE</text>
+  <text x="68" y="184" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="21" font-weight="700">@ai-sdk-tool/parser</text>
+  <text x="68" y="210" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="13">Malformed tool-call text becomes</text>
+  <text x="68" y="230" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="13">schema-safe inputs instead of silent failure.</text>
+
+  <rect x="346" y="126" width="268" height="132" rx="16" fill="#121B2A" stroke="#00E676"/>
+  <text x="366" y="154" fill="#86EFAC" font-family="Arial, sans-serif" font-size="12" letter-spacing="1.5">BENCHMARK PROOF</text>
+  <text x="366" y="184" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">29.17% -&gt; 87.50% -&gt; 100.00%</text>
+  <text x="366" y="210" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="13">Baseline -&gt; middleware -&gt; Ralph loop (24-case snapshot)</text>
+  <text x="366" y="230" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="13">+70.83pp lift vs baseline in checked-in runs.</text>
+
+  <rect x="644" y="126" width="268" height="132" rx="16" fill="#121B2A" stroke="#B084E6"/>
+  <text x="664" y="154" fill="#D8B4FE" font-family="Arial, sans-serif" font-size="12" letter-spacing="1.5">BENCHLAB EVIDENCE</text>
+  <text x="664" y="184" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="19" font-weight="700">runs + claims + forensics</text>
+  <text x="664" y="210" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="13">Variant leaderboard, checked-in artifacts,</text>
+  <text x="664" y="230" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="13">and dominant failure buckets stay reviewable.</text>
+
+  <path d="M316 192H338" stroke="#5EEAD4" stroke-width="3" stroke-linecap="round"/>
+  <path d="M614 192H636" stroke="#5EEAD4" stroke-width="3" stroke-linecap="round"/>
+  <path d="M326 184L338 192L326 200" stroke="#5EEAD4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M624 184L636 192L624 200" stroke="#5EEAD4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <rect x="48" y="294" width="404" height="176" rx="16" fill="#0F172A" stroke="#334155"/>
+  <text x="68" y="324" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">Evaluation APIs</text>
+  <text x="68" y="356" fill="#E5E7EB" font-family="Arial, sans-serif" font-size="14">StagePilot</text>
+  <text x="68" y="382" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">/v1/runtime-brief   /v1/summary-pack   /v1/schema/plan-report</text>
+  <text x="68" y="418" fill="#E5E7EB" font-family="Arial, sans-serif" font-size="14">BenchLab</text>
+  <text x="68" y="444" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">/v1/benchlab/runtime-brief   /v1/benchlab/summary-pack   /v1/benchlab/schema/job-report</text>
+
+  <rect x="484" y="294" width="428" height="176" rx="16" fill="#0F172A" stroke="#334155"/>
+  <text x="504" y="324" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">Review Sequence</text>
+  <text x="504" y="356" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">1. Confirm runtime and integration posture.</text>
+  <text x="504" y="384" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">2. Inspect benchmark lift or checked-in claim delta.</text>
+  <text x="504" y="412" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">3. Run plan or compare surfaces before promoting any claim.</text>
+  <text x="504" y="444" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="13">Goal: make parser reliability and experiment evidence legible in under a minute.</text>
+</svg>

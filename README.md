@@ -1,4 +1,4 @@
-<img width="3168" height="1344" alt="AI SDK Tool monorepo banner" src="https://github.com/user-attachments/assets/9a002988-e535-42ac-8baf-56ec8754410f" />
+<img width="3168" height="1344" alt="StagePilot reliability runtime banner" src="https://github.com/user-attachments/assets/9a002988-e535-42ac-8baf-56ec8754410f" />
 
 # StagePilot: Tool-Calling Reliability Runtime
 
@@ -26,7 +26,7 @@ The repo brings together three connected surfaces:
 
 ## Portfolio context
 - **Portfolio family:** AI reliability and incident systems
-- **This repo's role:** flagship reliability / tool-calling proof lab in the portfolio.
+- **This repo's role:** flagship reliability and tool-calling runtime in the portfolio.
 - **Related repos:** `AegisOps`, `Aegis-Air`, `ogx`
 
 ## Big-Tech Elevation Track

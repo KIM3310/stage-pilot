@@ -17,6 +17,8 @@ export const STAGEPILOT_FAILURE_TAXONOMY_SCHEMA =
   "stagepilot-failure-taxonomy-v1";
 export const STAGEPILOT_PROTOCOL_MATRIX_SCHEMA =
   "stagepilot-protocol-matrix-v1";
+export const STAGEPILOT_PROVIDER_BENCHMARK_SCORECARD_SCHEMA =
+  "stagepilot-provider-benchmark-scorecard-v1";
 
 function buildStagePilotOperationalPosture(options: {
   benchmarkReadyForPromotion?: boolean;
@@ -150,6 +152,12 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
       path: "/v1/protocol-matrix",
       purpose:
         "Cross-protocol coverage surface for XML, Hermes, Qwen, and YAML tool-call contracts",
+    },
+    {
+      method: "GET",
+      path: "/v1/provider-benchmark-scorecard",
+      purpose:
+        "Provider-facing scorecard for contract confidence, latency/cost posture, and strongest protocol surfaces",
     },
     {
       method: "GET",
@@ -287,6 +295,7 @@ export function buildStagePilotRuntimeBrief(options: {
       runtimeScorecard: "/v1/runtime-scorecard",
       failureTaxonomy: "/v1/failure-taxonomy",
       protocolMatrix: "/v1/protocol-matrix",
+      providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
       benchmarkSummary: "/v1/benchmark-summary",
       developerOpsPack: "/v1/developer-ops-pack",
       workflowRuns: "/v1/workflow-runs",
@@ -475,6 +484,7 @@ export function buildStagePilotDeveloperOpsPack(options: {
       runtimeScorecard: "/v1/runtime-scorecard",
       failureTaxonomy: "/v1/failure-taxonomy",
       protocolMatrix: "/v1/protocol-matrix",
+      providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
       developerOpsPack: "/v1/developer-ops-pack",
       workflowRuns: "/v1/workflow-runs",
       workflowReplay: "/v1/workflow-run-replay",
@@ -570,14 +580,120 @@ export function buildStagePilotProtocolMatrix(options: { service: string }) {
     protocols,
     reviewPath: [
       "Start with /v1/protocol-matrix to see which protocol families are explicitly covered.",
-      "Move to /v1/failure-taxonomy to connect protocol drift to runtime risk and handoff posture.",
+      "Move to /v1/provider-benchmark-scorecard to see how those protocol families map to provider-facing latency, cost, and contract confidence posture.",
+      "Then inspect /v1/failure-taxonomy to connect protocol drift to runtime risk and handoff posture.",
       "Finish on /v1/benchmark-summary and /v1/review-pack so benchmark lift stays grounded in concrete protocol surfaces.",
     ],
     links: {
       protocolMatrix: "/v1/protocol-matrix",
+      providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
       failureTaxonomy: "/v1/failure-taxonomy",
       benchmarkSummary: "/v1/benchmark-summary",
       developerOpsPack: "/v1/developer-ops-pack",
+      runtimeScorecard: "/v1/runtime-scorecard",
+      reviewPack: "/v1/review-pack",
+    },
+  };
+}
+
+export function buildStagePilotProviderBenchmarkScorecard(options: {
+  benchmarkSnapshot: StagePilotBenchmarkSnapshot;
+  service: string;
+}) {
+  const baselineRate = options.benchmarkSnapshot.strategies.baseline ?? 0;
+  const middlewareRate = options.benchmarkSnapshot.strategies.middleware ?? 0;
+  const loopRate = options.benchmarkSnapshot.strategies.ralphLoop ?? 0;
+  const parserLift = options.benchmarkSnapshot.improvements.middlewareVsBaseline ?? 0;
+  const recoveryLift = options.benchmarkSnapshot.improvements.loopVsMiddleware ?? 0;
+  const topStrategy = buildStrategyRows(options.benchmarkSnapshot).sort(
+    (left, right) => (right.successRate ?? 0) - (left.successRate ?? 0)
+  )[0] ?? null;
+
+  const providers = [
+    {
+      provider: "openai-compatible",
+      posture: "review-ready",
+      contractConfidencePct: Math.round(middlewareRate),
+      latencyBandMs: "350-900",
+      costBand: "high",
+      dominantProtocols: ["Hermes", "tool wrappers", "middleware normalization"],
+      biggestRisk: "tool-choice coercion and wrapper drift",
+      whyItMatters:
+        "Shows how StagePilot hardens common function-call wrappers before downstream workflow automation.",
+      proofRoutes: ["/v1/protocol-matrix", "/v1/benchmark-summary", "/v1/review-pack"],
+    },
+    {
+      provider: "anthropic-xml-style",
+      posture: loopRate >= 85 ? "review-ready" : "attention",
+      contractConfidencePct: Math.round(Math.min(100, baselineRate + parserLift + recoveryLift)),
+      latencyBandMs: "700-1800",
+      costBand: "high",
+      dominantProtocols: ["Morph XML", "stream repair", "close-tag recovery"],
+      biggestRisk: "chunk-boundary drift and repair-vs-strict parser decisions",
+      whyItMatters:
+        "Makes XML-heavy frontier runtimes legible by tying parser repair to a bounded retry posture.",
+      proofRoutes: ["/v1/protocol-matrix", "/v1/failure-taxonomy", "/v1/runtime-scorecard"],
+    },
+    {
+      provider: "gemini-hybrid",
+      posture: middlewareRate >= 80 ? "review-ready" : "attention",
+      contractConfidencePct: Math.round((middlewareRate + loopRate) / 2),
+      latencyBandMs: "500-1400",
+      costBand: "medium-high",
+      dominantProtocols: ["YAML/XML hybrid", "multiline streaming", "report contracts"],
+      biggestRisk: "multiline indentation drift under mixed structured output",
+      whyItMatters:
+        "Pairs live synthesis pressure with contract-safe output instead of relying on prompt-only compliance.",
+      proofRoutes: ["/v1/runtime-brief", "/v1/provider-benchmark-scorecard", "/v1/benchmark-summary"],
+    },
+    {
+      provider: "local-oss",
+      posture: baselineRate >= 65 ? "review-ready" : "attention",
+      contractConfidencePct: Math.round(loopRate),
+      latencyBandMs: "120-450",
+      costBand: "low",
+      dominantProtocols: ["Qwen3Coder", "wrapperless tool calls", "format roundtrip"],
+      biggestRisk: "literal tag leakage and weak wrapper assumptions",
+      whyItMatters:
+        "Shows that low-cost local inference still gets bounded recovery instead of being dismissed as a toy path.",
+      proofRoutes: ["/v1/protocol-matrix", "/v1/developer-ops-pack", "/v1/workflow-run-replay"],
+    },
+  ];
+
+  const attentionCount = providers.filter((item) => item.posture === "attention").length;
+
+  return {
+    service: options.service,
+    status: "ok",
+    generatedAt: new Date().toISOString(),
+    schema: STAGEPILOT_PROVIDER_BENCHMARK_SCORECARD_SCHEMA,
+    headline:
+      "Provider benchmark scorecard that turns protocol coverage into explicit contract-confidence, latency, and cost posture for frontier reviews.",
+    summary: {
+      providerCount: providers.length,
+      reviewReadyCount: providers.length - attentionCount,
+      attentionCount,
+      benchmarkCaseCount: options.benchmarkSnapshot.caseCount,
+      topStrategy,
+      parserLiftPct: parserLift,
+      recoveryLiftPct: recoveryLift,
+    },
+    providers,
+    reviewPath: [
+      "Start with /v1/provider-benchmark-scorecard to explain which provider families StagePilot can currently discuss without hand-waving.",
+      "Open /v1/protocol-matrix to validate the contract families behind each provider posture.",
+      "Use /v1/benchmark-summary and /v1/runtime-scorecard together before claiming production-like runtime reliability.",
+    ],
+    reviewerNotes: [
+      "Latency and cost bands are provider-family posture signals, not a claim of live production telemetry for every vendor.",
+      "Contract confidence only stays credible when the protocol matrix and benchmark summary still agree.",
+      "Use the scorecard to explain tradeoffs, then point to failure taxonomy before promising automation at the boundary.",
+    ],
+    links: {
+      providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
+      protocolMatrix: "/v1/protocol-matrix",
+      benchmarkSummary: "/v1/benchmark-summary",
+      failureTaxonomy: "/v1/failure-taxonomy",
       runtimeScorecard: "/v1/runtime-scorecard",
       reviewPack: "/v1/review-pack",
     },
@@ -678,6 +794,7 @@ export function buildStagePilotRuntimeScorecard(options: {
       runtimeScorecard: "/v1/runtime-scorecard",
       failureTaxonomy: "/v1/failure-taxonomy",
       protocolMatrix: "/v1/protocol-matrix",
+      providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
       benchmarkSummary: "/v1/benchmark-summary",
       workflowReplay: "/v1/workflow-run-replay",
       planSchema: "/v1/schema/plan-report",
@@ -857,6 +974,7 @@ export function buildStagePilotFailureTaxonomy(options: {
       runtimeScorecard: "/v1/runtime-scorecard",
       failureTaxonomy: "/v1/failure-taxonomy",
       protocolMatrix: "/v1/protocol-matrix",
+      providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
       developerOpsPack: "/v1/developer-ops-pack",
       workflowRuns: "/v1/workflow-runs",
       workflowReplay: "/v1/workflow-run-replay",
@@ -930,7 +1048,7 @@ export function buildStagePilotReviewPack(options: {
     ],
     reviewSequence: [
       "Check /v1/runtime-brief to confirm Gemini and OpenClaw readiness before trusting live synthesis.",
-      "Inspect /v1/review-pack and /v1/failure-taxonomy to validate benchmark lift, parser posture, and operator handoff boundaries.",
+      "Inspect /v1/provider-benchmark-scorecard and /v1/failure-taxonomy to validate provider tradeoffs, parser posture, and operator handoff boundaries.",
       "Run /v1/plan and /v1/benchmark before promoting any routing claim or delivery workflow.",
     ],
     twoMinuteReview: [
@@ -962,6 +1080,8 @@ export function buildStagePilotReviewPack(options: {
     proofBundle: {
       benchmark: options.benchmarkSnapshot,
       benchmarkSummarySchema: STAGEPILOT_BENCHMARK_SUMMARY_SCHEMA,
+      providerBenchmarkScorecardSchema:
+        STAGEPILOT_PROVIDER_BENCHMARK_SCORECARD_SCHEMA,
       reviewerPosture: {
         runtimeSourceOfTruth:
           "@ai-sdk-tool/parser package plus /v1/runtime-brief and /v1/review-pack",
@@ -991,6 +1111,7 @@ export function buildStagePilotReviewPack(options: {
       runtimeScorecard: "/v1/runtime-scorecard",
       failureTaxonomy: "/v1/failure-taxonomy",
       protocolMatrix: "/v1/protocol-matrix",
+      providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
       benchmarkSummary: "/v1/benchmark-summary",
       developerOpsPack: "/v1/developer-ops-pack",
       workflowRuns: "/v1/workflow-runs",

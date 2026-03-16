@@ -27,6 +27,11 @@
 - **This repo's role:** flagship reliability / tool-calling proof lab in the portfolio.
 - **Related repos:** `AegisOps`, `Aegis-Air`, `ogx`
 
+## Big-Tech Elevation Track
+
+- Canonical execution plan: [`docs/BIGTECH_ELEVATION_PLAN.md`](docs/BIGTECH_ELEVATION_PLAN.md)
+- Goal: turn this repo into the clearest public proof of tool-runtime reliability across unstable providers.
+
 ## Best target-team fit
 
 This repo is strongest for frontier/runtime reliability and platform-infrastructure teams. For broader enterprise platform discussions, pair it with `enterprise-llm-adoption-kit`.

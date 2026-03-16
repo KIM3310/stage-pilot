@@ -27,6 +27,17 @@
 - **This repo's role:** flagship reliability / tool-calling proof lab in the portfolio.
 - **Related repos:** `AegisOps`, `Aegis-Air`, `ogx`
 
+## Best target-team fit
+
+This repo is strongest for frontier/runtime reliability and platform-infrastructure teams. For broader enterprise platform discussions, pair it with `enterprise-llm-adoption-kit`.
+
+| Team lens | What should stand out fast | Start here |
+|---|---|---|
+| Frontier / runtime reliability | parser hardening, benchmark lift, bounded retry posture, explicit review surfaces | [`docs/reviewer-proof-guide.md`](docs/reviewer-proof-guide.md), `GET /v1/review-pack`, [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json) |
+| Big tech / AI infra | runtime/API separation, contract visibility, developer-ops posture, honest benchmark boundary | `GET /v1/runtime-brief`, `GET /v1/schema/plan-report`, `GET /v1/developer-ops-pack` |
+| Databricks / eval systems | benchmark artifacts, variant comparison, local experiment loop, failure forensics | `GET /v1/benchlab/review-pack`, [`docs/benchlab/LOCAL_OLLAMA_SWEEP_20260311.md`](docs/benchlab/LOCAL_OLLAMA_SWEEP_20260311.md), `experiments/` |
+| Palantir / high-trust ops | reviewable workflow history, replayable proof surfaces, explicit parser-to-handoff boundary | `GET /v1/workflow-runs`, `GET /v1/workflow-run-replay`, [`docs/solution-architecture.md`](docs/solution-architecture.md) |
+
 ## Project links
 
 - GitHub profile: https://github.com/KIM3310
@@ -47,6 +58,13 @@ Then read, in order:
 - [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json)
 - [`docs/executive-one-pager.md`](docs/executive-one-pager.md)
 - [`docs/solution-architecture.md`](docs/solution-architecture.md)
+
+## Reviewer Front Door
+
+- **Recruiter / hiring manager:** read [`docs/reviewer-proof-guide.md`](docs/reviewer-proof-guide.md), then inspect [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json).
+- **AI engineer:** open `GET /v1/review-pack` -> `GET /v1/schema/plan-report` -> `src/`.
+- **Platform / solutions architect:** open `GET /v1/runtime-brief` -> `GET /v1/developer-ops-pack` -> [`docs/solution-architecture.md`](docs/solution-architecture.md).
+- **Eval / research reviewer:** open `GET /v1/benchlab/review-pack` -> `docs/benchlab/` -> `experiments/`.
 
 ## Choose Your First Lane
 

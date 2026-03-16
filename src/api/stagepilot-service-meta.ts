@@ -21,6 +21,8 @@ export const STAGEPILOT_PROVIDER_BENCHMARK_SCORECARD_SCHEMA =
   "stagepilot-provider-benchmark-scorecard-v1";
 export const STAGEPILOT_PERF_EVIDENCE_PACK_SCHEMA =
   "stagepilot-perf-evidence-pack-v1";
+export const STAGEPILOT_TRACE_OBSERVABILITY_PACK_SCHEMA =
+  "stagepilot-trace-observability-pack-v1";
 
 function buildStagePilotOperationalPosture(options: {
   benchmarkReadyForPromotion?: boolean;
@@ -68,6 +70,11 @@ function buildStagePilotProofAssets() {
     {
       label: "Runtime perf evidence",
       path: "docs/benchmarks/stagepilot-runtime-load-latest.json",
+      kind: "report",
+    },
+    {
+      label: "Trace observability evidence",
+      path: "docs/benchmarks/stagepilot-trace-observability-latest.json",
       kind: "report",
     },
     {
@@ -130,6 +137,35 @@ interface StagePilotPerfEvidenceArtifact {
     httpReqFailed: string;
   };
   tool: string;
+}
+
+interface StagePilotTraceObservabilityArtifact {
+  generatedAt: string | null;
+  hotspots: Array<{
+    attentionCount: number;
+    providerFamily: string;
+    risk: string;
+  }>;
+  regressionGate: {
+    failCount: number | null;
+    gate: string;
+    passCount: number | null;
+    rule: string;
+    watchCount: number | null;
+  };
+  reviewerTier: string;
+  tool: string;
+  traces: Array<{
+    durationMs: number | null;
+    failureClass: string;
+    operatorHandoff: string;
+    protocolFamily: string;
+    providerFamily: string;
+    regressionGate: string;
+    reviewerSurface: string;
+    scenario: string;
+    traceId: string;
+  }>;
 }
 
 function buildStrategyRows(snapshot: StagePilotBenchmarkSnapshot) {
@@ -205,6 +241,12 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
       path: "/v1/perf-evidence-pack",
       purpose:
         "Checked-in load and latency evidence surface for runtime pressure, guardrails, and operator-facing scale posture",
+    },
+    {
+      method: "GET",
+      path: "/v1/trace-observability-pack",
+      purpose:
+        "Checked-in trace bundle for frontier failure replay, regression gates, and operator-facing escalation posture",
     },
     {
       method: "GET",
@@ -341,6 +383,7 @@ export function buildStagePilotRuntimeBrief(options: {
       reviewPack: "/v1/review-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
       perfEvidencePack: "/v1/perf-evidence-pack",
+      traceObservabilityPack: "/v1/trace-observability-pack",
       failureTaxonomy: "/v1/failure-taxonomy",
       protocolMatrix: "/v1/protocol-matrix",
       providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
@@ -732,6 +775,7 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
     reviewPath: [
       "Start with /v1/provider-benchmark-scorecard to explain which provider families StagePilot can currently discuss without hand-waving.",
       "Open /v1/protocol-matrix to validate the contract families behind each provider posture.",
+      "Use /v1/trace-observability-pack to connect provider posture to replayable traces and regression gates before claiming frontier-runtime depth.",
       "Use /v1/benchmark-summary and /v1/runtime-scorecard together before claiming production-like runtime reliability.",
     ],
     reviewerNotes: [
@@ -743,6 +787,7 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
       providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
       protocolMatrix: "/v1/protocol-matrix",
       perfEvidencePack: "/v1/perf-evidence-pack",
+      traceObservabilityPack: "/v1/trace-observability-pack",
       benchmarkSummary: "/v1/benchmark-summary",
       failureTaxonomy: "/v1/failure-taxonomy",
       runtimeScorecard: "/v1/runtime-scorecard",
@@ -842,8 +887,86 @@ export function buildStagePilotPerfEvidencePack(options: {
       runtimeScorecard: "/v1/runtime-scorecard",
       protocolMatrix: "/v1/protocol-matrix",
       providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
+      traceObservabilityPack: "/v1/trace-observability-pack",
       benchmarkSummary: "/v1/benchmark-summary",
       developerOpsPack: "/v1/developer-ops-pack",
+      reviewPack: "/v1/review-pack",
+    },
+  };
+}
+
+export function buildStagePilotTraceObservabilityPack(options: {
+  benchmarkSnapshot: StagePilotBenchmarkSnapshot;
+  service: string;
+  traceArtifact: StagePilotTraceObservabilityArtifact;
+}) {
+  const topStrategy = buildStrategyRows(options.benchmarkSnapshot).sort(
+    (left, right) => (right.successRate ?? 0) - (left.successRate ?? 0)
+  )[0] ?? null;
+  const providerFamilyCount = new Set(
+    options.traceArtifact.traces.map((item) => item.providerFamily)
+  ).size;
+  const slowestTrace = [...options.traceArtifact.traces].sort(
+    (left, right) => (right.durationMs ?? 0) - (left.durationMs ?? 0)
+  )[0] ?? null;
+
+  return {
+    service: options.service,
+    status: "ok",
+    generatedAt: new Date().toISOString(),
+    schema: STAGEPILOT_TRACE_OBSERVABILITY_PACK_SCHEMA,
+    headline:
+      "Trace observability pack that turns frontier-style failure replay, regression gates, and operator escalation posture into a checked-in proof surface.",
+    summary: {
+      benchmarkCaseCount: options.benchmarkSnapshot.caseCount,
+      failCount: options.traceArtifact.regressionGate.failCount,
+      gate: options.traceArtifact.regressionGate.gate,
+      passCount: options.traceArtifact.regressionGate.passCount,
+      providerFamilyCount,
+      reviewerTier: options.traceArtifact.reviewerTier,
+      slowestTrace,
+      topStrategy,
+      totalTraces: options.traceArtifact.traces.length,
+      watchCount: options.traceArtifact.regressionGate.watchCount,
+    },
+    regressionGate: options.traceArtifact.regressionGate,
+    hotspots: options.traceArtifact.hotspots,
+    traces: options.traceArtifact.traces,
+    reviewPath: [
+      "Start with /v1/trace-observability-pack to see whether replayable traces and regression gates agree before discussing frontier-runtime maturity.",
+      "Move to /v1/provider-benchmark-scorecard and /v1/protocol-matrix so each trace stays tied to a real contract family instead of generic model talk.",
+      "Use /v1/failure-taxonomy to connect the trace bundle to explicit parser/runtime classes.",
+      "Finish on /v1/perf-evidence-pack and /v1/review-pack so replay evidence, load posture, and benchmark lift stay in one story.",
+    ],
+    reviewerNotes: [
+      "These traces are checked-in reviewer artifacts, not a claim of internet-scale production telemetry.",
+      "The regression gate is meaningful only when protocol, failure, and perf surfaces still agree.",
+      "Use the slowest or watch traces to discuss debugging posture, not to imply unlimited provider coverage.",
+    ],
+    proofAssets: [
+      {
+        label: "Latest trace observability artifact",
+        path: "docs/benchmarks/stagepilot-trace-observability-latest.json",
+        kind: "report",
+      },
+      {
+        label: "Latest runtime load artifact",
+        path: "docs/benchmarks/stagepilot-runtime-load-latest.json",
+        kind: "report",
+      },
+      {
+        label: "Latest benchmark snapshot",
+        path: "docs/benchmarks/stagepilot-latest.json",
+        kind: "report",
+      },
+    ],
+    links: {
+      traceObservabilityPack: "/v1/trace-observability-pack",
+      providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
+      protocolMatrix: "/v1/protocol-matrix",
+      perfEvidencePack: "/v1/perf-evidence-pack",
+      failureTaxonomy: "/v1/failure-taxonomy",
+      runtimeScorecard: "/v1/runtime-scorecard",
       reviewPack: "/v1/review-pack",
     },
   };
@@ -1212,7 +1335,7 @@ export function buildStagePilotReviewPack(options: {
         step: "2. Failure posture",
         surface: "/v1/failure-taxonomy -> /v1/review-pack",
         proof:
-          "Validate benchmark deltas, delivery gaps, and runtime failure classes before repeating any claim.",
+          "Validate benchmark deltas, replayable traces, delivery gaps, and runtime failure classes before repeating any claim.",
       },
       {
         step: "3. Contract boundary",
@@ -1244,6 +1367,7 @@ export function buildStagePilotReviewPack(options: {
       },
       runtimeScorecardSchema: STAGEPILOT_RUNTIME_SCORECARD_SCHEMA,
       perfEvidencePackSchema: STAGEPILOT_PERF_EVIDENCE_PACK_SCHEMA,
+      traceObservabilityPackSchema: STAGEPILOT_TRACE_OBSERVABILITY_PACK_SCHEMA,
       integrationsReady: options.geminiHasApiKey && options.openClawConfigured,
       operationalPosture,
       model: options.model,
@@ -1261,6 +1385,7 @@ export function buildStagePilotReviewPack(options: {
       reviewPack: "/v1/review-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
       perfEvidencePack: "/v1/perf-evidence-pack",
+      traceObservabilityPack: "/v1/trace-observability-pack",
       failureTaxonomy: "/v1/failure-taxonomy",
       protocolMatrix: "/v1/protocol-matrix",
       providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",

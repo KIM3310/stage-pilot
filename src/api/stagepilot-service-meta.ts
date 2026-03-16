@@ -15,6 +15,8 @@ export const STAGEPILOT_DEVELOPER_OPS_PACK_SCHEMA =
   "stagepilot-developer-ops-pack-v1";
 export const STAGEPILOT_FAILURE_TAXONOMY_SCHEMA =
   "stagepilot-failure-taxonomy-v1";
+export const STAGEPILOT_PROTOCOL_MATRIX_SCHEMA =
+  "stagepilot-protocol-matrix-v1";
 
 function buildStagePilotOperationalPosture(options: {
   benchmarkReadyForPromotion?: boolean;
@@ -142,6 +144,12 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
       path: "/v1/failure-taxonomy",
       purpose:
         "Failure classes for parser drift, retry exhaustion, delivery gaps, and reviewer handoff risk",
+    },
+    {
+      method: "GET",
+      path: "/v1/protocol-matrix",
+      purpose:
+        "Cross-protocol coverage surface for XML, Hermes, Qwen, and YAML tool-call contracts",
     },
     {
       method: "GET",
@@ -278,6 +286,7 @@ export function buildStagePilotRuntimeBrief(options: {
       reviewPack: "/v1/review-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
       failureTaxonomy: "/v1/failure-taxonomy",
+      protocolMatrix: "/v1/protocol-matrix",
       benchmarkSummary: "/v1/benchmark-summary",
       developerOpsPack: "/v1/developer-ops-pack",
       workflowRuns: "/v1/workflow-runs",
@@ -465,12 +474,112 @@ export function buildStagePilotDeveloperOpsPack(options: {
       runtimeBrief: "/v1/runtime-brief",
       runtimeScorecard: "/v1/runtime-scorecard",
       failureTaxonomy: "/v1/failure-taxonomy",
+      protocolMatrix: "/v1/protocol-matrix",
       developerOpsPack: "/v1/developer-ops-pack",
       workflowRuns: "/v1/workflow-runs",
       workflowReplay: "/v1/workflow-run-replay",
       benchmarkSummary: "/v1/benchmark-summary",
       reviewPack: "/v1/review-pack",
       planSchema: "/v1/schema/plan-report",
+    },
+  };
+}
+
+export function buildStagePilotProtocolMatrix(options: { service: string }) {
+  const protocols = [
+    {
+      id: "morph-xml",
+      label: "Morph XML",
+      providerSignals: [
+        "XML-heavy frontier or Anthropic-style tool wrappers",
+        "Nested tool payloads with explicit close-tag repair pressure",
+      ],
+      coverage: ["parse-generated-text", "stream", "pipeline"],
+      failureHotspots: [
+        "chunk-boundary tag drift",
+        "self-closing edge cases",
+        "repair-vs-strict boundary decisions",
+      ],
+      proofSurface: "src/__tests__/protocols/morph-xml-protocol",
+      readiness: "ready",
+    },
+    {
+      id: "hermes",
+      label: "Hermes",
+      providerSignals: [
+        "Function-call wrappers from OpenAI-compatible runtimes",
+        "Middleware-first contract normalization",
+      ],
+      coverage: ["formatters", "stream-compat", "middleware"],
+      failureHotspots: [
+        "tool-choice coercion",
+        "wrapper fallback mismatch",
+        "provider option drift",
+      ],
+      proofSurface: "src/__tests__/protocols/hermes-protocol",
+      readiness: "ready",
+    },
+    {
+      id: "qwen3coder",
+      label: "Qwen3Coder",
+      providerSignals: [
+        "Local or OSS coding-model tool calls",
+        "Wrapperless calls and literal tag collisions",
+      ],
+      coverage: ["core-parsing", "recovery", "format-roundtrip"],
+      failureHotspots: [
+        "implicit call wrappers",
+        "literal closing-tag leakage",
+        "boundary heuristics under streaming deltas",
+      ],
+      proofSurface: "src/__tests__/protocols/qwen3coder-protocol",
+      readiness: "ready",
+    },
+    {
+      id: "yaml-xml",
+      label: "YAML XML hybrid",
+      providerSignals: [
+        "Structured agent outputs that mix YAML sections with XML-like tool envelopes",
+        "Streaming-first contract proof for mixed formatting",
+      ],
+      coverage: ["stream", "multiline", "error-policy"],
+      failureHotspots: [
+        "multiline indentation drift",
+        "text-boundary truncation",
+        "error policy mismatch while streaming",
+      ],
+      proofSurface: "src/__tests__/protocols/yaml-xml-protocol",
+      readiness: "ready",
+    },
+  ] as const;
+
+  return {
+    service: options.service,
+    status: "ok",
+    generatedAt: new Date().toISOString(),
+    schema: STAGEPILOT_PROTOCOL_MATRIX_SCHEMA,
+    headline:
+      "Cross-protocol matrix that makes StagePilot's parser and streaming coverage explicit before any provider-agnostic reliability claim.",
+    summary: {
+      protocolCount: protocols.length,
+      readyCount: protocols.filter((item) => item.readiness === "ready").length,
+      coverageAreas: ["parse-generated-text", "stream", "pipeline", "middleware"],
+      biggestWhy:
+        "Provider-agnostic tool reliability only matters if protocol families and their failure hotspots are visible together.",
+    },
+    protocols,
+    reviewPath: [
+      "Start with /v1/protocol-matrix to see which protocol families are explicitly covered.",
+      "Move to /v1/failure-taxonomy to connect protocol drift to runtime risk and handoff posture.",
+      "Finish on /v1/benchmark-summary and /v1/review-pack so benchmark lift stays grounded in concrete protocol surfaces.",
+    ],
+    links: {
+      protocolMatrix: "/v1/protocol-matrix",
+      failureTaxonomy: "/v1/failure-taxonomy",
+      benchmarkSummary: "/v1/benchmark-summary",
+      developerOpsPack: "/v1/developer-ops-pack",
+      runtimeScorecard: "/v1/runtime-scorecard",
+      reviewPack: "/v1/review-pack",
     },
   };
 }
@@ -568,6 +677,7 @@ export function buildStagePilotRuntimeScorecard(options: {
       reviewPack: "/v1/review-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
       failureTaxonomy: "/v1/failure-taxonomy",
+      protocolMatrix: "/v1/protocol-matrix",
       benchmarkSummary: "/v1/benchmark-summary",
       workflowReplay: "/v1/workflow-run-replay",
       planSchema: "/v1/schema/plan-report",
@@ -746,6 +856,7 @@ export function buildStagePilotFailureTaxonomy(options: {
       benchmarkSummary: "/v1/benchmark-summary",
       runtimeScorecard: "/v1/runtime-scorecard",
       failureTaxonomy: "/v1/failure-taxonomy",
+      protocolMatrix: "/v1/protocol-matrix",
       developerOpsPack: "/v1/developer-ops-pack",
       workflowRuns: "/v1/workflow-runs",
       workflowReplay: "/v1/workflow-run-replay",
@@ -879,6 +990,7 @@ export function buildStagePilotReviewPack(options: {
       reviewPack: "/v1/review-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
       failureTaxonomy: "/v1/failure-taxonomy",
+      protocolMatrix: "/v1/protocol-matrix",
       benchmarkSummary: "/v1/benchmark-summary",
       developerOpsPack: "/v1/developer-ops-pack",
       workflowRuns: "/v1/workflow-runs",

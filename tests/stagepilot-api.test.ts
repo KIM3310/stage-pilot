@@ -552,6 +552,7 @@ describe("stagepilot api server", () => {
     expect(body.routes).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ method: "GET", path: "/v1/meta" }),
+        expect.objectContaining({ method: "GET", path: "/v1/protocol-matrix" }),
         expect.objectContaining({ method: "POST", path: "/v1/plan" }),
       ])
     );
@@ -592,6 +593,7 @@ describe("stagepilot api server", () => {
       headline: string;
       links: {
         developerOpsPack: string;
+        protocolMatrix: string;
         workflowRuns: string;
       };
       readinessContract: string;
@@ -609,8 +611,51 @@ describe("stagepilot api server", () => {
     expect(body.routeCount).toBeGreaterThanOrEqual(10);
     expect(body.headline).toContain("orchestration");
     expect(body.links.developerOpsPack).toBe("/v1/developer-ops-pack");
+    expect(body.links.protocolMatrix).toBe("/v1/protocol-matrix");
     expect(body.links.workflowRuns).toBe("/v1/workflow-runs");
     expect(body.links.workflowReplay).toBe("/v1/workflow-run-replay");
+  });
+
+  it("returns protocol matrix for cross-provider tool-call coverage", async () => {
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const response = await fetch(`${baseUrl}/v1/protocol-matrix`);
+    expect(response.status).toBe(200);
+
+    const body = (await response.json()) as {
+      schema: string;
+      headline: string;
+      summary: {
+        protocolCount: number;
+        readyCount: number;
+      };
+      protocols: Array<{
+        id: string;
+        coverage: string[];
+        failureHotspots: string[];
+      }>;
+      links: {
+        protocolMatrix: string;
+        reviewPack: string;
+      };
+      reviewPath: string[];
+    };
+
+    expect(body.schema).toBe("stagepilot-protocol-matrix-v1");
+    expect(body.headline).toContain("Cross-protocol matrix");
+    expect(body.summary.protocolCount).toBeGreaterThanOrEqual(4);
+    expect(body.summary.readyCount).toBeGreaterThanOrEqual(4);
+    expect(body.protocols.some((item) => item.id === "morph-xml")).toBe(true);
+    expect(
+      body.protocols.every(
+        (item) => item.coverage.length >= 3 && item.failureHotspots.length >= 3
+      )
+    ).toBe(true);
+    expect(body.links.protocolMatrix).toBe("/v1/protocol-matrix");
+    expect(body.links.reviewPack).toBe("/v1/review-pack");
+    expect(body.reviewPath.length).toBeGreaterThanOrEqual(3);
   });
 
   it("returns runtime scorecard with live route telemetry", async () => {

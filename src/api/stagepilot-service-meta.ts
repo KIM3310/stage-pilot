@@ -19,6 +19,8 @@ export const STAGEPILOT_PROTOCOL_MATRIX_SCHEMA =
   "stagepilot-protocol-matrix-v1";
 export const STAGEPILOT_PROVIDER_BENCHMARK_SCORECARD_SCHEMA =
   "stagepilot-provider-benchmark-scorecard-v1";
+export const STAGEPILOT_PERF_EVIDENCE_PACK_SCHEMA =
+  "stagepilot-perf-evidence-pack-v1";
 
 function buildStagePilotOperationalPosture(options: {
   benchmarkReadyForPromotion?: boolean;
@@ -64,6 +66,16 @@ function buildStagePilotProofAssets() {
       kind: "report",
     },
     {
+      label: "Runtime perf evidence",
+      path: "docs/benchmarks/stagepilot-runtime-load-latest.json",
+      kind: "report",
+    },
+    {
+      label: "k6 load harness",
+      path: "scripts/k6-runtime-scorecard.js",
+      kind: "script",
+    },
+    {
       label: "Operator runbook",
       path: "docs/STAGEPILOT.md",
       kind: "doc",
@@ -89,6 +101,35 @@ interface StagePilotBenchmarkSnapshot {
     middleware: number | null;
     ralphLoop: number | null;
   };
+}
+
+interface StagePilotPerfEvidenceArtifact {
+  baseUrl: string;
+  environment: string;
+  generatedAt: string | null;
+  observed: {
+    avgDurationMs: number | null;
+    checksPassRatePct: number | null;
+    httpReqFailedRatePct: number | null;
+    maxDurationMs: number | null;
+    p95DurationMs: number | null;
+    requestCount: number | null;
+    routeMix: Array<{
+      path: string;
+      sharePct: number;
+    }>;
+  };
+  scenario: {
+    executor: string;
+    iterations: number | null;
+    maxDuration: string;
+    vus: number | null;
+  };
+  thresholds: {
+    httpReqDurationP95: string;
+    httpReqFailed: string;
+  };
+  tool: string;
 }
 
 function buildStrategyRows(snapshot: StagePilotBenchmarkSnapshot) {
@@ -158,6 +199,12 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
       path: "/v1/provider-benchmark-scorecard",
       purpose:
         "Provider-facing scorecard for contract confidence, latency/cost posture, and strongest protocol surfaces",
+    },
+    {
+      method: "GET",
+      path: "/v1/perf-evidence-pack",
+      purpose:
+        "Checked-in load and latency evidence surface for runtime pressure, guardrails, and operator-facing scale posture",
     },
     {
       method: "GET",
@@ -293,6 +340,7 @@ export function buildStagePilotRuntimeBrief(options: {
       runtimeBrief: "/v1/runtime-brief",
       reviewPack: "/v1/review-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
+      perfEvidencePack: "/v1/perf-evidence-pack",
       failureTaxonomy: "/v1/failure-taxonomy",
       protocolMatrix: "/v1/protocol-matrix",
       providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
@@ -378,6 +426,7 @@ export function buildStagePilotBenchmarkSummary(options: {
       reviewPack: "/v1/review-pack",
       benchmark: "/v1/benchmark",
       benchmarkSummary: "/v1/benchmark-summary",
+      perfEvidencePack: "/v1/perf-evidence-pack",
       failureTaxonomy: "/v1/failure-taxonomy",
       developerOpsPack: "/v1/developer-ops-pack",
       workflowRuns: "/v1/workflow-runs",
@@ -482,6 +531,7 @@ export function buildStagePilotDeveloperOpsPack(options: {
     links: {
       runtimeBrief: "/v1/runtime-brief",
       runtimeScorecard: "/v1/runtime-scorecard",
+      perfEvidencePack: "/v1/perf-evidence-pack",
       failureTaxonomy: "/v1/failure-taxonomy",
       protocolMatrix: "/v1/protocol-matrix",
       providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
@@ -692,9 +742,108 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
     links: {
       providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
       protocolMatrix: "/v1/protocol-matrix",
+      perfEvidencePack: "/v1/perf-evidence-pack",
       benchmarkSummary: "/v1/benchmark-summary",
       failureTaxonomy: "/v1/failure-taxonomy",
       runtimeScorecard: "/v1/runtime-scorecard",
+      reviewPack: "/v1/review-pack",
+    },
+  };
+}
+
+export function buildStagePilotPerfEvidencePack(options: {
+  benchmarkSnapshot: StagePilotBenchmarkSnapshot;
+  perfArtifact: StagePilotPerfEvidenceArtifact;
+  service: string;
+}) {
+  const topStrategy = buildStrategyRows(options.benchmarkSnapshot).sort(
+    (left, right) => (right.successRate ?? 0) - (left.successRate ?? 0)
+  )[0] ?? null;
+  const hottestRoute = [...options.perfArtifact.observed.routeMix].sort(
+    (left, right) => right.sharePct - left.sharePct
+  )[0] ?? null;
+
+  return {
+    service: options.service,
+    status: "ok",
+    generatedAt: new Date().toISOString(),
+    schema: STAGEPILOT_PERF_EVIDENCE_PACK_SCHEMA,
+    headline:
+      "Perf evidence pack that ties checked-in k6 rehearsal data to StagePilot's runtime, benchmark, and release guardrails.",
+    summary: {
+      tool: options.perfArtifact.tool,
+      environment: options.perfArtifact.environment,
+      benchmarkCaseCount: options.benchmarkSnapshot.caseCount,
+      topStrategy,
+      requestCount: options.perfArtifact.observed.requestCount,
+      checksPassRatePct: options.perfArtifact.observed.checksPassRatePct,
+      httpReqFailedRatePct: options.perfArtifact.observed.httpReqFailedRatePct,
+      p95DurationMs: options.perfArtifact.observed.p95DurationMs,
+      hottestRoute,
+    },
+    scenario: options.perfArtifact.scenario,
+    thresholds: options.perfArtifact.thresholds,
+    observedRun: {
+      ...options.perfArtifact.observed,
+      benchmarkGeneratedAt: options.benchmarkSnapshot.generatedAt,
+      baseUrl: options.perfArtifact.baseUrl,
+    },
+    scaleGuardrails: [
+      {
+        guardrail: "bounded request surface",
+        whyItMatters:
+          "Load evidence only matters if plan and benchmark routes stay inside explicit timeout and schema boundaries.",
+        surface: "/v1/runtime-brief",
+      },
+      {
+        guardrail: "benchmark-backed reliability floor",
+        whyItMatters:
+          "The load run stays paired with protocol and benchmark proof so latency is never mistaken for correctness.",
+        surface: "/v1/benchmark-summary",
+      },
+      {
+        guardrail: "operator-confirmed delivery",
+        whyItMatters:
+          "Notify remains a final reviewed action, which keeps runtime pressure separate from downstream side effects.",
+        surface: "/v1/developer-ops-pack",
+      },
+    ],
+    reviewPath: [
+      "Open /v1/perf-evidence-pack to see the checked-in runtime rehearsal before making scale claims.",
+      "Pair it with /v1/runtime-scorecard so local load evidence and live route telemetry stay in the same story.",
+      "Use /v1/provider-benchmark-scorecard and /v1/benchmark-summary to separate raw speed from contract-safe correctness.",
+      "Finish on /v1/developer-ops-pack and /v1/review-pack before describing production posture.",
+    ],
+    reviewerNotes: [
+      "This is a checked-in local rehearsal against the StagePilot backend, not a claim of internet-scale vendor telemetry.",
+      "The strongest claim is bounded runtime discipline under reviewable load, not generic throughput bragging.",
+      "Use the perf pack together with the benchmark and failure taxonomy before discussing frontier-runtime promotion.",
+    ],
+    proofAssets: [
+      {
+        label: "Latest runtime load artifact",
+        path: "docs/benchmarks/stagepilot-runtime-load-latest.json",
+        kind: "report",
+      },
+      {
+        label: "k6 load harness",
+        path: "scripts/k6-runtime-scorecard.js",
+        kind: "script",
+      },
+      {
+        label: "Latest benchmark snapshot",
+        path: "docs/benchmarks/stagepilot-latest.json",
+        kind: "report",
+      },
+    ],
+    links: {
+      perfEvidencePack: "/v1/perf-evidence-pack",
+      runtimeBrief: "/v1/runtime-brief",
+      runtimeScorecard: "/v1/runtime-scorecard",
+      protocolMatrix: "/v1/protocol-matrix",
+      providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
+      benchmarkSummary: "/v1/benchmark-summary",
+      developerOpsPack: "/v1/developer-ops-pack",
       reviewPack: "/v1/review-pack",
     },
   };
@@ -792,6 +941,7 @@ export function buildStagePilotRuntimeScorecard(options: {
       runtimeBrief: "/v1/runtime-brief",
       reviewPack: "/v1/review-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
+      perfEvidencePack: "/v1/perf-evidence-pack",
       failureTaxonomy: "/v1/failure-taxonomy",
       protocolMatrix: "/v1/protocol-matrix",
       providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
@@ -1093,6 +1243,7 @@ export function buildStagePilotReviewPack(options: {
           "Treat static/docs surfaces as reviewer aids, then repeat runtime claims only after the benchmark and live review-pack surfaces agree.",
       },
       runtimeScorecardSchema: STAGEPILOT_RUNTIME_SCORECARD_SCHEMA,
+      perfEvidencePackSchema: STAGEPILOT_PERF_EVIDENCE_PACK_SCHEMA,
       integrationsReady: options.geminiHasApiKey && options.openClawConfigured,
       operationalPosture,
       model: options.model,
@@ -1109,6 +1260,7 @@ export function buildStagePilotReviewPack(options: {
       runtimeBrief: "/v1/runtime-brief",
       reviewPack: "/v1/review-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
+      perfEvidencePack: "/v1/perf-evidence-pack",
       failureTaxonomy: "/v1/failure-taxonomy",
       protocolMatrix: "/v1/protocol-matrix",
       providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",

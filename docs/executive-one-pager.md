@@ -1,5 +1,9 @@
 # StagePilot Executive One-Pager
 
+## Best fit
+
+StagePilot is strongest as a flagship sample for **AI engineer**, **frontier LLM runtime**, and **runtime reliability** conversations. It can also support solutions-architect conversations, but that is the secondary read.
+
 ## Problem
 
 Tool-calling failures often look like model failures, but many are really parsing and handoff failures. That makes agent rollouts appear less reliable than they should be.
@@ -7,14 +11,15 @@ Tool-calling failures often look like model failures, but many are really parsin
 ## What StagePilot changes
 
 - raises success rate for non-native tool-calling models
-- exposes benchmark lift in a compact review surface
-- turns parser reliability into a productized integration layer
+- exposes benchmark lift through compact, reviewer-safe proof surfaces
+- turns parser reliability and retry discipline into a productized runtime boundary
 
-## Buyer value
+## Reviewer value
 
 - fewer silent tool-call failures
 - easier adoption of cheaper or non-native models
 - benchmark-backed rollout decisions instead of intuition
+- a fast way to review reliability posture without overstating hosted-platform maturity
 
 ## Key metrics
 
@@ -31,8 +36,9 @@ Tool-calling failures often look like model failures, but many are really parsin
 
 ## Best proof path
 
-- `/v1/benchmark-summary`
+- `pnpm review:proof`
+- `/v1/runtime-brief`
 - `/v1/review-pack`
-- `/v1/benchlab/review-pack`
+- `/v1/trace-observability-pack`
 - `docs/benchmarks/stagepilot-latest.json`
 - `docs/solution-architecture.md`

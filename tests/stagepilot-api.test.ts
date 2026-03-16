@@ -1,6 +1,6 @@
 import { createSign, generateKeyPairSync } from "node:crypto";
 import { type AddressInfo, Socket } from "node:net";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createStagePilotApiServer } from "../src/api/stagepilot-server";
 import { StagePilotEngine } from "../src/stagepilot/orchestrator";
 
@@ -14,6 +14,10 @@ const OPERATOR_OIDC_ISSUER_ENV_KEY = "STAGEPILOT_OPERATOR_OIDC_ISSUER";
 const OPERATOR_OIDC_AUDIENCE_ENV_KEY = "STAGEPILOT_OPERATOR_OIDC_AUDIENCE";
 const OPERATOR_OIDC_JWKS_ENV_KEY = "STAGEPILOT_OPERATOR_OIDC_JWKS_JSON";
 const OPENCLAW_WEBHOOK_ENV_KEY = "OPENCLAW_WEBHOOK_URL";
+const OPENAI_API_KEY_ENV_KEY = "OPENAI_API_KEY";
+const OPENAI_KILL_SWITCH_ENV_KEY = "OPENAI_KILL_SWITCH";
+const OPENAI_PUBLIC_RPM_ENV_KEY = "OPENAI_PUBLIC_RPM";
+const STAGEPILOT_REVIEW_ONLY_ENV_KEY = "STAGEPILOT_REVIEW_ONLY_MODE";
 const BODY_TIMEOUT_ENV_SNAPSHOT = process.env[BODY_TIMEOUT_ENV_KEY];
 const GEMINI_API_KEY_ENV_SNAPSHOT = process.env[GEMINI_API_KEY_ENV_KEY];
 const GEMINI_TIMEOUT_ENV_SNAPSHOT = process.env[GEMINI_TIMEOUT_ENV_KEY];
@@ -28,6 +32,12 @@ const HTTP_STATUS_LINE_REGEX = /^HTTP\/1\.1 (\d{3})/m;
 const REVIEWER_CLAIM_TIER_REGEX =
   /runtime-backed-review-ready|bounded-review-demo/;
 const OPENCLAW_WEBHOOK_ENV_SNAPSHOT = process.env[OPENCLAW_WEBHOOK_ENV_KEY];
+const OPENAI_API_KEY_ENV_SNAPSHOT = process.env[OPENAI_API_KEY_ENV_KEY];
+const OPENAI_KILL_SWITCH_ENV_SNAPSHOT =
+  process.env[OPENAI_KILL_SWITCH_ENV_KEY];
+const OPENAI_PUBLIC_RPM_ENV_SNAPSHOT = process.env[OPENAI_PUBLIC_RPM_ENV_KEY];
+const STAGEPILOT_REVIEW_ONLY_ENV_SNAPSHOT =
+  process.env[STAGEPILOT_REVIEW_ONLY_ENV_KEY];
 
 function encodeBase64Url(value: string): string {
   return Buffer.from(value, "utf8")
@@ -143,6 +153,33 @@ afterEach(async () => {
   } else {
     process.env[OPENCLAW_WEBHOOK_ENV_KEY] = OPENCLAW_WEBHOOK_ENV_SNAPSHOT;
   }
+
+  if (typeof OPENAI_API_KEY_ENV_SNAPSHOT === "undefined") {
+    delete process.env[OPENAI_API_KEY_ENV_KEY];
+  } else {
+    process.env[OPENAI_API_KEY_ENV_KEY] = OPENAI_API_KEY_ENV_SNAPSHOT;
+  }
+
+  if (typeof OPENAI_KILL_SWITCH_ENV_SNAPSHOT === "undefined") {
+    delete process.env[OPENAI_KILL_SWITCH_ENV_KEY];
+  } else {
+    process.env[OPENAI_KILL_SWITCH_ENV_KEY] = OPENAI_KILL_SWITCH_ENV_SNAPSHOT;
+  }
+
+  if (typeof OPENAI_PUBLIC_RPM_ENV_SNAPSHOT === "undefined") {
+    delete process.env[OPENAI_PUBLIC_RPM_ENV_KEY];
+  } else {
+    process.env[OPENAI_PUBLIC_RPM_ENV_KEY] = OPENAI_PUBLIC_RPM_ENV_SNAPSHOT;
+  }
+
+  if (typeof STAGEPILOT_REVIEW_ONLY_ENV_SNAPSHOT === "undefined") {
+    delete process.env[STAGEPILOT_REVIEW_ONLY_ENV_KEY];
+  } else {
+    process.env[STAGEPILOT_REVIEW_ONLY_ENV_KEY] =
+      STAGEPILOT_REVIEW_ONLY_ENV_SNAPSHOT;
+  }
+
+  vi.restoreAllMocks();
 });
 
 async function startServer(
@@ -502,6 +539,7 @@ describe("stagepilot api server", () => {
     process.env.GEMINI_API_KEY = "stagepilot-test-key";
     process.env.STAGEPILOT_REQUEST_BODY_TIMEOUT_MS = "2100";
     process.env.OPENCLAW_WEBHOOK_URL = "https://example.invalid/webhook";
+    process.env.OPENAI_API_KEY = "sk-stagepilot-live";
 
     const { baseUrl } = await startServer({
       engine: new StagePilotEngine(),
@@ -515,6 +553,10 @@ describe("stagepilot api server", () => {
         integrationReady: boolean;
         missingIntegrations: string[];
         nextAction: string;
+      };
+      openai: {
+        deploymentMode: string;
+        publicLiveApi: boolean;
       };
       integrations: {
         gemini: {
@@ -545,7 +587,9 @@ describe("stagepilot api server", () => {
     expect(body.requestLimits.bodyTimeoutMs).toBe(2100);
     expect(body.diagnostics.integrationReady).toBe(true);
     expect(body.diagnostics.missingIntegrations).toEqual([]);
-    expect(body.diagnostics.nextAction).toContain("POST /v1/plan");
+    expect(body.diagnostics.nextAction).toContain("POST /v1/live-review-run");
+    expect(body.openai.deploymentMode).toBe("public-capped-live");
+    expect(body.openai.publicLiveApi).toBe(true);
     expect(body.integrations.gemini.timeoutMs).toBe(4321);
     expect(body.integrations.openClaw.configured).toBe(true);
     expect(body.integrations.openClaw.hasWebhookUrl).toBe(true);
@@ -568,6 +612,10 @@ describe("stagepilot api server", () => {
         expect.objectContaining({
           method: "GET",
           path: "/v1/regression-gate-pack",
+        }),
+        expect.objectContaining({
+          method: "POST",
+          path: "/v1/live-review-run",
         }),
         expect.objectContaining({ method: "POST", path: "/v1/plan" }),
       ])
@@ -594,6 +642,7 @@ describe("stagepilot api server", () => {
   it("returns operator runtime brief", async () => {
     process.env.GEMINI_API_KEY = "stagepilot-test-key";
     process.env.OPENCLAW_WEBHOOK_URL = "https://example.invalid/webhook";
+    process.env.OPENAI_API_KEY = "sk-stagepilot-live";
 
     const { baseUrl } = await startServer({
       engine: new StagePilotEngine(),
@@ -606,9 +655,12 @@ describe("stagepilot api server", () => {
       diagnostics: {
         integrationReady: boolean;
       };
+      deploymentMode: string;
       headline: string;
+      liveModel: string;
       links: {
         developerOpsPack: string;
+        liveReviewRun: string;
         perfEvidencePack: string;
         providerBenchmarkScorecard: string;
         protocolMatrix: string;
@@ -627,10 +679,13 @@ describe("stagepilot api server", () => {
     expect(body.readinessContract).toBe("stagepilot-runtime-brief-v1");
     expect(body.reportContract.schema).toBe("stagepilot-plan-report-v1");
     expect(body.diagnostics.integrationReady).toBe(true);
+    expect(body.deploymentMode).toBe("public-capped-live");
+    expect(body.liveModel).toBe("gpt-4.1-mini");
     expect(body.reviewFlow.length).toBeGreaterThanOrEqual(3);
     expect(body.routeCount).toBeGreaterThanOrEqual(10);
     expect(body.headline).toContain("orchestration");
     expect(body.links.developerOpsPack).toBe("/v1/developer-ops-pack");
+    expect(body.links.liveReviewRun).toBe("/v1/live-review-run");
     expect(body.links.perfEvidencePack).toBe("/v1/perf-evidence-pack");
     expect(body.links.providerBenchmarkScorecard).toBe(
       "/v1/provider-benchmark-scorecard"
@@ -642,6 +697,111 @@ describe("stagepilot api server", () => {
     );
     expect(body.links.workflowRuns).toBe("/v1/workflow-runs");
     expect(body.links.workflowReplay).toBe("/v1/workflow-run-replay");
+  });
+
+  it("runs the bounded public live review scenario with a stubbed OpenAI response", async () => {
+    process.env.OPENAI_API_KEY = "sk-stagepilot-live";
+    process.env.OPENAI_PUBLIC_RPM = "3";
+    const realFetch = globalThis.fetch;
+    vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (input: RequestInfo | URL, init?: RequestInit) => {
+        const url =
+          typeof input === "string"
+            ? input
+            : input instanceof URL
+            ? input.toString()
+            : input.url;
+        if (url.includes("/moderations")) {
+          return {
+            ok: true,
+            json: async () => ({ results: [{ flagged: false }] }),
+            text: async () => "",
+          } as Response;
+        }
+        if (url.includes("/chat/completions")) {
+          return {
+            ok: true,
+            json: async () => ({
+              choices: [
+                {
+                  message: {
+                    content: JSON.stringify({
+                      summary:
+                        "Bounded retry is enough if reviewer evidence stays visible.",
+                      selectedStrategy: "middleware+bounded-retry",
+                      boundedRecovery:
+                        "Retry once, then stop before downstream notify.",
+                      watchouts: ["Keep notify behind human confirmation."],
+                      handoffDecision: "review-before-notify",
+                      reviewerEvidence: [
+                        "/v1/failure-taxonomy",
+                        "/v1/review-pack",
+                      ],
+                    }),
+                  },
+                },
+              ],
+            }),
+            text: async () => "",
+          } as Response;
+        }
+        return realFetch(input as never, init);
+      }
+    );
+
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const response = await fetch(`${baseUrl}/v1/live-review-run`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ scenarioId: "parser-drift-recovery" }),
+    });
+
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as {
+      capped: boolean;
+      mode: string;
+      model: string;
+      nextReviewPath: string;
+      result: {
+        selectedStrategy: string;
+        title: string;
+      };
+      schema: string;
+      scenarioId: string;
+    };
+    expect(body.schema).toBe("stagepilot-live-review-run-v1");
+    expect(body.mode).toBe("public-capped-live");
+    expect(body.model).toBe("gpt-4.1-mini");
+    expect(body.capped).toBe(true);
+    expect(body.scenarioId).toBe("parser-drift-recovery");
+    expect(body.nextReviewPath).toBe("/v1/failure-taxonomy");
+    expect(body.result.title).toBe("Parser drift recovery");
+    expect(body.result.selectedStrategy).toBe("middleware+bounded-retry");
+  });
+
+  it("blocks non-live mutation routes while review-only mode is enabled", async () => {
+    process.env.STAGEPILOT_REVIEW_ONLY_MODE = "1";
+
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const denied = await fetch(`${baseUrl}/v1/plan`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        caseId: "case-1",
+        district: "district-a",
+        risks: ["housing"],
+      }),
+    });
+
+    expect(denied.status).toBe(403);
+    const body = (await denied.json()) as { error: string };
+    expect(body.error).toContain("/v1/live-review-run");
   });
 
   it("returns protocol matrix for cross-provider tool-call coverage", async () => {

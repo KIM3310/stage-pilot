@@ -61,6 +61,7 @@ import {
   buildStagePilotFailureTaxonomy,
   buildStagePilotDeveloperOpsPack,
   buildStagePilotPlanReportSchema,
+  buildStagePilotProtocolMatrix,
   buildStagePilotReviewPack,
   buildStagePilotRouteDescriptors,
   buildStagePilotRuntimeBrief,
@@ -852,6 +853,12 @@ function buildDeveloperOpsPackPayload(lane?: string): JsonObject {
   });
 }
 
+function buildProtocolMatrixPayload(): JsonObject {
+  return buildStagePilotProtocolMatrix({
+    service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
+  });
+}
+
 function buildFailureTaxonomyPayload(
   telemetry: StagePilotRuntimeTelemetry
 ): JsonObject {
@@ -1434,6 +1441,15 @@ function handleDeveloperOpsPackRequest(
   }
 ) {
   sendJson(response, 200, buildDeveloperOpsPackPayload(lane), options);
+}
+
+function handleProtocolMatrixRequest(
+  response: ServerResponse,
+  options?: {
+    includeBody?: boolean;
+  }
+) {
+  sendJson(response, 200, buildProtocolMatrixPayload(), options);
 }
 
 function parseStagePilotLane(rawUrl?: string): {
@@ -2157,6 +2173,9 @@ function handleReadonlyRequest(options: {
       return true;
     case "/v1/failure-taxonomy":
       handleFailureTaxonomyRequest(response, telemetry, { includeBody });
+      return true;
+    case "/v1/protocol-matrix":
+      handleProtocolMatrixRequest(response, { includeBody });
       return true;
     case "/v1/benchmark-summary":
       handleBenchmarkSummaryReadonly(response, rawUrl, { includeBody });

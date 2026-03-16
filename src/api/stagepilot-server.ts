@@ -68,6 +68,7 @@ import {
   buildStagePilotRouteDescriptors,
   buildStagePilotRuntimeBrief,
   buildStagePilotRuntimeScorecard,
+  buildStagePilotTraceObservabilityPack,
   type StagePilotRouteDescriptor,
 } from "./stagepilot-service-meta";
 
@@ -941,6 +942,140 @@ function readStagePilotPerfEvidenceArtifact() {
   }
 }
 
+function readStagePilotTraceObservabilityArtifact() {
+  const fallback = {
+    generatedAt: null,
+    hotspots: [] as Array<{
+      attentionCount: number;
+      providerFamily: string;
+      risk: string;
+    }>,
+    regressionGate: {
+      failCount: null,
+      gate: "unknown",
+      passCount: null,
+      rule: "No checked-in trace artifact found.",
+      watchCount: null,
+    },
+    reviewerTier: "bounded-review-demo",
+    tool: "checked-in frontier trace bundle",
+    traces: [] as Array<{
+      durationMs: number | null;
+      failureClass: string;
+      operatorHandoff: string;
+      protocolFamily: string;
+      providerFamily: string;
+      regressionGate: string;
+      reviewerSurface: string;
+      scenario: string;
+      traceId: string;
+    }>,
+  };
+
+  try {
+    const payload = JSON.parse(
+      readFileSync(
+        new URL(
+          "../../docs/benchmarks/stagepilot-trace-observability-latest.json",
+          import.meta.url
+        ),
+        "utf8"
+      )
+    ) as {
+      generatedAt?: unknown;
+      hotspots?: Array<Record<string, unknown>>;
+      regressionGate?: Record<string, unknown>;
+      reviewerTier?: unknown;
+      tool?: unknown;
+      traces?: Array<Record<string, unknown>>;
+    };
+
+    return {
+      generatedAt:
+        typeof payload.generatedAt === "string" ? payload.generatedAt : null,
+      hotspots: Array.isArray(payload.hotspots)
+        ? payload.hotspots.map((item) => ({
+            attentionCount:
+              typeof item.attentionCount === "number"
+                ? item.attentionCount
+                : 0,
+            providerFamily:
+              typeof item.providerFamily === "string"
+                ? item.providerFamily
+                : "unknown",
+            risk: typeof item.risk === "string" ? item.risk : "unknown",
+          }))
+        : fallback.hotspots,
+      regressionGate: {
+        failCount:
+          typeof payload.regressionGate?.failCount === "number"
+            ? payload.regressionGate.failCount
+            : null,
+        gate:
+          typeof payload.regressionGate?.gate === "string"
+            ? payload.regressionGate.gate
+            : fallback.regressionGate.gate,
+        passCount:
+          typeof payload.regressionGate?.passCount === "number"
+            ? payload.regressionGate.passCount
+            : null,
+        rule:
+          typeof payload.regressionGate?.rule === "string"
+            ? payload.regressionGate.rule
+            : fallback.regressionGate.rule,
+        watchCount:
+          typeof payload.regressionGate?.watchCount === "number"
+            ? payload.regressionGate.watchCount
+            : null,
+      },
+      reviewerTier:
+        typeof payload.reviewerTier === "string"
+          ? payload.reviewerTier
+          : fallback.reviewerTier,
+      tool:
+        typeof payload.tool === "string" ? payload.tool : fallback.tool,
+      traces: Array.isArray(payload.traces)
+        ? payload.traces.map((item) => ({
+            durationMs:
+              typeof item.durationMs === "number" ? item.durationMs : null,
+            failureClass:
+              typeof item.failureClass === "string"
+                ? item.failureClass
+                : "unknown",
+            operatorHandoff:
+              typeof item.operatorHandoff === "string"
+                ? item.operatorHandoff
+                : "review required",
+            protocolFamily:
+              typeof item.protocolFamily === "string"
+                ? item.protocolFamily
+                : "unknown",
+            providerFamily:
+              typeof item.providerFamily === "string"
+                ? item.providerFamily
+                : "unknown",
+            regressionGate:
+              typeof item.regressionGate === "string"
+                ? item.regressionGate
+                : "watch",
+            reviewerSurface:
+              typeof item.reviewerSurface === "string"
+                ? item.reviewerSurface
+                : "/v1/review-pack",
+            scenario:
+              typeof item.scenario === "string"
+                ? item.scenario
+                : "unspecified scenario",
+            traceId:
+              typeof item.traceId === "string" ? item.traceId : randomUUID(),
+          }))
+        : fallback.traces,
+    };
+  } catch {
+    return fallback;
+  }
+}
+
 function buildReviewPackPayload(): JsonObject {
   const runtimeBrief = buildRuntimeBriefPayload() as ReturnType<
     typeof buildStagePilotRuntimeBrief
@@ -1007,6 +1142,14 @@ function buildPerfEvidencePackPayload(): JsonObject {
     benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
     perfArtifact: readStagePilotPerfEvidenceArtifact(),
     service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
+  });
+}
+
+function buildTraceObservabilityPackPayload(): JsonObject {
+  return buildStagePilotTraceObservabilityPack({
+    benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
+    service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
+    traceArtifact: readStagePilotTraceObservabilityArtifact(),
   });
 }
 
@@ -1619,6 +1762,15 @@ function handlePerfEvidencePackRequest(
   }
 ) {
   sendJson(response, 200, buildPerfEvidencePackPayload(), options);
+}
+
+function handleTraceObservabilityPackRequest(
+  response: ServerResponse,
+  options?: {
+    includeBody?: boolean;
+  }
+) {
+  sendJson(response, 200, buildTraceObservabilityPackPayload(), options);
 }
 
 function parseStagePilotLane(rawUrl?: string): {
@@ -2351,6 +2503,9 @@ function handleReadonlyRequest(options: {
       return true;
     case "/v1/perf-evidence-pack":
       handlePerfEvidencePackRequest(response, { includeBody });
+      return true;
+    case "/v1/trace-observability-pack":
+      handleTraceObservabilityPackRequest(response, { includeBody });
       return true;
     case "/v1/benchmark-summary":
       handleBenchmarkSummaryReadonly(response, rawUrl, { includeBody });

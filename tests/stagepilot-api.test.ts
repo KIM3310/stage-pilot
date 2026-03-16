@@ -557,6 +557,10 @@ describe("stagepilot api server", () => {
           method: "GET",
           path: "/v1/provider-benchmark-scorecard",
         }),
+        expect.objectContaining({
+          method: "GET",
+          path: "/v1/perf-evidence-pack",
+        }),
         expect.objectContaining({ method: "POST", path: "/v1/plan" }),
       ])
     );
@@ -597,6 +601,7 @@ describe("stagepilot api server", () => {
       headline: string;
       links: {
         developerOpsPack: string;
+        perfEvidencePack: string;
         providerBenchmarkScorecard: string;
         protocolMatrix: string;
         workflowRuns: string;
@@ -616,6 +621,7 @@ describe("stagepilot api server", () => {
     expect(body.routeCount).toBeGreaterThanOrEqual(10);
     expect(body.headline).toContain("orchestration");
     expect(body.links.developerOpsPack).toBe("/v1/developer-ops-pack");
+    expect(body.links.perfEvidencePack).toBe("/v1/perf-evidence-pack");
     expect(body.links.providerBenchmarkScorecard).toBe(
       "/v1/provider-benchmark-scorecard"
     );
@@ -714,6 +720,48 @@ describe("stagepilot api server", () => {
     expect(body.reviewPath.length).toBeGreaterThanOrEqual(3);
   });
 
+  it("returns perf evidence pack for runtime pressure review", async () => {
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const response = await fetch(`${baseUrl}/v1/perf-evidence-pack`);
+    expect(response.status).toBe(200);
+
+    const body = (await response.json()) as {
+      headline: string;
+      links: {
+        perfEvidencePack: string;
+        runtimeScorecard: string;
+      };
+      observedRun: {
+        p95DurationMs: number | null;
+        routeMix: Array<{
+          path: string;
+          sharePct: number;
+        }>;
+      };
+      reviewPath: string[];
+      schema: string;
+      summary: {
+        checksPassRatePct: number | null;
+        requestCount: number | null;
+        topStrategy: { strategy: string } | null;
+      };
+    };
+
+    expect(body.schema).toBe("stagepilot-perf-evidence-pack-v1");
+    expect(body.headline).toContain("Perf evidence pack");
+    expect(body.summary.topStrategy).not.toBeNull();
+    expect(body.summary.requestCount).toBeGreaterThanOrEqual(100);
+    expect(body.summary.checksPassRatePct).toBeGreaterThanOrEqual(100);
+    expect(body.observedRun.p95DurationMs).toBeGreaterThanOrEqual(1000);
+    expect(body.observedRun.routeMix.some((item) => item.path === "/v1/plan")).toBe(true);
+    expect(body.links.perfEvidencePack).toBe("/v1/perf-evidence-pack");
+    expect(body.links.runtimeScorecard).toBe("/v1/runtime-scorecard");
+    expect(body.reviewPath.length).toBeGreaterThanOrEqual(3);
+  });
+
   it("returns runtime scorecard with live route telemetry", async () => {
     process.env.GEMINI_API_KEY = "stagepilot-test-key";
     process.env.OPENCLAW_WEBHOOK_URL = "https://example.invalid/webhook";
@@ -733,6 +781,7 @@ describe("stagepilot api server", () => {
         topStrategy: { strategy: string } | null;
       };
       links: {
+        perfEvidencePack: string;
         providerBenchmarkScorecard: string;
         runtimeScorecard: string;
       };
@@ -767,6 +816,7 @@ describe("stagepilot api server", () => {
     expect(body.links.providerBenchmarkScorecard).toBe(
       "/v1/provider-benchmark-scorecard"
     );
+    expect(body.links.perfEvidencePack).toBe("/v1/perf-evidence-pack");
     expect(body.links.runtimeScorecard).toBe("/v1/runtime-scorecard");
     expect(body.runtime.integrationsReady).toBe(true);
     expect(body.traffic.requestCount).toBeGreaterThanOrEqual(2);

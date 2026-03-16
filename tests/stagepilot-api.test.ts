@@ -553,6 +553,10 @@ describe("stagepilot api server", () => {
       expect.arrayContaining([
         expect.objectContaining({ method: "GET", path: "/v1/meta" }),
         expect.objectContaining({ method: "GET", path: "/v1/protocol-matrix" }),
+        expect.objectContaining({
+          method: "GET",
+          path: "/v1/provider-benchmark-scorecard",
+        }),
         expect.objectContaining({ method: "POST", path: "/v1/plan" }),
       ])
     );
@@ -593,6 +597,7 @@ describe("stagepilot api server", () => {
       headline: string;
       links: {
         developerOpsPack: string;
+        providerBenchmarkScorecard: string;
         protocolMatrix: string;
         workflowRuns: string;
       };
@@ -611,6 +616,9 @@ describe("stagepilot api server", () => {
     expect(body.routeCount).toBeGreaterThanOrEqual(10);
     expect(body.headline).toContain("orchestration");
     expect(body.links.developerOpsPack).toBe("/v1/developer-ops-pack");
+    expect(body.links.providerBenchmarkScorecard).toBe(
+      "/v1/provider-benchmark-scorecard"
+    );
     expect(body.links.protocolMatrix).toBe("/v1/protocol-matrix");
     expect(body.links.workflowRuns).toBe("/v1/workflow-runs");
     expect(body.links.workflowReplay).toBe("/v1/workflow-run-replay");
@@ -658,6 +666,54 @@ describe("stagepilot api server", () => {
     expect(body.reviewPath.length).toBeGreaterThanOrEqual(3);
   });
 
+  it("returns provider benchmark scorecard for frontier review posture", async () => {
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const response = await fetch(`${baseUrl}/v1/provider-benchmark-scorecard`);
+    expect(response.status).toBe(200);
+
+    const body = (await response.json()) as {
+      headline: string;
+      links: {
+        providerBenchmarkScorecard: string;
+        protocolMatrix: string;
+      };
+      providers: Array<{
+        contractConfidencePct: number;
+        posture: string;
+        provider: string;
+        proofRoutes: string[];
+      }>;
+      reviewPath: string[];
+      schema: string;
+      summary: {
+        providerCount: number;
+        topStrategy: { strategy: string } | null;
+      };
+    };
+
+    expect(body.schema).toBe("stagepilot-provider-benchmark-scorecard-v1");
+    expect(body.headline).toContain("Provider benchmark scorecard");
+    expect(body.summary.providerCount).toBeGreaterThanOrEqual(4);
+    expect(body.summary.topStrategy).not.toBeNull();
+    expect(
+      body.providers.some((item) => item.provider === "openai-compatible")
+    ).toBe(true);
+    expect(
+      body.providers.every(
+        (item) =>
+          item.contractConfidencePct >= 0 && item.proofRoutes.length >= 3
+      )
+    ).toBe(true);
+    expect(body.links.providerBenchmarkScorecard).toBe(
+      "/v1/provider-benchmark-scorecard"
+    );
+    expect(body.links.protocolMatrix).toBe("/v1/protocol-matrix");
+    expect(body.reviewPath.length).toBeGreaterThanOrEqual(3);
+  });
+
   it("returns runtime scorecard with live route telemetry", async () => {
     process.env.GEMINI_API_KEY = "stagepilot-test-key";
     process.env.OPENCLAW_WEBHOOK_URL = "https://example.invalid/webhook";
@@ -677,6 +733,7 @@ describe("stagepilot api server", () => {
         topStrategy: { strategy: string } | null;
       };
       links: {
+        providerBenchmarkScorecard: string;
         runtimeScorecard: string;
       };
       live?: never;
@@ -707,6 +764,9 @@ describe("stagepilot api server", () => {
     };
 
     expect(body.schema).toBe("stagepilot-runtime-scorecard-v1");
+    expect(body.links.providerBenchmarkScorecard).toBe(
+      "/v1/provider-benchmark-scorecard"
+    );
     expect(body.links.runtimeScorecard).toBe("/v1/runtime-scorecard");
     expect(body.runtime.integrationsReady).toBe(true);
     expect(body.traffic.requestCount).toBeGreaterThanOrEqual(2);
@@ -751,6 +811,7 @@ describe("stagepilot api server", () => {
       headline: string;
       links: {
         failureTaxonomy: string;
+        providerBenchmarkScorecard: string;
         runtimeScorecard: string;
       };
       reviewPath: string[];
@@ -764,6 +825,9 @@ describe("stagepilot api server", () => {
 
     expect(body.schema).toBe("stagepilot-failure-taxonomy-v1");
     expect(body.links.failureTaxonomy).toBe("/v1/failure-taxonomy");
+    expect(body.links.providerBenchmarkScorecard).toBe(
+      "/v1/provider-benchmark-scorecard"
+    );
     expect(body.links.runtimeScorecard).toBe("/v1/runtime-scorecard");
     expect(body.summary.categoryCount).toBeGreaterThanOrEqual(4);
     expect(body.summary.observedRequestCount).toBeGreaterThanOrEqual(2);
@@ -798,6 +862,7 @@ describe("stagepilot api server", () => {
       links: {
         benchmarkSummary: string;
         developerOpsPack: string;
+        providerBenchmarkScorecard: string;
         reviewPack: string;
         workflowRuns: string;
       };
@@ -840,6 +905,9 @@ describe("stagepilot api server", () => {
       body.proofBundle.benchmark.improvements.loopVsBaseline
     ).toBeGreaterThan(50);
     expect(body.links.developerOpsPack).toBe("/v1/developer-ops-pack");
+    expect(body.links.providerBenchmarkScorecard).toBe(
+      "/v1/provider-benchmark-scorecard"
+    );
     expect(body.links.workflowRuns).toBe("/v1/workflow-runs");
     expect(body.links.workflowReplay).toBe("/v1/workflow-run-replay");
     expect(body.links.benchmarkSummary).toBe("/v1/benchmark-summary");

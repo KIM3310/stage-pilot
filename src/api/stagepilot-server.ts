@@ -61,6 +61,7 @@ import {
   buildStagePilotFailureTaxonomy,
   buildStagePilotDeveloperOpsPack,
   buildStagePilotPlanReportSchema,
+  buildStagePilotProviderBenchmarkScorecard,
   buildStagePilotProtocolMatrix,
   buildStagePilotReviewPack,
   buildStagePilotRouteDescriptors,
@@ -859,6 +860,13 @@ function buildProtocolMatrixPayload(): JsonObject {
   });
 }
 
+function buildProviderBenchmarkScorecardPayload(): JsonObject {
+  return buildStagePilotProviderBenchmarkScorecard({
+    benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
+    service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
+  });
+}
+
 function buildFailureTaxonomyPayload(
   telemetry: StagePilotRuntimeTelemetry
 ): JsonObject {
@@ -1450,6 +1458,15 @@ function handleProtocolMatrixRequest(
   }
 ) {
   sendJson(response, 200, buildProtocolMatrixPayload(), options);
+}
+
+function handleProviderBenchmarkScorecardRequest(
+  response: ServerResponse,
+  options?: {
+    includeBody?: boolean;
+  }
+) {
+  sendJson(response, 200, buildProviderBenchmarkScorecardPayload(), options);
 }
 
 function parseStagePilotLane(rawUrl?: string): {
@@ -2176,6 +2193,9 @@ function handleReadonlyRequest(options: {
       return true;
     case "/v1/protocol-matrix":
       handleProtocolMatrixRequest(response, { includeBody });
+      return true;
+    case "/v1/provider-benchmark-scorecard":
+      handleProviderBenchmarkScorecardRequest(response, { includeBody });
       return true;
     case "/v1/benchmark-summary":
       handleBenchmarkSummaryReadonly(response, rawUrl, { includeBody });

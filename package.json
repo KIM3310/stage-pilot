@@ -65,7 +65,7 @@
     "check:biome": "biome check",
     "check:types": "tsc --noEmit",
     "check": "run-p check:*",
-    "verify": "pnpm check && pnpm test && pnpm build",
+    "verify": "npm run check && npm test && npm run build",
     "review:proof": "node scripts/review-proof.mjs",
     "fmt:biome": "biome check --write",
     "fmt": "run-p fmt:*",

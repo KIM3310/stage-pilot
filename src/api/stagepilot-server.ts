@@ -58,6 +58,7 @@ import {
 import { renderStagePilotDemoHtml } from "./stagepilot-demo";
 import {
   buildStagePilotBenchmarkSummary,
+  buildStagePilotFailureTaxonomy,
   buildStagePilotDeveloperOpsPack,
   buildStagePilotPlanReportSchema,
   buildStagePilotReviewPack,
@@ -851,6 +852,31 @@ function buildDeveloperOpsPackPayload(lane?: string): JsonObject {
   });
 }
 
+function buildFailureTaxonomyPayload(
+  telemetry: StagePilotRuntimeTelemetry
+): JsonObject {
+  return buildStagePilotFailureTaxonomy({
+    benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
+    geminiHasApiKey:
+      typeof process.env.GEMINI_API_KEY === "string" &&
+      process.env.GEMINI_API_KEY.trim().length > 0,
+    openClawConfigured:
+      Boolean(toNonEmptyString(process.env.OPENCLAW_WEBHOOK_URL)) ||
+      Boolean(toNonEmptyString(process.env.OPENCLAW_CMD)),
+    runtimeTelemetry: {
+      errorCount: telemetry.errorCount,
+      requestCount: telemetry.requestCount,
+      routeCounts: [...telemetry.routeCounts.entries()]
+        .map(([path, count]) => ({ path, count }))
+        .sort(
+          (left, right) =>
+            right.count - left.count || left.path.localeCompare(right.path)
+        ),
+    },
+    service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
+  });
+}
+
 function buildRuntimeScorecardPayload(
   telemetry: StagePilotRuntimeTelemetry
 ): JsonObject {
@@ -1372,6 +1398,16 @@ function handleReviewPackRequest(
   }
 ) {
   sendJson(response, 200, buildReviewPackPayload(), options);
+}
+
+function handleFailureTaxonomyRequest(
+  response: ServerResponse,
+  telemetry: StagePilotRuntimeTelemetry,
+  options?: {
+    includeBody?: boolean;
+  }
+) {
+  sendJson(response, 200, buildFailureTaxonomyPayload(telemetry), options);
 }
 
 function handleBenchmarkSummaryRequest(
@@ -2118,6 +2154,9 @@ function handleReadonlyRequest(options: {
       return true;
     case "/v1/runtime-scorecard":
       handleRuntimeScorecardRequest(response, telemetry, { includeBody });
+      return true;
+    case "/v1/failure-taxonomy":
+      handleFailureTaxonomyRequest(response, telemetry, { includeBody });
       return true;
     case "/v1/benchmark-summary":
       handleBenchmarkSummaryReadonly(response, rawUrl, { includeBody });

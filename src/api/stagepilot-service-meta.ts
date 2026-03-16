@@ -13,6 +13,8 @@ export const STAGEPILOT_RUNTIME_SCORECARD_SCHEMA =
   "stagepilot-runtime-scorecard-v1";
 export const STAGEPILOT_DEVELOPER_OPS_PACK_SCHEMA =
   "stagepilot-developer-ops-pack-v1";
+export const STAGEPILOT_FAILURE_TAXONOMY_SCHEMA =
+  "stagepilot-failure-taxonomy-v1";
 
 function buildStagePilotOperationalPosture(options: {
   benchmarkReadyForPromotion?: boolean;
@@ -134,6 +136,12 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
       path: "/v1/runtime-scorecard",
       purpose:
         "Operational scorecard for live traffic, route pressure, and benchmark-backed readiness",
+    },
+    {
+      method: "GET",
+      path: "/v1/failure-taxonomy",
+      purpose:
+        "Failure classes for parser drift, retry exhaustion, delivery gaps, and reviewer handoff risk",
     },
     {
       method: "GET",
@@ -269,6 +277,7 @@ export function buildStagePilotRuntimeBrief(options: {
       runtimeBrief: "/v1/runtime-brief",
       reviewPack: "/v1/review-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
+      failureTaxonomy: "/v1/failure-taxonomy",
       benchmarkSummary: "/v1/benchmark-summary",
       developerOpsPack: "/v1/developer-ops-pack",
       workflowRuns: "/v1/workflow-runs",
@@ -351,6 +360,7 @@ export function buildStagePilotBenchmarkSummary(options: {
       reviewPack: "/v1/review-pack",
       benchmark: "/v1/benchmark",
       benchmarkSummary: "/v1/benchmark-summary",
+      failureTaxonomy: "/v1/failure-taxonomy",
       developerOpsPack: "/v1/developer-ops-pack",
       workflowRuns: "/v1/workflow-runs",
       workflowReplay: "/v1/workflow-run-replay",
@@ -439,6 +449,7 @@ export function buildStagePilotDeveloperOpsPack(options: {
     proofRoutes: [
       "/v1/runtime-brief",
       "/v1/runtime-scorecard",
+      "/v1/failure-taxonomy",
       "/v1/developer-ops-pack",
       "/v1/workflow-runs",
       "/v1/benchmark-summary",
@@ -453,6 +464,7 @@ export function buildStagePilotDeveloperOpsPack(options: {
     links: {
       runtimeBrief: "/v1/runtime-brief",
       runtimeScorecard: "/v1/runtime-scorecard",
+      failureTaxonomy: "/v1/failure-taxonomy",
       developerOpsPack: "/v1/developer-ops-pack",
       workflowRuns: "/v1/workflow-runs",
       workflowReplay: "/v1/workflow-run-replay",
@@ -555,8 +567,189 @@ export function buildStagePilotRuntimeScorecard(options: {
       runtimeBrief: "/v1/runtime-brief",
       reviewPack: "/v1/review-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
+      failureTaxonomy: "/v1/failure-taxonomy",
       benchmarkSummary: "/v1/benchmark-summary",
       workflowReplay: "/v1/workflow-run-replay",
+      planSchema: "/v1/schema/plan-report",
+    },
+  };
+}
+
+export function buildStagePilotFailureTaxonomy(options: {
+  benchmarkSnapshot: StagePilotBenchmarkSnapshot;
+  geminiHasApiKey: boolean;
+  openClawConfigured: boolean;
+  runtimeTelemetry: {
+    errorCount: number;
+    requestCount: number;
+    routeCounts: Array<{
+      count: number;
+      path: string;
+    }>;
+  };
+  service: string;
+}) {
+  const parserLift = options.benchmarkSnapshot.improvements.middlewareVsBaseline;
+  const recoveryLift = options.benchmarkSnapshot.improvements.loopVsMiddleware;
+  const baselineRate = options.benchmarkSnapshot.strategies.baseline;
+  const loopRate = options.benchmarkSnapshot.strategies.ralphLoop;
+  const topPressureRoutes = options.runtimeTelemetry.routeCounts.slice(0, 3);
+
+  const failureModes = [
+    {
+      id: "parse-contract-drift",
+      label: "Parse contract drift",
+      severity: "high",
+      stage: "parse",
+      status:
+        (typeof baselineRate === "number" && baselineRate < 70) ||
+        (typeof parserLift === "number" && parserLift >= 15)
+          ? "attention"
+          : "ready",
+      whyItBreaks:
+        "Model output slips outside the expected tool/report contract and turns a planning request into reviewer cleanup work.",
+      signals: [
+        typeof baselineRate === "number"
+          ? `Baseline success is ${baselineRate}% before parser hardening.`
+          : "Baseline success rate is unavailable in the current snapshot.",
+        typeof parserLift === "number"
+          ? `Middleware lift versus baseline is ${parserLift} percentage points.`
+          : "Middleware lift has not been captured yet.",
+      ],
+      reviewerSurfaces: [
+        "/v1/benchmark-summary",
+        "/v1/schema/plan-report",
+        "/v1/review-pack",
+      ],
+      mitigations: [
+        "Keep the parser middleware and contract schema together in the reviewer path.",
+        "Treat benchmark regressions as release blockers for automation-facing lanes.",
+      ],
+    },
+    {
+      id: "bounded-retry-exhaustion",
+      label: "Bounded retry exhaustion",
+      severity: "high",
+      stage: "recover",
+      status:
+        (typeof loopRate === "number" && loopRate < 85) ||
+        (typeof recoveryLift === "number" && recoveryLift < 5)
+          ? "attention"
+          : "ready",
+      whyItBreaks:
+        "Recovery loops stop helping once malformed tool output repeats or the retry budget is consumed without a contract-safe answer.",
+      signals: [
+        typeof loopRate === "number"
+          ? `Middleware + Ralph-loop success is ${loopRate}%.`
+          : "Loop-recovery success rate is unavailable in the current snapshot.",
+        typeof recoveryLift === "number"
+          ? `Loop lift versus middleware is ${recoveryLift} percentage points.`
+          : "Loop lift has not been captured yet.",
+      ],
+      reviewerSurfaces: [
+        "/v1/benchmark-summary",
+        "/v1/developer-ops-pack",
+        "/v1/workflow-run-replay",
+      ],
+      mitigations: [
+        "Keep retries bounded and visible instead of silently looping until timeout.",
+        "Use workflow replay to inspect which lane still needs human escalation.",
+      ],
+    },
+    {
+      id: "delivery-readiness-gap",
+      label: "Delivery readiness gap",
+      severity: "high",
+      stage: "deliver",
+      status:
+        options.geminiHasApiKey && options.openClawConfigured
+          ? "ready"
+          : "attention",
+      whyItBreaks:
+        "A plan can look valid while live synthesis or downstream delivery is still unconfigured, turning the demo into a docs-only surface.",
+      signals: [
+        options.geminiHasApiKey
+          ? "Gemini live planning is configured."
+          : "Gemini live planning is not configured.",
+        options.openClawConfigured
+          ? "OpenClaw delivery is configured."
+          : "OpenClaw delivery is not configured.",
+      ],
+      reviewerSurfaces: [
+        "/v1/runtime-brief",
+        "/v1/runtime-scorecard",
+        "/v1/review-pack",
+      ],
+      mitigations: [
+        "Separate plan synthesis success from downstream delivery success.",
+        "Keep runtime brief in the first review step before any live claim.",
+      ],
+    },
+    {
+      id: "observed-runtime-regressions",
+      label: "Observed runtime regressions",
+      severity: "medium",
+      stage: "operate",
+      status:
+        options.runtimeTelemetry.requestCount > 0 &&
+        options.runtimeTelemetry.errorCount === 0
+          ? "ready"
+          : "attention",
+      whyItBreaks:
+        "Reviewer trust drops if the live runtime has no traffic proof or if requests are already erroring under light load.",
+      signals: [
+        `Observed requests in this process: ${options.runtimeTelemetry.requestCount}.`,
+        `Observed errors in this process: ${options.runtimeTelemetry.errorCount}.`,
+        topPressureRoutes.length > 0
+          ? `Top pressure routes: ${topPressureRoutes
+              .map((item) => `${item.path} (${item.count})`)
+              .join(", ")}.`
+          : "No route pressure has been observed in this process yet.",
+      ],
+      reviewerSurfaces: [
+        "/v1/runtime-scorecard",
+        "/v1/workflow-runs",
+        "/v1/workflow-run-replay",
+      ],
+      mitigations: [
+        "Keep workflow replay and runtime scorecard together when demoing developer lanes.",
+        "Do not promote the runtime as reliable until request and error posture are visible.",
+      ],
+    },
+  ];
+  const attentionModes = failureModes.filter((item) => item.status === "attention");
+  const topRisk = attentionModes[0] ?? failureModes[0];
+
+  return {
+    service: options.service,
+    status: "ok",
+    generatedAt: new Date().toISOString(),
+    schema: STAGEPILOT_FAILURE_TAXONOMY_SCHEMA,
+    headline:
+      "Failure taxonomy that keeps parser drift, retry limits, delivery gaps, and live runtime regressions explicit before any reliability claim.",
+    summary: {
+      categoryCount: failureModes.length,
+      readyCount: failureModes.length - attentionModes.length,
+      attentionCount: attentionModes.length,
+      highestRisk: topRisk.id,
+      benchmarkCaseCount: options.benchmarkSnapshot.caseCount,
+      observedRequestCount: options.runtimeTelemetry.requestCount,
+    },
+    failureModes,
+    reviewPath: [
+      "Start on /v1/runtime-brief to separate missing integrations from true parser/runtime defects.",
+      "Use /v1/benchmark-summary and /v1/schema/plan-report to explain why tool-call hardening exists.",
+      "Finish on /v1/runtime-scorecard and /v1/workflow-run-replay to show live reviewer pressure and escalation paths.",
+    ],
+    links: {
+      runtimeBrief: "/v1/runtime-brief",
+      benchmarkSummary: "/v1/benchmark-summary",
+      runtimeScorecard: "/v1/runtime-scorecard",
+      failureTaxonomy: "/v1/failure-taxonomy",
+      developerOpsPack: "/v1/developer-ops-pack",
+      workflowRuns: "/v1/workflow-runs",
+      workflowReplay: "/v1/workflow-run-replay",
+      reviewPack: "/v1/review-pack",
       planSchema: "/v1/schema/plan-report",
     },
   };
@@ -626,7 +819,7 @@ export function buildStagePilotReviewPack(options: {
     ],
     reviewSequence: [
       "Check /v1/runtime-brief to confirm Gemini and OpenClaw readiness before trusting live synthesis.",
-      "Inspect /v1/review-pack to validate benchmark lift, parser posture, and operator handoff boundaries.",
+      "Inspect /v1/review-pack and /v1/failure-taxonomy to validate benchmark lift, parser posture, and operator handoff boundaries.",
       "Run /v1/plan and /v1/benchmark before promoting any routing claim or delivery workflow.",
     ],
     twoMinuteReview: [
@@ -637,10 +830,10 @@ export function buildStagePilotReviewPack(options: {
           "Confirm Gemini/OpenClaw readiness and request boundary before trusting orchestration.",
       },
       {
-        step: "2. Benchmark lift",
-        surface: "/v1/review-pack -> docs/benchmarks/stagepilot-latest.json",
+        step: "2. Failure posture",
+        surface: "/v1/failure-taxonomy -> /v1/review-pack",
         proof:
-          "Validate baseline, middleware, and Ralph-loop deltas before repeating any claim.",
+          "Validate benchmark deltas, delivery gaps, and runtime failure classes before repeating any claim.",
       },
       {
         step: "3. Contract boundary",
@@ -685,6 +878,7 @@ export function buildStagePilotReviewPack(options: {
       runtimeBrief: "/v1/runtime-brief",
       reviewPack: "/v1/review-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
+      failureTaxonomy: "/v1/failure-taxonomy",
       benchmarkSummary: "/v1/benchmark-summary",
       developerOpsPack: "/v1/developer-ops-pack",
       workflowRuns: "/v1/workflow-runs",

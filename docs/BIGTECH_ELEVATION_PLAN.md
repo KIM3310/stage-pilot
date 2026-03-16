@@ -4,6 +4,11 @@
 
 Turn `stage-pilot` from a strong parser plus benchmark repo into a canonical `LLM tool-runtime reliability` proof. The hiring story should be: this repo hardens tool use across unstable providers, exposes failure boundaries clearly, and proves recovery quality with repeatable evidence.
 
+## Implemented Now
+
+- `GET /v1/failure-taxonomy` is live and makes parser drift, bounded retry exhaustion, delivery readiness gaps, and observed runtime regressions reviewable in one surface.
+- `GET /v1/runtime-scorecard` is already live and now pairs cleanly with the failure taxonomy for runtime pressure and promotion posture.
+
 ## 30 / 60 / 90
 
 ### 30 days
@@ -21,11 +26,14 @@ Turn `stage-pilot` from a strong parser plus benchmark repo into a canonical `LL
 - Add a "production adoption guide" that explains where parser middleware ends and application trust policy begins.
 - Add one end-to-end case study showing a broken tool path that becomes stable only because of StagePilot.
 
-## Proof Surfaces To Add
+## Proof Surfaces
 
-- `GET /v1/provider-matrix`
+### Live now
 - `GET /v1/runtime-scorecard`
 - `GET /v1/failure-taxonomy`
+
+### Next
+- `GET /v1/provider-matrix`
 - `GET /v1/schema-drift-replay`
 
 ## Success Bar

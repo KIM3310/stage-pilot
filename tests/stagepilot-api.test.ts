@@ -33,8 +33,7 @@ const REVIEWER_CLAIM_TIER_REGEX =
   /runtime-backed-review-ready|bounded-review-demo/;
 const OPENCLAW_WEBHOOK_ENV_SNAPSHOT = process.env[OPENCLAW_WEBHOOK_ENV_KEY];
 const OPENAI_API_KEY_ENV_SNAPSHOT = process.env[OPENAI_API_KEY_ENV_KEY];
-const OPENAI_KILL_SWITCH_ENV_SNAPSHOT =
-  process.env[OPENAI_KILL_SWITCH_ENV_KEY];
+const OPENAI_KILL_SWITCH_ENV_SNAPSHOT = process.env[OPENAI_KILL_SWITCH_ENV_KEY];
 const OPENAI_PUBLIC_RPM_ENV_SNAPSHOT = process.env[OPENAI_PUBLIC_RPM_ENV_KEY];
 const STAGEPILOT_REVIEW_ONLY_ENV_SNAPSHOT =
   process.env[STAGEPILOT_REVIEW_ONLY_ENV_KEY];
@@ -704,13 +703,15 @@ describe("stagepilot api server", () => {
     process.env.OPENAI_PUBLIC_RPM = "3";
     const realFetch = globalThis.fetch;
     vi.spyOn(globalThis, "fetch").mockImplementation(
-      async (input: RequestInfo | URL, init?: RequestInit) => {
-        const url =
-          typeof input === "string"
-            ? input
-            : input instanceof URL
-            ? input.toString()
-            : input.url;
+      (input: RequestInfo | URL, init?: RequestInit) => {
+        let url: string;
+        if (typeof input === "string") {
+          url = input;
+        } else if (input instanceof URL) {
+          url = input.toString();
+        } else {
+          url = input.url;
+        }
         if (url.includes("/moderations")) {
           return {
             ok: true,
@@ -930,7 +931,9 @@ describe("stagepilot api server", () => {
     expect(body.summary.requestCount).toBeGreaterThanOrEqual(100);
     expect(body.summary.checksPassRatePct).toBeGreaterThanOrEqual(100);
     expect(body.observedRun.p95DurationMs).toBeGreaterThanOrEqual(1000);
-    expect(body.observedRun.routeMix.some((item) => item.path === "/v1/plan")).toBe(true);
+    expect(
+      body.observedRun.routeMix.some((item) => item.path === "/v1/plan")
+    ).toBe(true);
     expect(body.links.perfEvidencePack).toBe("/v1/perf-evidence-pack");
     expect(body.links.runtimeScorecard).toBe("/v1/runtime-scorecard");
     expect(body.reviewPath.length).toBeGreaterThanOrEqual(3);
@@ -1161,9 +1164,9 @@ describe("stagepilot api server", () => {
         item.reviewerSurfaces.includes("/v1/runtime-scorecard")
       )
     ).toBe(true);
-    expect(
-      body.failureModes.every((item) => item.signals.length >= 2)
-    ).toBe(true);
+    expect(body.failureModes.every((item) => item.signals.length >= 2)).toBe(
+      true
+    );
     expect(body.summary.attentionCount).toBeGreaterThanOrEqual(1);
   });
 

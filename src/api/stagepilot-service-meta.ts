@@ -25,8 +25,7 @@ export const STAGEPILOT_TRACE_OBSERVABILITY_PACK_SCHEMA =
   "stagepilot-trace-observability-pack-v1";
 export const STAGEPILOT_REGRESSION_GATE_PACK_SCHEMA =
   "stagepilot-regression-gate-pack-v1";
-export const STAGEPILOT_LIVE_REVIEW_SCHEMA =
-  "stagepilot-live-review-run-v1";
+export const STAGEPILOT_LIVE_REVIEW_SCHEMA = "stagepilot-live-review-run-v1";
 
 function buildStagePilotOperationalPosture(options: {
   benchmarkReadyForPromotion?: boolean;
@@ -178,7 +177,6 @@ interface StagePilotTraceObservabilityArtifact {
 }
 
 interface StagePilotRegressionGateArtifact {
-  generatedAt: string | null;
   gates: Array<{
     decision: string;
     focus: string;
@@ -186,6 +184,7 @@ interface StagePilotRegressionGateArtifact {
     owner: string;
     signal: string;
   }>;
+  generatedAt: string | null;
   releaseRecommendation: {
     nextStep: string;
     posture: string;
@@ -386,6 +385,16 @@ export function buildStagePilotRuntimeBrief(options: {
   const missingIntegrations = operationalPosture.blockers.filter(
     (blocker) => blocker === "gemini_api_key" || blocker === "openclaw_delivery"
   );
+  let nextAction: string;
+  if (options.publicLiveApi) {
+    nextAction =
+      "Run POST /v1/live-review-run with a fixed scenarioId to validate the bounded public reviewer lane.";
+  } else if (missingIntegrations.length === 0) {
+    nextAction =
+      "Run POST /v1/plan or POST /v1/benchmark to validate live flows.";
+  } else {
+    nextAction = `Configure ${missingIntegrations[0]} to unlock live planning diagnostics.`;
+  }
 
   return {
     service: options.service,
@@ -433,12 +442,7 @@ export function buildStagePilotRuntimeBrief(options: {
       integrationReady: missingIntegrations.length === 0,
       missingIntegrations,
       operationalPosture,
-      nextAction:
-        options.publicLiveApi
-          ? "Run POST /v1/live-review-run with a fixed scenarioId to validate the bounded public reviewer lane."
-          : missingIntegrations.length === 0
-          ? "Run POST /v1/plan or POST /v1/benchmark to validate live flows."
-          : `Configure ${missingIntegrations[0]} to unlock live planning diagnostics.`,
+      nextAction,
     },
     links: {
       health: "/health",
@@ -732,7 +736,12 @@ export function buildStagePilotProtocolMatrix(options: { service: string }) {
     summary: {
       protocolCount: protocols.length,
       readyCount: protocols.filter((item) => item.readiness === "ready").length,
-      coverageAreas: ["parse-generated-text", "stream", "pipeline", "middleware"],
+      coverageAreas: [
+        "parse-generated-text",
+        "stream",
+        "pipeline",
+        "middleware",
+      ],
       biggestWhy:
         "Provider-agnostic tool reliability only matters if protocol families and their failure hotspots are visible together.",
     },
@@ -762,11 +771,14 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
   const baselineRate = options.benchmarkSnapshot.strategies.baseline ?? 0;
   const middlewareRate = options.benchmarkSnapshot.strategies.middleware ?? 0;
   const loopRate = options.benchmarkSnapshot.strategies.ralphLoop ?? 0;
-  const parserLift = options.benchmarkSnapshot.improvements.middlewareVsBaseline ?? 0;
-  const recoveryLift = options.benchmarkSnapshot.improvements.loopVsMiddleware ?? 0;
-  const topStrategy = buildStrategyRows(options.benchmarkSnapshot).sort(
-    (left, right) => (right.successRate ?? 0) - (left.successRate ?? 0)
-  )[0] ?? null;
+  const parserLift =
+    options.benchmarkSnapshot.improvements.middlewareVsBaseline ?? 0;
+  const recoveryLift =
+    options.benchmarkSnapshot.improvements.loopVsMiddleware ?? 0;
+  const topStrategy =
+    buildStrategyRows(options.benchmarkSnapshot).sort(
+      (left, right) => (right.successRate ?? 0) - (left.successRate ?? 0)
+    )[0] ?? null;
 
   const providers = [
     {
@@ -775,23 +787,37 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
       contractConfidencePct: Math.round(middlewareRate),
       latencyBandMs: "350-900",
       costBand: "high",
-      dominantProtocols: ["Hermes", "tool wrappers", "middleware normalization"],
+      dominantProtocols: [
+        "Hermes",
+        "tool wrappers",
+        "middleware normalization",
+      ],
       biggestRisk: "tool-choice coercion and wrapper drift",
       whyItMatters:
         "Shows how StagePilot hardens common function-call wrappers before downstream workflow automation.",
-      proofRoutes: ["/v1/protocol-matrix", "/v1/benchmark-summary", "/v1/review-pack"],
+      proofRoutes: [
+        "/v1/protocol-matrix",
+        "/v1/benchmark-summary",
+        "/v1/review-pack",
+      ],
     },
     {
       provider: "anthropic-xml-style",
       posture: loopRate >= 85 ? "review-ready" : "attention",
-      contractConfidencePct: Math.round(Math.min(100, baselineRate + parserLift + recoveryLift)),
+      contractConfidencePct: Math.round(
+        Math.min(100, baselineRate + parserLift + recoveryLift)
+      ),
       latencyBandMs: "700-1800",
       costBand: "high",
       dominantProtocols: ["Morph XML", "stream repair", "close-tag recovery"],
       biggestRisk: "chunk-boundary drift and repair-vs-strict parser decisions",
       whyItMatters:
         "Makes XML-heavy frontier runtimes legible by tying parser repair to a bounded retry posture.",
-      proofRoutes: ["/v1/protocol-matrix", "/v1/failure-taxonomy", "/v1/runtime-scorecard"],
+      proofRoutes: [
+        "/v1/protocol-matrix",
+        "/v1/failure-taxonomy",
+        "/v1/runtime-scorecard",
+      ],
     },
     {
       provider: "gemini-hybrid",
@@ -799,11 +825,19 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
       contractConfidencePct: Math.round((middlewareRate + loopRate) / 2),
       latencyBandMs: "500-1400",
       costBand: "medium-high",
-      dominantProtocols: ["YAML/XML hybrid", "multiline streaming", "report contracts"],
+      dominantProtocols: [
+        "YAML/XML hybrid",
+        "multiline streaming",
+        "report contracts",
+      ],
       biggestRisk: "multiline indentation drift under mixed structured output",
       whyItMatters:
         "Pairs live synthesis pressure with contract-safe output instead of relying on prompt-only compliance.",
-      proofRoutes: ["/v1/runtime-brief", "/v1/provider-benchmark-scorecard", "/v1/benchmark-summary"],
+      proofRoutes: [
+        "/v1/runtime-brief",
+        "/v1/provider-benchmark-scorecard",
+        "/v1/benchmark-summary",
+      ],
     },
     {
       provider: "local-oss",
@@ -811,15 +845,25 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
       contractConfidencePct: Math.round(loopRate),
       latencyBandMs: "120-450",
       costBand: "low",
-      dominantProtocols: ["Qwen3Coder", "wrapperless tool calls", "format roundtrip"],
+      dominantProtocols: [
+        "Qwen3Coder",
+        "wrapperless tool calls",
+        "format roundtrip",
+      ],
       biggestRisk: "literal tag leakage and weak wrapper assumptions",
       whyItMatters:
         "Shows that low-cost local inference still gets bounded recovery instead of being dismissed as a toy path.",
-      proofRoutes: ["/v1/protocol-matrix", "/v1/developer-ops-pack", "/v1/workflow-run-replay"],
+      proofRoutes: [
+        "/v1/protocol-matrix",
+        "/v1/developer-ops-pack",
+        "/v1/workflow-run-replay",
+      ],
     },
   ];
 
-  const attentionCount = providers.filter((item) => item.posture === "attention").length;
+  const attentionCount = providers.filter(
+    (item) => item.posture === "attention"
+  ).length;
 
   return {
     service: options.service,
@@ -868,12 +912,14 @@ export function buildStagePilotPerfEvidencePack(options: {
   perfArtifact: StagePilotPerfEvidenceArtifact;
   service: string;
 }) {
-  const topStrategy = buildStrategyRows(options.benchmarkSnapshot).sort(
-    (left, right) => (right.successRate ?? 0) - (left.successRate ?? 0)
-  )[0] ?? null;
-  const hottestRoute = [...options.perfArtifact.observed.routeMix].sort(
-    (left, right) => right.sharePct - left.sharePct
-  )[0] ?? null;
+  const topStrategy =
+    buildStrategyRows(options.benchmarkSnapshot).sort(
+      (left, right) => (right.successRate ?? 0) - (left.successRate ?? 0)
+    )[0] ?? null;
+  const hottestRoute =
+    [...options.perfArtifact.observed.routeMix].sort(
+      (left, right) => right.sharePct - left.sharePct
+    )[0] ?? null;
 
   return {
     service: options.service,
@@ -968,15 +1014,17 @@ export function buildStagePilotTraceObservabilityPack(options: {
   service: string;
   traceArtifact: StagePilotTraceObservabilityArtifact;
 }) {
-  const topStrategy = buildStrategyRows(options.benchmarkSnapshot).sort(
-    (left, right) => (right.successRate ?? 0) - (left.successRate ?? 0)
-  )[0] ?? null;
+  const topStrategy =
+    buildStrategyRows(options.benchmarkSnapshot).sort(
+      (left, right) => (right.successRate ?? 0) - (left.successRate ?? 0)
+    )[0] ?? null;
   const providerFamilyCount = new Set(
     options.traceArtifact.traces.map((item) => item.providerFamily)
   ).size;
-  const slowestTrace = [...options.traceArtifact.traces].sort(
-    (left, right) => (right.durationMs ?? 0) - (left.durationMs ?? 0)
-  )[0] ?? null;
+  const slowestTrace =
+    [...options.traceArtifact.traces].sort(
+      (left, right) => (right.durationMs ?? 0) - (left.durationMs ?? 0)
+    )[0] ?? null;
 
   return {
     service: options.service,
@@ -1046,9 +1094,10 @@ export function buildStagePilotRegressionGatePack(options: {
   regressionArtifact: StagePilotRegressionGateArtifact;
   service: string;
 }) {
-  const topStrategy = buildStrategyRows(options.benchmarkSnapshot).sort(
-    (left, right) => (right.successRate ?? 0) - (left.successRate ?? 0)
-  )[0] ?? null;
+  const topStrategy =
+    buildStrategyRows(options.benchmarkSnapshot).sort(
+      (left, right) => (right.successRate ?? 0) - (left.successRate ?? 0)
+    )[0] ?? null;
   const attentionCount = options.regressionArtifact.gates.filter(
     (item) => item.decision !== "pass"
   ).length;
@@ -1227,7 +1276,8 @@ export function buildStagePilotFailureTaxonomy(options: {
   };
   service: string;
 }) {
-  const parserLift = options.benchmarkSnapshot.improvements.middlewareVsBaseline;
+  const parserLift =
+    options.benchmarkSnapshot.improvements.middlewareVsBaseline;
   const recoveryLift = options.benchmarkSnapshot.improvements.loopVsMiddleware;
   const baselineRate = options.benchmarkSnapshot.strategies.baseline;
   const loopRate = options.benchmarkSnapshot.strategies.ralphLoop;
@@ -1355,7 +1405,9 @@ export function buildStagePilotFailureTaxonomy(options: {
       ],
     },
   ];
-  const attentionModes = failureModes.filter((item) => item.status === "attention");
+  const attentionModes = failureModes.filter(
+    (item) => item.status === "attention"
+  );
   const topRisk = attentionModes[0] ?? failureModes[0];
 
   return {

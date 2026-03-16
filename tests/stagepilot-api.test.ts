@@ -682,6 +682,62 @@ describe("stagepilot api server", () => {
     expect(body.recommendations.length).toBeGreaterThanOrEqual(3);
   });
 
+  it("returns failure taxonomy for parser, delivery, and runtime review", async () => {
+    process.env.GEMINI_API_KEY = "stagepilot-test-key";
+    process.env.OPENCLAW_WEBHOOK_URL = "https://example.invalid/webhook";
+
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    await fetch(`${baseUrl}/v1/runtime-brief`);
+    await fetch(`${baseUrl}/v1/benchmark-summary`);
+
+    const response = await fetch(`${baseUrl}/v1/failure-taxonomy`);
+    expect(response.status).toBe(200);
+
+    const body = (await response.json()) as {
+      failureModes: Array<{
+        id: string;
+        reviewerSurfaces: string[];
+        signals: string[];
+        status: string;
+      }>;
+      headline: string;
+      links: {
+        failureTaxonomy: string;
+        runtimeScorecard: string;
+      };
+      reviewPath: string[];
+      schema: string;
+      summary: {
+        attentionCount: number;
+        categoryCount: number;
+        observedRequestCount: number;
+      };
+    };
+
+    expect(body.schema).toBe("stagepilot-failure-taxonomy-v1");
+    expect(body.links.failureTaxonomy).toBe("/v1/failure-taxonomy");
+    expect(body.links.runtimeScorecard).toBe("/v1/runtime-scorecard");
+    expect(body.summary.categoryCount).toBeGreaterThanOrEqual(4);
+    expect(body.summary.observedRequestCount).toBeGreaterThanOrEqual(2);
+    expect(body.reviewPath.length).toBeGreaterThanOrEqual(3);
+    expect(body.headline).toContain("Failure taxonomy");
+    expect(
+      body.failureModes.some((item) => item.id === "parse-contract-drift")
+    ).toBe(true);
+    expect(
+      body.failureModes.some((item) =>
+        item.reviewerSurfaces.includes("/v1/runtime-scorecard")
+      )
+    ).toBe(true);
+    expect(
+      body.failureModes.every((item) => item.signals.length >= 2)
+    ).toBe(true);
+    expect(body.summary.attentionCount).toBeGreaterThanOrEqual(1);
+  });
+
   it("returns benchmark-backed review pack", async () => {
     process.env.GEMINI_API_KEY = "stagepilot-test-key";
     process.env.OPENCLAW_WEBHOOK_URL = "https://example.invalid/webhook";

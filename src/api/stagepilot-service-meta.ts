@@ -25,6 +25,8 @@ export const STAGEPILOT_TRACE_OBSERVABILITY_PACK_SCHEMA =
   "stagepilot-trace-observability-pack-v1";
 export const STAGEPILOT_REGRESSION_GATE_PACK_SCHEMA =
   "stagepilot-regression-gate-pack-v1";
+export const STAGEPILOT_LIVE_REVIEW_SCHEMA =
+  "stagepilot-live-review-run-v1";
 
 function buildStagePilotOperationalPosture(options: {
   benchmarkReadyForPromotion?: boolean;
@@ -302,6 +304,11 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
     },
     {
       method: "POST",
+      path: "/v1/live-review-run",
+      purpose: "Run the bounded public OpenAI reviewer scenario",
+    },
+    {
+      method: "POST",
       path: "/v1/plan",
       purpose: "Run StagePilot planning and routing",
     },
@@ -354,11 +361,22 @@ export function buildStagePilotPlanReportSchema() {
 
 export function buildStagePilotRuntimeBrief(options: {
   bodyTimeoutMs: number;
+  dailyBudgetUsd: number;
+  deploymentMode:
+    | "artifact-refresh-only"
+    | "public-capped-live"
+    | "review-only-live";
   geminiHasApiKey: boolean;
   geminiTimeoutMs: number;
+  killSwitch: boolean;
+  lastLiveRunAt: string | null;
+  liveModel: string;
   model: string;
+  moderationEnabled: boolean;
+  monthlyBudgetUsd: number;
   openClawConfigured: boolean;
   openClawHasWebhookUrl: boolean;
+  publicLiveApi: boolean;
   service: string;
 }) {
   const operationalPosture = buildStagePilotOperationalPosture({
@@ -374,6 +392,14 @@ export function buildStagePilotRuntimeBrief(options: {
     status: "ok",
     generatedAt: new Date().toISOString(),
     readinessContract: STAGEPILOT_READINESS_CONTRACT,
+    deploymentMode: options.deploymentMode,
+    publicLiveApi: options.publicLiveApi,
+    liveModel: options.liveModel,
+    dailyBudgetUsd: options.dailyBudgetUsd,
+    monthlyBudgetUsd: options.monthlyBudgetUsd,
+    killSwitch: options.killSwitch,
+    moderationEnabled: options.moderationEnabled,
+    lastLiveRunAt: options.lastLiveRunAt,
     headline:
       "Case-routing orchestration surface with explicit Gemini/OpenClaw readiness and report contracts.",
     reportContract: buildStagePilotPlanReportSchema(),
@@ -393,6 +419,7 @@ export function buildStagePilotRuntimeBrief(options: {
     },
     reviewFlow: [
       "Check health and runtime brief before trusting live plan synthesis.",
+      "Run /v1/live-review-run with a fixed scenarioId to inspect the bounded public reviewer lane.",
       "Run /v1/plan first, then enrich with /v1/insights and /v1/whatif.",
       "Treat /v1/notify as the final operator confirmation step.",
     ],
@@ -407,7 +434,9 @@ export function buildStagePilotRuntimeBrief(options: {
       missingIntegrations,
       operationalPosture,
       nextAction:
-        missingIntegrations.length === 0
+        options.publicLiveApi
+          ? "Run POST /v1/live-review-run with a fixed scenarioId to validate the bounded public reviewer lane."
+          : missingIntegrations.length === 0
           ? "Run POST /v1/plan or POST /v1/benchmark to validate live flows."
           : `Configure ${missingIntegrations[0]} to unlock live planning diagnostics.`,
     },
@@ -420,6 +449,7 @@ export function buildStagePilotRuntimeBrief(options: {
       perfEvidencePack: "/v1/perf-evidence-pack",
       traceObservabilityPack: "/v1/trace-observability-pack",
       regressionGatePack: "/v1/regression-gate-pack",
+      liveReviewRun: "/v1/live-review-run",
       failureTaxonomy: "/v1/failure-taxonomy",
       protocolMatrix: "/v1/protocol-matrix",
       providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",

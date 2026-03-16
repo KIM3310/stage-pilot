@@ -60,6 +60,7 @@ import {
   buildStagePilotBenchmarkSummary,
   buildStagePilotFailureTaxonomy,
   buildStagePilotDeveloperOpsPack,
+  STAGEPILOT_LIVE_REVIEW_SCHEMA,
   buildStagePilotPerfEvidencePack,
   buildStagePilotPlanReportSchema,
   buildStagePilotProviderBenchmarkScorecard,
@@ -155,6 +156,71 @@ const LEADING_SLASHES_REGEX = /^\/+/;
 const BENCHMARK_DEFAULT_CASE_COUNT = 24;
 const BENCHMARK_DEFAULT_MAX_LOOP_ATTEMPTS = 2;
 const BENCHMARK_DEFAULT_SEED = 20_260_228;
+const OPENAI_BASE_URL = "https://api.openai.com/v1";
+const OPENAI_PUBLIC_DEFAULT_DAILY_BUDGET_USD = 4;
+const OPENAI_PUBLIC_DEFAULT_MONTHLY_BUDGET_USD = 120;
+const OPENAI_PUBLIC_DEFAULT_MODEL = "gpt-4.1-mini";
+const OPENAI_PUBLIC_DEFAULT_RPM = 6;
+const OPENAI_PUBLIC_TIMEOUT_MS = 20_000;
+const STAGEPILOT_REVIEW_ONLY_MODE_ENV_KEY = "STAGEPILOT_REVIEW_ONLY_MODE";
+
+type StagePilotDeploymentMode =
+  | "artifact-refresh-only"
+  | "public-capped-live"
+  | "review-only-live";
+
+type StagePilotLiveScenario = {
+  concern: string;
+  estimatedCostUsd: number;
+  failureMode: string;
+  id: string;
+  nextReviewPath: string;
+  prompt: string;
+  title: string;
+  toolRegistry: string[];
+};
+
+type StagePilotOpenAiConfig = {
+  apiKey: string;
+  dailyBudgetUsd: number;
+  killSwitch: boolean;
+  moderationEnabled: boolean;
+  modelPublic: string;
+  modelRefresh: string;
+  monthlyBudgetUsd: number;
+  publicRpm: number;
+};
+
+const STAGEPILOT_LIVE_SCENARIOS: Record<string, StagePilotLiveScenario> = {
+  "parser-drift-recovery": {
+    id: "parser-drift-recovery",
+    title: "Parser drift recovery",
+    concern: "Tool-call output drifts out of schema under provider variation.",
+    failureMode: "schema-drift",
+    nextReviewPath: "/v1/failure-taxonomy",
+    toolRegistry: ["lookup_household", "check_eligibility", "assign_referral"],
+    estimatedCostUsd: 0.01,
+    prompt:
+      "A tool-calling runtime receives malformed structured output for check_eligibility after a provider-side format drift. Review whether bounded retry plus schema repair is enough, what should stay manual, and what reviewer evidence should be shown.",
+  },
+  "bounded-handoff-release": {
+    id: "bounded-handoff-release",
+    title: "Bounded handoff release",
+    concern: "Runtime reliability is strong, but downstream delivery still needs explicit human confirmation.",
+    failureMode: "handoff-boundary",
+    nextReviewPath: "/v1/review-pack",
+    toolRegistry: ["build_plan_report", "score_risk", "notify_operator"],
+    estimatedCostUsd: 0.012,
+    prompt:
+      "A reviewer wants to know if a high-confidence routing result should auto-notify downstream delivery. Explain the handoff boundary, the human approval point, and the runtime proof that should be checked before promotion.",
+  },
+};
+
+const stagePilotLiveRateBuckets = new Map<
+  string,
+  { count: number; resetAt: number }
+>();
+let lastStagePilotLiveRunAt: string | null = null;
 
 class HttpError extends Error {
   readonly statusCode: number;
@@ -199,6 +265,226 @@ function toNonEmptyString(value: string | undefined): string | null {
   }
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
+}
+
+function readBooleanEnv(name: string, fallback: boolean): boolean {
+  const raw = String(process.env[name] || "")
+    .trim()
+    .toLowerCase();
+  if (!raw) {
+    return fallback;
+  }
+  if (
+    raw === "1" ||
+    raw === "true" ||
+    raw === "yes" ||
+    raw === "y" ||
+    raw === "on"
+  ) {
+    return true;
+  }
+  if (
+    raw === "0" ||
+    raw === "false" ||
+    raw === "no" ||
+    raw === "n" ||
+    raw === "off"
+  ) {
+    return false;
+  }
+  return fallback;
+}
+
+function readUsdEnv(name: string, fallback: number): number {
+  const parsed = Number.parseFloat(String(process.env[name] || ""));
+  if (!Number.isFinite(parsed) || Number.isNaN(parsed)) {
+    return fallback;
+  }
+  return Math.max(0, Math.round(parsed * 100) / 100);
+}
+
+function readStagePilotOpenAiConfig(): StagePilotOpenAiConfig {
+  const apiKey = String(process.env.OPENAI_API_KEY || "").trim();
+  return {
+    apiKey,
+    modelPublic:
+      String(process.env.OPENAI_MODEL_PUBLIC || "").trim() ||
+      OPENAI_PUBLIC_DEFAULT_MODEL,
+    modelRefresh:
+      String(process.env.OPENAI_MODEL_REFRESH || "").trim() || "gpt-5.2",
+    dailyBudgetUsd: readUsdEnv(
+      "OPENAI_PUBLIC_DAILY_BUDGET_USD",
+      OPENAI_PUBLIC_DEFAULT_DAILY_BUDGET_USD
+    ),
+    monthlyBudgetUsd: readUsdEnv(
+      "OPENAI_PUBLIC_MONTHLY_BUDGET_USD",
+      OPENAI_PUBLIC_DEFAULT_MONTHLY_BUDGET_USD
+    ),
+    publicRpm: readInteger(
+      Number.parseInt(String(process.env.OPENAI_PUBLIC_RPM || ""), 10),
+      {
+        fallback: OPENAI_PUBLIC_DEFAULT_RPM,
+        min: 1,
+        max: 120,
+      }
+    ),
+    killSwitch: readBooleanEnv("OPENAI_KILL_SWITCH", false),
+    moderationEnabled: readBooleanEnv("OPENAI_MODERATION_ENABLED", true),
+  };
+}
+
+function getStagePilotDeploymentMode(
+  config: StagePilotOpenAiConfig
+): StagePilotDeploymentMode {
+  if (
+    config.apiKey &&
+    !config.killSwitch &&
+    config.dailyBudgetUsd > 0 &&
+    config.monthlyBudgetUsd > 0
+  ) {
+    return "public-capped-live";
+  }
+  return "review-only-live";
+}
+
+function isStagePilotReviewOnlyMode(): boolean {
+  return readBooleanEnv(STAGEPILOT_REVIEW_ONLY_MODE_ENV_KEY, false);
+}
+
+function getStagePilotLiveRequestKey(request: IncomingMessage): string {
+  const forwarded = request.headers["x-forwarded-for"];
+  const value = Array.isArray(forwarded)
+    ? forwarded[0]
+    : typeof forwarded === "string"
+    ? forwarded.split(",")[0]
+    : request.socket.remoteAddress;
+  return String(value || "anonymous").trim() || "anonymous";
+}
+
+function enforceStagePilotLiveRateLimit(
+  request: IncomingMessage,
+  rpm: number
+): void {
+  const key = getStagePilotLiveRequestKey(request);
+  const now = Date.now();
+  const bucket = stagePilotLiveRateBuckets.get(key);
+  if (!bucket || bucket.resetAt <= now) {
+    stagePilotLiveRateBuckets.set(key, {
+      count: 1,
+      resetAt: now + 60_000,
+    });
+    return;
+  }
+  if (bucket.count >= rpm) {
+    throw new HttpError(429, "public live reviewer rate limit exceeded");
+  }
+  bucket.count += 1;
+}
+
+async function callOpenAiModeration(options: {
+  apiKey: string;
+  input: string;
+}): Promise<void> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), OPENAI_PUBLIC_TIMEOUT_MS);
+  try {
+    const response = await fetch(`${OPENAI_BASE_URL}/moderations`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${options.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      signal: controller.signal,
+      body: JSON.stringify({
+        input: options.input,
+        model: "omni-moderation-latest",
+      }),
+    });
+    if (!response.ok) {
+      const detail = (await response.text().catch(() => "")).trim();
+      throw new HttpError(
+        502,
+        `moderation request failed${detail ? `: ${detail.slice(0, 200)}` : ""}`
+      );
+    }
+    const payload = (await response.json().catch(() => ({}))) as {
+      results?: Array<{ flagged?: boolean }>;
+    };
+    if (payload.results?.[0]?.flagged) {
+      throw new HttpError(
+        400,
+        "scenario content failed moderation and was not sent to the public live model"
+      );
+    }
+  } catch (error) {
+    if (error instanceof HttpError) {
+      throw error;
+    }
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new HttpError(504, "moderation request timed out");
+    }
+    throw new HttpError(502, toErrorMessage(error));
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+async function callOpenAiStructuredJson(options: {
+  apiKey: string;
+  model: string;
+  systemPrompt: string;
+  userPrompt: string;
+}): Promise<Record<string, unknown>> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), OPENAI_PUBLIC_TIMEOUT_MS);
+  try {
+    const response = await fetch(`${OPENAI_BASE_URL}/chat/completions`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${options.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model: options.model,
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: options.systemPrompt },
+          { role: "user", content: options.userPrompt },
+        ],
+      }),
+    });
+    if (!response.ok) {
+      const detail = (await response.text().catch(() => "")).trim();
+      throw new HttpError(
+        502,
+        `OpenAI request failed${detail ? `: ${detail.slice(0, 240)}` : ""}`
+      );
+    }
+    const payload = (await response.json().catch(() => ({}))) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    const content = String(payload.choices?.[0]?.message?.content || "").trim();
+    if (!content) {
+      throw new HttpError(502, "OpenAI response did not include message content");
+    }
+    const parsed = JSON.parse(content) as Record<string, unknown>;
+    return parsed;
+  } catch (error) {
+    if (error instanceof HttpError) {
+      throw error;
+    }
+    if (error instanceof SyntaxError) {
+      throw new HttpError(502, "OpenAI response did not return valid JSON");
+    }
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new HttpError(504, "OpenAI request timed out");
+    }
+    throw new HttpError(502, toErrorMessage(error));
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 function sendJson(
@@ -614,6 +900,7 @@ function recordRuntimeTelemetry(
 }
 
 function buildMetaPayload(): JsonObject {
+  const openAi = readStagePilotOpenAiConfig();
   const geminiTimeoutMs = readGeminiHttpTimeoutMs(
     process.env.GEMINI_HTTP_TIMEOUT_MS
   );
@@ -637,13 +924,21 @@ function buildMetaPayload(): JsonObject {
   const service = process.env.SERVICE_NAME_API ?? "stagepilot-api";
   const runtimeBrief = buildStagePilotRuntimeBrief({
     bodyTimeoutMs,
+    dailyBudgetUsd: openAi.dailyBudgetUsd,
+    deploymentMode: getStagePilotDeploymentMode(openAi),
     geminiHasApiKey,
     geminiTimeoutMs,
+    killSwitch: openAi.killSwitch,
+    lastLiveRunAt: lastStagePilotLiveRunAt,
+    liveModel: openAi.modelPublic,
     model: process.env.GEMINI_MODEL ?? "gemini-2.5-pro",
+    moderationEnabled: openAi.moderationEnabled,
+    monthlyBudgetUsd: openAi.monthlyBudgetUsd,
     openClawConfigured,
     openClawHasWebhookUrl: Boolean(
       toNonEmptyString(process.env.OPENCLAW_WEBHOOK_URL)
     ),
+    publicLiveApi: Boolean(openAi.apiKey) && !openAi.killSwitch,
     service,
   });
 
@@ -660,6 +955,7 @@ function buildMetaPayload(): JsonObject {
     features: {
       benchmark: true,
       insights: true,
+      liveReviewRun: true,
       notify: true,
       openClawInbox: true,
       whatIf: true,
@@ -681,12 +977,26 @@ function buildMetaPayload(): JsonObject {
     },
     links: runtimeBrief.links,
     model: process.env.GEMINI_MODEL ?? "gemini-2.5-pro",
+    openai: {
+      dailyBudgetUsd: openAi.dailyBudgetUsd,
+      deploymentMode: runtimeBrief.deploymentMode,
+      killSwitch: openAi.killSwitch,
+      lastLiveRunAt: lastStagePilotLiveRunAt,
+      liveModel: openAi.modelPublic,
+      moderationEnabled: openAi.moderationEnabled,
+      monthlyBudgetUsd: openAi.monthlyBudgetUsd,
+      publicLiveApi: runtimeBrief.publicLiveApi,
+      refreshModel: openAi.modelRefresh,
+      rpm: openAi.publicRpm,
+    },
     ok: true,
     diagnostics: {
       integrationReady: missingIntegrations.length === 0,
       missingIntegrations,
       nextAction:
-        missingIntegrations.length === 0
+        runtimeBrief.publicLiveApi
+          ? "Run POST /v1/live-review-run with a fixed scenarioId to validate the bounded reviewer lane."
+          : missingIntegrations.length === 0
           ? "Run POST /v1/plan or POST /v1/benchmark to validate live flows."
           : `Configure ${missingIntegrations[0]} to unlock live planning diagnostics.`,
       requestBodyTimeoutMs: bodyTimeoutMs,
@@ -710,6 +1020,7 @@ function buildMetaPayload(): JsonObject {
 }
 
 function buildRuntimeBriefPayload(): JsonObject {
+  const openAi = readStagePilotOpenAiConfig();
   const meta = buildMetaPayload();
   const service =
     typeof meta.service === "string" ? meta.service : "stagepilot-api";
@@ -717,19 +1028,27 @@ function buildRuntimeBriefPayload(): JsonObject {
     bodyTimeoutMs: readBodyTimeoutMs(
       process.env.STAGEPILOT_REQUEST_BODY_TIMEOUT_MS
     ),
+    dailyBudgetUsd: openAi.dailyBudgetUsd,
+    deploymentMode: getStagePilotDeploymentMode(openAi),
     geminiHasApiKey:
       typeof process.env.GEMINI_API_KEY === "string" &&
       process.env.GEMINI_API_KEY.trim().length > 0,
     geminiTimeoutMs: readGeminiHttpTimeoutMs(
       process.env.GEMINI_HTTP_TIMEOUT_MS
     ),
+    killSwitch: openAi.killSwitch,
+    lastLiveRunAt: lastStagePilotLiveRunAt,
+    liveModel: openAi.modelPublic,
     model: process.env.GEMINI_MODEL ?? "gemini-2.5-pro",
+    moderationEnabled: openAi.moderationEnabled,
+    monthlyBudgetUsd: openAi.monthlyBudgetUsd,
     openClawConfigured:
       Boolean(toNonEmptyString(process.env.OPENCLAW_WEBHOOK_URL)) ||
       Boolean(toNonEmptyString(process.env.OPENCLAW_CMD)),
     openClawHasWebhookUrl: Boolean(
       toNonEmptyString(process.env.OPENCLAW_WEBHOOK_URL)
     ),
+    publicLiveApi: Boolean(openAi.apiKey) && !openAi.killSwitch,
     service,
   });
 }
@@ -1786,6 +2105,109 @@ function handleRuntimeBriefRequest(
   sendJson(response, 200, buildRuntimeBriefPayload(), options);
 }
 
+function readStagePilotLiveScenario(body: unknown): StagePilotLiveScenario {
+  const record =
+    body && typeof body === "object" ? (body as Record<string, unknown>) : {};
+  const scenarioId = String(record.scenarioId || "").trim().toLowerCase();
+  const scenario = STAGEPILOT_LIVE_SCENARIOS[scenarioId];
+  if (!scenario) {
+    throw new HttpError(
+      400,
+      "scenarioId must be one of parser-drift-recovery or bounded-handoff-release"
+    );
+  }
+  return scenario;
+}
+
+async function handleLiveReviewRunRequest(options: {
+  logger: Pick<Console, "error" | "info" | "warn">;
+  request: StagePilotTrackedRequest;
+  response: ServerResponse;
+}) {
+  const { logger, request, response } = options;
+  const openAi = readStagePilotOpenAiConfig();
+  if (
+    !openAi.apiKey ||
+    openAi.killSwitch ||
+    openAi.dailyBudgetUsd <= 0 ||
+    openAi.monthlyBudgetUsd <= 0
+  ) {
+    sendJson(response, 503, {
+      error:
+        "public OpenAI live review is unavailable; configure OPENAI_API_KEY and keep budgets above zero.",
+      ok: false,
+      schema: STAGEPILOT_LIVE_REVIEW_SCHEMA,
+    });
+    return;
+  }
+
+  try {
+    enforceStagePilotLiveRateLimit(request, openAi.publicRpm);
+    const scenario = readStagePilotLiveScenario(
+      await readJsonBody(request, DEFAULT_BODY_LIMIT_BYTES)
+    );
+    if (openAi.moderationEnabled) {
+      await callOpenAiModeration({
+        apiKey: openAi.apiKey,
+        input: scenario.prompt,
+      });
+    }
+    const runtimeBrief = buildRuntimeBriefPayload();
+    const result = await callOpenAiStructuredJson({
+      apiKey: openAi.apiKey,
+      model: openAi.modelPublic,
+      systemPrompt:
+        "You are evaluating a public reviewer-safe tool-calling runtime. Return compact JSON only with keys summary, selectedStrategy, boundedRecovery, watchouts, handoffDecision, reviewerEvidence.",
+      userPrompt: JSON.stringify(
+        {
+          benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
+          links: (runtimeBrief as { links?: unknown }).links,
+          scenario,
+        },
+        null,
+        2
+      ),
+    });
+    lastStagePilotLiveRunAt = new Date().toISOString();
+    sendJson(response, 200, {
+      ok: true,
+      schema: STAGEPILOT_LIVE_REVIEW_SCHEMA,
+      mode: getStagePilotDeploymentMode(openAi),
+      model: openAi.modelPublic,
+      scenarioId: scenario.id,
+      moderated: true,
+      capped: true,
+      traceId: request.requestId,
+      estimatedCostUsd: scenario.estimatedCostUsd,
+      nextReviewPath: scenario.nextReviewPath,
+      result: {
+        title: scenario.title,
+        concern: scenario.concern,
+        failureMode: scenario.failureMode,
+        toolRegistry: scenario.toolRegistry,
+        ...result,
+      },
+    });
+  } catch (error) {
+    const httpError = toHttpError(error);
+    logStagePilotEvent(
+      logger,
+      httpError.statusCode >= 500 ? "error" : "warn",
+      "live-review-run-failed",
+      {
+        error: httpError.message,
+        requestId: request.requestId ?? null,
+        statusCode: httpError.statusCode,
+      }
+    );
+    sendJson(response, httpError.statusCode, {
+      error: httpError.message,
+      ok: false,
+      schema: STAGEPILOT_LIVE_REVIEW_SCHEMA,
+    });
+  }
+}
+
 function handlePlanReportSchemaRequest(
   response: ServerResponse,
   options?: { includeBody?: boolean }
@@ -2679,7 +3101,23 @@ async function handlePostRequest(options: {
     return false;
   }
 
+  if (
+    isStagePilotReviewOnlyMode() &&
+    pathname !== "/v1/live-review-run"
+  ) {
+    sendJson(response, 403, {
+      error:
+        "review-only mode keeps public mutation routes disabled; use POST /v1/live-review-run instead.",
+      ok: false,
+      path: pathname,
+    });
+    return true;
+  }
+
   switch (pathname) {
+    case "/v1/live-review-run":
+      await handleLiveReviewRunRequest({ logger, request, response });
+      return true;
     case "/v1/auth/session":
       await handleOperatorSessionCreate({ logger, request, response });
       return true;

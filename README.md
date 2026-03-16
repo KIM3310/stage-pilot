@@ -67,6 +67,7 @@ Then read, in order:
 ## Reviewer Front Door
 
 - **Recruiter / hiring manager:** read [`docs/reviewer-proof-guide.md`](docs/reviewer-proof-guide.md), then inspect [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json).
+- **Bounded public live lane:** `POST /v1/live-review-run` with a fixed `scenarioId` when you want reviewer-safe OpenAI proof instead of the full operator mutation surface.
 - **AI engineer:** open `GET /v1/provider-benchmark-scorecard` -> `GET /v1/trace-observability-pack` -> `GET /v1/regression-gate-pack` -> `GET /v1/perf-evidence-pack` -> `GET /v1/failure-taxonomy` -> `GET /v1/review-pack` -> `GET /v1/schema/plan-report` -> `src/`.
 - **Platform / solutions architect:** open `GET /v1/runtime-brief` -> `GET /v1/perf-evidence-pack` -> `GET /v1/trace-observability-pack` -> `GET /v1/regression-gate-pack` -> `GET /v1/provider-benchmark-scorecard` -> `GET /v1/failure-taxonomy` -> `GET /v1/developer-ops-pack` -> [`docs/solution-architecture.md`](docs/solution-architecture.md).
 - **Eval / research reviewer:** open `GET /v1/benchlab/review-pack` -> `docs/benchlab/` -> `experiments/`.

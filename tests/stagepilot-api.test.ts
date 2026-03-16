@@ -561,6 +561,10 @@ describe("stagepilot api server", () => {
           method: "GET",
           path: "/v1/perf-evidence-pack",
         }),
+        expect.objectContaining({
+          method: "GET",
+          path: "/v1/trace-observability-pack",
+        }),
         expect.objectContaining({ method: "POST", path: "/v1/plan" }),
       ])
     );
@@ -604,6 +608,7 @@ describe("stagepilot api server", () => {
         perfEvidencePack: string;
         providerBenchmarkScorecard: string;
         protocolMatrix: string;
+        traceObservabilityPack: string;
         workflowRuns: string;
       };
       readinessContract: string;
@@ -626,6 +631,9 @@ describe("stagepilot api server", () => {
       "/v1/provider-benchmark-scorecard"
     );
     expect(body.links.protocolMatrix).toBe("/v1/protocol-matrix");
+    expect(body.links.traceObservabilityPack).toBe(
+      "/v1/trace-observability-pack"
+    );
     expect(body.links.workflowRuns).toBe("/v1/workflow-runs");
     expect(body.links.workflowReplay).toBe("/v1/workflow-run-replay");
   });
@@ -760,6 +768,56 @@ describe("stagepilot api server", () => {
     expect(body.links.perfEvidencePack).toBe("/v1/perf-evidence-pack");
     expect(body.links.runtimeScorecard).toBe("/v1/runtime-scorecard");
     expect(body.reviewPath.length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("returns trace observability pack for frontier replay review", async () => {
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const response = await fetch(`${baseUrl}/v1/trace-observability-pack`);
+    expect(response.status).toBe(200);
+
+    const body = (await response.json()) as {
+      headline: string;
+      hotspots: Array<{
+        providerFamily: string;
+        risk: string;
+      }>;
+      links: {
+        failureTaxonomy: string;
+        traceObservabilityPack: string;
+      };
+      reviewPath: string[];
+      schema: string;
+      summary: {
+        gate: string;
+        totalTraces: number;
+        topStrategy: { strategy: string } | null;
+      };
+      traces: Array<{
+        providerFamily: string;
+        regressionGate: string;
+        traceId: string;
+      }>;
+    };
+
+    expect(body.schema).toBe("stagepilot-trace-observability-pack-v1");
+    expect(body.headline).toContain("Trace observability pack");
+    expect(body.summary.gate).toBe("bounded-review-ready");
+    expect(body.summary.topStrategy).not.toBeNull();
+    expect(body.summary.totalTraces).toBeGreaterThanOrEqual(4);
+    expect(
+      body.traces.some((item) => item.providerFamily === "anthropic-xml-style")
+    ).toBe(true);
+    expect(
+      body.hotspots.some((item) => item.risk === "chunk-boundary drift")
+    ).toBe(true);
+    expect(body.links.traceObservabilityPack).toBe(
+      "/v1/trace-observability-pack"
+    );
+    expect(body.links.failureTaxonomy).toBe("/v1/failure-taxonomy");
+    expect(body.reviewPath.length).toBeGreaterThanOrEqual(4);
   });
 
   it("returns runtime scorecard with live route telemetry", async () => {
@@ -914,6 +972,7 @@ describe("stagepilot api server", () => {
         developerOpsPack: string;
         providerBenchmarkScorecard: string;
         reviewPack: string;
+        traceObservabilityPack: string;
         workflowRuns: string;
       };
       operatorJourney: Array<{ stage: string }>;
@@ -926,6 +985,7 @@ describe("stagepilot api server", () => {
           };
         };
         benchmarkSummarySchema: string;
+        traceObservabilityPackSchema: string;
         reviewerPosture: {
           claimTier: string;
           claimRule: string;
@@ -958,11 +1018,17 @@ describe("stagepilot api server", () => {
     expect(body.links.providerBenchmarkScorecard).toBe(
       "/v1/provider-benchmark-scorecard"
     );
+    expect(body.links.traceObservabilityPack).toBe(
+      "/v1/trace-observability-pack"
+    );
     expect(body.links.workflowRuns).toBe("/v1/workflow-runs");
     expect(body.links.workflowReplay).toBe("/v1/workflow-run-replay");
     expect(body.links.benchmarkSummary).toBe("/v1/benchmark-summary");
     expect(body.proofBundle.benchmarkSummarySchema).toBe(
       "stagepilot-benchmark-summary-v1"
+    );
+    expect(body.proofBundle.traceObservabilityPackSchema).toBe(
+      "stagepilot-trace-observability-pack-v1"
     );
     expect(body.proofBundle.reviewerPosture.docsOnlySurfaces).toContain(
       "site/"

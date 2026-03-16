@@ -38,8 +38,8 @@ This repo is strongest for frontier/runtime reliability and platform-infrastruct
 
 | Team lens | What should stand out fast | Start here |
 |---|---|---|
-| Frontier / runtime reliability | parser hardening, benchmark lift, bounded retry posture, explicit failure classes | [`docs/reviewer-proof-guide.md`](docs/reviewer-proof-guide.md), `GET /v1/failure-taxonomy`, `GET /v1/review-pack`, [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json) |
-| Big tech / AI infra | runtime/API separation, contract visibility, developer-ops posture, honest benchmark boundary | `GET /v1/runtime-brief`, `GET /v1/failure-taxonomy`, `GET /v1/schema/plan-report`, `GET /v1/developer-ops-pack` |
+| Frontier / runtime reliability | parser hardening, benchmark lift, provider tradeoff posture, bounded retry posture, explicit failure classes | [`docs/reviewer-proof-guide.md`](docs/reviewer-proof-guide.md), `GET /v1/provider-benchmark-scorecard`, `GET /v1/failure-taxonomy`, `GET /v1/review-pack`, [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json) |
+| Big tech / AI infra | runtime/API separation, contract visibility, developer-ops posture, honest benchmark boundary | `GET /v1/runtime-brief`, `GET /v1/provider-benchmark-scorecard`, `GET /v1/failure-taxonomy`, `GET /v1/schema/plan-report`, `GET /v1/developer-ops-pack` |
 | Databricks / eval systems | benchmark artifacts, variant comparison, local experiment loop, failure forensics | `GET /v1/benchlab/review-pack`, [`docs/benchlab/LOCAL_OLLAMA_SWEEP_20260311.md`](docs/benchlab/LOCAL_OLLAMA_SWEEP_20260311.md), `experiments/` |
 | Palantir / high-trust ops | reviewable workflow history, replayable proof surfaces, explicit parser-to-handoff boundary | `GET /v1/workflow-runs`, `GET /v1/workflow-run-replay`, [`docs/solution-architecture.md`](docs/solution-architecture.md) |
 
@@ -67,8 +67,8 @@ Then read, in order:
 ## Reviewer Front Door
 
 - **Recruiter / hiring manager:** read [`docs/reviewer-proof-guide.md`](docs/reviewer-proof-guide.md), then inspect [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json).
-- **AI engineer:** open `GET /v1/failure-taxonomy` -> `GET /v1/review-pack` -> `GET /v1/schema/plan-report` -> `src/`.
-- **Platform / solutions architect:** open `GET /v1/runtime-brief` -> `GET /v1/failure-taxonomy` -> `GET /v1/developer-ops-pack` -> [`docs/solution-architecture.md`](docs/solution-architecture.md).
+- **AI engineer:** open `GET /v1/provider-benchmark-scorecard` -> `GET /v1/failure-taxonomy` -> `GET /v1/review-pack` -> `GET /v1/schema/plan-report` -> `src/`.
+- **Platform / solutions architect:** open `GET /v1/runtime-brief` -> `GET /v1/provider-benchmark-scorecard` -> `GET /v1/failure-taxonomy` -> `GET /v1/developer-ops-pack` -> [`docs/solution-architecture.md`](docs/solution-architecture.md).
 - **Eval / research reviewer:** open `GET /v1/benchlab/review-pack` -> `docs/benchlab/` -> `experiments/`.
 
 ## Choose Your First Lane
@@ -81,6 +81,7 @@ Then read, in order:
 ## Review Pack At A Glance
 
 - StagePilot reviewer API: `GET /v1/runtime-brief`, `GET /v1/review-pack`, `GET /v1/schema/plan-report`
+- Provider benchmark scorecard: `GET /v1/provider-benchmark-scorecard`
 - Failure review surface: `GET /v1/failure-taxonomy`
 - StagePilot developer workflow pack: `GET /v1/developer-ops-pack`
 - StagePilot workflow history: `GET /v1/workflow-runs`, `GET /v1/workflow-runs/:requestId`
@@ -95,14 +96,15 @@ Then read, in order:
 ## Review Flow
 
 1. `GET /v1/runtime-brief` -> confirm orchestration readiness and integration posture.
-2. `GET /v1/failure-taxonomy` -> inspect parser drift, retry exhaustion, delivery gaps, and observed runtime regressions in one place.
-3. `GET /v1/developer-ops-pack` -> inspect MR / pipeline / release lanes before demoing automation.
-4. `GET /v1/workflow-runs` -> verify recent developer workflow runs.
-5. `GET /v1/workflow-run-replay` -> inspect replay-ready proof routes and recent workflow timeline.
-6. `GET /v1/review-pack` -> inspect benchmark lift and parser/handoff boundary.
-7. `GET /v1/schema/plan-report` -> verify contract before trusting downstream routing output.
-8. `GET /v1/benchlab/review-pack` -> inspect checked-in runtime and artifact claims.
-9. `docs/reviewer-proof-guide.md` + `docs/review-pack.svg` + `docs/benchmarks/stagepilot-latest.json` -> read the strongest proof assets first.
+2. `GET /v1/provider-benchmark-scorecard` -> inspect provider-family contract confidence, latency/cost posture, and strongest protocol surfaces.
+3. `GET /v1/failure-taxonomy` -> inspect parser drift, retry exhaustion, delivery gaps, and observed runtime regressions in one place.
+4. `GET /v1/developer-ops-pack` -> inspect MR / pipeline / release lanes before demoing automation.
+5. `GET /v1/workflow-runs` -> verify recent developer workflow runs.
+6. `GET /v1/workflow-run-replay` -> inspect replay-ready proof routes and recent workflow timeline.
+7. `GET /v1/review-pack` -> inspect benchmark lift and parser/handoff boundary.
+8. `GET /v1/schema/plan-report` -> verify contract before trusting downstream routing output.
+9. `GET /v1/benchlab/review-pack` -> inspect checked-in runtime and artifact claims.
+10. `docs/reviewer-proof-guide.md` + `docs/review-pack.svg` + `docs/benchmarks/stagepilot-latest.json` -> read the strongest proof assets first.
 
 ![StagePilot Review Pack](docs/review-pack.svg)
 

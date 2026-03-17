@@ -13,7 +13,7 @@
   <rect x="346" y="126" width="268" height="132" rx="16" fill="#121B2A" stroke="#00E676"/>
   <text x="366" y="154" fill="#86EFAC" font-family="Arial, sans-serif" font-size="12" letter-spacing="1.5">BENCHMARK PROOF</text>
   <text x="366" y="184" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">29.17% -&gt; 87.50% -&gt; 100.00%</text>
-  <text x="366" y="210" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="13">Baseline -&gt; middleware -&gt; Ralph loop</text>
+  <text x="366" y="210" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="13">Baseline -&gt; middleware -&gt; Ralph loop (24-case snapshot)</text>
   <text x="366" y="230" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="13">+70.83pp lift vs baseline in checked-in runs.</text>
 
   <rect x="644" y="126" width="268" height="132" rx="16" fill="#121B2A" stroke="#B084E6"/>

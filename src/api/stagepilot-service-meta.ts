@@ -1357,8 +1357,8 @@ export function buildStagePilotFailureTaxonomy(options: {
         "A plan can look valid while live synthesis or downstream delivery is still unconfigured, turning the demo into a docs-only surface.",
       signals: [
         options.geminiHasApiKey
-          ? "Gemini live planning is configured."
-          : "Gemini live planning is not configured.",
+          ? "Live provider planning is configured."
+          : "Live provider planning is not configured.",
         options.openClawConfigured
           ? "OpenClaw delivery is configured."
           : "OpenClaw delivery is not configured.",

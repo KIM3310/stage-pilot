@@ -1,11 +1,11 @@
 <img width="3168" height="1344" alt="StagePilot reliability runtime banner" src="https://github.com/user-attachments/assets/9a002988-e535-42ac-8baf-56ec8754410f" />
 
-# StagePilot: Tool-Calling Reliability Runtime
+# StagePilot: Stage-Gated Tool-Calling Reliability Runtime
 
 [![npm - parser](https://img.shields.io/npm/v/@ai-sdk-tool/parser)](https://www.npmjs.com/package/@ai-sdk-tool/parser)
 [![npm downloads - parser](https://img.shields.io/npm/dt/@ai-sdk-tool/parser)](https://www.npmjs.com/package/@ai-sdk-tool/parser)
 
-`StagePilot` is a TypeScript runtime and benchmark harness for stabilizing tool calls across provider families. It combines parser middleware, replayable review APIs, and checked-in benchmark artifacts so reliability claims stay inspectable.
+`StagePilot` is a TypeScript runtime and benchmark harness for stabilizing tool calls across provider families. The name comes from stage-gating unstable runs through parse, repair, replay, and review so reliability claims stay inspectable instead of hand-wavy.
 
 The repo brings together three connected surfaces:
 
@@ -42,8 +42,8 @@ This repo is strongest for frontier/runtime reliability and platform-infrastruct
 |---|---|---|
 | Frontier / runtime reliability | parser hardening, benchmark lift, provider tradeoff posture, replayable traces, explicit regression gates, bounded retry posture, explicit failure classes, checked-in perf rehearsal | [`docs/reviewer-proof-guide.md`](docs/reviewer-proof-guide.md), `GET /v1/provider-benchmark-scorecard`, `GET /v1/trace-observability-pack`, `GET /v1/regression-gate-pack`, `GET /v1/perf-evidence-pack`, `GET /v1/failure-taxonomy`, `GET /v1/review-pack`, [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json) |
 | Big tech / AI infra | runtime/API separation, contract visibility, developer-ops posture, honest benchmark boundary, bounded load evidence, replay-backed debugging posture | `GET /v1/runtime-brief`, `GET /v1/perf-evidence-pack`, `GET /v1/trace-observability-pack`, `GET /v1/regression-gate-pack`, `GET /v1/provider-benchmark-scorecard`, `GET /v1/failure-taxonomy`, `GET /v1/schema/plan-report`, `GET /v1/developer-ops-pack` |
-| Databricks / eval systems | benchmark artifacts, variant comparison, local experiment loop, failure forensics | `GET /v1/benchlab/review-pack`, [`docs/benchlab/LOCAL_OLLAMA_SWEEP_20260311.md`](docs/benchlab/LOCAL_OLLAMA_SWEEP_20260311.md), `experiments/` |
-| Palantir / high-trust ops | reviewable workflow history, replayable proof surfaces, explicit parser-to-handoff boundary | `GET /v1/workflow-runs`, `GET /v1/workflow-run-replay`, [`docs/solution-architecture.md`](docs/solution-architecture.md) |
+| Evaluation systems | benchmark artifacts, variant comparison, local experiment loop, failure forensics | `GET /v1/benchlab/review-pack`, [`docs/benchlab/LOCAL_OLLAMA_SWEEP_20260311.md`](docs/benchlab/LOCAL_OLLAMA_SWEEP_20260311.md), `experiments/` |
+| High-trust workflow systems | reviewable workflow history, replayable proof surfaces, explicit parser-to-handoff boundary | `GET /v1/workflow-runs`, `GET /v1/workflow-run-replay`, [`docs/solution-architecture.md`](docs/solution-architecture.md) |
 
 ## Project links
 

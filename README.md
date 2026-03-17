@@ -96,7 +96,7 @@ If you only want the flagship story: treat this repo as the public proof that I 
 - StagePilot workflow replay surface: `GET /v1/workflow-run-replay`
 - Local reviewer summary: `pnpm review:proof`
 - BenchLab reviewer API: `GET /v1/benchlab/runtime-brief`, `GET /v1/benchlab/review-pack`, `GET /v1/benchlab/schema/job-report`
-- Checked-in benchmark proof: baseline `29.17%` -> middleware `87.50%` -> Ralph loop `100.00%`
+- Checked-in 24-case benchmark proof: baseline `29.17%` -> middleware `87.50%` -> Ralph loop `100.00%`
 - Checked-in BenchLab claims: runtime compare, variant leaderboard, best artifacts, and failure forensics
 - Latest no-key local validation: `llama3.1:8b`, `llama3.2:latest`, `qwen3.5:4b` all moved from `7.83` to `8.33` with tuned RALPH variants on a `5` cases/category sweep
 - Llama follow-up hunt: on `llama3.2:latest`, `schema-lock` stayed ahead while `parallel-safe`, `coverage`, `strict`, `call-count`, and `compact` all stayed flat in a `3` cases/category search; a wider `10` cases/category replay still kept `schema-lock` positive at `7.50 -> 7.75` (+0.25pp)
@@ -194,7 +194,7 @@ Ralph-loop point (what changed):
 
 - `middleware` is already robust on malformed payloads.
 - `middleware+ralph-loop` adds one bounded retry pass (default max 2 attempts), letting the second corrected output recover remaining failures.
-- In this benchmark, that closes the gap from `87.50%` to `100.00%`.
+- In this current checked-in 24-case benchmark, that closes the gap from `87.50%` to `100.00%`.
 
 Latency note: these numbers come from deterministic in-process benchmark harness execution (parser + planning), not network LLM round-trip latency.
 

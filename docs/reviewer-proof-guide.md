@@ -55,7 +55,7 @@ The most defensible repo headline is not "hosted agent platform." It is:
 Current checked-in benchmark snapshot:
 - baseline: `29.17%`
 - parser middleware: `87.50%`
-- bounded retry loop: `100.00%`
+- bounded retry loop: `100.00%` on the current checked-in 24-case snapshot
 - delta vs baseline: `+58.33pp` middleware, `+70.83pp` loop
 
 ## Safe interview framing

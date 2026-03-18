@@ -1,0 +1,47 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "name": "stagepilot",
+  "version": 2,
+  "buildCommand": "pnpm build",
+  "installCommand": "pnpm install",
+  "framework": null,
+  "outputDirectory": "dist",
+  "regions": ["iad1", "icn1"],
+  "functions": {
+    "src/api/**/*.ts": {
+      "memory": 256,
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    { "source": "/demo", "destination": "/api/demo" },
+    { "source": "/health", "destination": "/api/health" },
+    { "source": "/v1/:path*", "destination": "/api/v1/:path*" }
+  ],
+  "headers": [
+    {
+      "source": "/v1/metrics",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain; version=0.0.4; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/v1/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=60, s-maxage=300" },
+        { "key": "X-Content-Type-Options", "value": "nosniff" }
+      ]
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production",
+    "APP_ENV": "production"
+  }
+}

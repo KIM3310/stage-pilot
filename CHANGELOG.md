@@ -1,0 +1,456 @@
+# @ai-sdk-tool/parser
+
+## 4.1.3
+
+### Patch Changes
+
+- 1f8b516: Add `inputExamples` prompt rendering support across all built-in middleware templates, including Hermes, Morph XML, YAML XML, Qwen3Coder, and community presets (UI-TARS and Sijawara variants).
+
+  Introduce shared input-example rendering utilities and add regression tests to verify the rendered examples appear in system prompts when tool `inputExamples` are provided.
+
+## 4.1.2
+
+### Patch Changes
+
+- e08ff92: Improve Morph XML tool-call prompting with clearer decision/output rules and stronger example guidance.
+
+  Add a parser-core demo script plus fixture to inspect how `inputExamples` render into the Morph XML system prompt across single-tool and multi-tool scenarios.
+
+- c9cda8b: Add cross-protocol regression coverage for literal angle-bracket tool argument values in both generated-text parsing and character-by-character streaming parsing paths.
+
+## 4.1.1
+
+### Patch Changes
+
+- 8e499fb: Fix morph XML streaming end-tag matching by escaping tool names before building the closing-tag regex.
+  This preserves correct parsing for tool names with regex metacharacters (for example `weather.v2`) and prevents premature or missed tool-call termination in stream output.
+
+## 4.1.0
+
+### Minor Changes
+
+- 097a6fb: Add a new `model` media strategy mode for tool-result handling so tool `content` outputs can be converted into model-recognizable user content parts (`text`/`file`) instead of fallback-only text.
+
+  Update tool-role message conversion and middleware typing to support structured tool-response template outputs, while preserving existing string-based formatter behavior.
+
+  Improve prompt shared module naming clarity and align shared test ownership with the renamed modules.
+
+- 097a6fb: Add Qwen3-Coder dedicated middleware and prompt/protocol support, including:
+
+  - Qwen3-Coder specific system-prompt rendering aligned to the Qwen tool format.
+  - Qwen3-Coder tool-response formatting and assistant tool-call text conversion flow.
+  - Prompt-layer refactor that separates shared prompt utilities from protocol-specific prompt modules for better maintainability.
+
+- 37933c7: Rename the JSON protocol surface from `jsonProtocol` to `hermesProtocol` and align Hermes prompt/tool-response behavior with the vLLM Hermes format.
+
+  Expand Hermes-focused parser test coverage (including nested schema rendering) and update protocol/preconfigured middleware references to the new naming.
+
+  Refresh README and example documentation, including parser-core example filename cleanup and an AI SDK compatibility matrix in the top-level README.
+
+## 4.0.1
+
+### Patch Changes
+
+- 43fc0db: fix(schema-coerce): try JSON.parse before replacing apostrophes
+
+  Previously, `coerceStringToArray()` and `coerceStringToObject()` blindly replaced all single quotes with double quotes before `JSON.parse()`, corrupting valid JSON values containing apostrophes (e.g. `it's`, `don't`, `skill'leri`). Now the original string is parsed first, with single-quote replacement only as a fallback.
+
+## 4.0.0
+
+### Major Changes
+
+- 11778c6: Stream stable, monotonic JSON argument deltas for tool calls across protocols.
+
+  - `hermesProtocol`: `tool-input-delta` streams canonical JSON argument text.
+  - `morphXmlProtocol` and `yamlXmlProtocol`: `tool-input-delta` streams parsed JSON argument prefixes (not raw XML/YAML fragments).
+  - Preserve ID reconciliation across `tool-input-start`, `tool-input-end`, and final `tool-call`.
+  - Tool call ids are now generated in an OpenAI-like `call_` format.
+  - Suppress raw protocol-markup fallback in streaming parse failures by default to avoid leaking internal markup to end users (opt-in via `emitRawToolCallTextOnError: true`).
+  - Add tests and fixture updates for value-split/key-split streaming chunks, finish reconciliation, malformed paths, and fallback policy.
+
+  **BREAKING CHANGE**: `emitRawToolCallTextOnError` now defaults to `false`. Previously, malformed streaming tool calls could emit raw protocol markup as `text-delta` fallback. Now this is opt-in. If you relied on this behavior, set `emitRawToolCallTextOnError: true` in your parser options.
+
+## 3.3.3
+
+### Patch Changes
+
+- ff8ee41: Improve middleware robustness and compatibility with the latest AI SDK v6 patch releases.
+
+  - Harden toolChoice JSON payload parsing with strict object validation and safe fallbacks.
+  - Normalize tool-call argument coercion across both generate and stream paths.
+  - Ensure stream protocol consistency by emitting `text-end` before `finish` when buffered text remains.
+  - Safely decode persisted tool schemas from provider options and recover on malformed schema payloads.
+  - Upgrade AI SDK-related dependencies to the latest patch versions.
+
+- 4e00d44: Fix JSON tool-call recovery to prefer the earliest candidate and ignore nested payloads.
+
+## 3.3.2
+
+### Patch Changes
+
+- 25b3c0e: Refactor codebase to eliminate code duplications and update dependencies
+
+  ### Code Refactoring
+
+  - Extract shared `escapeRegExp` function: removed duplicate from `rxml/heuristics/xml-defaults.ts`, now imports from `core/utils/regex.ts`
+  - Create shared regex constants: new `core/utils/regex-constants.ts` exports `NAME_CHAR_RE` and `WHITESPACE_REGEX` used by protocol implementations
+  - Extract shared `ParserOptions` interface: moved to `core/protocols/protocol-interface.ts` from duplicate definitions in `morph-xml-protocol.ts` and `yaml-xml-protocol.ts`
+  - Create shared protocol utility: new `core/utils/protocol-utils.ts` exports `addTextSegment()` function, replacing duplicate implementations in `hermes-protocol.ts` and `yaml-xml-protocol.ts`
+
+  ### Dependency Updates
+
+  - Update `@ai-sdk/openai-compatible` from 2.0.26 to 2.0.27
+  - Update `ai` from 6.0.69 to 6.0.70
+
+  These changes improve code maintainability by consolidating ~40 lines of duplicated code into shared utilities, making future changes easier and reducing the risk of inconsistencies.
+
+- d619370: Update development dependencies
+
+  - Update `@types/node` from 25.2.0 to 25.2.1
+  - Update `ai` from 6.0.70 to 6.0.73
+
+## 3.3.1
+
+### Patch Changes
+
+- bc17084: Improve object-to-array coercion heuristics: consistently wrap objects in arrays when schema expects array type, handle single-key object extraction for XML patterns
+
+## 3.3.0
+
+### Minor Changes
+
+- d7f6ba0: Convert monorepo structure to single package with subpath exports. All internal packages (rxml, rjson, schema-coerce) are now accessible via subpath imports (e.g., `@ai-sdk-tool/parser/rxml`).
+
+## 3.2.1
+
+### Patch Changes
+
+- 4cdd469: Improve XML protocol self-closing tag parsing to handle whitespace variations and enhance system prompt template with dedent for cleaner formatting
+
+## 3.2.0
+
+### Minor Changes
+
+- ef6536e: Refactor XML tool-call parsing to use rxml repair parsing options and more robust tag handling.
+  Move XML repair heuristics into @ai-sdk-tool/rxml and add schema-coerce utilities for schema-driven coercion.
+
+### Patch Changes
+
+- cf61516: Simplify wrapStream by removing separate toolChoice branch handling
+- Updated dependencies [ef6536e]
+  - @ai-sdk-tool/rxml@0.2.0
+
+## 3.1.3
+
+### Patch Changes
+
+- aa0b37b: Update AI SDK dependencies to latest versions
+
+## 3.1.2
+
+### Patch Changes
+
+- ec30a4d: Improve formatToolCall XML output: add proper indentation/newlines and preserve quotes without HTML entity escaping
+
+## 3.1.1
+
+### Patch Changes
+
+- 1400780: Handle tool calls with undefined/null input and clean up type casting. formatToolCall functions now handle null/undefined input gracefully. Replace manual type guards with discriminated union narrowing using switch statements. Extract extractSchemaProperties helper in xml-defaults.ts to reduce code duplication.
+
+## 3.1.0
+
+### Minor Changes
+
+- b9b13bd: Major refactoring of tool call protocol interface and implementation.
+
+  - Renamed ToolCallProtocol to TCMCoreProtocol with TCM prefix consistency
+  - Renamed isProtocolFactory to isTCMProtocolFactory
+  - Renamed file tool-call-protocol.ts to protocol-interface.ts
+  - Reorganized protocol implementations with cleaner structure
+  - Updated all type references and imports across the codebase
+
+- b9b13bd: Change toolSystemPromptTemplate parameter type from string to TCMToolDefinition[] array and add TCM prefix to ToolDefinition and ToolInputExample types for better type safety and API clarity.
+
+### Patch Changes
+
+- b9b13bd: Simplify `formatToolResponseAsHermes` signature to match `morphFormatToolResponseAsXml` by removing optional tag parameters and hardcoding `<tool_response>` tags.
+- b9b13bd: feat: Implement PR #141 review feedback - clean up gemma support and fix documentation
+
+  - Remove all gemma model references and configurations across codebase
+  - Fix broken README examples by adding proper model and middleware imports
+
+- Change morphXmlToolMiddleware placement from "first" to "last" for consistency
+
+  - Fix yamlXmlToolMiddleware import name in benchmark scripts
+  - Update ai dependency from 6.0.5 to 6.0.6
+  - Add missing transformParams to disk cache middleware
+
+- b9b13bd: Fix type issues and variable references in tool response formatting refactoring
+- b9b13bd: Fixed prompt normalization in v5 transform handler to handle single message objects, preventing runtime errors when params.prompt is a single ModelMessage instead of an array.
+- b9b13bd: Fixed XML escaping in morphFormatToolResponseAsXml to prevent invalid XML when tool results contain special characters like < and & in JSON-serialized objects.
+- b9b13bd: Sync v5 and v6 middleware implementations: extract shared prompts to `core/prompts/`, add orchestratorToolMiddleware to v5, unify morphXmlToolMiddleware placement, and add debug logging to v5 handlers
+
+## 3.0.0
+
+### Major Changes
+
+- 537adc6: upgrade language model interfaces to V3
+- 537adc6: bump ai v6 (middleware v3 not yet)
+
+### Minor Changes
+
+- 537adc6: feat(parser): implement pluggable heuristic pipeline for XML parsing
+
+  - Add 3-phase heuristic engine (pre-parse, fallback-reparse, post-parse)
+  - Add 5 default XML heuristics: normalizeCloseTags, escapeInvalidLt, balanceTags, dedupeShellStringTags, repairAgainstSchema
+  - Reorganize heuristics into dedicated `src/heuristics/` module
+  - Export heuristic APIs for custom pipeline configuration
+
+- 537adc6: Remove internal barrel files and enable noBarrelFile linting rule for better tree-shaking and build performance
+- 1fc1810: Add YAML+XML mixed tool call protocol (Orchestrator-style)
+- Internal restructuring: consolidate v6 folder contents into main src directory, update all imports and exports accordingly
+
+  - New `yamlXmlProtocol` for parsing tool calls with YAML content inside XML tags
+  - New `yamlXmlToolMiddleware` pre-configured middleware
+  - New `orchestratorSystemPromptTemplate` for customizable system prompts
+  - Supports YAML multiline syntax (`|` and `>`)
+  - Full streaming support with proper text/tool-call separation
+  - Self-closing tags and empty bodies return `{}`
+
+### Patch Changes
+
+- 537adc6: minor dependency version bump
+- Updated dependencies [537adc6]
+  - @ai-sdk-tool/rxml@0.1.2
+
+## 3.0.0-canary.3
+
+### Patch Changes
+
+- 1f36102: minor dependency version bump
+- Updated dependencies [1f36102]
+  - @ai-sdk-tool/rxml@0.1.2-canary.0
+
+## 3.0.0-canary.2
+
+### Minor Changes
+
+- 68a4248: feat(parser): implement pluggable heuristic pipeline for XML parsing
+
+  - Add 3-phase heuristic engine (pre-parse, fallback-reparse, post-parse)
+  - Add 5 default XML heuristics: normalizeCloseTags, escapeInvalidLt, balanceTags, dedupeShellStringTags, repairAgainstSchema
+  - Reorganize heuristics into dedicated `src/heuristics/` module
+  - Export heuristic APIs for custom pipeline configuration
+
+## 3.0.0-canary.1
+
+### Minor Changes
+
+- b48924c: Remove internal barrel files and enable noBarrelFile linting rule for better tree-shaking and build performance
+
+## 3.0.0-canary.0
+
+### Major Changes
+
+- c96c293: upgrade language model interfaces to V3
+- df62ec5: bump ai v6 (middleware v3 not yet)
+
+## 2.1.7
+
+### Patch Changes
+
+- 4fb674f: Add community XML tools and reorganize parsers
+
+## 2.1.6
+
+### Patch Changes
+
+- dce31fe: Add a debugging field that returns the original output of the model before parsing.
+
+## 2.1.5
+
+### Patch Changes
+
+- c25f1d4: `ToolCallMiddlewareProviderOptions` stability improvements and refactoring
+- c25f1d4: Apply `noChildNodes: []` to the RXML parser to treat self-closing tags as regular tags; RXML 0.1.1 released (improved parsing stability with inner tags)
+- Updated dependencies [c25f1d4]
+  - @ai-sdk-tool/rxml@0.1.1
+
+## 2.1.4
+
+### Patch Changes
+
+- 49f5024: Added license to Apache 2.0
+- 02b32c0: Morph XML protocol and utils robustness tweaks.
+
+  - Add `RXML` for safer XML extraction (raw string tags, duplicate checks) and use it in `morphXmlProtocol`.
+  - Replace relaxed JSON helper with `RJSON`; export `RXML`/`RJSON` from utils.
+  - Minor improvements to streaming parsing and XML stringify options.
+
+- 5e03e27: RXML 0.1.0 released (initial Robust XML implementation).
+
+  - Safe XML parsing and streaming
+  - JSON Schema-based coercion
+  - Stringification
+  - Error types
+  - Options
+  - Examples
+
+  Add RXML docs and README:
+
+  - New comprehensive docs at `docs/rxml.md` and index link
+  - Concise package README with install and quick usage
+
+- Updated dependencies [5e03e27]
+  - @ai-sdk-tool/rxml@0.1.0
+
+## 2.1.3
+
+### Patch Changes
+
+- 2656b85: Preserve raw inner text for string-typed arguments in Morph-XML protocol; add tests; adjust examples.
+  - XML parser now prefers raw inner content for properties typed as string
+  - Adds unit tests for parse and streaming cases
+
+## 2.1.2
+
+### Patch Changes
+
+- 6b37de7: Added a debugger to check model output and parsing results.
+- 6b37de7: Improved README documentation
+
+## 2.1.1
+
+### Patch Changes
+
+- eb546f2: Add a heuristic-based typecaster to the xml tool parser.
+- eb546f2: The XML Parser has been significantly improved through heuristics. It is robust in parallel calls.
+
+## 2.1.0
+
+### Minor Changes
+
+- 86bb361: - To support formats other than the existing json-mix, a protocol standard was created and large-scale refactoring was performed.
+  - Added XML parser to increase support for various models including GLM 4.5 model series.
+
+## 2.0.16
+
+### Patch Changes
+
+- bd04904: bump dependencies
+
+## 2.0.15
+
+### Patch Changes
+
+- 43a8d59: bump deps
+
+## 2.0.14
+
+### Patch Changes
+
+- 06582e2: - feat(eval): introduce evaluation toolkit with BFCL and JSON-generation benchmarks; add console/json reporters and `run-test` script; include dataset files. Ensure ESM builds work by fixing relative import extensions, switching to tsup bundling, and aligning TS config.
+  - fix(parser): improve `convertToolPrompt()` behavior — preserve assistant tool-call/text order, merge consecutive text blocks, serialize tools as an array of function descriptors (avoids numeric keys), and inject tool system prompt correctly when the first message is system.
+  - docs(examples): add/update `examples/eval-core` and `examples/parser-core` (not published).
+
+## 2.0.13
+
+### Patch Changes
+
+- 7358b9f: Add and configure development tooling and quality improvements:
+
+  - add ESLint and Prettier configs
+  - add code coverage reporting and CI-friendly setup
+  - bump and align dev dependencies
+
+  These changes improve DX, enforce consistent styling, and surface test coverage.
+
+- ca45854: Added extensive testing and improved handling of incomplete function calls.
+
+## 2.0.12
+
+### Patch Changes
+
+- 1ff1177: # feat: upgrade dependencies to latest versions
+  - Updated @ai-sdk dependencies to latest versions
+  - Resolved zod peer dependency warnings
+  - Fixed turbo build warnings
+  - Updated test script to indicate no tests are available for core package
+  - Removed zod overrides and updated peer dependencies to support multiple versions
+
+## 2.0.11
+
+### Patch Changes
+
+- a7b1878: Fix AI SDK v5 stream protocol compatibility
+
+## 2.0.10
+
+### Patch Changes
+
+- 6354bb8: bump to ai sdk v5
+
+## 2.0.9
+
+### Patch Changes
+
+- 2afa6f2: sync deps beta.3
+
+## 2.0.8
+
+### Patch Changes
+
+- 94e42cc: sync alpha.17
+
+## 2.0.7
+
+### Patch Changes
+
+- 2cd90ae: bump ai package alpha 7
+
+## 2.0.6
+
+### Patch Changes
+
+- 0df0009: Implement tool Choice support for tool selection
+
+## 2.0.5
+
+### Patch Changes
+
+- 64d83bc: bump to ai package alpha-4
+
+## 2.0.4
+
+### Patch Changes
+
+- 1180bcc: bump to ai package alpha-3
+
+## 2.0.3
+
+### Patch Changes
+
+- 34d0e38: Bump to alpha.1
+
+## 2.0.2
+
+### Patch Changes
+
+- a5c0846: Remove unused dependency ai
+
+## 2.0.1
+
+### Patch Changes
+
+- 2d8b8b8: Added reasoning tool call example (deepseek-r1)
+
+## 1.0.2
+
+### Patch Changes
+
+- 21e4f79: update default template
+
+## 1.0.1
+
+### Patch Changes

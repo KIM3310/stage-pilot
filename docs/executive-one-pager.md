@@ -2,7 +2,7 @@
 
 ## Best fit
 
-StagePilot is strongest as a flagship sample for **AI engineer**, **frontier LLM runtime**, and **runtime reliability** conversations. It can also support solutions-architect conversations, but that is the secondary read.
+StagePilot is strongest as a sample for **AI engineer**, **frontier LLM runtime**, and **runtime reliability** conversations. It can also support solutions-architect conversations, but that is the secondary read.
 
 ## Problem
 

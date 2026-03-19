@@ -355,8 +355,8 @@
 
       <section class="panel lens-panel">
         <div class="lens-tabs" role="tablist" aria-label="stagepilot lens">
-          <button id="lensRecruiterBtn" class="lens-tab active" type="button">
-            Recruiter
+          <button id="lensQuickstartBtn" class="lens-tab active" type="button">
+            Quick Start
           </button>
           <button id="lensEvalBtn" class="lens-tab" type="button">
             Evaluation
@@ -365,7 +365,7 @@
             Platform
           </button>
         </div>
-        <h2 id="lensHeadline">Recruiter-first evidence path</h2>
+        <h2 id="lensHeadline">Quick start evidence path</h2>
         <p id="lensSummary" class="hint">
           Start with benchmark lift, then show the parser recovery story, then
           end with the copyable review path.
@@ -440,7 +440,7 @@
             <li>Frontend: this static Pages microsite</li>
             <li>Backend: not hosted on Pages by design</li>
             <li>Recommended live runtime: Cloud Run or equivalent API host</li>
-            <li>Canonical repo: <code>KIM3310/stage-pilot</code></li>
+            <li>Repo: <code>KIM3310/stage-pilot</code></li>
           </ul>
         </article>
       </section>
@@ -505,7 +505,7 @@
     const lensHeadline = document.getElementById("lensHeadline");
     const lensSummary = document.getElementById("lensSummary");
     const lensGrid = document.getElementById("lensGrid");
-    const lensRecruiterBtn = document.getElementById("lensRecruiterBtn");
+    const lensQuickstartBtn = document.getElementById("lensQuickstartBtn");
     const lensEvalBtn = document.getElementById("lensEvalBtn");
     const lensPlatformBtn = document.getElementById("lensPlatformBtn");
     const quickActions = {
@@ -531,10 +531,10 @@
         failureLabel: "Failed to copy launch deck.",
       },
     };
-    let currentLens = "recruiter";
+    let currentLens = "quickstart";
     const lensConfig = {
-      recruiter: {
-        headline: "Recruiter-first evidence path",
+      quickstart: {
+        headline: "Quick start evidence path",
         summary:
           "Start with benchmark lift, then show the parser recovery story, then end with the copyable review path.",
         cards: [
@@ -605,11 +605,11 @@
             `<article class="lens-card"><strong>${title}</strong><p>${body}</p></article>`
         )
         .join("");
-      for (const btn of [lensRecruiterBtn, lensEvalBtn, lensPlatformBtn]) {
+      for (const btn of [lensQuickstartBtn, lensEvalBtn, lensPlatformBtn]) {
         btn?.classList.remove("active");
       }
-      if (currentLens === "recruiter") {
-        lensRecruiterBtn?.classList.add("active");
+      if (currentLens === "quickstart") {
+        lensQuickstartBtn?.classList.add("active");
       }
       if (currentLens === "operator") {
         lensEvalBtn?.classList.add("active");
@@ -644,8 +644,8 @@
         });
     }
 
-    lensRecruiterBtn?.addEventListener("click", () => {
-      currentLens = "recruiter";
+    lensQuickstartBtn?.addEventListener("click", () => {
+      currentLens = "quickstart";
       renderLensGrid();
     });
     lensEvalBtn?.addEventListener("click", () => {

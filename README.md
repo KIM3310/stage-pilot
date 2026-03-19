@@ -13,38 +13,6 @@ The repo brings together three connected surfaces:
 2. `StagePilot`: a multi-agent orchestration vertical with benchmark, API, demo UI, and Cloud Run path.
 3. `BenchLab`: prompt-mode BFCL experiment tooling, forensics, and local operator APIs.
 
-## Portfolio posture
-- Read this repo as a reliability runtime with evidence, not as a generic agent demo.
-- The strongest signals are checked-in benchmark lift, parser middleware behavior, replayable review APIs, and explicit regression and perf surfaces.
-- It is the clearest first-pass repo for AI engineer interviews, while still carrying useful platform and solutions-architecture signal.
-
-## Role signals
-- **AI engineer:** parser hardening, benchmark discipline, explicit failure classes, replayable traces, and bounded retry posture.
-- **Solutions architect:** package, API, benchmark, and review surfaces stay separate enough to discuss production posture honestly.
-- **Recruiter / hiring manager:** this is the fastest repo for showing I can turn unstable model behavior into reviewable runtime evidence.
-
-
-## Portfolio context
-- **Portfolio family:** AI reliability and incident systems
-- **This repo's role:** flagship reliability and tool-calling runtime in the portfolio.
-- **Related repos:** `AegisOps`, `Aegis-Air`, `ogx`
-
-## Big-Tech Elevation Track
-
-- Canonical execution plan: [`docs/BIGTECH_ELEVATION_PLAN.md`](docs/BIGTECH_ELEVATION_PLAN.md)
-- Goal: turn this repo into the clearest public proof of tool-runtime reliability across unstable providers.
-
-## Best target-team fit
-
-This repo is strongest for frontier/runtime reliability and platform-infrastructure teams. For broader enterprise platform discussions, pair it with `enterprise-llm-adoption-kit`.
-
-| Team lens | What should stand out fast | Start here |
-|---|---|---|
-| Frontier / runtime reliability | parser hardening, benchmark lift, provider tradeoff posture, replayable traces, explicit regression gates, bounded retry posture, explicit failure classes, checked-in perf rehearsal | [`docs/validation-guide.md`](docs/validation-guide.md), `GET /v1/provider-benchmark-scorecard`, `GET /v1/trace-observability-pack`, `GET /v1/regression-gate-pack`, `GET /v1/perf-evidence-pack`, `GET /v1/failure-taxonomy`, `GET /v1/summary-pack`, [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json) |
-| Big tech / AI infra | runtime/API separation, contract visibility, developer-ops posture, honest benchmark boundary, bounded load evidence, replay-backed debugging posture | `GET /v1/runtime-brief`, `GET /v1/perf-evidence-pack`, `GET /v1/trace-observability-pack`, `GET /v1/regression-gate-pack`, `GET /v1/provider-benchmark-scorecard`, `GET /v1/failure-taxonomy`, `GET /v1/schema/plan-report`, `GET /v1/developer-ops-pack` |
-| Evaluation systems | benchmark artifacts, variant comparison, local experiment loop, failure forensics | `GET /v1/benchlab/summary-pack`, [`docs/benchlab/LOCAL_OLLAMA_SWEEP_20260311.md`](docs/benchlab/LOCAL_OLLAMA_SWEEP_20260311.md), `experiments/` |
-| High-trust workflow systems | reviewable workflow history, replayable evidence surfaces, explicit parser-to-handoff boundary | `GET /v1/workflow-runs`, `GET /v1/workflow-run-replay`, [`docs/solution-architecture.md`](docs/solution-architecture.md) |
-
 ## Project links
 
 - GitHub profile: https://github.com/KIM3310
@@ -66,15 +34,12 @@ Then read, in order:
 - [`docs/executive-one-pager.md`](docs/executive-one-pager.md)
 - [`docs/solution-architecture.md`](docs/solution-architecture.md)
 
-If you only want the flagship story: treat this repo as the public proof that I can evaluate unreliable tool calls, harden the parser/runtime boundary, and present the results in a bounded way.
-
 ## Quick Start
 
-- **Recruiter / hiring manager:** read [`docs/validation-guide.md`](docs/validation-guide.md), then inspect [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json).
-- **Bounded public live lane:** `POST /v1/live-review-run` with a fixed `scenarioId` when you want bounded OpenAI proof instead of the full operator mutation surface.
-- **AI engineer:** open `GET /v1/provider-benchmark-scorecard` -> `GET /v1/trace-observability-pack` -> `GET /v1/regression-gate-pack` -> `GET /v1/perf-evidence-pack` -> `GET /v1/failure-taxonomy` -> `GET /v1/summary-pack` -> `GET /v1/schema/plan-report` -> `src/`.
-- **Platform / solutions architect:** open `GET /v1/runtime-brief` -> `GET /v1/perf-evidence-pack` -> `GET /v1/trace-observability-pack` -> `GET /v1/regression-gate-pack` -> `GET /v1/provider-benchmark-scorecard` -> `GET /v1/failure-taxonomy` -> `GET /v1/developer-ops-pack` -> [`docs/solution-architecture.md`](docs/solution-architecture.md).
-- **Eval / research engineer:** open `GET /v1/benchlab/summary-pack` -> `docs/benchlab/` -> `experiments/`.
+- `GET /v1/provider-benchmark-scorecard` -> `GET /v1/trace-observability-pack` -> `GET /v1/regression-gate-pack` -> `GET /v1/perf-evidence-pack` -> `GET /v1/failure-taxonomy` -> `GET /v1/summary-pack` -> `GET /v1/schema/plan-report` -> `src/`.
+- Or: `GET /v1/runtime-brief` -> `GET /v1/perf-evidence-pack` -> `GET /v1/trace-observability-pack` -> `GET /v1/developer-ops-pack` -> [`docs/solution-architecture.md`](docs/solution-architecture.md).
+- Or: `GET /v1/benchlab/summary-pack` -> `docs/benchlab/` -> `experiments/`.
+- Bounded public live lane: `POST /v1/live-review-run` with a fixed `scenarioId`.
 
 ## Choose Your First Lane
 
@@ -132,7 +97,7 @@ If you only want the flagship story: treat this repo as the public proof that I 
 - Earlier fork / baseline reference: https://github.com/KIM3310/ai-sdk-tool-call-middleware
 - Upstream source lineage: https://github.com/minpeter/ai-sdk-tool-call-middleware
 
-This repo keeps attribution explicit while treating `stage-pilot` as the canonical working surface for new development.
+This repo keeps attribution explicit while treating `stage-pilot` as the primary working surface for new development.
 
 ## Project context
 
@@ -328,7 +293,7 @@ Endpoints:
 
 See full behavior and payload examples in [`docs/STAGEPILOT.md`](docs/STAGEPILOT.md).
 
-## Service-Grade Surfaces
+## Runtime Surfaces
 
 - `/v1/runtime-brief`, `/v1/summary-pack`, and `/v1/schema/plan-report` expose StagePilot readiness, benchmark proof, parser/orchestration posture, and report contract.
 - `/v1/benchlab/runtime-brief`, `/v1/benchlab/summary-pack`, and `/v1/benchlab/schema/job-report` expose BenchLab evidence counts, checked-in claim proof, dominant failure buckets, and job-report expectations.

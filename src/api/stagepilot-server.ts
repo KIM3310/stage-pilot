@@ -55,6 +55,10 @@ import {
   buildStagePilotWorkflowRunDetail,
   buildStagePilotWorkflowRunList,
 } from "./runtime-store";
+import {
+  PROMETHEUS_CONTENT_TYPE,
+  serializeMetrics,
+} from "./prometheus-metrics";
 import { renderStagePilotDemoHtml } from "./stagepilot-demo";
 import {
   buildStagePilotBenchmarkSummary,
@@ -2109,6 +2113,22 @@ function handleMetaRequest(
   sendJson(response, 200, buildMetaPayload(), options);
 }
 
+function handlePrometheusMetricsRequest(
+  response: ServerResponse,
+  options?: { includeBody?: boolean }
+) {
+  const body = serializeMetrics();
+  response.writeHead(200, {
+    "Content-Type": PROMETHEUS_CONTENT_TYPE,
+    "Cache-Control": "no-cache, no-store, must-revalidate",
+  });
+  if (options?.includeBody !== false) {
+    response.end(body);
+  } else {
+    response.end();
+  }
+}
+
 function handleRuntimeBriefRequest(
   response: ServerResponse,
   options?: { includeBody?: boolean }
@@ -3069,6 +3089,9 @@ function handleReadonlyRequest(options: {
       return true;
     case "/v1/schema/plan-report":
       handlePlanReportSchemaRequest(response, { includeBody });
+      return true;
+    case "/v1/metrics":
+      handlePrometheusMetricsRequest(response, { includeBody });
       return true;
     default:
       if (pathname.startsWith("/v1/workflow-runs/")) {

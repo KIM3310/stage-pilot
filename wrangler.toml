@@ -1,0 +1,50 @@
+# Cloudflare Workers configuration for StagePilot demo endpoint.
+#
+# Deploy:
+#   npx wrangler deploy
+#
+# Preview:
+#   npx wrangler dev
+#
+# The worker exposes a lightweight demo/health surface.
+# Full API runs on Cloud Run / Kubernetes; this is a CDN-edge
+# entry point for the demo UI and review-pack endpoints.
+
+name = "stagepilot-demo"
+main = "src/api/worker-entry.ts"
+compatibility_date = "2024-12-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Account-level settings (set via env or wrangler login)
+# account_id = ""
+
+[build]
+command = "pnpm build"
+
+[vars]
+APP_ENV = "production"
+DEPLOYMENT_TRACK = "edge"
+
+# Routes — uncomment and set your domain
+# routes = [
+#   { pattern = "stagepilot.example.com/*", zone_name = "example.com" }
+# ]
+
+# Custom domain (alternative to routes)
+# [env.production]
+# workers_dev = false
+# route = "stagepilot.example.com/*"
+
+[observability]
+enabled = true
+
+# KV namespace for caching benchmark artifacts (optional)
+# [[kv_namespaces]]
+# binding = "BENCHMARK_CACHE"
+# id = ""
+# preview_id = ""
+
+# R2 bucket for artifact storage (optional)
+# [[r2_buckets]]
+# binding = "ARTIFACTS"
+# bucket_name = "stagepilot-artifacts"

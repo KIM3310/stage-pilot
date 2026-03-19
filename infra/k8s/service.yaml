@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: stagepilot-api
+  namespace: stagepilot
+  labels:
+    app: stagepilot-api
+    component: api
+spec:
+  type: ClusterIP
+  selector:
+    app: stagepilot-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: stagepilot-api
+  namespace: stagepilot
+  labels:
+    app: stagepilot-api
+  annotations:
+    # For GKE Workload Identity (optional):
+    # iam.gke.io/gcp-service-account: stagepilot-api@PROJECT_ID.iam.gserviceaccount.com

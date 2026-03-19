@@ -336,6 +336,12 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
       path: "/v1/openclaw/inbox",
       purpose: "Accept inbox-style commands and optional replies",
     },
+    {
+      method: "GET",
+      path: "/v1/metrics",
+      purpose:
+        "Prometheus-compatible metrics endpoint for benchmark counts, parse rates, and latency histograms",
+    },
   ];
 }
 

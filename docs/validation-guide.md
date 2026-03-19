@@ -4,7 +4,7 @@ Use this when you want the fastest credible read of the repo for AI engineer, fr
 
 ## Hiring signal to anchor
 
-This repo should read first as: **tool-calling reliability proof for frontier/runtime teams**. The recruiter-safe takeaway is that the work is benchmarked, bounded, and reviewable.
+This repo should read first as: **tool-calling reliability proof for frontier/runtime teams**. The takeaway is that the work is benchmarked, bounded, and reviewable.
 
 ## What to believe first
 
@@ -60,7 +60,7 @@ Current checked-in benchmark snapshot:
 
 ## Safe interview framing
 
-Use these boundaries to keep the portfolio story honest:
+Use these boundaries to keep the project claims honest:
 
 - **Strong claim:** parser middleware + benchmark discipline + reviewable orchestration surface
 - **Careful claim:** StagePilot runtime/API shape is production-minded and Cloud Run-friendly

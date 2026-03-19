@@ -6,7 +6,7 @@ export interface StagePilotRouteDescriptor {
 
 export const STAGEPILOT_READINESS_CONTRACT = "stagepilot-runtime-brief-v1";
 export const STAGEPILOT_PLAN_REPORT_SCHEMA = "stagepilot-plan-report-v1";
-export const STAGEPILOT_REVIEW_PACK_ID = "stagepilot-review-pack-v1";
+export const STAGEPILOT_SUMMARY_PACK_ID = "stagepilot-summary-pack-v1";
 export const STAGEPILOT_BENCHMARK_SUMMARY_SCHEMA =
   "stagepilot-benchmark-summary-v1";
 export const STAGEPILOT_RUNTIME_SCORECARD_SCHEMA =
@@ -48,21 +48,21 @@ function buildStagePilotOperationalPosture(options: {
     blockers,
     mode: liveReady ? "live-ready" : "bounded-demo",
     summary: liveReady
-      ? "Live integrations and benchmark floor support real reviewer runs."
-      : `Keep this as a bounded reviewer demo until ${blockers[0]} is cleared.`,
+      ? "Live integrations and benchmark floor support real evaluation runs."
+      : `Keep this as a bounded bounded demo until ${blockers[0]} is cleared.`,
   };
 }
 
 function buildStagePilotProofAssets() {
   return [
     {
-      label: "Reviewer proof guide",
-      path: "docs/reviewer-proof-guide.md",
+      label: "Validation data guide",
+      path: "docs/validation-guide.md",
       kind: "doc",
     },
     {
-      label: "Review pack diagram",
-      path: "docs/review-pack.svg",
+      label: "Summary pack diagram",
+      path: "docs/summary-pack.svg",
       kind: "diagram",
     },
     {
@@ -161,7 +161,7 @@ interface StagePilotTraceObservabilityArtifact {
     rule: string;
     watchCount: number | null;
   };
-  reviewerTier: string;
+  evaluationTier: string;
   tool: string;
   traces: Array<{
     durationMs: number | null;
@@ -170,7 +170,7 @@ interface StagePilotTraceObservabilityArtifact {
     protocolFamily: string;
     providerFamily: string;
     regressionGate: string;
-    reviewerSurface: string;
+    dashboardSurface: string;
     scenario: string;
     traceId: string;
   }>;
@@ -239,8 +239,8 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
     },
     {
       method: "GET",
-      path: "/v1/review-pack",
-      purpose: "Benchmark-backed reviewer proof pack",
+      path: "/v1/summary-pack",
+      purpose: "Benchmark-backed validation data pack",
     },
     {
       method: "GET",
@@ -252,7 +252,7 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
       method: "GET",
       path: "/v1/failure-taxonomy",
       purpose:
-        "Failure classes for parser drift, retry exhaustion, delivery gaps, and reviewer handoff risk",
+        "Failure classes for parser drift, retry exhaustion, delivery gaps, and escalation risk",
     },
     {
       method: "GET",
@@ -282,13 +282,13 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
       method: "GET",
       path: "/v1/regression-gate-pack",
       purpose:
-        "Checked-in gate board for frontier promotion posture, reviewer-visible release decisions, and eval discipline",
+        "Checked-in gate board for frontier promotion posture, visible release decisions, and eval discipline",
     },
     {
       method: "GET",
       path: "/v1/benchmark-summary",
       purpose:
-        "Reviewer summary of benchmark lift, weakest strategy, and promotion posture",
+        "Summary of benchmark lift, weakest strategy, and promotion posture",
     },
     {
       method: "GET",
@@ -299,12 +299,12 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
     {
       method: "GET",
       path: "/v1/schema/plan-report",
-      purpose: "Plan report contract for reviewers and downstream tools",
+      purpose: "Plan report contract for operators and downstream tools",
     },
     {
       method: "POST",
       path: "/v1/live-review-run",
-      purpose: "Run the bounded public OpenAI reviewer scenario",
+      purpose: "Run the bounded public OpenAI evaluation scenario",
     },
     {
       method: "POST",
@@ -388,7 +388,7 @@ export function buildStagePilotRuntimeBrief(options: {
   let nextAction: string;
   if (options.publicLiveApi) {
     nextAction =
-      "Run POST /v1/live-review-run with a fixed scenarioId to validate the bounded public reviewer lane.";
+      "Run POST /v1/live-review-run with a fixed scenarioId to validate the bounded public evaluation lane.";
   } else if (missingIntegrations.length === 0) {
     nextAction =
       "Run POST /v1/plan or POST /v1/benchmark to validate live flows.";
@@ -428,7 +428,7 @@ export function buildStagePilotRuntimeBrief(options: {
     },
     reviewFlow: [
       "Check health and runtime brief before trusting live plan synthesis.",
-      "Run /v1/live-review-run with a fixed scenarioId to inspect the bounded public reviewer lane.",
+      "Run /v1/live-review-run with a fixed scenarioId to inspect the bounded public evaluation lane.",
       "Run /v1/plan first, then enrich with /v1/insights and /v1/whatif.",
       "Treat /v1/notify as the final operator confirmation step.",
     ],
@@ -448,7 +448,7 @@ export function buildStagePilotRuntimeBrief(options: {
       health: "/health",
       meta: "/v1/meta",
       runtimeBrief: "/v1/runtime-brief",
-      reviewPack: "/v1/review-pack",
+      summaryPack: "/v1/summary-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
       perfEvidencePack: "/v1/perf-evidence-pack",
       traceObservabilityPack: "/v1/trace-observability-pack",
@@ -530,13 +530,13 @@ export function buildStagePilotBenchmarkSummary(options: {
           weakestStrategy?.strategy === item.strategy ? "attention" : "ready",
       })),
     },
-    reviewerNotes: [
+    operatorNotes: [
       "Review benchmark lift before claiming parser or loop recovery gains.",
       "Weakest strategy stays visible so regressions are not hidden by average lift.",
       "Use the summary as a promotion screen, then confirm with /v1/benchmark when changing runtime code.",
     ],
     links: {
-      reviewPack: "/v1/review-pack",
+      summaryPack: "/v1/summary-pack",
       benchmark: "/v1/benchmark",
       benchmarkSummary: "/v1/benchmark-summary",
       perfEvidencePack: "/v1/perf-evidence-pack",
@@ -568,13 +568,13 @@ export function buildStagePilotDeveloperOpsPack(options: {
       headline:
         "Use parser reliability and contract checks to keep merge-request review deterministic.",
       operatorFlow: [
-        "Collect MR notes, changed-file summary, and reviewer instructions.",
+        "Collect MR notes, changed-file summary, and evaluation instructions.",
         "Run plan generation through the same schema-safe parser surface used in benchmarked routing.",
-        "Keep the final reviewer decision separate from the agent recommendation.",
+        "Keep the final final decision separate from the agent recommendation.",
       ],
       guardrails: [
         "Do not auto-merge on tool output alone.",
-        "Keep report contract stable before exposing results to reviewers.",
+        "Keep report contract stable before exposing results to operators.",
       ],
     },
     "pipeline-recovery": {
@@ -586,7 +586,7 @@ export function buildStagePilotDeveloperOpsPack(options: {
         "Escalate to a human release owner when confidence or tool output is weak.",
       ],
       guardrails: [
-        "Do not rerun or mutate live infrastructure without reviewer approval.",
+        "Do not rerun or mutate live infrastructure without team approval.",
         "Persist weakest strategy evidence so regressions stay visible.",
       ],
     },
@@ -633,10 +633,10 @@ export function buildStagePilotDeveloperOpsPack(options: {
       "/v1/developer-ops-pack",
       "/v1/workflow-runs",
       "/v1/benchmark-summary",
-      "/v1/review-pack",
+      "/v1/summary-pack",
       "/v1/schema/plan-report",
     ],
-    reviewerNotes: [
+    operatorNotes: [
       "Use the developer ops pack to explain where agent help stops and human release review begins.",
       "Benchmark lift matters because developer automation breaks first on malformed tool or workflow output.",
       "Keep the weakest strategy visible during demo and submission walkthroughs.",
@@ -652,7 +652,7 @@ export function buildStagePilotDeveloperOpsPack(options: {
       workflowRuns: "/v1/workflow-runs",
       workflowReplay: "/v1/workflow-run-replay",
       benchmarkSummary: "/v1/benchmark-summary",
-      reviewPack: "/v1/review-pack",
+      summaryPack: "/v1/summary-pack",
       planSchema: "/v1/schema/plan-report",
     },
   };
@@ -750,7 +750,7 @@ export function buildStagePilotProtocolMatrix(options: { service: string }) {
       "Start with /v1/protocol-matrix to see which protocol families are explicitly covered.",
       "Move to /v1/provider-benchmark-scorecard to see how those protocol families map to provider-facing latency, cost, and contract confidence posture.",
       "Then inspect /v1/failure-taxonomy to connect protocol drift to runtime risk and handoff posture.",
-      "Finish on /v1/benchmark-summary and /v1/review-pack so benchmark lift stays grounded in concrete protocol surfaces.",
+      "Finish on /v1/benchmark-summary and /v1/summary-pack so benchmark lift stays grounded in concrete protocol surfaces.",
     ],
     links: {
       protocolMatrix: "/v1/protocol-matrix",
@@ -759,7 +759,7 @@ export function buildStagePilotProtocolMatrix(options: { service: string }) {
       benchmarkSummary: "/v1/benchmark-summary",
       developerOpsPack: "/v1/developer-ops-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
-      reviewPack: "/v1/review-pack",
+      summaryPack: "/v1/summary-pack",
     },
   };
 }
@@ -798,7 +798,7 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
       proofRoutes: [
         "/v1/protocol-matrix",
         "/v1/benchmark-summary",
-        "/v1/review-pack",
+        "/v1/summary-pack",
       ],
     },
     {
@@ -888,7 +888,7 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
       "Use /v1/trace-observability-pack to connect provider posture to replayable traces and regression gates before claiming frontier-runtime depth.",
       "Use /v1/benchmark-summary and /v1/runtime-scorecard together before claiming production-like runtime reliability.",
     ],
-    reviewerNotes: [
+    operatorNotes: [
       "Latency and cost bands are provider-family posture signals, not a claim of live production telemetry for every vendor.",
       "Contract confidence only stays credible when the protocol matrix and benchmark summary still agree.",
       "Use the scorecard to explain tradeoffs, then point to failure taxonomy before promising automation at the boundary.",
@@ -902,7 +902,7 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
       benchmarkSummary: "/v1/benchmark-summary",
       failureTaxonomy: "/v1/failure-taxonomy",
       runtimeScorecard: "/v1/runtime-scorecard",
-      reviewPack: "/v1/review-pack",
+      summaryPack: "/v1/summary-pack",
     },
   };
 }
@@ -970,9 +970,9 @@ export function buildStagePilotPerfEvidencePack(options: {
       "Open /v1/perf-evidence-pack to see the checked-in runtime rehearsal before making scale claims.",
       "Pair it with /v1/runtime-scorecard so local load evidence and live route telemetry stay in the same story.",
       "Use /v1/provider-benchmark-scorecard and /v1/benchmark-summary to separate raw speed from contract-safe correctness.",
-      "Finish on /v1/developer-ops-pack and /v1/review-pack before describing production posture.",
+      "Finish on /v1/developer-ops-pack and /v1/summary-pack before describing production posture.",
     ],
-    reviewerNotes: [
+    operatorNotes: [
       "This is a checked-in local rehearsal against the StagePilot backend, not a claim of internet-scale vendor telemetry.",
       "The strongest claim is bounded runtime discipline under reviewable load, not generic throughput bragging.",
       "Use the perf pack together with the benchmark and failure taxonomy before discussing frontier-runtime promotion.",
@@ -1004,7 +1004,7 @@ export function buildStagePilotPerfEvidencePack(options: {
       regressionGatePack: "/v1/regression-gate-pack",
       benchmarkSummary: "/v1/benchmark-summary",
       developerOpsPack: "/v1/developer-ops-pack",
-      reviewPack: "/v1/review-pack",
+      summaryPack: "/v1/summary-pack",
     },
   };
 }
@@ -1039,7 +1039,7 @@ export function buildStagePilotTraceObservabilityPack(options: {
       gate: options.traceArtifact.regressionGate.gate,
       passCount: options.traceArtifact.regressionGate.passCount,
       providerFamilyCount,
-      reviewerTier: options.traceArtifact.reviewerTier,
+      evaluationTier: options.traceArtifact.evaluationTier,
       slowestTrace,
       topStrategy,
       totalTraces: options.traceArtifact.traces.length,
@@ -1052,10 +1052,10 @@ export function buildStagePilotTraceObservabilityPack(options: {
       "Start with /v1/trace-observability-pack to see whether replayable traces and regression gates agree before discussing frontier-runtime maturity.",
       "Move to /v1/provider-benchmark-scorecard and /v1/protocol-matrix so each trace stays tied to a real contract family instead of generic model talk.",
       "Use /v1/failure-taxonomy to connect the trace bundle to explicit parser/runtime classes.",
-      "Finish on /v1/perf-evidence-pack and /v1/review-pack so replay evidence, load posture, and benchmark lift stay in one story.",
+      "Finish on /v1/perf-evidence-pack and /v1/summary-pack so replay evidence, load posture, and benchmark lift stay in one story.",
     ],
-    reviewerNotes: [
-      "These traces are checked-in reviewer artifacts, not a claim of internet-scale production telemetry.",
+    operatorNotes: [
+      "These traces are checked-in test artifacts, not a claim of internet-scale production telemetry.",
       "The regression gate is meaningful only when protocol, failure, and perf surfaces still agree.",
       "Use the slowest or watch traces to discuss debugging posture, not to imply unlimited provider coverage.",
     ],
@@ -1084,7 +1084,7 @@ export function buildStagePilotTraceObservabilityPack(options: {
       failureTaxonomy: "/v1/failure-taxonomy",
       regressionGatePack: "/v1/regression-gate-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
-      reviewPack: "/v1/review-pack",
+      summaryPack: "/v1/summary-pack",
     },
   };
 }
@@ -1108,7 +1108,7 @@ export function buildStagePilotRegressionGatePack(options: {
     generatedAt: new Date().toISOString(),
     schema: STAGEPILOT_REGRESSION_GATE_PACK_SCHEMA,
     headline:
-      "Regression gate pack that compresses frontier promotion posture, release decisions, and reviewer-visible eval discipline into one checked-in surface.",
+      "Regression gate pack that compresses frontier promotion posture, release decisions, and visible eval discipline into one checked-in surface.",
     summary: {
       attentionCount,
       failCount: options.regressionArtifact.scoreSummary.failCount,
@@ -1124,11 +1124,11 @@ export function buildStagePilotRegressionGatePack(options: {
       "Start with /v1/regression-gate-pack to explain what would block or allow StagePilot promotion into a stronger frontier-runtime claim tier.",
       "Pair it with /v1/trace-observability-pack so each gate stays grounded in replay evidence instead of generic scorekeeping.",
       "Use /v1/perf-evidence-pack and /v1/provider-benchmark-scorecard to show that gate posture still matches runtime pressure and provider-family tradeoffs.",
-      "Finish on /v1/review-pack before summarizing the strongest public frontier signal.",
+      "Finish on /v1/summary-pack before summarizing the strongest public frontier signal.",
     ],
-    reviewerNotes: [
+    operatorNotes: [
       "This is a checked-in release board, not a substitute for live production SLO ownership.",
-      "The value is explicit promotion logic: what would make a reviewer claim stronger, weaker, or blocked.",
+      "The value is explicit promotion logic: what would make a benchmark claim stronger, weaker, or blocked.",
       "Use this pack when an interviewer asks how you decide whether a reliability surface is ready to be trusted more broadly.",
     ],
     proofAssets: [
@@ -1154,7 +1154,7 @@ export function buildStagePilotRegressionGatePack(options: {
       providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
       perfEvidencePack: "/v1/perf-evidence-pack",
       benchmarkSummary: "/v1/benchmark-summary",
-      reviewPack: "/v1/review-pack",
+      summaryPack: "/v1/summary-pack",
     },
   };
 }
@@ -1249,7 +1249,7 @@ export function buildStagePilotRuntimeScorecard(options: {
       health: "/health",
       meta: "/v1/meta",
       runtimeBrief: "/v1/runtime-brief",
-      reviewPack: "/v1/review-pack",
+      summaryPack: "/v1/summary-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
       perfEvidencePack: "/v1/perf-evidence-pack",
       failureTaxonomy: "/v1/failure-taxonomy",
@@ -1295,7 +1295,7 @@ export function buildStagePilotFailureTaxonomy(options: {
           ? "attention"
           : "ready",
       whyItBreaks:
-        "Model output slips outside the expected tool/report contract and turns a planning request into reviewer cleanup work.",
+        "Model output slips outside the expected tool/report contract and turns a planning request into manual cleanup work.",
       signals: [
         typeof baselineRate === "number"
           ? `Baseline success is ${baselineRate}% before parser hardening.`
@@ -1304,13 +1304,13 @@ export function buildStagePilotFailureTaxonomy(options: {
           ? `Middleware lift versus baseline is ${parserLift} percentage points.`
           : "Middleware lift has not been captured yet.",
       ],
-      reviewerSurfaces: [
+      dashboardSurfaces: [
         "/v1/benchmark-summary",
         "/v1/schema/plan-report",
-        "/v1/review-pack",
+        "/v1/summary-pack",
       ],
       mitigations: [
-        "Keep the parser middleware and contract schema together in the reviewer path.",
+        "Keep the parser middleware and contract schema together in the evaluation path.",
         "Treat benchmark regressions as release blockers for automation-facing lanes.",
       ],
     },
@@ -1334,7 +1334,7 @@ export function buildStagePilotFailureTaxonomy(options: {
           ? `Loop lift versus middleware is ${recoveryLift} percentage points.`
           : "Loop lift has not been captured yet.",
       ],
-      reviewerSurfaces: [
+      dashboardSurfaces: [
         "/v1/benchmark-summary",
         "/v1/developer-ops-pack",
         "/v1/workflow-run-replay",
@@ -1363,10 +1363,10 @@ export function buildStagePilotFailureTaxonomy(options: {
           ? "OpenClaw delivery is configured."
           : "OpenClaw delivery is not configured.",
       ],
-      reviewerSurfaces: [
+      dashboardSurfaces: [
         "/v1/runtime-brief",
         "/v1/runtime-scorecard",
-        "/v1/review-pack",
+        "/v1/summary-pack",
       ],
       mitigations: [
         "Separate plan synthesis success from downstream delivery success.",
@@ -1384,7 +1384,7 @@ export function buildStagePilotFailureTaxonomy(options: {
           ? "ready"
           : "attention",
       whyItBreaks:
-        "Reviewer trust drops if the live runtime has no traffic proof or if requests are already erroring under light load.",
+        "Confidence drops if the live runtime has no traffic proof or if requests are already erroring under light load.",
       signals: [
         `Observed requests in this process: ${options.runtimeTelemetry.requestCount}.`,
         `Observed errors in this process: ${options.runtimeTelemetry.errorCount}.`,
@@ -1394,7 +1394,7 @@ export function buildStagePilotFailureTaxonomy(options: {
               .join(", ")}.`
           : "No route pressure has been observed in this process yet.",
       ],
-      reviewerSurfaces: [
+      dashboardSurfaces: [
         "/v1/runtime-scorecard",
         "/v1/workflow-runs",
         "/v1/workflow-run-replay",
@@ -1429,7 +1429,7 @@ export function buildStagePilotFailureTaxonomy(options: {
     reviewPath: [
       "Start on /v1/runtime-brief to separate missing integrations from true parser/runtime defects.",
       "Use /v1/benchmark-summary and /v1/schema/plan-report to explain why tool-call hardening exists.",
-      "Finish on /v1/runtime-scorecard and /v1/workflow-run-replay to show live reviewer pressure and escalation paths.",
+      "Finish on /v1/runtime-scorecard and /v1/workflow-run-replay to show live evaluation pressure and escalation paths.",
     ],
     links: {
       runtimeBrief: "/v1/runtime-brief",
@@ -1441,13 +1441,13 @@ export function buildStagePilotFailureTaxonomy(options: {
       developerOpsPack: "/v1/developer-ops-pack",
       workflowRuns: "/v1/workflow-runs",
       workflowReplay: "/v1/workflow-run-replay",
-      reviewPack: "/v1/review-pack",
+      summaryPack: "/v1/summary-pack",
       planSchema: "/v1/schema/plan-report",
     },
   };
 }
 
-export function buildStagePilotReviewPack(options: {
+export function buildStagePilotSummaryPack(options: {
   benchmarkSnapshot: StagePilotBenchmarkSnapshot;
   bodyTimeoutMs: number;
   geminiHasApiKey: boolean;
@@ -1475,9 +1475,9 @@ export function buildStagePilotReviewPack(options: {
     service: options.service,
     status: "ok",
     generatedAt: new Date().toISOString(),
-    reviewPackId: STAGEPILOT_REVIEW_PACK_ID,
+    summaryPackId: STAGEPILOT_SUMMARY_PACK_ID,
     headline:
-      "Parser hardening, bounded retry, and orchestration handoff proof now live in one reviewer-facing surface.",
+      "Parser hardening, bounded retry, and orchestration handoff proof now live in one user-facing surface.",
     operatorJourney: [
       {
         stage: "Collect",
@@ -1523,7 +1523,7 @@ export function buildStagePilotReviewPack(options: {
       },
       {
         step: "2. Failure posture",
-        surface: "/v1/failure-taxonomy -> /v1/review-pack",
+        surface: "/v1/failure-taxonomy -> /v1/summary-pack",
         proof:
           "Validate benchmark deltas, replayable traces, delivery gaps, and runtime failure classes before repeating any claim.",
       },
@@ -1535,25 +1535,25 @@ export function buildStagePilotReviewPack(options: {
       },
       {
         step: "4. Operator proof",
-        surface: "docs/review-pack.svg -> docs/STAGEPILOT.md",
+        surface: "docs/summary-pack.svg -> docs/STAGEPILOT.md",
         proof:
           "Read the end-to-end orchestration and handoff shape without tracing the full source tree.",
       },
     ],
-    proofBundle: {
+    evidenceBundle: {
       benchmark: options.benchmarkSnapshot,
       benchmarkSummarySchema: STAGEPILOT_BENCHMARK_SUMMARY_SCHEMA,
       providerBenchmarkScorecardSchema:
         STAGEPILOT_PROVIDER_BENCHMARK_SCORECARD_SCHEMA,
-      reviewerPosture: {
+      evaluationPosture: {
         runtimeSourceOfTruth:
-          "@ai-sdk-tool/parser package plus /v1/runtime-brief and /v1/review-pack",
-        docsOnlySurfaces: ["docs/review-pack.svg", "site/"],
+          "@ai-sdk-tool/parser package plus /v1/runtime-brief and /v1/summary-pack",
+        docsOnlySurfaces: ["docs/summary-pack.svg", "site/"],
         claimTier: benchmarkReadyForPromotion
           ? "runtime-backed-review-ready"
           : "bounded-review-demo",
         claimRule:
-          "Treat static/docs surfaces as reviewer aids, then repeat runtime claims only after the benchmark and live review-pack surfaces agree.",
+          "Treat static/docs surfaces as supporting docs, then repeat runtime claims only after the benchmark and live summary-pack surfaces agree.",
       },
       runtimeScorecardSchema: STAGEPILOT_RUNTIME_SCORECARD_SCHEMA,
       perfEvidencePackSchema: STAGEPILOT_PERF_EVIDENCE_PACK_SCHEMA,
@@ -1573,7 +1573,7 @@ export function buildStagePilotReviewPack(options: {
       health: "/health",
       meta: "/v1/meta",
       runtimeBrief: "/v1/runtime-brief",
-      reviewPack: "/v1/review-pack",
+      summaryPack: "/v1/summary-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
       perfEvidencePack: "/v1/perf-evidence-pack",
       traceObservabilityPack: "/v1/trace-observability-pack",

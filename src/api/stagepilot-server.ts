@@ -65,7 +65,7 @@ import {
   buildStagePilotProtocolMatrix,
   buildStagePilotProviderBenchmarkScorecard,
   buildStagePilotRegressionGatePack,
-  buildStagePilotReviewPack,
+  buildStagePilotSummaryPack,
   buildStagePilotRouteDescriptors,
   buildStagePilotRuntimeBrief,
   buildStagePilotRuntimeScorecard,
@@ -201,7 +201,7 @@ const STAGEPILOT_LIVE_SCENARIOS: Record<string, StagePilotLiveScenario> = {
     toolRegistry: ["lookup_household", "check_eligibility", "assign_referral"],
     estimatedCostUsd: 0.01,
     prompt:
-      "A tool-calling runtime receives malformed structured output for check_eligibility after a provider-side format drift. Review whether bounded retry plus schema repair is enough, what should stay manual, and what reviewer evidence should be shown.",
+      "A tool-calling runtime receives malformed structured output for check_eligibility after a provider-side format drift. Review whether bounded retry plus schema repair is enough, what should stay manual, and what evaluation evidence should be shown.",
   },
   "bounded-handoff-release": {
     id: "bounded-handoff-release",
@@ -209,11 +209,11 @@ const STAGEPILOT_LIVE_SCENARIOS: Record<string, StagePilotLiveScenario> = {
     concern:
       "Runtime reliability is strong, but downstream delivery still needs explicit human confirmation.",
     failureMode: "handoff-boundary",
-    nextReviewPath: "/v1/review-pack",
+    nextReviewPath: "/v1/summary-pack",
     toolRegistry: ["build_plan_report", "score_risk", "notify_operator"],
     estimatedCostUsd: 0.012,
     prompt:
-      "A reviewer wants to know if a high-confidence routing result should auto-notify downstream delivery. Explain the handoff boundary, the human approval point, and the runtime proof that should be checked before promotion.",
+      "An evaluator wants to know if a high-confidence routing result should auto-notify downstream delivery. Explain the handoff boundary, the human approval point, and the runtime proof that should be checked before promotion.",
   },
 };
 
@@ -390,10 +390,10 @@ function mapStagePilotTraceRecord(item: Record<string, unknown>) {
       typeof item.providerFamily === "string" ? item.providerFamily : "unknown",
     regressionGate:
       typeof item.regressionGate === "string" ? item.regressionGate : "watch",
-    reviewerSurface:
-      typeof item.reviewerSurface === "string"
-        ? item.reviewerSurface
-        : "/v1/review-pack",
+    dashboardSurface:
+      typeof item.dashboardSurface === "string"
+        ? item.dashboardSurface
+        : "/v1/summary-pack",
     scenario:
       typeof item.scenario === "string"
         ? item.scenario
@@ -428,7 +428,7 @@ function enforceStagePilotLiveRateLimit(
     return;
   }
   if (bucket.count >= rpm) {
-    throw new HttpError(429, "public live reviewer rate limit exceeded");
+    throw new HttpError(429, "public live evaluation rate limit exceeded");
   }
   bucket.count += 1;
 }
@@ -1006,7 +1006,7 @@ function buildMetaPayload(): JsonObject {
   let nextAction: string;
   if (runtimeBrief.publicLiveApi) {
     nextAction =
-      "Run POST /v1/live-review-run with a fixed scenarioId to validate the bounded reviewer lane.";
+      "Run POST /v1/live-review-run with a fixed scenarioId to validate the bounded evaluation lane.";
   } else if (missingIntegrations.length === 0) {
     nextAction =
       "Run POST /v1/plan or POST /v1/benchmark to validate live flows.";
@@ -1343,7 +1343,7 @@ function readStagePilotTraceObservabilityArtifact() {
       rule: "No checked-in trace artifact found.",
       watchCount: null,
     },
-    reviewerTier: "bounded-review-demo",
+    evaluationTier: "bounded-review-demo",
     tool: "checked-in frontier trace bundle",
     traces: [] as Array<{
       durationMs: number | null;
@@ -1352,7 +1352,7 @@ function readStagePilotTraceObservabilityArtifact() {
       protocolFamily: string;
       providerFamily: string;
       regressionGate: string;
-      reviewerSurface: string;
+      dashboardSurface: string;
       scenario: string;
       traceId: string;
     }>,
@@ -1371,7 +1371,7 @@ function readStagePilotTraceObservabilityArtifact() {
       generatedAt?: unknown;
       hotspots?: Record<string, unknown>[];
       regressionGate?: Record<string, unknown>;
-      reviewerTier?: unknown;
+      evaluationTier?: unknown;
       tool?: unknown;
       traces?: Record<string, unknown>[];
     };
@@ -1404,10 +1404,10 @@ function readStagePilotTraceObservabilityArtifact() {
             ? payload.regressionGate.watchCount
             : null,
       },
-      reviewerTier:
-        typeof payload.reviewerTier === "string"
-          ? payload.reviewerTier
-          : fallback.reviewerTier,
+      evaluationTier:
+        typeof payload.evaluationTier === "string"
+          ? payload.evaluationTier
+          : fallback.evaluationTier,
       tool: typeof payload.tool === "string" ? payload.tool : fallback.tool,
       traces: Array.isArray(payload.traces)
         ? payload.traces.map(mapStagePilotTraceRecord)
@@ -1499,12 +1499,12 @@ function readStagePilotRegressionGateArtifact() {
   }
 }
 
-function buildReviewPackPayload(): JsonObject {
+function buildSummaryPackPayload(): JsonObject {
   const runtimeBrief = buildRuntimeBriefPayload() as ReturnType<
     typeof buildStagePilotRuntimeBrief
   >;
 
-  return buildStagePilotReviewPack({
+  return buildStagePilotSummaryPack({
     benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
     bodyTimeoutMs: readBodyTimeoutMs(
       process.env.STAGEPILOT_REQUEST_BODY_TIMEOUT_MS
@@ -2170,7 +2170,7 @@ async function handleLiveReviewRunRequest(options: {
       apiKey: openAi.apiKey,
       model: openAi.modelPublic,
       systemPrompt:
-        "You are evaluating a public reviewer-safe tool-calling runtime. Return compact JSON only with keys summary, selectedStrategy, boundedRecovery, watchouts, handoffDecision, reviewerEvidence.",
+        "You are evaluating a public bounded tool-calling runtime. Return compact JSON only with keys summary, selectedStrategy, boundedRecovery, watchouts, handoffDecision, evaluationEvidence.",
       userPrompt: JSON.stringify(
         {
           benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
@@ -2228,13 +2228,13 @@ function handlePlanReportSchemaRequest(
   sendJson(response, 200, buildPlanReportSchemaPayload(), options);
 }
 
-function handleReviewPackRequest(
+function handleSummaryPackRequest(
   response: ServerResponse,
   options?: {
     includeBody?: boolean;
   }
 ) {
-  sendJson(response, 200, buildReviewPackPayload(), options);
+  sendJson(response, 200, buildSummaryPackPayload(), options);
 }
 
 function handleFailureTaxonomyRequest(
@@ -3031,8 +3031,8 @@ function handleReadonlyRequest(options: {
     case "/v1/runtime-brief":
       handleRuntimeBriefRequest(response, { includeBody });
       return true;
-    case "/v1/review-pack":
-      handleReviewPackRequest(response, { includeBody });
+    case "/v1/summary-pack":
+      handleSummaryPackRequest(response, { includeBody });
       return true;
     case "/v1/runtime-scorecard":
       handleRuntimeScorecardRequest(response, telemetry, { includeBody });

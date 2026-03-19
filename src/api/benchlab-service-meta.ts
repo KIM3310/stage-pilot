@@ -6,13 +6,13 @@ export interface BenchLabRouteDescriptor {
 
 export const BENCHLAB_READINESS_CONTRACT = "benchlab-runtime-brief-v1";
 export const BENCHLAB_JOB_REPORT_SCHEMA = "benchlab-job-report-v1";
-export const BENCHLAB_REVIEW_PACK_ID = "benchlab-review-pack-v1";
+export const BENCHLAB_SUMMARY_PACK_ID = "benchlab-summary-pack-v1";
 
 function buildBenchLabProofAssets() {
   return [
     {
-      label: "Review pack diagram",
-      path: "docs/review-pack.svg",
+      label: "Summary pack diagram",
+      path: "docs/summary-pack.svg",
       kind: "diagram",
     },
     {
@@ -52,8 +52,8 @@ export function buildBenchLabRouteDescriptors(): BenchLabRouteDescriptor[] {
     },
     {
       method: "GET",
-      path: "/v1/benchlab/review-pack",
-      purpose: "BenchLab reviewer proof pack",
+      path: "/v1/benchlab/summary-pack",
+      purpose: "BenchLab validation data pack",
     },
     {
       method: "GET",
@@ -194,7 +194,7 @@ export function buildBenchLabRuntimeBrief(options: {
     links: {
       health: "/health",
       runtimeBrief: "/v1/benchlab/runtime-brief",
-      reviewPack: "/v1/benchlab/review-pack",
+      summaryPack: "/v1/benchlab/summary-pack",
       jobSchema: "/v1/benchlab/schema/job-report",
       jobs: "/v1/benchlab/jobs",
       runs: "/v1/benchlab/runs",
@@ -203,7 +203,7 @@ export function buildBenchLabRuntimeBrief(options: {
   };
 }
 
-export function buildBenchLabReviewPack(options: {
+export function buildBenchLabSummaryPack(options: {
   artifactCount: number;
   artifactsWithTrackedErrors: number;
   bestArtifactClaimName: string | null;
@@ -218,7 +218,7 @@ export function buildBenchLabReviewPack(options: {
     service: "benchlab-api",
     status: "ok",
     generatedAt: new Date().toISOString(),
-    reviewPackId: BENCHLAB_REVIEW_PACK_ID,
+    summaryPackId: BENCHLAB_SUMMARY_PACK_ID,
     headline:
       "BenchLab compresses configs, runtime matrices, checked-in claims, and failure forensics into one promotion-ready review surface.",
     operatorJourney: [
@@ -262,7 +262,7 @@ export function buildBenchLabReviewPack(options: {
       },
       {
         step: "2. Promotion proof",
-        surface: "/v1/benchlab/review-pack -> /v1/benchlab/artifacts/best",
+        surface: "/v1/benchlab/summary-pack -> /v1/benchlab/artifacts/best",
         proof:
           "Validate the strongest checked-in delta before comparing runtimes.",
       },
@@ -280,7 +280,7 @@ export function buildBenchLabReviewPack(options: {
           "Connect claim narrative to checked-in notes and runnable experiments.",
       },
     ],
-    proofBundle: {
+    evidenceBundle: {
       counts: {
         configs: options.configCount,
         jobs: options.jobCount,
@@ -301,7 +301,7 @@ export function buildBenchLabReviewPack(options: {
     links: {
       health: "/health",
       runtimeBrief: "/v1/benchlab/runtime-brief",
-      reviewPack: "/v1/benchlab/review-pack",
+      summaryPack: "/v1/benchlab/summary-pack",
       jobSchema: "/v1/benchlab/schema/job-report",
       jobs: "/v1/benchlab/jobs",
       runs: "/v1/benchlab/runs",

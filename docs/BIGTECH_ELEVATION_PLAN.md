@@ -18,7 +18,7 @@ Turn `stage-pilot` from a strong parser plus benchmark repo into a canonical `LL
 
 ### 60 days
 - Add schema drift replay routes that show before/after behavior when tool definitions change.
-- Add cost and latency deltas by model family so reviewers can discuss reliability tradeoffs honestly.
+- Add cost and latency deltas by model family so operators can discuss reliability tradeoffs honestly.
 - Add workflow-level traces that make parser, repair, retry, and final handoff decisions inspectable per request.
 
 ### 90 days
@@ -38,6 +38,6 @@ Turn `stage-pilot` from a strong parser plus benchmark repo into a canonical `LL
 
 ## Success Bar
 
-- A reviewer can compare providers without reading raw benchmark JSON first.
+- Anyone can compare providers without reading raw benchmark JSON first.
 - A hiring panel can see exactly which failure classes are recovered and which are still rejected.
 - The repo supports a credible discussion about bounded recovery, not just "the parser got better."

@@ -1,13 +1,13 @@
 {
   "generatedAt": "2026-03-16T11:22:00.000Z",
   "tool": "checked-in frontier trace bundle",
-  "reviewerTier": "runtime-backed-review-ready",
+  "evaluationTier": "runtime-backed-review-ready",
   "regressionGate": {
     "gate": "bounded-review-ready",
     "passCount": 3,
     "watchCount": 1,
     "failCount": 0,
-    "rule": "No failed traces and at most one watch trace before promotion into reviewer-facing runtime claims."
+    "rule": "No failed traces and at most one watch trace before promotion into user-facing runtime claims."
   },
   "hotspots": [
     {
@@ -36,7 +36,7 @@
       "failureClass": "chunk-boundary-drift",
       "regressionGate": "watch",
       "operatorHandoff": "review the repaired payload before final delivery",
-      "reviewerSurface": "/v1/failure-taxonomy"
+      "dashboardSurface": "/v1/failure-taxonomy"
     },
     {
       "traceId": "trace-openai-wrapper-contract",
@@ -47,7 +47,7 @@
       "failureClass": "wrapper-drift",
       "regressionGate": "pass",
       "operatorHandoff": "safe to keep as review-ready wrapper path",
-      "reviewerSurface": "/v1/provider-benchmark-scorecard"
+      "dashboardSurface": "/v1/provider-benchmark-scorecard"
     },
     {
       "traceId": "trace-gemini-multiline-report",
@@ -58,7 +58,7 @@
       "failureClass": "indentation-drift",
       "regressionGate": "pass",
       "operatorHandoff": "promote only with contract-level review still enabled",
-      "reviewerSurface": "/v1/runtime-brief"
+      "dashboardSurface": "/v1/runtime-brief"
     },
     {
       "traceId": "trace-local-oss-wrapperless",
@@ -69,7 +69,7 @@
       "failureClass": "literal-tag-leakage",
       "regressionGate": "pass",
       "operatorHandoff": "safe as a low-cost replayable proof path",
-      "reviewerSurface": "/v1/workflow-run-replay"
+      "dashboardSurface": "/v1/workflow-run-replay"
     }
   ]
 }

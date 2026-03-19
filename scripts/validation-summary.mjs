@@ -25,7 +25,7 @@ function formatDelta(value) {
 }
 
 const lines = [
-  "StagePilot reviewer proof summary",
+  "StagePilot validation summary",
   "===============================",
   `Artifact: ${benchmarkPath}`,
   `Generated: ${benchmark.generatedAt ?? "unknown"}`,
@@ -43,14 +43,14 @@ const lines = [
   `- loop vs baseline: ${formatDelta(benchmark.improvements?.loopVsBaseline)}`,
   "",
   "Read first",
-  "- docs/reviewer-proof-guide.md",
+  "- docs/validation-guide.md",
   "- docs/executive-one-pager.md",
   "- docs/solution-architecture.md",
-  "- docs/review-pack.svg",
+  "- docs/summary-pack.svg",
   "",
-  "Reviewer API path",
+  "API evaluation path",
   "- GET /v1/runtime-brief",
-  "- GET /v1/review-pack",
+  "- GET /v1/summary-pack",
   "- GET /v1/benchmark-summary",
   "- GET /v1/developer-ops-pack",
   "- GET /v1/workflow-run-replay",
@@ -60,8 +60,8 @@ const lines = [
   "- open http://127.0.0.1:8080/demo",
   "",
   "Boundary reminder",
-  "- Checked-in benchmark JSON and review-pack APIs are the strongest claim surfaces.",
-  "- site/ and docs/review-pack.svg are reviewer aids, not runtime proof.",
+  "- Checked-in benchmark JSON and summary-pack APIs are the strongest claim surfaces.",
+  "- site/ and docs/summary-pack.svg are supporting docs, not runtime proof.",
 ];
 
 process.stdout.write(`${lines.join("\n")}\n`);

@@ -406,7 +406,7 @@ export function buildStagePilotWorkflowRunDetail(requestId: string) {
       runtimeScorecard: "/v1/runtime-scorecard",
       developerOpsPack: "/v1/developer-ops-pack",
       workflowRuns: "/v1/workflow-runs",
-      reviewPack: "/v1/review-pack",
+      summaryPack: "/v1/summary-pack",
     },
   };
 }
@@ -432,7 +432,7 @@ export function buildStagePilotWorkflowReplay(options?: {
             detail.links.runtimeBrief,
             detail.links.runtimeScorecard,
             detail.links.developerOpsPack,
-            detail.links.reviewPack,
+            detail.links.summaryPack,
           ]
         : [],
       timelineCount: detail?.timeline.length ?? 0,
@@ -457,7 +457,7 @@ export function buildStagePilotWorkflowReplay(options?: {
       workflowRuns: "/v1/workflow-runs",
       runtimeBrief: "/v1/runtime-brief",
       runtimeScorecard: "/v1/runtime-scorecard",
-      reviewPack: "/v1/review-pack",
+      summaryPack: "/v1/summary-pack",
     },
   };
 }

@@ -454,8 +454,8 @@ describe("stagepilot api server", () => {
     const html = await response.text();
     expect(html).toContain("StagePilot Judge Console");
     expect(html).toContain("/v1/whatif");
-    expect(html).toContain("Loading benchmark-backed reviewer surface");
-    expect(html).toContain("Static/docs surfaces stay reviewer aids");
+    expect(html).toContain("Loading benchmark data");
+    expect(html).toContain("Static/docs surfaces stay supporting docs");
   });
 
   it("supports HEAD for desktop demo page", async () => {
@@ -728,15 +728,15 @@ describe("stagepilot api server", () => {
                   message: {
                     content: JSON.stringify({
                       summary:
-                        "Bounded retry is enough if reviewer evidence stays visible.",
+                        "Bounded retry is enough if evaluation evidence stays visible.",
                       selectedStrategy: "middleware+bounded-retry",
                       boundedRecovery:
                         "Retry once, then stop before downstream notify.",
                       watchouts: ["Keep notify behind human confirmation."],
                       handoffDecision: "review-before-notify",
-                      reviewerEvidence: [
+                      evaluationEvidence: [
                         "/v1/failure-taxonomy",
-                        "/v1/review-pack",
+                        "/v1/summary-pack",
                       ],
                     }),
                   },
@@ -827,7 +827,7 @@ describe("stagepilot api server", () => {
       }>;
       links: {
         protocolMatrix: string;
-        reviewPack: string;
+        summaryPack: string;
       };
       reviewPath: string[];
     };
@@ -843,7 +843,7 @@ describe("stagepilot api server", () => {
       )
     ).toBe(true);
     expect(body.links.protocolMatrix).toBe("/v1/protocol-matrix");
-    expect(body.links.reviewPack).toBe("/v1/review-pack");
+    expect(body.links.summaryPack).toBe("/v1/summary-pack");
     expect(body.reviewPath.length).toBeGreaterThanOrEqual(3);
   });
 
@@ -1127,7 +1127,7 @@ describe("stagepilot api server", () => {
     const body = (await response.json()) as {
       failureModes: Array<{
         id: string;
-        reviewerSurfaces: string[];
+        dashboardSurfaces: string[];
         signals: string[];
         status: string;
       }>;
@@ -1161,7 +1161,7 @@ describe("stagepilot api server", () => {
     ).toBe(true);
     expect(
       body.failureModes.some((item) =>
-        item.reviewerSurfaces.includes("/v1/runtime-scorecard")
+        item.dashboardSurfaces.includes("/v1/runtime-scorecard")
       )
     ).toBe(true);
     expect(body.failureModes.every((item) => item.signals.length >= 2)).toBe(
@@ -1170,7 +1170,7 @@ describe("stagepilot api server", () => {
     expect(body.summary.attentionCount).toBeGreaterThanOrEqual(1);
   });
 
-  it("returns benchmark-backed review pack", async () => {
+  it("returns benchmark-backed summary pack", async () => {
     process.env.GEMINI_API_KEY = "stagepilot-test-key";
     process.env.OPENCLAW_WEBHOOK_URL = "https://example.invalid/webhook";
 
@@ -1178,7 +1178,7 @@ describe("stagepilot api server", () => {
       engine: new StagePilotEngine(),
     });
 
-    const response = await fetch(`${baseUrl}/v1/review-pack`);
+    const response = await fetch(`${baseUrl}/v1/summary-pack`);
     expect(response.status).toBe(200);
 
     const body = (await response.json()) as {
@@ -1187,13 +1187,13 @@ describe("stagepilot api server", () => {
         developerOpsPack: string;
         providerBenchmarkScorecard: string;
         regressionGatePack: string;
-        reviewPack: string;
+        summaryPack: string;
         traceObservabilityPack: string;
         workflowRuns: string;
       };
       operatorJourney: Array<{ stage: string }>;
       proofAssets: Array<{ label: string; path: string }>;
-      proofBundle: {
+      evidenceBundle: {
         benchmark: {
           caseCount: number;
           improvements: {
@@ -1203,19 +1203,19 @@ describe("stagepilot api server", () => {
         benchmarkSummarySchema: string;
         regressionGatePackSchema: string;
         traceObservabilityPackSchema: string;
-        reviewerPosture: {
+        evaluationPosture: {
           claimTier: string;
           claimRule: string;
           docsOnlySurfaces: string[];
         };
       };
-      reviewPackId: string;
+      summaryPackId: string;
       reviewSequence: string[];
       twoMinuteReview: Array<{ step: string }>;
     };
 
-    expect(body.reviewPackId).toBe("stagepilot-review-pack-v1");
-    expect(body.links.reviewPack).toBe("/v1/review-pack");
+    expect(body.summaryPackId).toBe("stagepilot-summary-pack-v1");
+    expect(body.links.summaryPack).toBe("/v1/summary-pack");
     expect(body.operatorJourney).toHaveLength(4);
     expect(body.reviewSequence.length).toBeGreaterThanOrEqual(3);
     expect(body.twoMinuteReview.length).toBe(4);
@@ -1223,13 +1223,13 @@ describe("stagepilot api server", () => {
     expect(body.proofAssets).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          path: "docs/reviewer-proof-guide.md",
+          path: "docs/validation-guide.md",
         }),
       ])
     );
-    expect(body.proofBundle.benchmark.caseCount).toBeGreaterThanOrEqual(20);
+    expect(body.evidenceBundle.benchmark.caseCount).toBeGreaterThanOrEqual(20);
     expect(
-      body.proofBundle.benchmark.improvements.loopVsBaseline
+      body.evidenceBundle.benchmark.improvements.loopVsBaseline
     ).toBeGreaterThan(50);
     expect(body.links.developerOpsPack).toBe("/v1/developer-ops-pack");
     expect(body.links.providerBenchmarkScorecard).toBe(
@@ -1242,27 +1242,27 @@ describe("stagepilot api server", () => {
     expect(body.links.workflowRuns).toBe("/v1/workflow-runs");
     expect(body.links.workflowReplay).toBe("/v1/workflow-run-replay");
     expect(body.links.benchmarkSummary).toBe("/v1/benchmark-summary");
-    expect(body.proofBundle.benchmarkSummarySchema).toBe(
+    expect(body.evidenceBundle.benchmarkSummarySchema).toBe(
       "stagepilot-benchmark-summary-v1"
     );
-    expect(body.proofBundle.traceObservabilityPackSchema).toBe(
+    expect(body.evidenceBundle.traceObservabilityPackSchema).toBe(
       "stagepilot-trace-observability-pack-v1"
     );
-    expect(body.proofBundle.regressionGatePackSchema).toBe(
+    expect(body.evidenceBundle.regressionGatePackSchema).toBe(
       "stagepilot-regression-gate-pack-v1"
     );
-    expect(body.proofBundle.reviewerPosture.docsOnlySurfaces).toContain(
+    expect(body.evidenceBundle.evaluationPosture.docsOnlySurfaces).toContain(
       "site/"
     );
-    expect(body.proofBundle.reviewerPosture.claimTier).toMatch(
+    expect(body.evidenceBundle.evaluationPosture.claimTier).toMatch(
       REVIEWER_CLAIM_TIER_REGEX
     );
-    expect(body.proofBundle.reviewerPosture.claimRule).toContain(
-      "reviewer aids"
+    expect(body.evidenceBundle.evaluationPosture.claimRule).toContain(
+      "supporting docs"
     );
   });
 
-  it("returns benchmark summary for reviewer triage", async () => {
+  it("returns benchmark summary for triage", async () => {
     const { baseUrl } = await startServer({
       engine: new StagePilotEngine(),
     });
@@ -1324,7 +1324,7 @@ describe("stagepilot api server", () => {
         developerOpsPack: string;
       };
       proofRoutes: string[];
-      reviewerNotes: string[];
+      operatorNotes: string[];
       schema: string;
       selectedLane: {
         operatorFlow: string[];
@@ -1338,7 +1338,7 @@ describe("stagepilot api server", () => {
     expect(body.proofRoutes).toContain("/v1/workflow-runs");
     expect(body.links.developerOpsPack).toBe("/v1/developer-ops-pack");
     expect(body.links.workflowRuns).toBe("/v1/workflow-runs");
-    expect(body.reviewerNotes.length).toBeGreaterThanOrEqual(3);
+    expect(body.operatorNotes.length).toBeGreaterThanOrEqual(3);
   });
 
   it("returns workflow run history for developer workflow replay", async () => {
@@ -1414,7 +1414,7 @@ describe("stagepilot api server", () => {
     expect(detailBody.links.workflowRuns).toBe("/v1/workflow-runs");
   });
 
-  it("returns workflow replay surface with proof routes after execution", async () => {
+  it("returns workflow replay surface with evidence routes after execution", async () => {
     const { baseUrl } = await startServer({
       engine: new StagePilotEngine(),
     });

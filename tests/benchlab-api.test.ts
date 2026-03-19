@@ -477,19 +477,19 @@ describe("benchlab api", () => {
       expect.arrayContaining([expect.stringContaining("Validate configs")])
     );
 
-    const reviewPackResponse = await fetch(
-      `${baseUrl}/v1/benchlab/review-pack`
+    const summaryPackResponse = await fetch(
+      `${baseUrl}/v1/benchlab/summary-pack`
     );
-    const reviewPackPayload = await reviewPackResponse.json();
-    expect(reviewPackResponse.status).toBe(200);
-    expect(reviewPackPayload.reviewPackId).toBe("benchlab-review-pack-v1");
-    expect(reviewPackPayload.proofBundle.counts.configs).toBe(2);
-    expect(reviewPackPayload.proofBundle.counts.runs).toBeGreaterThanOrEqual(2);
-    expect(reviewPackPayload.proofBundle.bestArtifact.deltaPp).toBe(1.25);
-    expect(reviewPackPayload.proofBundle.dominantBucket).toBe("timeout");
-    expect(reviewPackPayload.twoMinuteReview).toHaveLength(4);
-    expect(reviewPackPayload.proofAssets.length).toBeGreaterThanOrEqual(4);
-    expect(reviewPackPayload.links.reviewPack).toBe("/v1/benchlab/review-pack");
+    const summaryPackPayload = await summaryPackResponse.json();
+    expect(summaryPackResponse.status).toBe(200);
+    expect(summaryPackPayload.summaryPackId).toBe("benchlab-summary-pack-v1");
+    expect(summaryPackPayload.evidenceBundle.counts.configs).toBe(2);
+    expect(summaryPackPayload.evidenceBundle.counts.runs).toBeGreaterThanOrEqual(2);
+    expect(summaryPackPayload.evidenceBundle.bestArtifact.deltaPp).toBe(1.25);
+    expect(summaryPackPayload.evidenceBundle.dominantBucket).toBe("timeout");
+    expect(summaryPackPayload.twoMinuteReview).toHaveLength(4);
+    expect(summaryPackPayload.proofAssets.length).toBeGreaterThanOrEqual(4);
+    expect(summaryPackPayload.links.summaryPack).toBe("/v1/benchlab/summary-pack");
 
     const schemaResponse = await fetch(
       `${baseUrl}/v1/benchlab/schema/job-report`

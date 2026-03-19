@@ -1,4 +1,4 @@
-<!-- biome-ignore-all lint: static StagePilot reviewer console -->
+<!-- biome-ignore-all lint: static StagePilot operator console -->
 <!doctype html>
 <html lang="en">
 
@@ -641,7 +641,7 @@
         <p class="lede">
           This is a calmer, review-first surface for StagePilot. It does not invent a new product layer.
           It simply makes the existing benchmark, runtime, workflow, and orchestration outputs easier to read
-          in the way a recruiter, hiring manager, or technical reviewer would actually scan them.
+          in the way a recruiter, hiring manager, or technical evaluator would actually scan them.
         </p>
       </article>
 
@@ -654,9 +654,9 @@
           <span id="heroState" class="status-pill live">Booting</span>
         </div>
         <div id="warmStatus" class="warm-status">
-          Loading benchmark-backed reviewer surface.
+          Loading benchmark data.
         </div>
-        <p class="muted-inline">Static/docs surfaces stay reviewer aids; benchmark and runtime routes remain the claim source of truth.</p>
+        <p class="muted-inline">Static/docs surfaces stay supporting docs; benchmark and runtime routes remain the claim source of truth.</p>
         <div id="warmChecklist" class="stack"></div>
       </aside>
     </section>
@@ -932,7 +932,7 @@
       insights: "/v1/insights",
       notify: "/v1/notify",
       plan: "/v1/plan",
-      reviewPack: "/v1/review-pack",
+      summaryPack: "/v1/summary-pack",
       runtimeBrief: "/v1/runtime-brief",
       runtimeScorecard: "/v1/runtime-scorecard",
       whatIf: "/v1/whatif",
@@ -988,7 +988,7 @@
       benchmarkSummary: null,
       latestMission: null,
       opsPack: null,
-      reviewPack: null,
+      summaryPack: null,
       runtimeBrief: null,
       runtimeScorecard: null,
       selectedScenarioId: SCENARIOS[0].id,
@@ -1176,10 +1176,10 @@
         },
         {
           label: "Claim Tier",
-          value: state.reviewPack?.proofBundle?.reviewerPosture?.claimTier === "runtime-backed-review-ready"
+          value: state.summaryPack?.evidenceBundle?.evaluationPosture?.claimTier === "runtime-backed-review-ready"
             ? "Runtime-backed"
             : "Bounded demo",
-          note: "Docs stay reviewer aids",
+          note: "Docs stay supporting docs",
         },
         {
           label: "Requests",
@@ -1217,14 +1217,14 @@
         },
         {
           title: "Claim tier",
-          detail: state.reviewPack?.proofBundle?.reviewerPosture?.claimTier === "runtime-backed-review-ready"
-            ? "Benchmark and integrations support runtime-backed reviewer claims."
+          detail: state.summaryPack?.evidenceBundle?.evaluationPosture?.claimTier === "runtime-backed-review-ready"
+            ? "Benchmark and integrations support runtime-backed benchmark claims."
             : "Keep the story premium but bounded: benchmark-backed proof, no oversized hosted-runtime promise.",
         },
         {
           title: "Runtime/source split",
-          detail: state.reviewPack?.proofBundle?.reviewerPosture?.claimRule
-            || "Load the review pack to pin docs-only posture before repeating claims.",
+          detail: state.summaryPack?.evidenceBundle?.evaluationPosture?.claimRule
+            || "Load the summary pack to pin docs-only posture before repeating claims.",
         },
         {
           title: "Benchmark floor",
@@ -1249,23 +1249,23 @@
 
       if (state.runtimeBrief?.diagnostics?.integrationReady) {
         setHeroState("Ready", "ok");
-        setWarmStatus("Runtime brief, review pack, and benchmark surfaces loaded successfully.", "");
+        setWarmStatus("Runtime brief, summary pack, and benchmark surfaces loaded successfully.", "");
       } else {
         setHeroState("Review", "warn");
-        setWarmStatus("Loading benchmark-backed reviewer surface. Live integrations are still bounded, which is okay for a portfolio demo.", "warn");
+        setWarmStatus("Loading benchmark data. Live integrations are still bounded, which is okay for a portfolio demo.", "warn");
       }
     }
 
     function renderReviewSummary() {
-      const reviewRoute = (state.reviewPack?.reviewSequence || []).slice(0, 3).join(" → ");
+      const reviewRoute = (state.summaryPack?.reviewSequence || []).slice(0, 3).join(" → ");
       const items = [
         {
           title: "Start here",
-          detail: reviewRoute || "Load the review pack to reveal the recommended reviewer route.",
+          detail: reviewRoute || "Load the summary pack to reveal the recommended data route.",
         },
         {
           title: "What this proves",
-          detail: state.reviewPack?.headline || "Review pack not loaded.",
+          detail: state.summaryPack?.headline || "Summary pack not loaded.",
         },
         {
           title: "Operator next step",
@@ -1291,7 +1291,7 @@
           title: "Planning utility",
           detail: missing.includes("gemini_api_key")
             ? "Gemini is not configured, so keep this in bounded-review mode and avoid overselling live narrative synthesis."
-            : "Gemini is configured, so live planning and insight enrichment are available for real reviewer runs.",
+            : "Gemini is configured, so live planning and insight enrichment are available for real evaluation runs.",
         },
         {
           title: "Delivery utility",
@@ -1300,7 +1300,7 @@
             : "Notify is wired for OpenClaw delivery, so the final operator step can be demonstrated honestly.",
         },
         {
-          title: "Proof freshness",
+          title: "Data freshness",
           detail: typeof workflowCount === "number"
             ? `${workflowCount} workflow events are recorded${typeof errorRate === "number" ? ` with ${formatPercent(errorRate)} error rate.` : "."}`
             : "Workflow history is still empty, so use the console as a guided surface rather than a proof of sustained traffic.",
@@ -1309,7 +1309,7 @@
           title: "Benchmark anchor",
           detail: benchmark?.topStrategy
             ? `${benchmark.topStrategy.strategy} is the strongest visible strategy at ${formatPercent(benchmark.topStrategy.successRate)}.`
-            : "Run the benchmark when the reviewer wants a reliability anchor before runtime details.",
+            : "Run the benchmark when the evaluator wants a reliability anchor before runtime details.",
         },
       ];
     }
@@ -1331,7 +1331,7 @@
         `- Planning utility: ${missing.includes("gemini_api_key") ? "bounded demo only" : "live-ready"}`,
         `- Delivery utility: ${missing.includes("openclaw_delivery") ? "local only" : "OpenClaw configured"}`,
         `- Next action: ${state.runtimeBrief?.diagnostics?.nextAction || "Load runtime brief first."}`,
-        `- Reviewer route: ${(state.reviewPack?.reviewSequence || []).join(" | ") || "Load review pack first."}`,
+        `- Data route: ${(state.summaryPack?.reviewSequence || []).join(" | ") || "Load summary pack first."}`,
       ].join("\\n");
       await navigator.clipboard.writeText(handoff);
       setWarmStatus("Runtime handoff copied. Use it to explain whether the console is live-ready or intentionally bounded.", "");
@@ -1350,7 +1350,7 @@
     }
 
     function renderProofAssets() {
-      const assets = state.reviewPack?.proofAssets || [];
+      const assets = state.summaryPack?.proofAssets || [];
       elements.proofAssets.innerHTML = assets.map((asset) => `
         <article class="card">
           <strong>${escapeHtml(asset.label)}</strong>
@@ -1405,7 +1405,7 @@
     }
 
     function renderReviewSequence() {
-      const items = state.reviewPack?.reviewSequence || [];
+      const items = state.summaryPack?.reviewSequence || [];
       elements.reviewSequence.innerHTML = items.map((item, index) => `
         <article class="card">
           <strong>Step ${index + 1}</strong>
@@ -1534,15 +1534,15 @@
     }
 
     async function loadSummaries() {
-      const [runtimeBrief, reviewPack, benchmarkSummary, runtimeScorecard, workflowRuns] = await Promise.all([
+      const [runtimeBrief, summaryPack, benchmarkSummary, runtimeScorecard, workflowRuns] = await Promise.all([
         fetchJson(API.runtimeBrief),
-        fetchJson(API.reviewPack),
+        fetchJson(API.summaryPack),
         fetchJson(API.benchmarkSummary),
         fetchJson(API.runtimeScorecard),
         fetchJson(API.workflowRuns),
       ]);
       state.runtimeBrief = runtimeBrief;
-      state.reviewPack = reviewPack;
+      state.summaryPack = summaryPack;
       state.benchmarkSummary = benchmarkSummary;
       state.runtimeScorecard = runtimeScorecard;
       state.workflowRuns = workflowRuns;
@@ -1605,7 +1605,7 @@
             message: "Reviewer-controlled notify step",
             target: {
               channel: "openclaw-demo",
-              target: "review-pack",
+              target: "summary-pack",
             },
           },
         }),
@@ -1693,7 +1693,7 @@
 
     boot().catch((error) => {
       setHeroState("Error", "warn");
-      setWarmStatus(error instanceof Error ? error.message : "Failed to boot reviewer console.", "danger");
+      setWarmStatus(error instanceof Error ? error.message : "Failed to boot operator console.", "danger");
     });
   </script>
 </body>

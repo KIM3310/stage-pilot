@@ -21,7 +21,7 @@ flowchart LR
   Parser --> StagePilot[StagePilot API]
   StagePilot --> Bench[Benchmark Summary]
   StagePilot --> Notify[Notifications or Handoffs]
-  Bench --> Review[BenchLab Review Pack]
+  Bench --> Review[BenchLab Summary Pack]
 ```
 
 ## Reliability posture
@@ -29,7 +29,7 @@ flowchart LR
 - malformed tool-call text is normalized before execution
 - benchmark summary exposes strongest and weakest strategies
 - BenchLab preserves artifact-level proof instead of anecdotal claims
-- review pack exposes lift before anyone reads raw benchmark JSON
+- summary pack exposes lift before anyone reads raw benchmark JSON
 
 ## What makes this useful for an AI engineer
 

@@ -471,7 +471,7 @@
               Copy Review Path
             </button>
             <button class="ghost" id="copy-proof-button" type="button">
-              Copy Proof Routes
+              Copy Routes
             </button>
             <button class="ghost" id="copy-top-claim-button" type="button">
               Copy Top Claim
@@ -756,7 +756,7 @@ Loading checked-in artifact failure taxonomy.</pre
       configs: [],
       forensics: null,
       jobs: [],
-      reviewPack: null,
+      summaryPack: null,
       runtimeBrief: null,
       runtimeModels: [],
       selectedRuntimeModelKey: null,
@@ -1081,24 +1081,24 @@ Loading checked-in artifact failure taxonomy.</pre
         .join("");
     }
 
-    function renderReviewPack(payload) {
-      state.reviewPack = payload || null;
+    function renderSummaryPack(payload) {
+      state.summaryPack = payload || null;
 
       if (!payload || payload.status !== "ok") {
         els.briefReviewSequence.textContent =
-          "Review pack unavailable. Check /health, /v1/benchlab/runtime-brief, and artifact routes.";
+          "Summary pack unavailable. Check /health, /v1/benchlab/runtime-brief, and artifact routes.";
         return;
       }
 
-      const counts = payload.proofBundle?.counts || {};
-      const bestDelta = payload.proofBundle?.bestArtifact?.deltaPp;
-      const bestClaim = payload.proofBundle?.bestArtifact?.claimName || "-";
+      const counts = payload.evidenceBundle?.counts || {};
+      const bestDelta = payload.evidenceBundle?.bestArtifact?.deltaPp;
+      const bestClaim = payload.evidenceBundle?.bestArtifact?.claimName || "-";
 
       els.briefBadge.textContent =
-        payload.reviewPackId || "benchlab-review-pack";
+        payload.summaryPackId || "benchlab-summary-pack";
       els.briefHeadline.textContent =
         payload.headline ||
-        "BenchLab reviewer proof is ready for configs, runs, and checked-in claims.";
+        "BenchLab validation data is ready for configs, runs, and checked-in claims.";
       els.briefStats.innerHTML = [
         { label: "Configs", value: String(counts.configs ?? 0) },
         { label: "Runs", value: String(counts.runs ?? 0) },
@@ -1109,12 +1109,12 @@ Loading checked-in artifact failure taxonomy.</pre
               ? `${formatMetric(bestDelta)}pp`
               : "-",
         },
-        { label: "Bucket", value: payload.proofBundle?.dominantBucket || "-" },
+        { label: "Bucket", value: payload.evidenceBundle?.dominantBucket || "-" },
         {
           label: "Improved",
-          value: String(payload.proofBundle?.improvedArtifacts ?? 0),
+          value: String(payload.evidenceBundle?.improvedArtifacts ?? 0),
         },
-        { label: "Schema", value: payload.proofBundle?.schema || "-" },
+        { label: "Schema", value: payload.evidenceBundle?.schema || "-" },
       ]
         .map(
           (item) =>
@@ -1899,9 +1899,9 @@ Loading checked-in artifact failure taxonomy.</pre
       renderRuntimeBrief(payload);
     }
 
-    async function loadReviewPack() {
-      const payload = await fetchJson("/v1/benchlab/review-pack");
-      renderReviewPack(payload);
+    async function loadSummaryPack() {
+      const payload = await fetchJson("/v1/benchlab/summary-pack");
+      renderSummaryPack(payload);
     }
 
     async function refreshAll() {
@@ -1913,7 +1913,7 @@ Loading checked-in artifact failure taxonomy.</pre
           loadArtifacts(),
           loadVariantSearch(),
         ]);
-        await loadReviewPack();
+        await loadSummaryPack();
         await loadRuns();
         if (state.selectedJobId) {
           const matchedJob = state.jobs.find(
@@ -1962,19 +1962,19 @@ Loading checked-in artifact failure taxonomy.</pre
 
     async function handleCopyReviewPath() {
       const counts =
-        state.reviewPack?.proofBundle?.counts ||
+        state.summaryPack?.evidenceBundle?.counts ||
         state.runtimeBrief?.evidenceCounts ||
         {};
       const steps =
-        Array.isArray(state.reviewPack?.reviewSequence) &&
-        state.reviewPack.reviewSequence.length > 0
-          ? state.reviewPack.reviewSequence
+        Array.isArray(state.summaryPack?.reviewSequence) &&
+        state.summaryPack.reviewSequence.length > 0
+          ? state.summaryPack.reviewSequence
           : [els.briefReviewSequence.textContent || "Review path unavailable"];
       const text = [
-        "BenchLab reviewer path",
+        "BenchLab evaluation path",
         `Headline: ${els.briefHeadline.textContent || "-"}`,
         `Schema: ${
-          state.reviewPack?.proofBundle?.schema ||
+          state.summaryPack?.evidenceBundle?.schema ||
           state.runtimeBrief?.reportContract?.schema ||
           "-"
         }`,
@@ -2001,30 +2001,30 @@ Loading checked-in artifact failure taxonomy.</pre
 
     async function handleCopyProofRoutes() {
       const counts =
-        state.reviewPack?.proofBundle?.counts ||
+        state.summaryPack?.evidenceBundle?.counts ||
         state.runtimeBrief?.evidenceCounts ||
         {};
       const text = [
-        "BenchLab proof routes",
+        "BenchLab evidence routes",
         `Configs: ${counts.configs ?? 0}`,
         `Runs: ${counts.runs ?? 0}`,
         `Artifacts: ${counts.artifacts ?? 0}`,
         "- /health",
         "- /v1/benchlab/runtime-brief",
-        "- /v1/benchlab/review-pack",
+        "- /v1/benchlab/summary-pack",
         "- /v1/benchlab/schema/job-report",
         "- /v1/benchlab/artifacts/best",
-        "- docs/review-pack.svg",
+        "- docs/summary-pack.svg",
       ].join("\n");
 
       try {
         await copyTextToClipboard(text);
-        flashButtonLabel(els.copyProofButton, "Copy Proof Routes", "Copied");
+        flashButtonLabel(els.copyProofButton, "Copy Routes", "Copied");
       } catch (error) {
-        console.warn("copy proof routes failed", error);
+        console.warn("copy evidence routes failed", error);
         flashButtonLabel(
           els.copyProofButton,
-          "Copy Proof Routes",
+          "Copy Routes",
           "Copy failed"
         );
       }
@@ -2032,7 +2032,7 @@ Loading checked-in artifact failure taxonomy.</pre
 
     async function handleCopyTopClaim() {
       const strongestArtifact =
-        state.reviewPack?.proofBundle?.bestArtifact ||
+        state.summaryPack?.evidenceBundle?.bestArtifact ||
         state.artifacts.find((artifact) => artifact.outcome === "improved") ||
         state.artifacts[0] ||
         null;
@@ -2046,8 +2046,8 @@ Loading checked-in artifact failure taxonomy.</pre
         `Scores: ${formatMetric(strongestArtifact?.baselineScore)} -> ${formatMetric(strongestArtifact?.ralphScore)}`,
         `Cases: ${strongestArtifact?.casesPerCategory ?? "-"}`,
         "",
-        "Proof routes",
-        "- /v1/benchlab/review-pack",
+        "Evidence routes",
+        "- /v1/benchlab/summary-pack",
         "- /v1/benchlab/artifacts/best",
         "- /v1/benchlab/artifacts/forensics",
       ].join("\n");

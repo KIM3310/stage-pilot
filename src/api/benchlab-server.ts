@@ -18,7 +18,7 @@ import { dirname, extname, join, relative, resolve, sep } from "node:path";
 import { renderBenchLabDemoHtml } from "./benchlab-demo";
 import {
   buildBenchLabJobReportSchema,
-  buildBenchLabReviewPack,
+  buildBenchLabSummaryPack,
   buildBenchLabRuntimeBrief,
 } from "./benchlab-service-meta";
 
@@ -2636,12 +2636,12 @@ export function createBenchLabApiServer(
     });
   }
 
-  function buildReviewPackPayload(): JsonObject {
+  function buildSummaryPackPayload(): JsonObject {
     const bestArtifacts = listBestArtifactSummaries(repoRoot);
     const bestArtifact = bestArtifacts[0] ?? null;
     const artifactForensicsOverview = listArtifactForensicsOverview(repoRoot);
 
-    return buildBenchLabReviewPack({
+    return buildBenchLabSummaryPack({
       artifactCount: bestArtifacts.length,
       artifactsWithTrackedErrors:
         artifactForensicsOverview.summary.artifactsWithTrackedErrors,
@@ -2711,15 +2711,15 @@ export function createBenchLabApiServer(
     return true;
   }
 
-  function handleReviewPackRoute(
+  function handleSummaryPackRoute(
     request: IncomingMessage,
     response: ServerResponse,
     pathname: string
   ): boolean {
-    if (request.method !== "GET" || pathname !== "/v1/benchlab/review-pack") {
+    if (request.method !== "GET" || pathname !== "/v1/benchlab/summary-pack") {
       return false;
     }
-    sendJson(response, 200, buildReviewPackPayload());
+    sendJson(response, 200, buildSummaryPackPayload());
     return true;
   }
 
@@ -3133,7 +3133,7 @@ export function createBenchLabApiServer(
     (request, response, requestUrl) =>
       handleRuntimeBriefRoute(request, response, requestUrl.pathname),
     (request, response, requestUrl) =>
-      handleReviewPackRoute(request, response, requestUrl.pathname),
+      handleSummaryPackRoute(request, response, requestUrl.pathname),
     (request, response, requestUrl) =>
       handleJobReportSchemaRoute(request, response, requestUrl.pathname),
     (request, response, requestUrl) =>

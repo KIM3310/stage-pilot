@@ -58,7 +58,7 @@ Winner replay with a slightly wider sample:
 - `coverage` helped `phi3:latest` in the tiny pilot, but flattened out in validation.
 - `gemma3:4b` and `qwen2.5:1.5b` are good reminders that RALPH is **variant-sensitive**, not magic.
 
-## Checked-in proof assets
+## Checked-in test assets
 
 Improved / flat validation claims now live under:
 

@@ -16,7 +16,7 @@ terraform apply \
   -var="image=asia-northeast3-docker.pkg.dev/your-project/apps/stagepilot:latest" \
   -var='env={
     STAGEPILOT_RUNTIME_STORE_PATH="/app/.runtime/stagepilot-runtime-events.db"
-    STAGEPILOT_OPERATOR_ALLOWED_ROLES="case_manager,reviewer"
+    STAGEPILOT_OPERATOR_ALLOWED_ROLES="case_manager,operator"
   }' \
   -var='secret_env={
     STAGEPILOT_OPERATOR_TOKEN={secret="stagepilot-operator-token",version="latest"}
@@ -36,6 +36,6 @@ terraform apply \
 ## Notes
 
 - Use `env` for non-secret config and `secret_env` for Secret Manager-backed values.
-- When `allow_unauthenticated=false`, add explicit `invoker_members` for reviewers or platform groups.
+- When `allow_unauthenticated=false`, add explicit `invoker_members` for operators or platform groups.
 - The runtime identity gets `roles/secretmanager.secretAccessor` on referenced secrets automatically.
 - Container probes default to `/health`.

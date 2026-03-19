@@ -246,12 +246,12 @@
         <p class="lede">
           Start here if you want proof that non-native models can still call
           tools safely. StagePilot turns malformed tool text into schema-safe
-          output, shows the benchmark lift, and keeps the reviewer story honest
+          output, shows the benchmark lift, and keeps the project story honest
           with a static proof surface instead of a fake hosted runtime.
         </p>
         <div class="proof-strip">
           <span class="chip">raw benchmark → middleware → recovery loop</span>
-          <span class="chip">copy-ready reviewer path</span>
+          <span class="chip">copy-ready evaluation path</span>
         </div>
       </section>
 
@@ -286,7 +286,7 @@
             <div class="value">Artifacts first</div>
             <p>
               Start with the saved benchmark JSON and the parser recovery lift
-              so the reviewer sees evidence before architecture language.
+              so the user sees evidence before architecture language.
             </p>
           </article>
           <article class="card">
@@ -326,14 +326,14 @@
               separately from the core parser package.
             </li>
             <li>
-              A static reviewer surface can still explain trust boundaries,
+              A static dashboard can still explain trust boundaries,
               benchmark lift, and adoption posture without pretending to host
               the full runtime.
             </li>
           </ul>
         </article>
         <article class="panel">
-          <h2>30-second reviewer path</h2>
+          <h2>30-second evaluation path</h2>
           <ul class="list">
             <li>
               Check the raw pass rate first so the middleware lift is concrete.
@@ -358,14 +358,14 @@
           <button id="lensRecruiterBtn" class="lens-tab active" type="button">
             Recruiter
           </button>
-          <button id="lensReviewerBtn" class="lens-tab" type="button">
-            Reviewer
+          <button id="lensEvalBtn" class="lens-tab" type="button">
+            Evaluation
           </button>
           <button id="lensPlatformBtn" class="lens-tab" type="button">
             Platform
           </button>
         </div>
-        <h2 id="lensHeadline">Recruiter-first proof path</h2>
+        <h2 id="lensHeadline">Recruiter-first evidence path</h2>
         <p id="lensSummary" class="hint">
           Start with benchmark lift, then show the parser recovery story, then
           end with the copyable review path.
@@ -398,8 +398,8 @@
           <ul class="list">
             <li>
               <a
-                href="https://github.com/KIM3310/stage-pilot/blob/main/docs/reviewer-proof-guide.md"
-                >Reviewer proof guide</a
+                href="https://github.com/KIM3310/stage-pilot/blob/main/docs/validation-guide.md"
+                >Validation data guide</a
               >
             </li>
             <li>
@@ -506,20 +506,20 @@
     const lensSummary = document.getElementById("lensSummary");
     const lensGrid = document.getElementById("lensGrid");
     const lensRecruiterBtn = document.getElementById("lensRecruiterBtn");
-    const lensReviewerBtn = document.getElementById("lensReviewerBtn");
+    const lensEvalBtn = document.getElementById("lensEvalBtn");
     const lensPlatformBtn = document.getElementById("lensPlatformBtn");
     const quickActions = {
       reviewPath: {
         buttonId: "copyReviewPathBtn",
         payload:
-          "StagePilot review path\n- Read the reviewer proof guide for the fastest grounded walkthrough.\n- Read the executive one-pager for the benchmark claim.\n- Open solution architecture for runtime boundaries.\n- Check the latest benchmark artifact before repeating the lift numbers.\n- Use the operator runbook only when the hosted runtime is actually involved.",
+          "StagePilot review path\n- Read the validation data guide for the fastest grounded walkthrough.\n- Read the executive one-pager for the benchmark claim.\n- Open solution architecture for runtime boundaries.\n- Check the latest benchmark artifact before repeating the lift numbers.\n- Use the operator runbook only when the hosted runtime is actually involved.",
         successLabel: "Review path copied.",
         failureLabel: "Failed to copy review path.",
       },
       reviewerBrief: {
         buttonId: "copyReviewerBriefBtn",
         payload:
-          "StagePilot benchmark brief\nHeadline: Reliable tool calling for non-native models.\nBaseline: 29.17%\nMiddleware: 87.50%\nRalph loop: 100.00% on the current checked-in 24-case snapshot.\nStatic site posture: reviewer-first Pages surface, runtime hosted separately.",
+          "StagePilot benchmark brief\nHeadline: Reliable tool calling for non-native models.\nBaseline: 29.17%\nMiddleware: 87.50%\nRalph loop: 100.00% on the current checked-in 24-case snapshot.\nStatic site posture: user-friendly Pages surface, runtime hosted separately.",
         successLabel: "Benchmark brief copied.",
         failureLabel: "Failed to copy benchmark brief.",
       },
@@ -534,7 +534,7 @@
     let currentLens = "recruiter";
     const lensConfig = {
       recruiter: {
-        headline: "Recruiter-first proof path",
+        headline: "Recruiter-first evidence path",
         summary:
           "Start with benchmark lift, then show the parser recovery story, then end with the copyable review path.",
         cards: [
@@ -552,7 +552,7 @@
           ],
         ],
       },
-      reviewer: {
+      evaluation: {
         headline: "Reviewer lens",
         summary:
           "Use this when the audience cares more about benchmark rigor, checked-in artifacts, and trust boundary than the parser headline alone.",
@@ -574,7 +574,7 @@
       platform: {
         headline: "Platform lens",
         summary:
-          "Use this when the reviewer wants to know how the parser package, API surface, and hosted wrapper fit together.",
+          "Use this when the evaluator wants to know how the parser package, API surface, and hosted wrapper fit together.",
         cards: [
           [
             "01 · Package first",
@@ -605,14 +605,14 @@
             `<article class="lens-card"><strong>${title}</strong><p>${body}</p></article>`
         )
         .join("");
-      for (const btn of [lensRecruiterBtn, lensReviewerBtn, lensPlatformBtn]) {
+      for (const btn of [lensRecruiterBtn, lensEvalBtn, lensPlatformBtn]) {
         btn?.classList.remove("active");
       }
       if (currentLens === "recruiter") {
         lensRecruiterBtn?.classList.add("active");
       }
-      if (currentLens === "reviewer") {
-        lensReviewerBtn?.classList.add("active");
+      if (currentLens === "operator") {
+        lensEvalBtn?.classList.add("active");
       }
       if (currentLens === "platform") {
         lensPlatformBtn?.classList.add("active");
@@ -648,8 +648,8 @@
       currentLens = "recruiter";
       renderLensGrid();
     });
-    lensReviewerBtn?.addEventListener("click", () => {
-      currentLens = "reviewer";
+    lensEvalBtn?.addEventListener("click", () => {
+      currentLens = "operator";
       renderLensGrid();
     });
     lensPlatformBtn?.addEventListener("click", () => {

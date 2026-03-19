@@ -28,7 +28,7 @@
     },
     {
       "gate": "mixed-format-regression-watch",
-      "signal": "Gemini-hybrid multiline indentation drift is bounded but still deserves reviewer-visible watch status.",
+      "signal": "Gemini-hybrid multiline indentation drift is bounded but still deserves visible watch status.",
       "decision": "watch",
       "focus": "contract drift",
       "owner": "evals"

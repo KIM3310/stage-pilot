@@ -9,6 +9,6 @@
 | R5 | CI duration inflates due to multiple jobs | Medium | Medium | Cache pnpm store, parallelize lint/type/test, fail fast with concurrency groups. |
 | R6 | Lack of docs causes misconfiguration of middleware templates | Medium | Medium | Maintain docs/STATUS cadence, add usage docs referencing hello middleware example. |
 | R7 | Release automation accidentally publishes unstable builds | Medium | Low | Require manual approval in release workflow and document release checklist. |
-| R8 | Example + docs drift from feature behavior | Medium | Medium | Tie hello middleware test to exported behavior and add docs review gate per PR. |
+| R8 | Example + docs drift from feature behavior | Medium | Medium | Tie hello middleware test to exported behavior and add docs quality gate per PR. |
 | R9 | Local environments missing pnpm/node versions block contributors | Medium | Medium | Document `corepack` bootstrap + provide fallback npm scripts in docs/STATUS + README. |
 | R10 | Observability hooks never implemented leading to diagnosability gaps | High | Low | Track as explicit task, guard with TODO, and add acceptance criteria in plan/spec. |

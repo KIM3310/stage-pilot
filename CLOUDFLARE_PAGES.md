@@ -6,5 +6,5 @@
 
 Notes:
 
-- This deploy is a static reviewer microsite only.
+- This deploy is a static microsite only.
 - The live StagePilot API/runtime is a separate service concern and is not hosted on Pages.

@@ -471,6 +471,33 @@ pnpm test
 pnpm build
 ```
 
+## OpenTelemetry (opt-in)
+
+Telemetry is **opt-in** and only activates when the `OTEL_EXPORTER_OTLP_ENDPOINT` environment variable is set.
+
+```bash
+# Point at any OTLP-compatible collector (e.g. Jaeger, Grafana Tempo, Datadog)
+export OTEL_EXPORTER_OTLP_ENDPOINT="http://localhost:4318"
+pnpm api:stagepilot
+```
+
+When enabled the runtime will:
+- Initialize an OTLP trace exporter with service name `stage-pilot`.
+- Auto-instrument Node.js HTTP, DNS, and other common libraries.
+- Create spans for `wrapGenerate` and `wrapStream` in the tool-call middleware.
+- Record `tool_calls_total` (counter), `tool_call_parse_duration_ms` (histogram), `tool_call_retries_total` (counter), and `benchmark_success_rate` (gauge) metrics.
+
+To initialize telemetry programmatically (e.g. in a custom entrypoint):
+
+```ts
+import { initTelemetry } from "./telemetry";
+await initTelemetry();
+```
+
+| Variable | Purpose | Default |
+|---|---|---|
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | OTLP collector base URL | _(unset = telemetry off)_ |
+
 ## Repository Hygiene
 - Keep runtime artifacts out of commits (`.codex_runs/`, cache folders, temporary venvs).
 - Prefer running verification commands above before opening a PR.

@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" fill="none">
   <rect width="960" height="540" fill="#0B0E14"/>
   <rect x="24" y="24" width="912" height="492" rx="24" fill="#111827" stroke="#2A3444"/>
-  <text x="48" y="62" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="26" font-weight="700">StagePilot Review Pack</text>
+  <text x="48" y="62" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="26" font-weight="700">StagePilot Summary Pack</text>
   <text x="48" y="90" fill="#7DD3FC" font-family="Arial, sans-serif" font-size="14">parser -&gt; stagepilot orchestration -&gt; benchlab evidence</text>
 
   <rect x="48" y="126" width="268" height="132" rx="16" fill="#121B2A" stroke="#00E5FF"/>
@@ -28,11 +28,11 @@
   <path d="M624 184L636 192L624 200" stroke="#5EEAD4" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 
   <rect x="48" y="294" width="404" height="176" rx="16" fill="#0F172A" stroke="#334155"/>
-  <text x="68" y="324" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">Reviewer APIs</text>
+  <text x="68" y="324" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">Evaluation APIs</text>
   <text x="68" y="356" fill="#E5E7EB" font-family="Arial, sans-serif" font-size="14">StagePilot</text>
-  <text x="68" y="382" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">/v1/runtime-brief   /v1/review-pack   /v1/schema/plan-report</text>
+  <text x="68" y="382" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">/v1/runtime-brief   /v1/summary-pack   /v1/schema/plan-report</text>
   <text x="68" y="418" fill="#E5E7EB" font-family="Arial, sans-serif" font-size="14">BenchLab</text>
-  <text x="68" y="444" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">/v1/benchlab/runtime-brief   /v1/benchlab/review-pack   /v1/benchlab/schema/job-report</text>
+  <text x="68" y="444" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">/v1/benchlab/runtime-brief   /v1/benchlab/summary-pack   /v1/benchlab/schema/job-report</text>
 
   <rect x="484" y="294" width="428" height="176" rx="16" fill="#0F172A" stroke="#334155"/>
   <text x="504" y="324" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">Review Sequence</text>

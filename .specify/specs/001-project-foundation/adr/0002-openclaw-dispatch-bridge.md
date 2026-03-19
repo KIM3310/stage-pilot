@@ -8,7 +8,7 @@ StagePilot already generates execution-ready plans (`/v1/plan`), ontology insigh
 For real operations flow, case workers need a direct way to push briefings into messaging channels used by public operators (e.g. Telegram/Google Chat) without leaving the console.
 
 We need:
-- minimal implementation risk during hackathon,
+- minimal implementation risk during project sprint,
 - CPU-only compatibility,
 - optional integration (service must still run when OpenClaw is not configured).
 

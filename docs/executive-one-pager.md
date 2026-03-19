@@ -11,7 +11,7 @@ Tool-calling failures often look like model failures, but many are really parsin
 ## What StagePilot changes
 
 - raises success rate for non-native tool-calling models
-- exposes benchmark lift through compact, reviewer-safe proof surfaces
+- exposes benchmark lift through compact, bounded evidence surfaces
 - turns parser reliability and retry discipline into a productized runtime boundary
 
 ## Reviewer value
@@ -34,11 +34,11 @@ Tool-calling failures often look like model failures, but many are really parsin
 2. middleware insertion for one workflow
 3. orchestrated StagePilot integration with notifications and handoff
 
-## Best proof path
+## Best evidence path
 
 - `pnpm review:proof`
 - `/v1/runtime-brief`
-- `/v1/review-pack`
+- `/v1/summary-pack`
 - `/v1/trace-observability-pack`
 - `docs/benchmarks/stagepilot-latest.json`
 - `docs/solution-architecture.md`

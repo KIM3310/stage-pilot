@@ -90,14 +90,14 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build
         run: pnpm build
-      - name: Generate benchmark proof artifact
+      - name: Generate benchmark test artifact
         run: pnpm bench:stagepilot
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
         with:
           name: dist
           path: dist
-      - name: Upload benchmark proof artifact
+      - name: Upload benchmark test artifact
         uses: actions/upload-artifact@v4
         with:
           name: stagepilot-benchmark-proof

@@ -16,7 +16,7 @@ Core routes:
 - `/v1/developer-ops-pack`
 - `/v1/workflow-runs`
 - `/v1/benchmark-summary`
-- `/v1/review-pack`
+- `/v1/summary-pack`
 - `/v1/schema/plan-report`
 
 The pack stays generic. It can back challenge submissions or interviews without turning the whole repo into a single-purpose Git tooling demo.

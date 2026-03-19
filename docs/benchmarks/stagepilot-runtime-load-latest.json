@@ -37,7 +37,7 @@
   },
   "notes": [
     "Local rehearsal used the checked-in k6 runtime harness against a loopback StagePilot backend.",
-    "The goal is bounded runtime evidence for reviewer conversations, not a claim of internet-scale frontier traffic.",
+    "The goal is bounded runtime evidence for technical discussions, not a claim of internet-scale frontier traffic.",
     "Latency posture should always be paired with benchmark and protocol surfaces before reliability claims are repeated."
   ]
 }

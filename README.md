@@ -40,10 +40,10 @@ This repo is strongest for frontier/runtime reliability and platform-infrastruct
 
 | Team lens | What should stand out fast | Start here |
 |---|---|---|
-| Frontier / runtime reliability | parser hardening, benchmark lift, provider tradeoff posture, replayable traces, explicit regression gates, bounded retry posture, explicit failure classes, checked-in perf rehearsal | [`docs/reviewer-proof-guide.md`](docs/reviewer-proof-guide.md), `GET /v1/provider-benchmark-scorecard`, `GET /v1/trace-observability-pack`, `GET /v1/regression-gate-pack`, `GET /v1/perf-evidence-pack`, `GET /v1/failure-taxonomy`, `GET /v1/review-pack`, [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json) |
+| Frontier / runtime reliability | parser hardening, benchmark lift, provider tradeoff posture, replayable traces, explicit regression gates, bounded retry posture, explicit failure classes, checked-in perf rehearsal | [`docs/validation-guide.md`](docs/validation-guide.md), `GET /v1/provider-benchmark-scorecard`, `GET /v1/trace-observability-pack`, `GET /v1/regression-gate-pack`, `GET /v1/perf-evidence-pack`, `GET /v1/failure-taxonomy`, `GET /v1/summary-pack`, [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json) |
 | Big tech / AI infra | runtime/API separation, contract visibility, developer-ops posture, honest benchmark boundary, bounded load evidence, replay-backed debugging posture | `GET /v1/runtime-brief`, `GET /v1/perf-evidence-pack`, `GET /v1/trace-observability-pack`, `GET /v1/regression-gate-pack`, `GET /v1/provider-benchmark-scorecard`, `GET /v1/failure-taxonomy`, `GET /v1/schema/plan-report`, `GET /v1/developer-ops-pack` |
-| Evaluation systems | benchmark artifacts, variant comparison, local experiment loop, failure forensics | `GET /v1/benchlab/review-pack`, [`docs/benchlab/LOCAL_OLLAMA_SWEEP_20260311.md`](docs/benchlab/LOCAL_OLLAMA_SWEEP_20260311.md), `experiments/` |
-| High-trust workflow systems | reviewable workflow history, replayable proof surfaces, explicit parser-to-handoff boundary | `GET /v1/workflow-runs`, `GET /v1/workflow-run-replay`, [`docs/solution-architecture.md`](docs/solution-architecture.md) |
+| Evaluation systems | benchmark artifacts, variant comparison, local experiment loop, failure forensics | `GET /v1/benchlab/summary-pack`, [`docs/benchlab/LOCAL_OLLAMA_SWEEP_20260311.md`](docs/benchlab/LOCAL_OLLAMA_SWEEP_20260311.md), `experiments/` |
+| High-trust workflow systems | reviewable workflow history, replayable evidence surfaces, explicit parser-to-handoff boundary | `GET /v1/workflow-runs`, `GET /v1/workflow-run-replay`, [`docs/solution-architecture.md`](docs/solution-architecture.md) |
 
 ## Project links
 
@@ -51,7 +51,7 @@ This repo is strongest for frontier/runtime reliability and platform-infrastruct
 - GitHub repository: https://github.com/KIM3310/stage-pilot
 - Demo video: https://youtu.be/6trgTH1vX4M
 
-## 60-second reviewer start
+## 60-second quick start
 
 ```bash
 pnpm install
@@ -61,31 +61,31 @@ pnpm api:stagepilot
 ```
 
 Then read, in order:
-- [`docs/reviewer-proof-guide.md`](docs/reviewer-proof-guide.md)
+- [`docs/validation-guide.md`](docs/validation-guide.md)
 - [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json)
 - [`docs/executive-one-pager.md`](docs/executive-one-pager.md)
 - [`docs/solution-architecture.md`](docs/solution-architecture.md)
 
-If you only want the flagship story: treat this repo as the public proof that I can evaluate unreliable tool calls, harden the parser/runtime boundary, and present the results in a reviewer-safe way.
+If you only want the flagship story: treat this repo as the public proof that I can evaluate unreliable tool calls, harden the parser/runtime boundary, and present the results in a bounded way.
 
-## Reviewer Front Door
+## Quick Start
 
-- **Recruiter / hiring manager:** read [`docs/reviewer-proof-guide.md`](docs/reviewer-proof-guide.md), then inspect [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json).
-- **Bounded public live lane:** `POST /v1/live-review-run` with a fixed `scenarioId` when you want reviewer-safe OpenAI proof instead of the full operator mutation surface.
-- **AI engineer:** open `GET /v1/provider-benchmark-scorecard` -> `GET /v1/trace-observability-pack` -> `GET /v1/regression-gate-pack` -> `GET /v1/perf-evidence-pack` -> `GET /v1/failure-taxonomy` -> `GET /v1/review-pack` -> `GET /v1/schema/plan-report` -> `src/`.
+- **Recruiter / hiring manager:** read [`docs/validation-guide.md`](docs/validation-guide.md), then inspect [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json).
+- **Bounded public live lane:** `POST /v1/live-review-run` with a fixed `scenarioId` when you want bounded OpenAI proof instead of the full operator mutation surface.
+- **AI engineer:** open `GET /v1/provider-benchmark-scorecard` -> `GET /v1/trace-observability-pack` -> `GET /v1/regression-gate-pack` -> `GET /v1/perf-evidence-pack` -> `GET /v1/failure-taxonomy` -> `GET /v1/summary-pack` -> `GET /v1/schema/plan-report` -> `src/`.
 - **Platform / solutions architect:** open `GET /v1/runtime-brief` -> `GET /v1/perf-evidence-pack` -> `GET /v1/trace-observability-pack` -> `GET /v1/regression-gate-pack` -> `GET /v1/provider-benchmark-scorecard` -> `GET /v1/failure-taxonomy` -> `GET /v1/developer-ops-pack` -> [`docs/solution-architecture.md`](docs/solution-architecture.md).
-- **Eval / research reviewer:** open `GET /v1/benchlab/review-pack` -> `docs/benchlab/` -> `experiments/`.
+- **Eval / research engineer:** open `GET /v1/benchlab/summary-pack` -> `docs/benchlab/` -> `experiments/`.
 
 ## Choose Your First Lane
 
 - **Parser package (real shipping surface):** start in `src/` + `package.json`; this is the npm/runtime path that actually hardens tool-call parsing.
-- **StagePilot runtime/API (real runtime surface):** start with `/v1/runtime-brief` and `/v1/review-pack`, then trace the implementation in `src/stagepilot/` and `src/api/`.
+- **StagePilot runtime/API (real runtime surface):** start with `/v1/runtime-brief` and `/v1/summary-pack`, then trace the implementation in `src/stagepilot/` and `src/api/`.
 - **BenchLab proof surface:** use `docs/benchmarks/`, `docs/benchlab/`, and `/v1/benchlab/*` for checked-in experiment evidence.
-- **Static/docs-only helpers:** `docs/review-pack.svg`, `site/`, and narrative docs are reviewer aids, not the benchmark or runtime source of truth.
+- **Static/docs-only helpers:** `docs/summary-pack.svg`, `site/`, and narrative docs are supporting docs, not the benchmark or runtime source of truth.
 
-## Review Pack At A Glance
+## Summary Pack At A Glance
 
-- StagePilot reviewer API: `GET /v1/runtime-brief`, `GET /v1/review-pack`, `GET /v1/schema/plan-report`
+- StagePilot evaluation API: `GET /v1/runtime-brief`, `GET /v1/summary-pack`, `GET /v1/schema/plan-report`
 - Provider benchmark scorecard: `GET /v1/provider-benchmark-scorecard`
 - Runtime perf evidence pack: `GET /v1/perf-evidence-pack`
 - Trace observability pack: `GET /v1/trace-observability-pack`
@@ -94,8 +94,8 @@ If you only want the flagship story: treat this repo as the public proof that I 
 - StagePilot developer workflow pack: `GET /v1/developer-ops-pack`
 - StagePilot workflow history: `GET /v1/workflow-runs`, `GET /v1/workflow-runs/:requestId`
 - StagePilot workflow replay surface: `GET /v1/workflow-run-replay`
-- Local reviewer summary: `pnpm review:proof`
-- BenchLab reviewer API: `GET /v1/benchlab/runtime-brief`, `GET /v1/benchlab/review-pack`, `GET /v1/benchlab/schema/job-report`
+- Local summary: `pnpm review:proof`
+- BenchLab evaluation API: `GET /v1/benchlab/runtime-brief`, `GET /v1/benchlab/summary-pack`, `GET /v1/benchlab/schema/job-report`
 - Checked-in 40-case expanded benchmark proof: baseline `25.00%` -> middleware `65.00%` -> Ralph loop `90.00%` (4 documented failure cases)
 - Checked-in BenchLab claims: runtime compare, variant leaderboard, best artifacts, and failure forensics
 - Latest no-key local validation: `llama3.1:8b`, `llama3.2:latest`, `qwen3.5:4b` all moved from `7.83` to `8.33` with tuned RALPH variants on a `5` cases/category sweep
@@ -111,17 +111,17 @@ If you only want the flagship story: treat this repo as the public proof that I 
 6. `GET /v1/failure-taxonomy` -> inspect parser drift, retry exhaustion, delivery gaps, and observed runtime regressions in one place.
 7. `GET /v1/developer-ops-pack` -> inspect MR / pipeline / release lanes before demoing automation.
 8. `GET /v1/workflow-runs` -> verify recent developer workflow runs.
-9. `GET /v1/workflow-run-replay` -> inspect replay-ready proof routes and recent workflow timeline.
-10. `GET /v1/review-pack` -> inspect benchmark lift and parser/handoff boundary.
+9. `GET /v1/workflow-run-replay` -> inspect replay-ready evidence routes and recent workflow timeline.
+10. `GET /v1/summary-pack` -> inspect benchmark lift and parser/handoff boundary.
 11. `GET /v1/schema/plan-report` -> verify contract before trusting downstream routing output.
-12. `GET /v1/benchlab/review-pack` -> inspect checked-in runtime and artifact claims.
-13. `docs/reviewer-proof-guide.md` + `docs/review-pack.svg` + `docs/benchmarks/stagepilot-latest.json` + `docs/benchmarks/stagepilot-runtime-load-latest.json` + `docs/benchmarks/stagepilot-trace-observability-latest.json` + `docs/benchmarks/stagepilot-regression-gate-latest.json` -> read the strongest proof assets first.
+12. `GET /v1/benchlab/summary-pack` -> inspect checked-in runtime and artifact claims.
+13. `docs/validation-guide.md` + `docs/summary-pack.svg` + `docs/benchmarks/stagepilot-latest.json` + `docs/benchmarks/stagepilot-runtime-load-latest.json` + `docs/benchmarks/stagepilot-trace-observability-latest.json` + `docs/benchmarks/stagepilot-regression-gate-latest.json` -> read the strongest test assets first.
 
-![StagePilot Review Pack](docs/review-pack.svg)
+![StagePilot Summary Pack](docs/summary-pack.svg)
 
 ## Further Reading
 
-- Reviewer guide: [`docs/reviewer-proof-guide.md`](docs/reviewer-proof-guide.md)
+- Validation guide: [`docs/validation-guide.md`](docs/validation-guide.md)
 - Architecture: [`docs/solution-architecture.md`](docs/solution-architecture.md)
 - Overview: [`docs/executive-one-pager.md`](docs/executive-one-pager.md)
 - Discovery notes: [`docs/discovery-guide.md`](docs/discovery-guide.md)
@@ -204,12 +204,12 @@ Ralph-loop point (what changed from the original 24-case suite):
 
 Latency note: these numbers come from deterministic in-process benchmark harness execution (parser + planning), not network LLM round-trip latency.
 
-Review-pack surfaces now expose this benchmark delta directly through `/v1/review-pack` so reviewers can inspect the lift without parsing the raw JSON file first.
+Review-pack surfaces now expose this benchmark delta directly through `/v1/summary-pack` so operators can inspect the lift without parsing the raw JSON file first.
 
 ## Supporting Files
 
-- `docs/reviewer-proof-guide.md`
-- `docs/review-pack.svg`
+- `docs/validation-guide.md`
+- `docs/summary-pack.svg`
 - `docs/DEVELOPER_OPS_PACK.md`
 - `docs/benchmarks/stagepilot-latest.json`
 - `docs/STAGEPILOT.md`
@@ -224,7 +224,7 @@ Review-pack surfaces now expose this benchmark delta directly through `/v1/revie
 pnpm install
 ```
 
-### 2) Print the reviewer proof summary
+### 2) Print the validation data summary
 
 ```bash
 pnpm review:proof
@@ -269,7 +269,7 @@ BenchLab surfaces:
 - `GET /benchlab`
 - `GET /health`
 - `GET /v1/benchlab/runtime-brief`
-- `GET /v1/benchlab/review-pack`
+- `GET /v1/benchlab/summary-pack`
 - `GET /v1/benchlab/schema/job-report`
 - `GET /v1/benchlab/configs`
 - `GET /v1/benchlab/jobs`
@@ -317,7 +317,7 @@ Endpoints:
 - `GET /health`
 - `GET /v1/meta`
 - `GET /v1/runtime-brief`
-- `GET /v1/review-pack`
+- `GET /v1/summary-pack`
 - `GET /v1/schema/plan-report`
 - `POST /v1/plan`
 - `POST /v1/benchmark`
@@ -330,9 +330,9 @@ See full behavior and payload examples in [`docs/STAGEPILOT.md`](docs/STAGEPILOT
 
 ## Service-Grade Surfaces
 
-- `/v1/runtime-brief`, `/v1/review-pack`, and `/v1/schema/plan-report` expose StagePilot readiness, benchmark proof, parser/orchestration posture, and report contract.
-- `/v1/benchlab/runtime-brief`, `/v1/benchlab/review-pack`, and `/v1/benchlab/schema/job-report` expose BenchLab evidence counts, checked-in claim proof, dominant failure buckets, and job-report expectations.
-- `/demo` and `/benchlab` now render review-pack surfaces directly in the UI so reviewers can validate posture without reading code first.
+- `/v1/runtime-brief`, `/v1/summary-pack`, and `/v1/schema/plan-report` expose StagePilot readiness, benchmark proof, parser/orchestration posture, and report contract.
+- `/v1/benchlab/runtime-brief`, `/v1/benchlab/summary-pack`, and `/v1/benchlab/schema/job-report` expose BenchLab evidence counts, checked-in claim proof, dominant failure buckets, and job-report expectations.
+- `/demo` and `/benchlab` now render summary-pack surfaces directly in the UI so operators can validate posture without reading code first.
 
 BenchLab API entrypoint:
 
@@ -449,7 +449,7 @@ corepack prepare pnpm@9.14.4 --activate
 
 ## Docs map
 
-- Reviewer guide: [`docs/reviewer-proof-guide.md`](docs/reviewer-proof-guide.md)
+- Validation guide: [`docs/validation-guide.md`](docs/validation-guide.md)
 - StagePilot guide: [`docs/STAGEPILOT.md`](docs/STAGEPILOT.md)
 - Latest benchmark artifact: [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json)
 - BenchLab gains: [`docs/benchlab/TOOL_CALLING_GAINS.md`](docs/benchlab/TOOL_CALLING_GAINS.md)

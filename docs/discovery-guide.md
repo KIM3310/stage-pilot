@@ -18,8 +18,8 @@
 
 1. show `/v1/runtime-brief`
 2. show `/v1/benchmark-summary`
-3. show `/v1/review-pack`
-4. open BenchLab review pack
+3. show `/v1/summary-pack`
+4. open BenchLab summary pack
 5. inspect failure taxonomy and strongest benchmark claim
 
 ## Success criteria

@@ -4,6 +4,10 @@
 
 [![npm - parser](https://img.shields.io/npm/v/@ai-sdk-tool/parser)](https://www.npmjs.com/package/@ai-sdk-tool/parser)
 [![npm downloads - parser](https://img.shields.io/npm/dt/@ai-sdk-tool/parser)](https://www.npmjs.com/package/@ai-sdk-tool/parser)
+[![CI](https://github.com/KIM3310/stage-pilot/actions/workflows/ci.yml/badge.svg)](https://github.com/KIM3310/stage-pilot/actions)
+[![codecov](https://codecov.io/gh/KIM3310/stage-pilot/branch/main/graph/badge.svg)](https://codecov.io/gh/KIM3310/stage-pilot)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 
 `StagePilot` is a TypeScript runtime and benchmark harness for stabilizing tool calls across provider families. The name comes from stage-gating unstable runs through parse, repair, replay, and review so reliability claims stay inspectable instead of hand-wavy.
 
@@ -126,15 +130,25 @@ For BenchLab, it creates a repeatable environment to test prompt-mode tool-calli
 ```text
 stage-pilot/
   src/
-    api/
-    bin/
-    stagepilot/
-  tests/
+    adapters/          # Multi-cloud integrations (AWS, GCP)
+    api/               # HTTP server, Prometheus metrics, worker entry
+    bin/               # CLI entrypoints
+    core/              # Parser protocols, utilities
+    stagepilot/        # Orchestration runtime, agents, benchmark
+    telemetry/         # OpenTelemetry instrumentation
+  tests/               # 184 test files, 1,713 tests
+  infra/
+    k8s/               # Kubernetes manifests (deploy, svc, hpa, configmap)
+    terraform/         # Terraform IaC for GCP
   docs/
-    benchmarks/
-    benchlab/
-  experiments/
-  scripts/
+    benchmarks/        # Checked-in benchmark artifacts
+    benchlab/          # BenchLab research and experiment notes
+    evidence/          # Performance baselines and load test results
+  experiments/         # Prompt-mode BFCL experiments
+  scripts/             # k6 load tests, deploy, smoke tests
+  vercel.json          # Vercel deployment config
+  wrangler.toml        # Cloudflare Workers config
+  Dockerfile           # Container image
 ```
 
 ## StagePilot benchmark (latest)
@@ -283,6 +297,7 @@ Endpoints:
 - `GET /v1/meta`
 - `GET /v1/runtime-brief`
 - `GET /v1/summary-pack`
+- `GET /v1/metrics` (Prometheus)
 - `GET /v1/schema/plan-report`
 - `POST /v1/plan`
 - `POST /v1/benchmark`
@@ -305,7 +320,68 @@ BenchLab API entrypoint:
 pnpm api:benchlab
 ```
 
-## Cloud Run deployment (Google-only)
+## Multi-Cloud Architecture
+
+```text
+                         +------------------+
+                         |   Cloudflare     |
+                         |   Workers (Edge) |
+                         |   /demo /health  |
+                         +--------+---------+
+                                  |
+               +------------------+------------------+
+               |                  |                  |
+    +----------v---+    +---------v----+    +--------v-------+
+    |   Vercel     |    | GCP Cloud    |    |  Kubernetes    |
+    |  (Demo UI /  |    |  Run (Full   |    |  (Production   |
+    |   API proxy) |    |  API + LLM)  |    |   workloads)   |
+    +--------------+    +---------+----+    +--------+-------+
+                                  |                  |
+                    +-------------+------------------+
+                    |             |                   |
+             +------v---+  +-----v------+  +---------v--------+
+             | GCS / S3  |  | BigQuery / |  | CloudWatch /     |
+             | Artifacts |  | Analytics  |  | Prometheus /     |
+             +----------+  +------------+  | Datadog          |
+                                           +------------------+
+```
+
+## Deployment
+
+### Vercel (Demo UI + API proxy)
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy (uses vercel.json config)
+vercel --prod
+
+# Environment variables to set in Vercel dashboard:
+# APP_ENV, GEMINI_API_KEY (if using live routes)
+```
+
+Configuration: [`vercel.json`](vercel.json)
+
+### Cloudflare Workers (Edge demo)
+
+```bash
+# Install Wrangler CLI
+npm i -g wrangler
+
+# Authenticate
+wrangler login
+
+# Deploy
+wrangler deploy
+
+# Preview locally
+wrangler dev
+```
+
+Configuration: [`wrangler.toml`](wrangler.toml)
+
+### GCP Cloud Run (Full API)
 
 ```bash
 pnpm deploy:stagepilot
@@ -321,11 +397,183 @@ Runtime notes:
 
 - CPU-only enforced: `USE_GPU=0`
 - Secret Manager key mapping expected for `GEMINI_API_KEY`
-- safety timeouts supported:
+- Safety timeouts supported:
   - `GEMINI_HTTP_TIMEOUT_MS`
   - `STAGEPILOT_REQUEST_BODY_TIMEOUT_MS`
   - `OPENCLAW_WEBHOOK_TIMEOUT_MS`
   - `OPENCLAW_CLI_TIMEOUT_MS`
+
+### Kubernetes
+
+```bash
+# Create namespace
+kubectl create namespace stagepilot
+
+# Create secrets
+kubectl create secret generic stagepilot-secrets \
+  --namespace stagepilot \
+  --from-literal=gemini-api-key="$GEMINI_API_KEY" \
+  --from-literal=aws-access-key-id="$AWS_ACCESS_KEY_ID" \
+  --from-literal=aws-secret-access-key="$AWS_SECRET_ACCESS_KEY"
+
+# Apply manifests
+kubectl apply -f infra/k8s/
+
+# Verify
+kubectl get pods -n stagepilot
+kubectl get hpa -n stagepilot
+```
+
+Manifests in [`infra/k8s/`](infra/k8s/):
+- `deployment.yaml` — 2-replica rolling deployment with health probes
+- `service.yaml` — ClusterIP service + ServiceAccount
+- `configmap.yaml` — Runtime configuration
+- `hpa.yaml` — HPA autoscaler (2-10 replicas, CPU/memory/latency targets)
+
+### Docker
+
+```bash
+docker build -t stagepilot-api .
+docker run -p 8080:8080 -e GEMINI_API_KEY="$GEMINI_API_KEY" stagepilot-api
+```
+
+## Multi-Cloud Adapters
+
+Cloud integrations are env-var gated and activate only when credentials are present.
+
+### AWS (S3 + CloudWatch)
+
+Set `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_REGION` to enable:
+- S3 artifact storage for benchmark reports
+- CloudWatch metrics publishing (success rates, latency)
+
+```ts
+import { AwsAdapter } from "./adapters/aws-adapter";
+const aws = AwsAdapter.fromEnv();
+if (aws) {
+  await aws.uploadBenchmarkArtifact("run-001", report);
+  await aws.publishBenchmarkMetrics({ strategy: "ralph-loop", successRate: 90, ... });
+}
+```
+
+### GCP (GCS + BigQuery)
+
+Set `GCP_PROJECT_ID` and `GOOGLE_APPLICATION_CREDENTIALS` to enable:
+- GCS artifact storage for benchmark reports
+- BigQuery streaming insert for benchmark analytics and trend queries
+
+```ts
+import { GcpAdapter } from "./adapters/gcp-adapter";
+const gcp = GcpAdapter.fromEnv();
+if (gcp) {
+  await gcp.publishBenchmarkReport("run-001", report, strategies);
+  const trends = await gcp.queryBenchmarkTrends(50);
+}
+```
+
+## Prometheus Metrics
+
+The `/v1/metrics` endpoint exposes Prometheus-compatible metrics:
+
+```bash
+curl http://127.0.0.1:8080/v1/metrics
+```
+
+Available metrics:
+
+| Metric | Type | Description |
+|--------|------|-------------|
+| `stagepilot_benchmark_runs_total` | counter | Total benchmark runs executed |
+| `stagepilot_parse_attempts_total` | counter | Total tool-call parse attempts |
+| `stagepilot_parse_successes_total` | counter | Successful parse attempts |
+| `stagepilot_parse_failures_total` | counter | Failed parse attempts |
+| `stagepilot_benchmark_success_rate` | gauge | Latest benchmark success rate (0-1) |
+| `stagepilot_uptime_seconds` | gauge | Process uptime |
+| `stagepilot_parse_latency_ms` | histogram | Parse latency per protocol |
+| `stagepilot_request_latency_ms` | histogram | HTTP request latency per route |
+
+Prometheus scrape config:
+
+```yaml
+scrape_configs:
+  - job_name: stagepilot
+    metrics_path: /v1/metrics
+    static_configs:
+      - targets: ["stagepilot-api:80"]
+```
+
+## API Documentation (curl examples)
+
+```bash
+# Health check
+curl http://127.0.0.1:8080/health
+
+# Runtime brief
+curl http://127.0.0.1:8080/v1/runtime-brief
+
+# Summary pack (benchmark proof + parser posture)
+curl http://127.0.0.1:8080/v1/summary-pack
+
+# Provider benchmark scorecard
+curl http://127.0.0.1:8080/v1/provider-benchmark-scorecard
+
+# Performance evidence pack
+curl http://127.0.0.1:8080/v1/perf-evidence-pack
+
+# Prometheus metrics
+curl http://127.0.0.1:8080/v1/metrics
+
+# Run planning
+curl -X POST http://127.0.0.1:8080/v1/plan \
+  -H "Content-Type: application/json" \
+  -d '{"caseId":"demo-001","district":"Mapo-gu","notes":"Needs food support","risks":["food","income"]}'
+
+# Run benchmark
+curl -X POST http://127.0.0.1:8080/v1/benchmark \
+  -H "Content-Type: application/json" \
+  -d '{"caseCount":24,"seed":20260228}'
+
+# What-if simulation
+curl -X POST http://127.0.0.1:8080/v1/whatif \
+  -H "Content-Type: application/json" \
+  -d '{"caseId":"demo-001","district":"Mapo-gu","notes":"Needs food support","risks":["food"]}'
+
+# Failure taxonomy
+curl http://127.0.0.1:8080/v1/failure-taxonomy
+
+# Regression gate pack
+curl http://127.0.0.1:8080/v1/regression-gate-pack
+```
+
+## Benchmark Visualization
+
+Benchmark data is available in machine-readable JSON and human-readable markdown:
+
+- Latest benchmark: [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json)
+- Expanded analysis: [`docs/benchmarks/expanded-benchmark-2026-03-19.md`](docs/benchmarks/expanded-benchmark-2026-03-19.md)
+- Load test results: [`docs/benchmarks/stagepilot-runtime-load-latest.json`](docs/benchmarks/stagepilot-runtime-load-latest.json)
+- Performance baseline: [`docs/evidence/performance-baseline.md`](docs/evidence/performance-baseline.md)
+
+API surfaces for live benchmark inspection:
+
+```bash
+# Formatted summary with lift deltas
+curl http://127.0.0.1:8080/v1/summary-pack | jq '.benchmarkLift'
+
+# Benchmark summary (strategy comparison)
+curl http://127.0.0.1:8080/v1/benchmark-summary
+
+# Trace observability pack (replay evidence)
+curl http://127.0.0.1:8080/v1/trace-observability-pack
+```
+
+Parse success rate trend (40-case expanded suite):
+
+```text
+baseline            |========                        | 25.00%
+middleware          |=====================           | 65.00%
+middleware+ralph    |============================    | 90.00%
+```
 
 ## `@ai-sdk-tool/parser` usage
 

@@ -21,7 +21,7 @@ function readIntEnv(name: string, fallback: number): number {
 }
 
 async function main() {
-  const caseCount = readIntEnv("BENCHMARK_CASES", 24);
+  const caseCount = readIntEnv("BENCHMARK_CASES", 40);
   const seed = readIntEnv("BENCHMARK_SEED", 20_260_228);
   const maxLoopAttempts = readIntEnv("BENCHMARK_LOOP_ATTEMPTS", 2);
 

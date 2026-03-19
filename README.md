@@ -96,7 +96,7 @@ If you only want the flagship story: treat this repo as the public proof that I 
 - StagePilot workflow replay surface: `GET /v1/workflow-run-replay`
 - Local reviewer summary: `pnpm review:proof`
 - BenchLab reviewer API: `GET /v1/benchlab/runtime-brief`, `GET /v1/benchlab/review-pack`, `GET /v1/benchlab/schema/job-report`
-- Checked-in 24-case benchmark proof: baseline `29.17%` -> middleware `87.50%` -> Ralph loop `100.00%`
+- Checked-in 40-case expanded benchmark proof: baseline `25.00%` -> middleware `65.00%` -> Ralph loop `90.00%` (4 documented failure cases)
 - Checked-in BenchLab claims: runtime compare, variant leaderboard, best artifacts, and failure forensics
 - Latest no-key local validation: `llama3.1:8b`, `llama3.2:latest`, `qwen3.5:4b` all moved from `7.83` to `8.33` with tuned RALPH variants on a `5` cases/category sweep
 - Llama follow-up hunt: on `llama3.2:latest`, `schema-lock` stayed ahead while `parallel-safe`, `coverage`, `strict`, `call-count`, and `compact` all stayed flat in a `3` cases/category search; a wider `10` cases/category replay still kept `schema-lock` positive at `7.50 -> 7.75` (+0.25pp)
@@ -174,27 +174,33 @@ stage-pilot/
 
 ## StagePilot benchmark (latest)
 
-Source: [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json)  
-Generated at: `2026-03-02T11:15:13.733Z`  
-Cases: `24` (`BENCHMARK_SEED=20260228`, `BENCHMARK_LOOP_ATTEMPTS=2`)
+Source: [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json)
+Expanded analysis: [`docs/benchmarks/expanded-benchmark-2026-03-19.md`](docs/benchmarks/expanded-benchmark-2026-03-19.md)
+Generated at: `2026-03-19T03:47:44.961Z`
+Cases: `40` across `20` mutation modes (`BENCHMARK_SEED=20260228`, `BENCHMARK_LOOP_ATTEMPTS=2`)
 
 | Strategy | Parse/Plan Success | Success Rate | Avg Latency (ms) | P95 Latency (ms) | Avg Attempts |
 |---|---:|---:|---:|---:|---:|
-| `baseline` | 7 / 24 | 29.17% | 0.02 | 0.03 | 1.00 |
-| `middleware` | 21 / 24 | 87.50% | 0.14 | 0.45 | 1.00 |
-| `middleware+ralph-loop` | 24 / 24 | 100.00% | 0.04 | 0.08 | 1.13 |
+| `baseline` | 10 / 40 | 25.00% | 0.02 | 0.03 | 1.00 |
+| `middleware` | 26 / 40 | 65.00% | 0.12 | 0.31 | 1.00 |
+| `middleware+ralph-loop` | 36 / 40 | 90.00% | 0.05 | 0.09 | 1.35 |
 
 Improvement deltas:
 
-- Middleware vs Baseline: `+58.33pp`
-- Ralph Loop vs Middleware: `+12.50pp`
-- Ralph Loop vs Baseline: `+70.83pp`
+- Middleware vs Baseline: `+40.00pp`
+- Ralph Loop vs Middleware: `+25.00pp`
+- Ralph Loop vs Baseline: `+65.00pp`
 
-Ralph-loop point (what changed):
+Known failure modes (4 cases that fail even with retry):
 
-- `middleware` is already robust on malformed payloads.
-- `middleware+ralph-loop` adds one bounded retry pass (default max 2 attempts), letting the second corrected output recover remaining failures.
-- In this current checked-in 24-case benchmark, that closes the gap from `87.50%` to `100.00%`.
+- **wrong-tool-name** (bench-17, bench-37): model hallucinates `rout_case` instead of `route_case`; no fuzzy tool-name matching by design.
+- **empty-arguments** (bench-14, bench-34): correct tool name but zero arguments; missing all required fields, retry reproduces the same empty payload.
+
+Ralph-loop point (what changed from the original 24-case suite):
+
+- The original 7-mode suite showed `29.17%` -> `87.50%` -> `100.00%`. The flat 100% was technically correct but masked real parser limits.
+- The expanded 20-mode suite adds genuinely hard edge cases: deeply nested args, oversized payloads (>10K), unicode/emoji values, HTML-escaped JSON, double-encoded arguments, adversarial prompt injection, truncated JSON, concurrent tool calls, and wrong tool names.
+- `middleware+ralph-loop` now shows `90.00%`, with 4 documented cases that fail for structural reasons, not parser bugs.
 
 Latency note: these numbers come from deterministic in-process benchmark harness execution (parser + planning), not network LLM round-trip latency.
 
@@ -246,7 +252,7 @@ pnpm bench:stagepilot
 Optional benchmark knobs:
 
 ```bash
-BENCHMARK_CASES=24 BENCHMARK_SEED=20260228 BENCHMARK_LOOP_ATTEMPTS=2 pnpm bench:stagepilot
+BENCHMARK_CASES=40 BENCHMARK_SEED=20260228 BENCHMARK_LOOP_ATTEMPTS=2 pnpm bench:stagepilot
 ```
 
 ## BenchLab quick start

@@ -1,10 +1,10 @@
 {
-  "caseCount": 24,
-  "generatedAt": "2026-03-15T17:25:10.459Z",
+  "caseCount": 40,
+  "generatedAt": "2026-03-19T03:47:44.961Z",
   "improvements": {
-    "loopVsBaseline": 70.83,
-    "loopVsMiddleware": 12.5,
-    "middlewareVsBaseline": 58.33
+    "loopVsBaseline": 65,
+    "loopVsMiddleware": 25,
+    "middlewareVsBaseline": 40
   },
   "seed": 20260228,
   "strategies": [
@@ -17,47 +17,80 @@
         "bench-4",
         "bench-5",
         "bench-6",
-        "bench-9",
+        "bench-8",
         "bench-10",
         "bench-11",
-        "bench-12",
         "bench-13",
+        "bench-14",
         "bench-16",
         "bench-17",
         "bench-18",
         "bench-19",
         "bench-20",
+        "bench-22",
         "bench-23",
-        "bench-24"
+        "bench-24",
+        "bench-25",
+        "bench-26",
+        "bench-28",
+        "bench-30",
+        "bench-31",
+        "bench-33",
+        "bench-34",
+        "bench-36",
+        "bench-37",
+        "bench-38",
+        "bench-39",
+        "bench-40"
       ],
-      "p95LatencyMs": 0.05,
-      "parseSuccessCount": 7,
-      "planSuccessCount": 7,
+      "p95LatencyMs": 0.03,
+      "parseSuccessCount": 10,
+      "planSuccessCount": 10,
       "strategy": "baseline",
-      "successRate": 29.17,
-      "totalCases": 24
+      "successRate": 25,
+      "totalCases": 40
     },
     {
       "avgAttemptsUsed": 1,
-      "avgLatencyMs": 0.16,
-      "failedCaseIds": ["bench-4", "bench-11", "bench-18"],
-      "p95LatencyMs": 0.44,
-      "parseSuccessCount": 21,
-      "planSuccessCount": 21,
+      "avgLatencyMs": 0.12,
+      "failedCaseIds": [
+        "bench-4",
+        "bench-8",
+        "bench-10",
+        "bench-14",
+        "bench-17",
+        "bench-18",
+        "bench-19",
+        "bench-24",
+        "bench-28",
+        "bench-30",
+        "bench-34",
+        "bench-37",
+        "bench-38",
+        "bench-39"
+      ],
+      "p95LatencyMs": 0.31,
+      "parseSuccessCount": 26,
+      "planSuccessCount": 26,
       "strategy": "middleware",
-      "successRate": 87.5,
-      "totalCases": 24
+      "successRate": 65,
+      "totalCases": 40
     },
     {
-      "avgAttemptsUsed": 1.13,
+      "avgAttemptsUsed": 1.35,
       "avgLatencyMs": 0.05,
-      "failedCaseIds": [],
-      "p95LatencyMs": 0.1,
-      "parseSuccessCount": 24,
-      "planSuccessCount": 24,
+      "failedCaseIds": [
+        "bench-14",
+        "bench-17",
+        "bench-34",
+        "bench-37"
+      ],
+      "p95LatencyMs": 0.09,
+      "parseSuccessCount": 36,
+      "planSuccessCount": 36,
       "strategy": "middleware+ralph-loop",
-      "successRate": 100,
-      "totalCases": 24
+      "successRate": 90,
+      "totalCases": 40
     }
   ]
 }

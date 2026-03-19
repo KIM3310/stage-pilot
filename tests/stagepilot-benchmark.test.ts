@@ -4,7 +4,7 @@ import { benchmarkStagePilotStrategies } from "../src/stagepilot/benchmark";
 describe("stagepilot benchmark harness", () => {
   it("shows middleware and ralph-loop gains over baseline", async () => {
     const report = await benchmarkStagePilotStrategies({
-      caseCount: 21,
+      caseCount: 40,
       maxLoopAttempts: 2,
       seed: 42,
     });
@@ -29,6 +29,13 @@ describe("stagepilot benchmark harness", () => {
     expect(loop?.successRate ?? 0).toBeGreaterThanOrEqual(
       middleware?.successRate ?? 0
     );
-    expect(loop?.avgAttemptsUsed ?? 0).toBeGreaterThan(1);
+
+    // With expanded edge cases (40 cases across 20 mutation modes), the
+    // ralph-loop should NOT hit 100%.  Modes like wrong-tool-name and
+    // empty-arguments are genuinely unrecoverable because the structural
+    // defect persists across retries.
+    expect(loop?.successRate ?? 0).toBeLessThan(100);
+    expect(loop?.successRate ?? 0).toBeGreaterThanOrEqual(85);
+    expect(loop?.failedCaseIds?.length ?? 0).toBeGreaterThan(0);
   });
 });

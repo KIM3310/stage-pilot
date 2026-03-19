@@ -1,0 +1,39 @@
+stage-pilot test run — 2026-03-19
+Runner: vitest v4.0.18
+Platform: darwin (macOS), Node.js >=18
+
+Test Files  184 passed (184)
+     Tests  1713 passed (1713)
+Type Errors  no errors
+  Start at  10:31:25
+  Duration  4.51s (transform 2.77s, setup 0ms, import 8.78s, tests 9.75s, environment 12ms)
+
+Notable test suites:
+- stagepilot-api.test.ts: 46 tests (2421ms, includes timeout behavior validation)
+- stagepilot-openclaw.test.ts: 7 tests (2033ms, webhook timeout testing)
+- stagepilot-gemini-gateway.test.ts: 4 tests (2026ms, gateway timeout testing)
+- chunk-boundary.randomized.test.ts: 600 tests (147ms, fuzz-style boundary tests)
+- stagepilot-benchmark.test.ts: 1 test (16ms)
+- stagepilot-insights.test.ts: 1 test (1035ms, gemini fallback testing)
+- stagepilot-twin.test.ts: 3 tests (2ms)
+- stagepilot-orchestrator.test.ts: 2 tests (2ms)
+- stagepilot-ontology.test.ts: 2 tests (3ms)
+- hello-middleware.test.ts: 2 tests (2ms)
+- benchlab-api.test.ts: 3 tests (117ms)
+
+Protocol coverage:
+- morph-xml-protocol: parse, stream, pipeline, formatters, heuristics
+- hermes-protocol: stream, parse, formatters
+- yaml-xml-protocol: parse, stream, formatters
+- qwen3coder-protocol: parse, recovery, boundary heuristics
+- cross-protocol: chunk-boundary-fuzzing, tool-input streaming, formatters
+- dummy-protocol: lifecycle, pass-through
+
+Core module coverage:
+- rxml: parser, tokenizer, schema, heuristics, integration, streaming, memory
+- rjson: parse, stringify, transform
+- schema-coerce: array extraction, object coercion, tuple handling, edge cases, depth limits, performance
+- stream-handler: coercion, toolchoice behavior and compat
+- transform-handler: prompt templates, signature regression, placement, outer layers
+- tool-call-middleware: create lifecycle, wrap-generate, wrap-stream, branches, coercion
+- entry: exports surface, community prompts, morph-xml smoke, preconfigured templates

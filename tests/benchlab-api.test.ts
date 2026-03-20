@@ -484,12 +484,16 @@ describe("benchlab api", () => {
     expect(summaryPackResponse.status).toBe(200);
     expect(summaryPackPayload.summaryPackId).toBe("benchlab-summary-pack-v1");
     expect(summaryPackPayload.evidenceBundle.counts.configs).toBe(2);
-    expect(summaryPackPayload.evidenceBundle.counts.runs).toBeGreaterThanOrEqual(2);
+    expect(
+      summaryPackPayload.evidenceBundle.counts.runs
+    ).toBeGreaterThanOrEqual(2);
     expect(summaryPackPayload.evidenceBundle.bestArtifact.deltaPp).toBe(1.25);
     expect(summaryPackPayload.evidenceBundle.dominantBucket).toBe("timeout");
     expect(summaryPackPayload.twoMinuteReview).toHaveLength(4);
     expect(summaryPackPayload.proofAssets.length).toBeGreaterThanOrEqual(4);
-    expect(summaryPackPayload.links.summaryPack).toBe("/v1/benchlab/summary-pack");
+    expect(summaryPackPayload.links.summaryPack).toBe(
+      "/v1/benchlab/summary-pack"
+    );
 
     const schemaResponse = await fetch(
       `${baseUrl}/v1/benchlab/schema/job-report`

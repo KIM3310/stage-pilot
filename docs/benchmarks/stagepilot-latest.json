@@ -79,12 +79,7 @@
     {
       "avgAttemptsUsed": 1.35,
       "avgLatencyMs": 0.05,
-      "failedCaseIds": [
-        "bench-14",
-        "bench-17",
-        "bench-34",
-        "bench-37"
-      ],
+      "failedCaseIds": ["bench-14", "bench-17", "bench-34", "bench-37"],
       "p95LatencyMs": 0.09,
       "parseSuccessCount": 36,
       "planSuccessCount": 36,

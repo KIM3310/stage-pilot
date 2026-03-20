@@ -46,6 +46,10 @@ export interface S3PutResult {
   url: string;
 }
 
+const ISO_MILLIS_SUFFIX_REGEX = /\.\d+Z$/;
+const S3_CONTENTS_REGEX =
+  /<Contents>[\s\S]*?<Key>(.*?)<\/Key>[\s\S]*?<Size>(\d+)<\/Size>[\s\S]*?<\/Contents>/g;
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -61,7 +65,10 @@ function sha256Hex(data: string): string {
 }
 
 function toAmzDate(date: Date): { dateStamp: string; amzDate: string } {
-  const iso = date.toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
+  const iso = date
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(ISO_MILLIS_SUFFIX_REGEX, "Z");
   return { amzDate: iso, dateStamp: iso.slice(0, 8) };
 }
 
@@ -93,9 +100,12 @@ function signAwsRequest(opts: {
     .map((k) => k.toLowerCase())
     .sort();
   const signedHeaders = signedHeaderKeys.join(";");
-  const canonicalHeaders = signedHeaderKeys
-    .map((k) => `${k}:${headers[k] ?? (headers as Record<string, string>)[k.charAt(0).toUpperCase() + k.slice(1)] ?? ""}`)
-    .join("\n") + "\n";
+  const canonicalHeaders = `${signedHeaderKeys
+    .map(
+      (k) =>
+        `${k}:${headers[k] ?? (headers as Record<string, string>)[k.charAt(0).toUpperCase() + k.slice(1)] ?? ""}`
+    )
+    .join("\n")}\n`;
 
   const payloadHash = sha256Hex(opts.body);
 
@@ -116,7 +126,10 @@ function signAwsRequest(opts: {
     sha256Hex(canonicalRequest),
   ].join("\n");
 
-  const kDate = hmacSha256(Buffer.from(`AWS4${opts.secretAccessKey}`, "utf8"), dateStamp);
+  const kDate = hmacSha256(
+    Buffer.from(`AWS4${opts.secretAccessKey}`, "utf8"),
+    dateStamp
+  );
   const kRegion = hmacSha256(kDate, opts.region);
   const kService = hmacSha256(kRegion, opts.service);
   const kSigning = hmacSha256(kService, "aws4_request");
@@ -150,7 +163,7 @@ export class AwsAdapter {
     const accessKeyId = process.env.AWS_ACCESS_KEY_ID?.trim();
     const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY?.trim();
 
-    if (!accessKeyId || !secretAccessKey) {
+    if (!(accessKeyId && secretAccessKey)) {
       return null;
     }
 
@@ -184,7 +197,7 @@ export class AwsAdapter {
   async uploadBenchmarkArtifact(
     runId: string,
     payload: Record<string, unknown>,
-    filename = "report.json",
+    filename = "report.json"
   ): Promise<S3PutResult> {
     const key = `benchmarks/${runId}/${filename}`;
     const body = JSON.stringify(payload, null, 2);
@@ -214,7 +227,7 @@ export class AwsAdapter {
     if (!response.ok) {
       const text = await response.text();
       throw new Error(
-        `S3 PUT failed (${response.status}): ${text.slice(0, 500)}`,
+        `S3 PUT failed (${response.status}): ${text.slice(0, 500)}`
       );
     }
 
@@ -225,7 +238,7 @@ export class AwsAdapter {
    * List benchmark artifacts for a given run ID.
    */
   async listBenchmarkArtifacts(
-    runId: string,
+    runId: string
   ): Promise<{ key: string; size: number }[]> {
     const prefix = `benchmarks/${runId}/`;
     const bucket = this.config.s3Bucket;
@@ -253,10 +266,12 @@ export class AwsAdapter {
     // Minimal XML parse for Contents/Key and Contents/Size
     const xml = await response.text();
     const items: { key: string; size: number }[] = [];
-    const contentRegex = /<Contents>[\s\S]*?<Key>(.*?)<\/Key>[\s\S]*?<Size>(\d+)<\/Size>[\s\S]*?<\/Contents>/g;
     let match: RegExpExecArray | null;
-    while ((match = contentRegex.exec(xml)) !== null) {
+    S3_CONTENTS_REGEX.lastIndex = 0;
+    match = S3_CONTENTS_REGEX.exec(xml);
+    while (match) {
       items.push({ key: match[1], size: Number(match[2]) });
+      match = S3_CONTENTS_REGEX.exec(xml);
     }
 
     return items;
@@ -273,7 +288,7 @@ export class AwsAdapter {
     metricName: string,
     value: number,
     unit: CloudWatchUnit,
-    dimensions?: Record<string, string>,
+    dimensions?: Record<string, string>
   ): Promise<void> {
     await this.publishMetrics([
       { metricName, value, unit, dimensions, timestamp: new Date() },
@@ -333,7 +348,7 @@ export class AwsAdapter {
     if (!response.ok) {
       const text = await response.text();
       throw new Error(
-        `CloudWatch PutMetricData failed (${response.status}): ${text.slice(0, 500)}`,
+        `CloudWatch PutMetricData failed (${response.status}): ${text.slice(0, 500)}`
       );
     }
   }

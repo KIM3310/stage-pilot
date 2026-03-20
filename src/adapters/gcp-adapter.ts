@@ -15,8 +15,8 @@
  *   }
  */
 
-import { readFileSync } from "node:fs";
 import { createSign } from "node:crypto";
+import { readFileSync } from "node:fs";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -69,11 +69,11 @@ let _tokenCache: CachedToken | null = null;
  */
 function createServiceAccountJwt(
   credentials: GcpServiceAccountCredentials,
-  scopes: string[],
+  scopes: string[]
 ): string {
   const now = Math.floor(Date.now() / 1000);
   const header = Buffer.from(
-    JSON.stringify({ alg: "RS256", typ: "JWT" }),
+    JSON.stringify({ alg: "RS256", typ: "JWT" })
   ).toString("base64url");
 
   const payload = Buffer.from(
@@ -83,14 +83,13 @@ function createServiceAccountJwt(
       aud: credentials.token_uri,
       iat: now,
       exp: now + 3600,
-    }),
+    })
   ).toString("base64url");
 
   const signInput = `${header}.${payload}`;
   const signer = createSign("RSA-SHA256");
   signer.update(signInput);
-  const signature = signer
-    .sign(credentials.private_key, "base64url");
+  const signature = signer.sign(credentials.private_key, "base64url");
 
   return `${signInput}.${signature}`;
 }
@@ -99,7 +98,7 @@ function createServiceAccountJwt(
  * Exchange a signed JWT for an OAuth2 access token.
  */
 async function getAccessToken(
-  credentials: GcpServiceAccountCredentials,
+  credentials: GcpServiceAccountCredentials
 ): Promise<string> {
   if (_tokenCache && Date.now() < _tokenCache.expiresAt - 60_000) {
     return _tokenCache.accessToken;
@@ -123,7 +122,7 @@ async function getAccessToken(
   if (!response.ok) {
     const text = await response.text();
     throw new Error(
-      `GCP token exchange failed (${response.status}): ${text.slice(0, 500)}`,
+      `GCP token exchange failed (${response.status}): ${text.slice(0, 500)}`
     );
   }
 
@@ -185,10 +184,8 @@ export class GcpAdapter {
       storageBucket:
         process.env.GCP_STORAGE_BUCKET?.trim() ||
         `${projectId}-stagepilot-artifacts`,
-      bigQueryDataset:
-        process.env.GCP_BIGQUERY_DATASET?.trim() || "stagepilot",
-      bigQueryTable:
-        process.env.GCP_BIGQUERY_TABLE?.trim() || "benchmark_runs",
+      bigQueryDataset: process.env.GCP_BIGQUERY_DATASET?.trim() || "stagepilot",
+      bigQueryTable: process.env.GCP_BIGQUERY_TABLE?.trim() || "benchmark_runs",
     });
   }
 
@@ -213,13 +210,11 @@ export class GcpAdapter {
     // Metadata server fallback (Cloud Run / GKE)
     const response = await fetch(
       "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token",
-      { headers: { "Metadata-Flavor": "Google" } },
+      { headers: { "Metadata-Flavor": "Google" } }
     );
 
     if (!response.ok) {
-      throw new Error(
-        `GCP metadata token fetch failed (${response.status})`,
-      );
+      throw new Error(`GCP metadata token fetch failed (${response.status})`);
     }
 
     const body = (await response.json()) as { access_token: string };
@@ -239,15 +234,14 @@ export class GcpAdapter {
   async uploadBenchmarkArtifact(
     runId: string,
     payload: Record<string, unknown>,
-    filename = "report.json",
+    filename = "report.json"
   ): Promise<GcsUploadResult> {
     const name = `benchmarks/${runId}/${filename}`;
     const bucket = this.config.storageBucket;
     const body = JSON.stringify(payload, null, 2);
     const token = await this.getToken();
 
-    const uploadUrl =
-      `https://storage.googleapis.com/upload/storage/v1/b/${encodeURIComponent(bucket)}/o?uploadType=media&name=${encodeURIComponent(name)}`;
+    const uploadUrl = `https://storage.googleapis.com/upload/storage/v1/b/${encodeURIComponent(bucket)}/o?uploadType=media&name=${encodeURIComponent(name)}`;
 
     const response = await fetch(uploadUrl, {
       method: "POST",
@@ -261,7 +255,7 @@ export class GcpAdapter {
     if (!response.ok) {
       const text = await response.text();
       throw new Error(
-        `GCS upload failed (${response.status}): ${text.slice(0, 500)}`,
+        `GCS upload failed (${response.status}): ${text.slice(0, 500)}`
       );
     }
 
@@ -276,14 +270,13 @@ export class GcpAdapter {
    * List benchmark artifacts under a given run ID prefix.
    */
   async listBenchmarkArtifacts(
-    runId: string,
+    runId: string
   ): Promise<{ name: string; size: string }[]> {
     const prefix = `benchmarks/${runId}/`;
     const bucket = this.config.storageBucket;
     const token = await this.getToken();
 
-    const url =
-      `https://storage.googleapis.com/storage/v1/b/${encodeURIComponent(bucket)}/o?prefix=${encodeURIComponent(prefix)}`;
+    const url = `https://storage.googleapis.com/storage/v1/b/${encodeURIComponent(bucket)}/o?prefix=${encodeURIComponent(prefix)}`;
 
     const response = await fetch(url, {
       headers: { Authorization: `Bearer ${token}` },
@@ -321,8 +314,7 @@ export class GcpAdapter {
     const token = await this.getToken();
     const { projectId, bigQueryDataset, bigQueryTable } = this.config;
 
-    const url =
-      `https://bigquery.googleapis.com/bigquery/v2/projects/${projectId}/datasets/${bigQueryDataset}/tables/${bigQueryTable}/insertAll`;
+    const url = `https://bigquery.googleapis.com/bigquery/v2/projects/${projectId}/datasets/${bigQueryDataset}/tables/${bigQueryTable}/insertAll`;
 
     const body = JSON.stringify({
       rows: rows.map((row) => ({
@@ -343,7 +335,7 @@ export class GcpAdapter {
     if (!response.ok) {
       const text = await response.text();
       throw new Error(
-        `BigQuery insertAll failed (${response.status}): ${text.slice(0, 500)}`,
+        `BigQuery insertAll failed (${response.status}): ${text.slice(0, 500)}`
       );
     }
 
@@ -353,7 +345,7 @@ export class GcpAdapter {
 
     if (result.insertErrors && result.insertErrors.length > 0) {
       throw new Error(
-        `BigQuery insert had ${result.insertErrors.length} error(s): ${JSON.stringify(result.insertErrors).slice(0, 500)}`,
+        `BigQuery insert had ${result.insertErrors.length} error(s): ${JSON.stringify(result.insertErrors).slice(0, 500)}`
       );
     }
   }
@@ -362,14 +354,11 @@ export class GcpAdapter {
    * Query benchmark analytics from BigQuery.
    * Returns the latest N runs per strategy for dashboard/trend display.
    */
-  async queryBenchmarkTrends(
-    limit = 50,
-  ): Promise<Record<string, unknown>[]> {
+  async queryBenchmarkTrends(limit = 50): Promise<Record<string, unknown>[]> {
     const token = await this.getToken();
     const { projectId, bigQueryDataset, bigQueryTable } = this.config;
 
-    const url =
-      `https://bigquery.googleapis.com/bigquery/v2/projects/${projectId}/queries`;
+    const url = `https://bigquery.googleapis.com/bigquery/v2/projects/${projectId}/queries`;
 
     const query = `
       SELECT run_id, strategy, success_rate, avg_latency_ms, p95_latency_ms,
@@ -391,7 +380,7 @@ export class GcpAdapter {
     if (!response.ok) {
       const text = await response.text();
       throw new Error(
-        `BigQuery query failed (${response.status}): ${text.slice(0, 500)}`,
+        `BigQuery query failed (${response.status}): ${text.slice(0, 500)}`
       );
     }
 
@@ -400,7 +389,7 @@ export class GcpAdapter {
       schema?: { fields: { name: string }[] };
     };
 
-    if (!body.rows || !body.schema) {
+    if (!(body.rows && body.schema)) {
       return [];
     }
 
@@ -427,7 +416,7 @@ export class GcpAdapter {
       strategy: string;
       success_rate: number;
       total_cases: number;
-    }[],
+    }[]
   ): Promise<{ bigQueryRows: number; gcsUrl: string }> {
     const gcsResult = await this.uploadBenchmarkArtifact(runId, report);
 

@@ -18,8 +18,8 @@ import { dirname, extname, join, relative, resolve, sep } from "node:path";
 import { renderBenchLabDemoHtml } from "./benchlab-demo";
 import {
   buildBenchLabJobReportSchema,
-  buildBenchLabSummaryPack,
   buildBenchLabRuntimeBrief,
+  buildBenchLabSummaryPack,
 } from "./benchlab-service-meta";
 
 type Logger = Pick<Console, "error" | "info" | "warn">;

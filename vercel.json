@@ -22,8 +22,14 @@
     {
       "source": "/v1/metrics",
       "headers": [
-        { "key": "Content-Type", "value": "text/plain; version=0.0.4; charset=utf-8" },
-        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+        {
+          "key": "Content-Type",
+          "value": "text/plain; version=0.0.4; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
       ]
     },
     {

@@ -1109,7 +1109,10 @@ Loading checked-in artifact failure taxonomy.</pre
               ? `${formatMetric(bestDelta)}pp`
               : "-",
         },
-        { label: "Bucket", value: payload.evidenceBundle?.dominantBucket || "-" },
+        {
+          label: "Bucket",
+          value: payload.evidenceBundle?.dominantBucket || "-",
+        },
         {
           label: "Improved",
           value: String(payload.evidenceBundle?.improvedArtifacts ?? 0),
@@ -2022,11 +2025,7 @@ Loading checked-in artifact failure taxonomy.</pre
         flashButtonLabel(els.copyProofButton, "Copy Routes", "Copied");
       } catch (error) {
         console.warn("copy evidence routes failed", error);
-        flashButtonLabel(
-          els.copyProofButton,
-          "Copy Routes",
-          "Copy failed"
-        );
+        flashButtonLabel(els.copyProofButton, "Copy Routes", "Copy failed");
       }
     }
 

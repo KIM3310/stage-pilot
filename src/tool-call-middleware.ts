@@ -9,9 +9,9 @@ import type { TCMCoreProtocol } from "./core/protocols/protocol-interface";
 import { isTCMProtocolFactory } from "./core/protocols/protocol-interface";
 import { wrapGenerate as wrapGenerateHandler } from "./generate-handler";
 import { wrapStream as wrapStreamHandler } from "./stream-handler";
+import { isOtelEnabled, SpanStatusCode, tracer } from "./telemetry";
+import { toolCallParseDuration, toolCallsTotal } from "./telemetry/metrics";
 import { transformParams } from "./transform-handler";
-import { tracer, SpanStatusCode, isOtelEnabled } from "./telemetry";
-import { toolCallsTotal, toolCallParseDuration } from "./telemetry/metrics";
 
 export function createToolMiddleware({
   protocol,
@@ -44,30 +44,41 @@ export function createToolMiddleware({
           params,
         });
       }
-      return tracer.startActiveSpan("tool-call-middleware.wrapStream", async (span) => {
-        span.setAttribute("protocol", protocolName);
-        const start = performance.now();
-        try {
-          const result = await wrapStreamHandler({
-            protocol: resolvedProtocol,
-            doStream,
-            doGenerate,
-            params,
-          });
-          span.setStatus({ code: SpanStatusCode.OK });
-          toolCallsTotal.add(1, { protocol: protocolName, status: "success" });
-          return result;
-        } catch (err) {
-          span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-          toolCallsTotal.add(1, { protocol: protocolName, status: "error" });
-          throw err;
-        } finally {
-          toolCallParseDuration.record(performance.now() - start, { protocol: protocolName });
-          span.end();
+      return tracer.startActiveSpan(
+        "tool-call-middleware.wrapStream",
+        async (span) => {
+          span.setAttribute("protocol", protocolName);
+          const start = performance.now();
+          try {
+            const result = await wrapStreamHandler({
+              protocol: resolvedProtocol,
+              doStream,
+              doGenerate,
+              params,
+            });
+            span.setStatus({ code: SpanStatusCode.OK });
+            toolCallsTotal.add(1, {
+              protocol: protocolName,
+              status: "success",
+            });
+            return result;
+          } catch (err) {
+            span.setStatus({
+              code: SpanStatusCode.ERROR,
+              message: String(err),
+            });
+            toolCallsTotal.add(1, { protocol: protocolName, status: "error" });
+            throw err;
+          } finally {
+            toolCallParseDuration.record(performance.now() - start, {
+              protocol: protocolName,
+            });
+            span.end();
+          }
         }
-      });
+      );
     },
-    wrapGenerate: async ({ doGenerate, params }) => {
+    wrapGenerate: ({ doGenerate, params }) => {
       if (!isOtelEnabled()) {
         return wrapGenerateHandler({
           protocol: resolvedProtocol,
@@ -75,27 +86,38 @@ export function createToolMiddleware({
           params,
         });
       }
-      return tracer.startActiveSpan("tool-call-middleware.wrapGenerate", async (span) => {
-        span.setAttribute("protocol", protocolName);
-        const start = performance.now();
-        try {
-          const result = await wrapGenerateHandler({
-            protocol: resolvedProtocol,
-            doGenerate,
-            params,
-          });
-          span.setStatus({ code: SpanStatusCode.OK });
-          toolCallsTotal.add(1, { protocol: protocolName, status: "success" });
-          return result;
-        } catch (err) {
-          span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
-          toolCallsTotal.add(1, { protocol: protocolName, status: "error" });
-          throw err;
-        } finally {
-          toolCallParseDuration.record(performance.now() - start, { protocol: protocolName });
-          span.end();
+      return tracer.startActiveSpan(
+        "tool-call-middleware.wrapGenerate",
+        async (span) => {
+          span.setAttribute("protocol", protocolName);
+          const start = performance.now();
+          try {
+            const result = await wrapGenerateHandler({
+              protocol: resolvedProtocol,
+              doGenerate,
+              params,
+            });
+            span.setStatus({ code: SpanStatusCode.OK });
+            toolCallsTotal.add(1, {
+              protocol: protocolName,
+              status: "success",
+            });
+            return result;
+          } catch (err) {
+            span.setStatus({
+              code: SpanStatusCode.ERROR,
+              message: String(err),
+            });
+            toolCallsTotal.add(1, { protocol: protocolName, status: "error" });
+            throw err;
+          } finally {
+            toolCallParseDuration.record(performance.now() - start, {
+              protocol: protocolName,
+            });
+            span.end();
+          }
         }
-      });
+      );
     },
     transformParams: async ({ params }): Promise<LanguageModelV3CallOptions> =>
       transformParams({

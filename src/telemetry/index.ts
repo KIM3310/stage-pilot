@@ -9,7 +9,13 @@
  *   const span = tracer.startSpan("my-operation");
  */
 
-import { trace, context, SpanStatusCode, type Span, type Tracer } from "@opentelemetry/api";
+import {
+  SpanStatusCode as OtelSpanStatusCode,
+  context as otelContext,
+  trace as otelTrace,
+  type Span,
+  type Tracer,
+} from "@opentelemetry/api";
 
 let _initialized = false;
 let _sdkInstance: { shutdown: () => Promise<void> } | undefined;
@@ -79,7 +85,7 @@ export async function shutdownTelemetry(): Promise<void> {
 /**
  * Convenience tracer instance for manual span creation.
  */
-export const tracer: Tracer = trace.getTracer(TRACER_NAME);
+export const tracer: Tracer = otelTrace.getTracer(TRACER_NAME);
 
 // ---------------------------------------------------------------------------
 // Span helpers for common stage-pilot operations
@@ -88,18 +94,18 @@ export const tracer: Tracer = trace.getTracer(TRACER_NAME);
 /**
  * Wrap an async function in a "tool-call-parse" span.
  */
-export async function withToolCallParseSpan<T>(
+export function withToolCallParseSpan<T>(
   protocol: string,
-  fn: (span: Span) => Promise<T>,
+  fn: (span: Span) => Promise<T>
 ): Promise<T> {
   return tracer.startActiveSpan("tool-call.parse", async (span) => {
     span.setAttribute("tool_call.protocol", protocol);
     try {
       const result = await fn(span);
-      span.setStatus({ code: SpanStatusCode.OK });
+      span.setStatus({ code: OtelSpanStatusCode.OK });
       return result;
     } catch (err) {
-      span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
+      span.setStatus({ code: OtelSpanStatusCode.ERROR, message: String(err) });
       throw err;
     } finally {
       span.end();
@@ -110,16 +116,16 @@ export async function withToolCallParseSpan<T>(
 /**
  * Wrap an async function in a "protocol-detection" span.
  */
-export async function withProtocolDetectionSpan<T>(
-  fn: (span: Span) => Promise<T>,
+export function withProtocolDetectionSpan<T>(
+  fn: (span: Span) => Promise<T>
 ): Promise<T> {
   return tracer.startActiveSpan("protocol.detect", async (span) => {
     try {
       const result = await fn(span);
-      span.setStatus({ code: SpanStatusCode.OK });
+      span.setStatus({ code: OtelSpanStatusCode.OK });
       return result;
     } catch (err) {
-      span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
+      span.setStatus({ code: OtelSpanStatusCode.ERROR, message: String(err) });
       throw err;
     } finally {
       span.end();
@@ -130,18 +136,18 @@ export async function withProtocolDetectionSpan<T>(
 /**
  * Wrap an async function in a "retry-loop" span (e.g. Ralph loop).
  */
-export async function withRetryLoopSpan<T>(
+export function withRetryLoopSpan<T>(
   maxAttempts: number,
-  fn: (span: Span) => Promise<T>,
+  fn: (span: Span) => Promise<T>
 ): Promise<T> {
   return tracer.startActiveSpan("retry.loop", async (span) => {
     span.setAttribute("retry.max_attempts", maxAttempts);
     try {
       const result = await fn(span);
-      span.setStatus({ code: SpanStatusCode.OK });
+      span.setStatus({ code: OtelSpanStatusCode.OK });
       return result;
     } catch (err) {
-      span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
+      span.setStatus({ code: OtelSpanStatusCode.ERROR, message: String(err) });
       throw err;
     } finally {
       span.end();
@@ -152,20 +158,20 @@ export async function withRetryLoopSpan<T>(
 /**
  * Wrap an async function in a "benchmark-run" span.
  */
-export async function withBenchmarkRunSpan<T>(
+export function withBenchmarkRunSpan<T>(
   strategy: string,
   caseCount: number,
-  fn: (span: Span) => Promise<T>,
+  fn: (span: Span) => Promise<T>
 ): Promise<T> {
   return tracer.startActiveSpan("benchmark.run", async (span) => {
     span.setAttribute("benchmark.strategy", strategy);
     span.setAttribute("benchmark.case_count", caseCount);
     try {
       const result = await fn(span);
-      span.setStatus({ code: SpanStatusCode.OK });
+      span.setStatus({ code: OtelSpanStatusCode.OK });
       return result;
     } catch (err) {
-      span.setStatus({ code: SpanStatusCode.ERROR, message: String(err) });
+      span.setStatus({ code: OtelSpanStatusCode.ERROR, message: String(err) });
       throw err;
     } finally {
       span.end();
@@ -173,5 +179,7 @@ export async function withBenchmarkRunSpan<T>(
   });
 }
 
-export { context, SpanStatusCode, trace };
-export type { Span };
+export const context = otelContext;
+export const SpanStatusCode = OtelSpanStatusCode;
+export const trace = otelTrace;
+export type { Span } from "@opentelemetry/api";

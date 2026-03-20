@@ -16,7 +16,11 @@ declare class ExecutionContext {
   passThroughOnException(): void;
 }
 interface ExportedHandler<E = Record<string, unknown>> {
-  fetch?(request: Request, env: E, ctx: ExecutionContext): Promise<Response>;
+  fetch?(
+    request: Request,
+    env: E,
+    ctx: ExecutionContext
+  ): Promise<Response> | Response;
 }
 
 export interface Env {
@@ -36,11 +40,7 @@ const CORS_HEADERS = {
 };
 
 export default {
-  async fetch(
-    request: Request,
-    env: Env,
-    _ctx: ExecutionContext,
-  ): Promise<Response> {
+  fetch(request: Request, env: Env, _ctx: ExecutionContext): Response {
     const url = new URL(request.url);
     const { pathname } = url;
 
@@ -60,7 +60,7 @@ export default {
           track: env.DEPLOYMENT_TRACK ?? "edge",
           timestamp: new Date().toISOString(),
         },
-        { headers: JSON_HEADERS },
+        { headers: JSON_HEADERS }
       );
     }
 
@@ -88,7 +88,7 @@ export default {
           ],
           note: "This is the edge demo surface. Full API runs on Cloud Run or Kubernetes.",
         },
-        { headers: JSON_HEADERS },
+        { headers: JSON_HEADERS }
       );
     }
 
@@ -117,7 +117,7 @@ export default {
         message: `No route for ${request.method} ${pathname}`,
         hint: "Try /demo, /health, /v1/runtime-brief, or /v1/metrics",
       },
-      { status: 404, headers: JSON_HEADERS },
+      { status: 404, headers: JSON_HEADERS }
     );
   },
 } satisfies ExportedHandler<Env>;

@@ -31,7 +31,7 @@ export const toolCallRetriesTotal = meter.createCounter(
   {
     description: "Total tool-call retry attempts",
     unit: "1",
-  },
+  }
 );
 
 // ---------------------------------------------------------------------------
@@ -46,7 +46,7 @@ export const toolCallParseDuration = meter.createHistogram(
   {
     description: "Tool-call parse duration in milliseconds",
     unit: "ms",
-  },
+  }
 );
 
 // ---------------------------------------------------------------------------
@@ -61,5 +61,5 @@ export const benchmarkSuccessRate = meter.createGauge(
   {
     description: "Latest benchmark success rate (0.0 to 1.0)",
     unit: "1",
-  },
+  }
 );

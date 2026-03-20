@@ -148,6 +148,7 @@ interface StagePilotPerfEvidenceArtifact {
 }
 
 interface StagePilotTraceObservabilityArtifact {
+  evaluationTier: string;
   generatedAt: string | null;
   hotspots: Array<{
     attentionCount: number;
@@ -161,7 +162,6 @@ interface StagePilotTraceObservabilityArtifact {
     rule: string;
     watchCount: number | null;
   };
-  evaluationTier: string;
   tool: string;
   traces: Array<{
     durationMs: number | null;

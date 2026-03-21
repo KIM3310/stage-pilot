@@ -35,6 +35,9 @@ export type StagePilotOpenClawNotifier = (
   input: StagePilotOpenClawNotifyInput
 ) => Promise<StagePilotOpenClawNotifyResult>;
 
+const DISCORD_WEBHOOK_URL_REGEX =
+  /^https:\/\/(?:(?:canary|ptb)\.)?(?:discord(?:app)?\.com)\/api\/webhooks\/[^/?#]+/i;
+
 function isTruthy(value: string | undefined): boolean {
   if (!value) {
     return false;
@@ -78,6 +81,10 @@ function readWebhookTimeoutMs(raw: string | undefined): number {
     return 5000;
   }
   return Math.min(30_000, Math.max(1000, parsed));
+}
+
+function isDiscordWebhookUrl(url: string): boolean {
+  return DISCORD_WEBHOOK_URL_REGEX.test(url);
 }
 
 function isAbortError(error: unknown): boolean {
@@ -175,24 +182,35 @@ async function sendViaWebhook(options: {
   timeoutMs: number;
   url: string;
 }): Promise<StagePilotOpenClawNotifyResult> {
+  const discordWebhook = isDiscordWebhookUrl(options.url);
+  const url = new URL(options.url);
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
-  if (options.apiKey) {
+  if (options.apiKey && !discordWebhook) {
     headers.Authorization = `Bearer ${options.apiKey}`;
   }
+  if (discordWebhook && options.targetThreadId) {
+    url.searchParams.set("thread_id", options.targetThreadId);
+  }
+
+  const body = discordWebhook
+    ? JSON.stringify({
+        content: truncateText(options.message, 2000),
+      })
+    : JSON.stringify({
+        channel: options.channel,
+        message: options.message,
+        target: options.target,
+        threadId: options.targetThreadId,
+      });
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs);
   let response: Response;
   try {
-    response = await fetch(options.url, {
-      body: JSON.stringify({
-        channel: options.channel,
-        message: options.message,
-        target: options.target,
-        threadId: options.targetThreadId,
-      }),
+    response = await fetch(url.toString(), {
+      body,
       headers,
       method: "POST",
       signal: controller.signal,

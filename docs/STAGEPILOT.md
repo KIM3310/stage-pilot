@@ -89,6 +89,7 @@ Error status behavior:
 - builds operator briefing text (case summary + top routes + first actions + twin recommendation)
 - dispatches through OpenClaw bridge:
   - webhook mode (`OPENCLAW_WEBHOOK_URL`)
+  - Discord webhook URLs are accepted directly and sent as `content` payloads
   - webhook path is guarded by timeout (`OPENCLAW_WEBHOOK_TIMEOUT_MS`, default `5000`)
   - or CLI mode (`OPENCLAW_CMD`, default `openclaw`)
   - CLI path is guarded by timeout (`OPENCLAW_CLI_TIMEOUT_MS`, default `5000`)

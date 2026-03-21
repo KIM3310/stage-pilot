@@ -156,6 +156,63 @@ describe("stagepilot openclaw notifier", () => {
     expect(outcome.statusCode).toBe(200);
   });
 
+  it("uses discord webhook payload shape and thread query when url is discord", async () => {
+    process.env.OPENCLAW_ENABLED = "1";
+    process.env.OPENCLAW_WEBHOOK_URL =
+      "https://discord.com/api/webhooks/123/token";
+    process.env.OPENCLAW_THREAD_ID = "999";
+    process.env.OPENCLAW_API_KEY = "should-not-be-sent";
+
+    const fetchMock = vi.fn(() => {
+      return new Response(null, { status: 204 });
+    }) as typeof fetch;
+    globalThis.fetch = fetchMock;
+
+    const notifier = createStagePilotOpenClawNotifierFromEnv();
+    const outcome = await notifier({
+      message: "discord-ready payload",
+      result: SAMPLE_RESULT,
+    });
+
+    expect(outcome.mode).toBe("webhook");
+    expect(outcome.delivered).toBe(true);
+    expect(outcome.statusCode).toBe(204);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [requestUrl, requestInit] = fetchMock.mock.calls[0] as [
+      string,
+      RequestInit,
+    ];
+    expect(requestUrl).toContain("thread_id=999");
+    expect(requestInit.headers).toEqual({
+      "Content-Type": "application/json",
+    });
+    expect(JSON.parse(String(requestInit.body))).toEqual({
+      content: "discord-ready payload",
+    });
+  });
+
+  it("truncates discord webhook content to discord-safe length", async () => {
+    process.env.OPENCLAW_ENABLED = "1";
+    process.env.OPENCLAW_WEBHOOK_URL =
+      "https://discord.com/api/webhooks/123/token";
+
+    const fetchMock = vi.fn(() => {
+      return new Response(null, { status: 204 });
+    }) as typeof fetch;
+    globalThis.fetch = fetchMock;
+
+    const notifier = createStagePilotOpenClawNotifierFromEnv();
+    await notifier({
+      message: "x".repeat(2500),
+      result: SAMPLE_RESULT,
+    });
+
+    const [, requestInit] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const payload = JSON.parse(String(requestInit.body)) as { content: string };
+    expect(payload.content).toHaveLength(2000);
+  });
+
   it("returns failed when webhook times out", async () => {
     process.env.OPENCLAW_ENABLED = "1";
     process.env.OPENCLAW_WEBHOOK_URL = "https://example.invalid/webhook";

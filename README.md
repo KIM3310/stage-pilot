@@ -38,6 +38,17 @@ Then read, in order:
 - [`docs/executive-one-pager.md`](docs/executive-one-pager.md)
 - [`docs/solution-architecture.md`](docs/solution-architecture.md)
 
+## Reviewer Fast Path
+
+If a reviewer is looking for the strongest proof first, use this order:
+
+1. `GET /v1/runtime-brief` — confirm runtime posture and integration readiness
+2. `GET /v1/provider-benchmark-scorecard` — inspect provider-family tradeoffs
+3. `GET /v1/trace-observability-pack` — verify replayable trace evidence
+4. `GET /v1/regression-gate-pack` — inspect promotion and rollback posture
+5. `GET /v1/summary-pack` — compress benchmark lift and handoff boundary
+6. `GET /v1/schema/plan-report` — lock the downstream report contract before reading code
+
 ## Quick Start
 
 - `GET /v1/provider-benchmark-scorecard` -> `GET /v1/trace-observability-pack` -> `GET /v1/regression-gate-pack` -> `GET /v1/perf-evidence-pack` -> `GET /v1/failure-taxonomy` -> `GET /v1/summary-pack` -> `GET /v1/schema/plan-report` -> `src/`.

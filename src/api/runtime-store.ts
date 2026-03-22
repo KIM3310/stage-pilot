@@ -47,7 +47,11 @@ function resolveStorePath(): string {
   if (configured) {
     return path.resolve(configured);
   }
-  return path.join(process.cwd(), ".runtime", "stagepilot-runtime-events.db");
+  return path.join(
+    process.cwd(),
+    ".runtime",
+    "stagepilot-runtime-events.jsonl"
+  );
 }
 
 function resolveStoreBackend(targetPath: string): RuntimeStoreBackend {

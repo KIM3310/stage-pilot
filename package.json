@@ -61,7 +61,7 @@
     "clean": "rimraf dist *.tsbuildinfo",
     "clean:repo": "bash scripts/clean-local-artifacts.sh",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
+    "test": "NODE_OPTIONS=--disable-warning=ExperimentalWarning vitest run",
     "check:biome": "biome check",
     "check:types": "tsc --noEmit",
     "check": "run-p check:*",

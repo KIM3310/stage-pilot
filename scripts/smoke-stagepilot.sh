@@ -97,6 +97,14 @@ if [[ "${plan_ok}" != "true" ]] || [[ "${plan_actions}" -lt 1 ]]; then
 fi
 echo "[smoke-stagepilot] plan ok (actions=${plan_actions})"
 
+resource_pack_json="$(curl_json "${BASE_URL}/v1/review-resource-pack")"
+resource_pack_ok="$(echo "${resource_pack_json}" | jq -r '.schema')"
+if [[ "${resource_pack_ok}" != "stagepilot-review-resource-pack-v1" ]]; then
+  echo "[smoke-stagepilot] review-resource-pack check failed: ${resource_pack_json}" >&2
+  exit 1
+fi
+echo "[smoke-stagepilot] review-resource-pack ok"
+
 invalid_status="$(curl -s --max-time "${CURL_MAX_TIME}" -o /tmp/stagepilot-invalid.json -w "%{http_code}" \
   "${BASE_URL}/v1/plan" \
   -H "Content-Type: application/json" \

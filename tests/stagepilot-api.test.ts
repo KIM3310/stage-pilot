@@ -670,6 +670,7 @@ describe("stagepilot api server", () => {
         liveReviewRun: string;
         perfEvidencePack: string;
         providerBenchmarkScorecard: string;
+        reviewResourcePack: string;
         protocolMatrix: string;
         regressionGatePack: string;
         traceObservabilityPack: string;
@@ -697,6 +698,7 @@ describe("stagepilot api server", () => {
     expect(body.links.providerBenchmarkScorecard).toBe(
       "/v1/provider-benchmark-scorecard"
     );
+    expect(body.links.reviewResourcePack).toBe("/v1/review-resource-pack");
     expect(body.links.protocolMatrix).toBe("/v1/protocol-matrix");
     expect(body.links.regressionGatePack).toBe("/v1/regression-gate-pack");
     expect(body.links.traceObservabilityPack).toBe(
@@ -1194,6 +1196,7 @@ describe("stagepilot api server", () => {
         benchmarkSummary: string;
         developerOpsPack: string;
         providerBenchmarkScorecard: string;
+        reviewResourcePack: string;
         regressionGatePack: string;
         summaryPack: string;
         traceObservabilityPack: string;
@@ -1209,6 +1212,9 @@ describe("stagepilot api server", () => {
           };
         };
         benchmarkSummarySchema: string;
+        reviewResourcePack: {
+          scenarioCount: number;
+        };
         regressionGatePackSchema: string;
         traceObservabilityPackSchema: string;
         evaluationPosture: {
@@ -1226,7 +1232,7 @@ describe("stagepilot api server", () => {
     expect(body.links.summaryPack).toBe("/v1/summary-pack");
     expect(body.operatorJourney).toHaveLength(4);
     expect(body.reviewSequence.length).toBeGreaterThanOrEqual(3);
-    expect(body.twoMinuteReview.length).toBe(4);
+    expect(body.twoMinuteReview.length).toBe(5);
     expect(body.proofAssets.length).toBeGreaterThanOrEqual(5);
     expect(body.proofAssets).toEqual(
       expect.arrayContaining([
@@ -1243,6 +1249,7 @@ describe("stagepilot api server", () => {
     expect(body.links.providerBenchmarkScorecard).toBe(
       "/v1/provider-benchmark-scorecard"
     );
+    expect(body.links.reviewResourcePack).toBe("/v1/review-resource-pack");
     expect(body.links.regressionGatePack).toBe("/v1/regression-gate-pack");
     expect(body.links.traceObservabilityPack).toBe(
       "/v1/trace-observability-pack"
@@ -1259,6 +1266,9 @@ describe("stagepilot api server", () => {
     expect(body.evidenceBundle.regressionGatePackSchema).toBe(
       "stagepilot-regression-gate-pack-v1"
     );
+    expect(
+      body.evidenceBundle.reviewResourcePack.scenarioCount
+    ).toBeGreaterThanOrEqual(4);
     expect(body.evidenceBundle.evaluationPosture.docsOnlySurfaces).toContain(
       "site/"
     );
@@ -1268,6 +1278,35 @@ describe("stagepilot api server", () => {
     expect(body.evidenceBundle.evaluationPosture.claimRule).toContain(
       "supporting docs"
     );
+  });
+
+  it("returns a checked-in review resource pack for no-key walkthroughs", async () => {
+    const { baseUrl } = await startServer({
+      engine: new StagePilotEngine(),
+    });
+
+    const response = await fetch(`${baseUrl}/v1/review-resource-pack`);
+    expect(response.status).toBe(200);
+
+    const body = (await response.json()) as {
+      schema: string;
+      summary: {
+        scenarioCount: number;
+        validationCaseCount: number;
+      };
+      reviewerFastPath: string[];
+      links: {
+        reviewResourcePack: string;
+        summaryPack: string;
+      };
+    };
+
+    expect(body.schema).toBe("stagepilot-review-resource-pack-v1");
+    expect(body.summary.scenarioCount).toBeGreaterThanOrEqual(4);
+    expect(body.summary.validationCaseCount).toBeGreaterThanOrEqual(4);
+    expect(body.reviewerFastPath[1]).toBe("/v1/review-resource-pack");
+    expect(body.links.reviewResourcePack).toBe("/v1/review-resource-pack");
+    expect(body.links.summaryPack).toBe("/v1/summary-pack");
   });
 
   it("returns benchmark summary for triage", async () => {

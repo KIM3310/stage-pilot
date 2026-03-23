@@ -69,6 +69,7 @@ import {
   buildStagePilotProtocolMatrix,
   buildStagePilotProviderBenchmarkScorecard,
   buildStagePilotRegressionGatePack,
+  buildStagePilotReviewResourcePack,
   buildStagePilotRouteDescriptors,
   buildStagePilotRuntimeBrief,
   buildStagePilotRuntimeScorecard,
@@ -1530,6 +1531,13 @@ function buildSummaryPackPayload(): JsonObject {
   });
 }
 
+function buildReviewResourcePackPayload(): JsonObject {
+  return buildStagePilotReviewResourcePack({
+    benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
+    service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
+  });
+}
+
 function buildBenchmarkSummaryPayload(
   minSuccessRate?: number,
   strategy?: string
@@ -2255,6 +2263,15 @@ function handleSummaryPackRequest(
   }
 ) {
   sendJson(response, 200, buildSummaryPackPayload(), options);
+}
+
+function handleReviewResourcePackRequest(
+  response: ServerResponse,
+  options?: {
+    includeBody?: boolean;
+  }
+) {
+  sendJson(response, 200, buildReviewResourcePackPayload(), options);
 }
 
 function handleFailureTaxonomyRequest(
@@ -3053,6 +3070,9 @@ function handleReadonlyRequest(options: {
       return true;
     case "/v1/summary-pack":
       handleSummaryPackRequest(response, { includeBody });
+      return true;
+    case "/v1/review-resource-pack":
+      handleReviewResourcePackRequest(response, { includeBody });
       return true;
     case "/v1/runtime-scorecard":
       handleRuntimeScorecardRequest(response, telemetry, { includeBody });

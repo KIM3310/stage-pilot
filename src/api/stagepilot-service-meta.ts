@@ -25,6 +25,8 @@ export const STAGEPILOT_TRACE_OBSERVABILITY_PACK_SCHEMA =
   "stagepilot-trace-observability-pack-v1";
 export const STAGEPILOT_REGRESSION_GATE_PACK_SCHEMA =
   "stagepilot-regression-gate-pack-v1";
+export const STAGEPILOT_REVIEW_RESOURCE_PACK_SCHEMA =
+  "stagepilot-review-resource-pack-v1";
 export const STAGEPILOT_LIVE_REVIEW_SCHEMA = "stagepilot-live-review-run-v1";
 
 function buildStagePilotOperationalPosture(options: {
@@ -99,6 +101,11 @@ function buildStagePilotProofAssets() {
       label: "BenchLab gains note",
       path: "docs/benchlab/TOOL_CALLING_GAINS.md",
       kind: "doc",
+    },
+    {
+      label: "Review resource pack",
+      path: "/v1/review-resource-pack",
+      kind: "route",
     },
   ];
 }
@@ -241,6 +248,12 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
       method: "GET",
       path: "/v1/summary-pack",
       purpose: "Benchmark-backed validation data pack",
+    },
+    {
+      method: "GET",
+      path: "/v1/review-resource-pack",
+      purpose:
+        "Checked-in review scenarios, operator checks, and benchmark playbooks",
     },
     {
       method: "GET",
@@ -454,6 +467,7 @@ export function buildStagePilotRuntimeBrief(options: {
       health: "/health",
       meta: "/v1/meta",
       runtimeBrief: "/v1/runtime-brief",
+      reviewResourcePack: "/v1/review-resource-pack",
       summaryPack: "/v1/summary-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
       perfEvidencePack: "/v1/perf-evidence-pack",
@@ -467,6 +481,150 @@ export function buildStagePilotRuntimeBrief(options: {
       developerOpsPack: "/v1/developer-ops-pack",
       workflowRuns: "/v1/workflow-runs",
       workflowReplay: "/v1/workflow-run-replay",
+      planSchema: "/v1/schema/plan-report",
+    },
+  };
+}
+
+export function buildStagePilotReviewResourcePack(options: {
+  benchmarkSnapshot: StagePilotBenchmarkSnapshot;
+  service: string;
+}) {
+  const resourceScenarios = [
+    {
+      scenarioId: "parser-drift-recovery",
+      focus:
+        "Show why malformed tool envelopes need bounded retry plus explicit failure review.",
+      nextSurface: "/v1/failure-taxonomy",
+    },
+    {
+      scenarioId: "bounded-handoff-release",
+      focus:
+        "Keep notify delivery behind human confirmation even when plan synthesis succeeds.",
+      nextSurface: "/v1/developer-ops-pack",
+    },
+    {
+      scenarioId: "provider-family-review",
+      focus:
+        "Explain provider posture through protocol coverage, contract confidence, and benchmark lift.",
+      nextSurface: "/v1/provider-benchmark-scorecard",
+    },
+    {
+      scenarioId: "regression-gate-watch",
+      focus:
+        "Keep promotion decisions tied to trace evidence and explicit gate posture.",
+      nextSurface: "/v1/regression-gate-pack",
+    },
+  ] as const;
+
+  const operatorChecks = [
+    {
+      checkId: "confirm-runtime-brief",
+      surface: "/v1/runtime-brief",
+      whyItMatters:
+        "Reviewers should confirm live readiness and request boundaries before any orchestration claim.",
+    },
+    {
+      checkId: "open-resource-pack",
+      surface: "/v1/review-resource-pack",
+      whyItMatters:
+        "Built-in scenarios and checks keep the repo reviewable without external keys.",
+    },
+    {
+      checkId: "verify-benchmark-proof",
+      surface: "/v1/summary-pack",
+      whyItMatters:
+        "Benchmark lift and handoff posture should stay visible in one surface.",
+    },
+    {
+      checkId: "check-regression-gates",
+      surface: "/v1/regression-gate-pack",
+      whyItMatters:
+        "Promotion posture needs explicit watch and rollback signals before release help.",
+    },
+  ] as const;
+
+  const validationCases = [
+    {
+      caseId: "runtime-brief-contract",
+      goal: "Runtime readiness and report contract should stay aligned before live review runs.",
+      proofSurface: "/v1/runtime-brief",
+    },
+    {
+      caseId: "provider-scorecard-path",
+      goal: "Provider-family tradeoffs should stay grounded in protocol coverage and benchmark evidence.",
+      proofSurface: "/v1/provider-benchmark-scorecard",
+    },
+    {
+      caseId: "trace-and-gate-link",
+      goal: "Trace observability and regression-gate posture should stay consistent across reviewed routes.",
+      proofSurface: "/v1/trace-observability-pack",
+    },
+    {
+      caseId: "summary-pack-boundary",
+      goal: "Summary-pack claims should remain bounded by checked-in docs and runtime proof routes.",
+      proofSurface: "/v1/summary-pack",
+    },
+  ] as const;
+
+  const playbooks = [
+    {
+      playbookId: "runtime-first-review",
+      entrySurface: "/v1/runtime-brief",
+      handoffSurface: "/v1/summary-pack",
+      focus:
+        "Use when a reviewer needs the shortest trustworthy path from readiness to proof.",
+    },
+    {
+      playbookId: "provider-tradeoff-review",
+      entrySurface: "/v1/provider-benchmark-scorecard",
+      handoffSurface: "/v1/protocol-matrix",
+      focus:
+        "Use when benchmark and protocol posture need to be explained together.",
+    },
+    {
+      playbookId: "release-governor-review",
+      entrySurface: "/v1/regression-gate-pack",
+      handoffSurface: "/v1/developer-ops-pack",
+      focus:
+        "Use when the story is about promotion, rollback, and human-controlled delivery.",
+    },
+  ] as const;
+
+  return {
+    service: options.service,
+    status: "ok",
+    generatedAt: new Date().toISOString(),
+    schema: STAGEPILOT_REVIEW_RESOURCE_PACK_SCHEMA,
+    headline:
+      "Checked-in review resource pack that keeps StagePilot's strongest no-key walkthrough explicit.",
+    summary: {
+      scenarioCount: resourceScenarios.length,
+      operatorCheckCount: operatorChecks.length,
+      validationCaseCount: validationCases.length,
+      playbookCount: playbooks.length,
+      benchmarkCaseCount: options.benchmarkSnapshot.caseCount,
+    },
+    resourceScenarios,
+    operatorChecks,
+    validationCases,
+    playbooks,
+    reviewerFastPath: [
+      "/v1/runtime-brief",
+      "/v1/review-resource-pack",
+      "/v1/provider-benchmark-scorecard",
+      "/v1/trace-observability-pack",
+      "/v1/regression-gate-pack",
+      "/v1/summary-pack",
+      "/v1/schema/plan-report",
+    ],
+    links: {
+      runtimeBrief: "/v1/runtime-brief",
+      reviewResourcePack: "/v1/review-resource-pack",
+      providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
+      traceObservabilityPack: "/v1/trace-observability-pack",
+      regressionGatePack: "/v1/regression-gate-pack",
+      summaryPack: "/v1/summary-pack",
       planSchema: "/v1/schema/plan-report",
     },
   };
@@ -1477,6 +1635,10 @@ export function buildStagePilotSummaryPack(options: {
     geminiHasApiKey: options.geminiHasApiKey,
     openClawConfigured: options.openClawConfigured,
   });
+  const reviewResourcePack = buildStagePilotReviewResourcePack({
+    benchmarkSnapshot: options.benchmarkSnapshot,
+    service: options.service,
+  });
   return {
     service: options.service,
     status: "ok",
@@ -1528,19 +1690,25 @@ export function buildStagePilotSummaryPack(options: {
           "Confirm Gemini/OpenClaw readiness and request boundary before trusting orchestration.",
       },
       {
-        step: "2. Failure posture",
+        step: "2. Review resource pack",
+        surface: "/v1/review-resource-pack",
+        proof:
+          "Inspect fixed scenarios, operator checks, and validation cases before moving into benchmark or live lanes.",
+      },
+      {
+        step: "3. Failure posture",
         surface: "/v1/failure-taxonomy -> /v1/summary-pack",
         proof:
           "Validate benchmark deltas, replayable traces, delivery gaps, and runtime failure classes before repeating any claim.",
       },
       {
-        step: "3. Contract boundary",
+        step: "4. Contract boundary",
         surface: "/v1/regression-gate-pack -> /v1/schema/plan-report",
         proof:
           "Check promotion posture, report sections, and operator rules before handing output to downstream tools.",
       },
       {
-        step: "4. Operator proof",
+        step: "5. Operator proof",
         surface: "docs/summary-pack.svg -> docs/STAGEPILOT.md",
         proof:
           "Read the end-to-end orchestration and handoff shape without tracing the full source tree.",
@@ -1573,12 +1741,14 @@ export function buildStagePilotSummaryPack(options: {
       planSchema: STAGEPILOT_PLAN_REPORT_SCHEMA,
       requestBodyTimeoutMs: options.bodyTimeoutMs,
       routeCount: buildStagePilotRouteDescriptors().length,
+      reviewResourcePack: reviewResourcePack.summary,
     },
     proofAssets: buildStagePilotProofAssets(),
     links: {
       health: "/health",
       meta: "/v1/meta",
       runtimeBrief: "/v1/runtime-brief",
+      reviewResourcePack: "/v1/review-resource-pack",
       summaryPack: "/v1/summary-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
       perfEvidencePack: "/v1/perf-evidence-pack",

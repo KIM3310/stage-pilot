@@ -43,11 +43,12 @@ Then read, in order:
 If a reviewer is looking for the strongest proof first, use this order:
 
 1. `GET /v1/runtime-brief` — confirm runtime posture and integration readiness
-2. `GET /v1/provider-benchmark-scorecard` — inspect provider-family tradeoffs
-3. `GET /v1/trace-observability-pack` — verify replayable trace evidence
-4. `GET /v1/regression-gate-pack` — inspect promotion and rollback posture
-5. `GET /v1/summary-pack` — compress benchmark lift and handoff boundary
-6. `GET /v1/schema/plan-report` — lock the downstream report contract before reading code
+2. `GET /v1/review-resource-pack` — inspect built-in no-key review scenarios and checks
+3. `GET /v1/provider-benchmark-scorecard` — inspect provider-family tradeoffs
+4. `GET /v1/trace-observability-pack` — verify replayable trace evidence
+5. `GET /v1/regression-gate-pack` — inspect promotion and rollback posture
+6. `GET /v1/summary-pack` — compress benchmark lift and handoff boundary
+7. `GET /v1/schema/plan-report` — lock the downstream report contract before reading code
 
 ## Quick Start
 
@@ -66,6 +67,7 @@ If a reviewer is looking for the strongest proof first, use this order:
 ## Summary Pack At A Glance
 
 - StagePilot evaluation API: `GET /v1/runtime-brief`, `GET /v1/summary-pack`, `GET /v1/schema/plan-report`
+- StagePilot review pack: `GET /v1/review-resource-pack`
 - Provider benchmark scorecard: `GET /v1/provider-benchmark-scorecard`
 - Runtime perf evidence pack: `GET /v1/perf-evidence-pack`
 - Trace observability pack: `GET /v1/trace-observability-pack`
@@ -84,16 +86,17 @@ If a reviewer is looking for the strongest proof first, use this order:
 ## Review Flow
 
 1. `GET /v1/runtime-brief` -> confirm orchestration readiness and integration posture.
-2. `GET /v1/perf-evidence-pack` -> inspect checked-in k6 rehearsal, latency posture, and release guardrails before scale claims.
-3. `GET /v1/trace-observability-pack` -> inspect replayable traces and operator escalation posture before frontier-runtime claims.
-4. `GET /v1/regression-gate-pack` -> inspect explicit promotion logic, watch items, and release posture.
-5. `GET /v1/provider-benchmark-scorecard` -> inspect provider-family contract confidence, latency/cost posture, and strongest protocol surfaces.
-6. `GET /v1/failure-taxonomy` -> inspect parser drift, retry exhaustion, delivery gaps, and observed runtime regressions in one place.
-7. `GET /v1/developer-ops-pack` -> inspect MR / pipeline / release lanes before demoing automation.
-8. `GET /v1/workflow-runs` -> verify recent developer workflow runs.
-9. `GET /v1/workflow-run-replay` -> inspect replay-ready evidence routes and recent workflow timeline.
-10. `GET /v1/summary-pack` -> inspect benchmark lift and parser/handoff boundary.
-11. `GET /v1/schema/plan-report` -> verify contract before trusting downstream routing output.
+2. `GET /v1/review-resource-pack` -> inspect built-in scenarios, checks, and playbooks before any live or benchmark claim.
+3. `GET /v1/perf-evidence-pack` -> inspect checked-in k6 rehearsal, latency posture, and release guardrails before scale claims.
+4. `GET /v1/trace-observability-pack` -> inspect replayable traces and operator escalation posture before frontier-runtime claims.
+5. `GET /v1/regression-gate-pack` -> inspect explicit promotion logic, watch items, and release posture.
+6. `GET /v1/provider-benchmark-scorecard` -> inspect provider-family contract confidence, latency/cost posture, and strongest protocol surfaces.
+7. `GET /v1/failure-taxonomy` -> inspect parser drift, retry exhaustion, delivery gaps, and observed runtime regressions in one place.
+8. `GET /v1/developer-ops-pack` -> inspect MR / pipeline / release lanes before demoing automation.
+9. `GET /v1/workflow-runs` -> verify recent developer workflow runs.
+10. `GET /v1/workflow-run-replay` -> inspect replay-ready evidence routes and recent workflow timeline.
+11. `GET /v1/summary-pack` -> inspect benchmark lift and parser/handoff boundary.
+12. `GET /v1/schema/plan-report` -> verify contract before trusting downstream routing output.
 12. `GET /v1/benchlab/summary-pack` -> inspect checked-in runtime and artifact claims.
 13. `docs/validation-guide.md` + `docs/summary-pack.svg` + `docs/benchmarks/stagepilot-latest.json` + `docs/benchmarks/stagepilot-runtime-load-latest.json` + `docs/benchmarks/stagepilot-trace-observability-latest.json` + `docs/benchmarks/stagepilot-regression-gate-latest.json` -> read the strongest test assets first.
 

@@ -28,6 +28,7 @@ export const STAGEPILOT_REGRESSION_GATE_PACK_SCHEMA =
 export const STAGEPILOT_REVIEW_RESOURCE_PACK_SCHEMA =
   "stagepilot-review-resource-pack-v1";
 export const STAGEPILOT_LIVE_REVIEW_SCHEMA = "stagepilot-live-review-run-v1";
+const CSV_ROW_SPLIT_REGEX = /\r?\n/;
 
 function buildStagePilotOperationalPosture(options: {
   benchmarkReadyForPromotion?: boolean;
@@ -490,6 +491,16 @@ export function buildStagePilotReviewResourcePack(options: {
   benchmarkSnapshot: StagePilotBenchmarkSnapshot;
   service: string;
 }) {
+  const fs = require("node:fs") as typeof import("node:fs");
+  const path = require("node:path") as typeof import("node:path");
+  const externalDir = path.join(
+    process.cwd(),
+    "data",
+    "external",
+    "incident_prompt_pack"
+  );
+  const incidentSummaryPath = path.join(externalDir, "Incident_response.txt");
+  const supportCsvPath = path.join(externalDir, "customer_support_tickets.csv");
   const resourceScenarios = [
     {
       scenarioId: "parser-drift-recovery",
@@ -605,6 +616,26 @@ export function buildStagePilotReviewResourcePack(options: {
       playbookCount: playbooks.length,
       benchmarkCaseCount: options.benchmarkSnapshot.caseCount,
     },
+    externalData: {
+      present: fs.existsSync(externalDir),
+      files: {
+        incidentSummary: {
+          path: "data/external/incident_prompt_pack/Incident_response.txt",
+          present: fs.existsSync(incidentSummaryPath),
+          sizeBytes: fs.existsSync(incidentSummaryPath)
+            ? fs.statSync(incidentSummaryPath).size
+            : 0,
+        },
+        supportTickets: {
+          path: "data/external/incident_prompt_pack/customer_support_tickets.csv",
+          present: fs.existsSync(supportCsvPath),
+          sizeBytes: fs.existsSync(supportCsvPath)
+            ? fs.statSync(supportCsvPath).size
+            : 0,
+          rowCount: countCsvRows(fs, supportCsvPath),
+        },
+      },
+    },
     resourceScenarios,
     operatorChecks,
     validationCases,
@@ -628,6 +659,17 @@ export function buildStagePilotReviewResourcePack(options: {
       planSchema: "/v1/schema/plan-report",
     },
   };
+}
+
+function countCsvRows(fs: typeof import("node:fs"), filePath: string): number {
+  if (!fs.existsSync(filePath)) {
+    return 0;
+  }
+  const raw = fs.readFileSync(filePath, "utf8").trim();
+  if (!raw) {
+    return 0;
+  }
+  return Math.max(0, raw.split(CSV_ROW_SPLIT_REGEX).length - 1);
 }
 
 export function buildStagePilotBenchmarkSummary(options: {

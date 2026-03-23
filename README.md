@@ -86,7 +86,7 @@ If a reviewer is looking for the strongest proof first, use this order:
 ## Review Flow
 
 1. `GET /v1/runtime-brief` -> confirm orchestration readiness and integration posture.
-2. `GET /v1/review-resource-pack` -> inspect built-in scenarios, checks, and playbooks before any live or benchmark claim.
+2. `GET /v1/review-resource-pack` -> inspect built-in scenarios, checks, playbooks, and staged public incident/support data before any live or benchmark claim.
 3. `GET /v1/perf-evidence-pack` -> inspect checked-in k6 rehearsal, latency posture, and release guardrails before scale claims.
 4. `GET /v1/trace-observability-pack` -> inspect replayable traces and operator escalation posture before frontier-runtime claims.
 5. `GET /v1/regression-gate-pack` -> inspect explicit promotion logic, watch items, and release posture.

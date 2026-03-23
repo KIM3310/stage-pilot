@@ -1294,6 +1294,13 @@ describe("stagepilot api server", () => {
         scenarioCount: number;
         validationCaseCount: number;
       };
+      externalData: {
+        files: {
+          supportTickets: {
+            path: string;
+          };
+        };
+      };
       reviewerFastPath: string[];
       links: {
         reviewResourcePack: string;
@@ -1304,6 +1311,12 @@ describe("stagepilot api server", () => {
     expect(body.schema).toBe("stagepilot-review-resource-pack-v1");
     expect(body.summary.scenarioCount).toBeGreaterThanOrEqual(4);
     expect(body.summary.validationCaseCount).toBeGreaterThanOrEqual(4);
+    expect(body.externalData.files.supportTickets.path).toBe(
+      "/Users/pizza/projects/stage-pilot/data/external/incident_prompt_pack/customer_support_tickets.csv".replace(
+        "/Users/pizza/projects/stage-pilot/",
+        ""
+      )
+    );
     expect(body.reviewerFastPath[1]).toBe("/v1/review-resource-pack");
     expect(body.links.reviewResourcePack).toBe("/v1/review-resource-pack");
     expect(body.links.summaryPack).toBe("/v1/summary-pack");

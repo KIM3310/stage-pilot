@@ -187,7 +187,15 @@ async function startServer(
   baseUrl: string;
   close: () => Promise<void>;
 }> {
-  const server = createStagePilotApiServer(options);
+  const silentLogger = {
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+  };
+  const server = createStagePilotApiServer({
+    ...options,
+    logger: options.logger ?? silentLogger,
+  });
   serversToClose.push(server);
 
   await new Promise<void>((resolve) => {

@@ -1,10 +1,11 @@
 import { randomUUID } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import {
   createServer,
   type IncomingMessage,
   type ServerResponse,
 } from "node:http";
+import { resolve } from "node:path";
 import { readGeminiHttpTimeoutMs } from "../stagepilot/agents";
 import {
   benchmarkStagePilotStrategies,
@@ -78,6 +79,8 @@ import {
   STAGEPILOT_LIVE_REVIEW_SCHEMA,
   type StagePilotRouteDescriptor,
 } from "./stagepilot-service-meta";
+
+const LINE_SPLIT_REGEX = /\r?\n/;
 
 interface JsonObject {
   [key: string]: unknown;
@@ -1532,10 +1535,87 @@ function buildSummaryPackPayload(): JsonObject {
 }
 
 function buildReviewResourcePackPayload(): JsonObject {
-  return buildStagePilotReviewResourcePack({
+  const payload = buildStagePilotReviewResourcePack({
     benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
     service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
   });
+  const externalDir = resolve(
+    process.cwd(),
+    "data",
+    "external",
+    "incident_prompt_pack"
+  );
+  const incidentSummaryPath = resolve(externalDir, "Incident_response.txt");
+  const supportCsvPath = resolve(externalDir, "customer_support_tickets.csv");
+  return {
+    ...payload,
+    externalData: {
+      present: existsSync(externalDir),
+      files: {
+        incidentSummary: {
+          path: "data/external/incident_prompt_pack/Incident_response.txt",
+          present: existsSync(incidentSummaryPath),
+          sizeBytes: existsSync(incidentSummaryPath)
+            ? statSync(incidentSummaryPath).size
+            : 0,
+          preview: previewTextLines(incidentSummaryPath, 3),
+        },
+        supportTickets: {
+          path: "data/external/incident_prompt_pack/customer_support_tickets.csv",
+          present: existsSync(supportCsvPath),
+          sizeBytes: existsSync(supportCsvPath)
+            ? statSync(supportCsvPath).size
+            : 0,
+          rowCount: countCsvRows(supportCsvPath),
+          preview: previewCsvRows(supportCsvPath, 2),
+        },
+      },
+    },
+  };
+}
+
+function countCsvRows(filePath: string): number {
+  if (!existsSync(filePath)) {
+    return 0;
+  }
+  const raw = readFileSync(filePath, "utf8").trim();
+  if (!raw) {
+    return 0;
+  }
+  return Math.max(0, raw.split(LINE_SPLIT_REGEX).length - 1);
+}
+
+function previewCsvRows(
+  filePath: string,
+  limit: number
+): Record<string, string>[] {
+  if (!existsSync(filePath)) {
+    return [];
+  }
+  const [header, ...rows] = readFileSync(filePath, "utf8")
+    .split(LINE_SPLIT_REGEX)
+    .filter((line) => line.trim().length > 0);
+  if (!header) {
+    return [];
+  }
+  const columns = header.split(",");
+  return rows.slice(0, limit).map((row) => {
+    const values = row.split(",");
+    return Object.fromEntries(
+      columns.map((column, index) => [column, values[index] ?? ""])
+    );
+  });
+}
+
+function previewTextLines(filePath: string, limit: number): string[] {
+  if (!existsSync(filePath)) {
+    return [];
+  }
+  return readFileSync(filePath, "utf8")
+    .split(LINE_SPLIT_REGEX)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+    .slice(0, limit);
 }
 
 function buildBenchmarkSummaryPayload(

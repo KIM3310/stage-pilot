@@ -1298,6 +1298,7 @@ describe("stagepilot api server", () => {
         files: {
           supportTickets: {
             path: string;
+            preview: Record<string, string>[];
           };
         };
       };
@@ -1312,10 +1313,10 @@ describe("stagepilot api server", () => {
     expect(body.summary.scenarioCount).toBeGreaterThanOrEqual(4);
     expect(body.summary.validationCaseCount).toBeGreaterThanOrEqual(4);
     expect(body.externalData.files.supportTickets.path).toBe(
-      "/Users/pizza/projects/stage-pilot/data/external/incident_prompt_pack/customer_support_tickets.csv".replace(
-        "/Users/pizza/projects/stage-pilot/",
-        ""
-      )
+      "data/external/incident_prompt_pack/customer_support_tickets.csv"
+    );
+    expect(Array.isArray(body.externalData.files.supportTickets.preview)).toBe(
+      true
     );
     expect(body.reviewerFastPath[1]).toBe("/v1/review-resource-pack");
     expect(body.links.reviewResourcePack).toBe("/v1/review-resource-pack");

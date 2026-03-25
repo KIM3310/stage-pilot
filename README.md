@@ -35,6 +35,7 @@ pnpm api:stagepilot
 Then read, in order:
 - [`docs/validation-guide.md`](docs/validation-guide.md)
 - [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json)
+- [`docs/tool-call-reliability-case-study.md`](docs/tool-call-reliability-case-study.md)
 - [`docs/executive-one-pager.md`](docs/executive-one-pager.md)
 - [`docs/solution-architecture.md`](docs/solution-architecture.md)
 

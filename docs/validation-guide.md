@@ -31,10 +31,11 @@ pnpm api:stagepilot
 ### Read in this order
 
 1. `docs/benchmarks/stagepilot-latest.json`
-2. `docs/executive-one-pager.md`
-3. `docs/solution-architecture.md`
-4. `docs/summary-pack.svg`
-5. `docs/STAGEPILOT.md` only if you want runtime/operator details
+2. `docs/tool-call-reliability-case-study.md`
+3. `docs/executive-one-pager.md`
+4. `docs/solution-architecture.md`
+5. `docs/summary-pack.svg`
+6. `docs/STAGEPILOT.md` only if you want runtime/operator details
 
 ## API evidence path
 

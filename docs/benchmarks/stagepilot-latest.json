@@ -1,6 +1,6 @@
 {
   "caseCount": 40,
-  "generatedAt": "2026-03-19T03:47:44.961Z",
+  "generatedAt": "2026-03-24T06:16:41.757Z",
   "improvements": {
     "loopVsBaseline": 65,
     "loopVsMiddleware": 25,
@@ -43,7 +43,7 @@
         "bench-39",
         "bench-40"
       ],
-      "p95LatencyMs": 0.03,
+      "p95LatencyMs": 0.05,
       "parseSuccessCount": 10,
       "planSuccessCount": 10,
       "strategy": "baseline",
@@ -52,7 +52,7 @@
     },
     {
       "avgAttemptsUsed": 1,
-      "avgLatencyMs": 0.12,
+      "avgLatencyMs": 0.13,
       "failedCaseIds": [
         "bench-4",
         "bench-8",
@@ -69,7 +69,7 @@
         "bench-38",
         "bench-39"
       ],
-      "p95LatencyMs": 0.31,
+      "p95LatencyMs": 0.39,
       "parseSuccessCount": 26,
       "planSuccessCount": 26,
       "strategy": "middleware",
@@ -78,9 +78,9 @@
     },
     {
       "avgAttemptsUsed": 1.35,
-      "avgLatencyMs": 0.05,
+      "avgLatencyMs": 0.06,
       "failedCaseIds": ["bench-14", "bench-17", "bench-34", "bench-37"],
-      "p95LatencyMs": 0.09,
+      "p95LatencyMs": 0.1,
       "parseSuccessCount": 36,
       "planSuccessCount": 36,
       "strategy": "middleware+ralph-loop",

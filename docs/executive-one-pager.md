@@ -1,8 +1,8 @@
 # StagePilot Executive One-Pager
 
-## Best fit
+## Primary read
 
-StagePilot is strongest as a sample for **AI engineer**, **frontier LLM runtime**, and **runtime reliability** conversations. It can also support solutions-architect conversations, but that is the secondary read.
+StagePilot works best as a concise sample of **runtime reliability and tool-calling validation**. It can also support broader systems and architecture conversations, but the reliability lens is the clearest starting point.
 
 ## Problem
 
@@ -14,12 +14,12 @@ Tool-calling failures often look like model failures, but many are really parsin
 - exposes benchmark lift through compact, bounded evidence surfaces
 - turns parser reliability and retry discipline into a productized runtime boundary
 
-## Reviewer value
+## Review value
 
 - fewer silent tool-call failures
 - easier adoption of cheaper or non-native models
 - benchmark-backed rollout decisions instead of intuition
-- a fast way to review reliability posture without overstating hosted-platform maturity
+- a compact way to review reliability posture without overstating hosted-platform maturity
 
 ## Key metrics
 

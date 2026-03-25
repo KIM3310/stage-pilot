@@ -1,10 +1,10 @@
 # StagePilot validation data guide
 
-Use this when you want the fastest credible read of the repo for AI engineer, frontier LLM runtime reliability, or Big Tech platform review. Treat solutions-architect review as a secondary lens, not the headline.
+Use this guide when you want a compact, evidence-first read of the repo. Start here if you want the benchmark artifact, API proof surfaces, and implementation boundaries in a clear order.
 
-## Hiring signal to anchor
+## Core signal
 
-This repo should read first as: **tool-calling reliability proof for frontier/runtime teams**. The takeaway is that the work is benchmarked, bounded, and reviewable.
+This repo is easiest to understand as **tool-calling reliability proof with checked-in benchmark evidence**. The key takeaway is that the work is benchmarked, bounded, and reviewable.
 
 ## What to believe first
 
@@ -46,9 +46,9 @@ Start here when you want the runtime-backed dashboard instead of reading raw fil
 4. `GET /v1/developer-ops-pack` — developer workflow / release lane posture
 5. `GET /v1/workflow-run-replay` — replay-oriented review surface after execution
 
-## Strongest current claim
+## Current claim
 
-The most defensible repo headline is not "hosted agent platform." It is:
+The clearest repo headline is not "hosted agent platform." It is:
 
 > reliable tool calling for non-native models, grounded in checked-in benchmark lift, replayable traces, and ready API/docs surfaces
 

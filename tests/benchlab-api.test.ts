@@ -2,8 +2,9 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import type { AddressInfo } from "node:net";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, expect, it } from "vitest";
 import { createBenchLabApiServer } from "../src/api/benchlab-server";
+import { describeIfSocketBinding } from "./socket-binding";
 
 const serversToClose: ReturnType<typeof createBenchLabApiServer>[] = [];
 
@@ -444,7 +445,7 @@ function createBenchLabFixtureRoot() {
   return { matrixRoot, repoRoot };
 }
 
-describe("benchlab api", () => {
+describeIfSocketBinding("benchlab api", () => {
   it("lists config files and renders the demo", async () => {
     const fixture = createBenchLabFixtureRoot();
     const baseUrl = await startServer({

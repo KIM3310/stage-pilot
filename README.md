@@ -475,6 +475,7 @@ if (aws) {
 Set `GCP_PROJECT_ID` and `GOOGLE_APPLICATION_CREDENTIALS` to enable:
 - GCS artifact storage for benchmark reports
 - BigQuery streaming insert for benchmark analytics and trend queries
+- automatic publish from `pnpm bench:stagepilot` so the checked-in benchmark can also land in reviewer-visible cloud artifacts
 
 ```ts
 import { GcpAdapter } from "./adapters/gcp-adapter";

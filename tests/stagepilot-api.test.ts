@@ -1,8 +1,9 @@
 import { createSign, generateKeyPairSync } from "node:crypto";
 import { type AddressInfo, Socket } from "node:net";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, expect, it, vi } from "vitest";
 import { createStagePilotApiServer } from "../src/api/stagepilot-server";
 import { StagePilotEngine } from "../src/stagepilot/orchestrator";
+import { describeIfSocketBinding } from "./socket-binding";
 
 const serversToClose: ReturnType<typeof createStagePilotApiServer>[] = [];
 const BODY_TIMEOUT_ENV_KEY = "STAGEPILOT_REQUEST_BODY_TIMEOUT_MS";
@@ -447,7 +448,7 @@ function sendTrickledPlanRequest(options: {
   });
 }
 
-describe("stagepilot api server", () => {
+describeIfSocketBinding("stagepilot api server", () => {
   it("serves desktop demo page", async () => {
     const { baseUrl } = await startServer({
       engine: new StagePilotEngine(),

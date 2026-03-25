@@ -5,6 +5,7 @@ import {
   benchmarkStagePilotStrategies,
   formatBenchmarkSummary,
 } from "../stagepilot/benchmark";
+import { publishBenchmarkReportIfConfigured } from "./benchmark-cloud-publish";
 
 function readIntEnv(name: string, fallback: number): number {
   const raw = process.env[name];
@@ -50,6 +51,13 @@ async function main() {
   }
 
   console.log(`\nSaved benchmark JSON -> ${outPath}`);
+
+  const publishResult = await publishBenchmarkReportIfConfigured(report);
+  if (publishResult) {
+    console.log(
+      `Published GCP benchmark artifacts -> ${publishResult.gcsUrl} (${publishResult.bigQueryRows} BigQuery rows)`
+    );
+  }
 }
 
 main().catch((error) => {

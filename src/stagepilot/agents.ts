@@ -86,15 +86,18 @@ async function readJsonWithTimeout<T>(
 
 export class GeminiGateway implements LlmGateway {
   private readonly apiKey: string;
+  private readonly fallbackModel: string | undefined;
   private readonly model: string;
   private readonly timeoutMs: number;
 
   constructor(
     apiKey: string,
     model: string,
-    timeoutMs = DEFAULT_GEMINI_HTTP_TIMEOUT_MS
+    timeoutMs = DEFAULT_GEMINI_HTTP_TIMEOUT_MS,
+    fallbackModel?: string
   ) {
     this.apiKey = apiKey;
+    this.fallbackModel = fallbackModel?.trim() || undefined;
     this.model = model;
     this.timeoutMs = normalizeGeminiHttpTimeoutMs(timeoutMs);
   }
@@ -104,67 +107,79 @@ export class GeminiGateway implements LlmGateway {
     plan: PlanResult;
     safety: SafetyResult;
   }): Promise<string> {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent`;
     const prompt = [
       "Summarize this social-welfare action plan in 3 short bullet points.",
       "Keep it operational and concrete.",
       JSON.stringify(input),
     ].join("\n");
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
-    let response: Response;
-    try {
-      response = await fetch(url, {
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: prompt }],
-            },
-          ],
-        }),
-        headers: {
-          "Content-Type": "application/json",
-          "X-goog-api-key": this.apiKey,
-        },
-        method: "POST",
-        signal: controller.signal,
-      });
-    } catch (error) {
-      if (isAbortError(error)) {
-        throw new Error(`Gemini request timed out (${this.timeoutMs}ms)`);
-      }
-      throw error;
-    } finally {
-      clearTimeout(timeoutId);
-    }
-
-    if (!response.ok) {
-      throw new Error(`Gemini request failed: ${response.status}`);
-    }
-
-    const data = await readJsonWithTimeout<{
-      candidates?: Array<{
-        content?: {
-          parts?: Array<{ text?: string }>;
-        };
-      }>;
-    }>(
-      response,
-      this.timeoutMs,
-      `Gemini response body timed out (${this.timeoutMs}ms)`
+    const models = Array.from(
+      new Set(
+        [this.model, this.fallbackModel].filter((value): value is string =>
+          Boolean(value)
+        )
+      )
     );
+    let lastError: unknown;
 
-    const text = data.candidates?.[0]?.content?.parts
-      ?.map((part) => part.text ?? "")
-      .join("\n")
-      .trim();
+    for (const model of models) {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
+      try {
+        const response = await fetch(url, {
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [{ text: prompt }],
+              },
+            ],
+          }),
+          headers: {
+            "Content-Type": "application/json",
+            "X-goog-api-key": this.apiKey,
+          },
+          method: "POST",
+          signal: controller.signal,
+        });
 
-    if (!text) {
-      throw new Error("Gemini response did not include summary text");
+        if (!response.ok) {
+          throw new Error(`Gemini request failed: ${response.status}`);
+        }
+
+        const data = await readJsonWithTimeout<{
+          candidates?: Array<{
+            content?: {
+              parts?: Array<{ text?: string }>;
+            };
+          }>;
+        }>(
+          response,
+          this.timeoutMs,
+          `Gemini response body timed out (${this.timeoutMs}ms)`
+        );
+
+        const text = data.candidates?.[0]?.content?.parts
+          ?.map((part) => part.text ?? "")
+          .join("\n")
+          .trim();
+
+        if (!text) {
+          throw new Error("Gemini response did not include summary text");
+        }
+
+        return text;
+      } catch (error) {
+        lastError = isAbortError(error)
+          ? new Error(`Gemini request timed out (${this.timeoutMs}ms)`)
+          : error;
+      } finally {
+        clearTimeout(timeoutId);
+      }
     }
 
-    return text;
+    throw lastError instanceof Error
+      ? lastError
+      : new Error("Gemini request failed");
   }
 }
 

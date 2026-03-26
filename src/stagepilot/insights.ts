@@ -83,75 +83,94 @@ async function readJsonWithTimeout<T>(
 
 async function summarizeWithGemini(options: {
   apiKey: string;
+  fallbackModel?: string;
   model: string;
   result: StagePilotResult;
   timeoutMs: number;
 }): Promise<string> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${options.model}:generateContent`;
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs);
-  let response: Response;
-  try {
-    response = await fetch(url, {
-      body: JSON.stringify({
-        contents: [
-          {
-            parts: [{ text: buildGeminiPrompt(options.result) }],
-          },
-        ],
-      }),
-      headers: {
-        "Content-Type": "application/json",
-        "X-goog-api-key": options.apiKey,
-      },
-      method: "POST",
-      signal: controller.signal,
-    });
-  } catch (error) {
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "name" in error &&
-      (error as { name?: string }).name === "AbortError"
-    ) {
-      throw new Error(
-        `Gemini insights request timed out (${options.timeoutMs}ms)`
-      );
-    }
-    throw error;
-  } finally {
-    clearTimeout(timeoutId);
-  }
-
-  if (!response.ok) {
-    throw new Error(`Gemini insights request failed: ${response.status}`);
-  }
-
-  const data = await readJsonWithTimeout<{
-    candidates?: Array<{
-      content?: {
-        parts?: Array<{ text?: string }>;
-      };
-    }>;
-  }>(
-    response,
-    options.timeoutMs,
-    `Gemini insights response body timed out (${options.timeoutMs}ms)`
+  const models = Array.from(
+    new Set(
+      [options.model, options.fallbackModel].filter((value): value is string =>
+        Boolean(value)
+      )
+    )
   );
+  let lastError: unknown;
 
-  const text = data.candidates?.[0]?.content?.parts
-    ?.map((part) => part.text ?? "")
-    .join("\n")
-    .trim();
-  if (!text) {
-    throw new Error("Gemini insights response missing text");
+  for (const model of models) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs);
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: buildGeminiPrompt(options.result) }],
+            },
+          ],
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          "X-goog-api-key": options.apiKey,
+        },
+        method: "POST",
+        signal: controller.signal,
+      });
+    } catch (error) {
+      lastError =
+        typeof error === "object" &&
+        error !== null &&
+        "name" in error &&
+        (error as { name?: string }).name === "AbortError"
+          ? new Error(
+              `Gemini insights request timed out (${options.timeoutMs}ms)`
+            )
+          : error;
+      clearTimeout(timeoutId);
+      continue;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    if (!response.ok) {
+      lastError = new Error(
+        `Gemini insights request failed: ${response.status}`
+      );
+      continue;
+    }
+
+    const data = await readJsonWithTimeout<{
+      candidates?: Array<{
+        content?: {
+          parts?: Array<{ text?: string }>;
+        };
+      }>;
+    }>(
+      response,
+      options.timeoutMs,
+      `Gemini insights response body timed out (${options.timeoutMs}ms)`
+    );
+
+    const text = data.candidates?.[0]?.content?.parts
+      ?.map((part) => part.text ?? "")
+      .join("\n")
+      .trim();
+    if (text) {
+      return text;
+    }
+    lastError = new Error("Gemini insights response missing text");
   }
 
-  return text;
+  throw lastError instanceof Error
+    ? lastError
+    : new Error("Gemini insights request failed");
 }
 
 export async function deriveStagePilotInsights(options: {
   apiKey?: string;
+  fallbackModel?: string;
   model?: string;
   result: StagePilotResult;
   timeoutMs?: number;
@@ -182,6 +201,7 @@ export async function deriveStagePilotInsights(options: {
   try {
     const narrative = await summarizeWithGemini({
       apiKey,
+      fallbackModel: options.fallbackModel,
       model,
       result: options.result,
       timeoutMs,

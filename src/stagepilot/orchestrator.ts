@@ -90,15 +90,16 @@ export class StagePilotEngine {
 
 export function createStagePilotEngine(
   apiKey?: string,
-  model = "gemini-2.5-pro",
-  geminiTimeoutMs?: number
+  model = "gemini-3.1-pro-preview",
+  geminiTimeoutMs?: number,
+  fallbackModel?: string
 ): StagePilotEngine {
   if (!apiKey) {
     return new StagePilotEngine();
   }
 
   return new StagePilotEngine({
-    gateway: new GeminiGateway(apiKey, model, geminiTimeoutMs),
+    gateway: new GeminiGateway(apiKey, model, geminiTimeoutMs, fallbackModel),
   });
 }
 
@@ -106,6 +107,7 @@ export function createStagePilotEngineFromEnv(): StagePilotEngine {
   return createStagePilotEngine(
     process.env.GEMINI_API_KEY,
     process.env.GEMINI_MODEL,
-    readGeminiHttpTimeoutMs(process.env.GEMINI_HTTP_TIMEOUT_MS)
+    readGeminiHttpTimeoutMs(process.env.GEMINI_HTTP_TIMEOUT_MS),
+    process.env.GEMINI_FALLBACK_MODEL
   );
 }

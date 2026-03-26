@@ -1,3 +1,6 @@
+import { existsSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+
 export interface StagePilotRouteDescriptor {
   method: "GET" | "POST";
   path: string;
@@ -491,16 +494,14 @@ export function buildStagePilotReviewResourcePack(options: {
   benchmarkSnapshot: StagePilotBenchmarkSnapshot;
   service: string;
 }) {
-  const fs = require("node:fs") as typeof import("node:fs");
-  const path = require("node:path") as typeof import("node:path");
-  const externalDir = path.join(
+  const externalDir = join(
     process.cwd(),
     "data",
     "external",
     "incident_prompt_pack"
   );
-  const incidentSummaryPath = path.join(externalDir, "Incident_response.txt");
-  const supportCsvPath = path.join(externalDir, "customer_support_tickets.csv");
+  const incidentSummaryPath = join(externalDir, "Incident_response.txt");
+  const supportCsvPath = join(externalDir, "customer_support_tickets.csv");
   const resourceScenarios = [
     {
       scenarioId: "parser-drift-recovery",
@@ -617,22 +618,22 @@ export function buildStagePilotReviewResourcePack(options: {
       benchmarkCaseCount: options.benchmarkSnapshot.caseCount,
     },
     externalData: {
-      present: fs.existsSync(externalDir),
+      present: existsSync(externalDir),
       files: {
         incidentSummary: {
           path: "data/external/incident_prompt_pack/Incident_response.txt",
-          present: fs.existsSync(incidentSummaryPath),
-          sizeBytes: fs.existsSync(incidentSummaryPath)
-            ? fs.statSync(incidentSummaryPath).size
+          present: existsSync(incidentSummaryPath),
+          sizeBytes: existsSync(incidentSummaryPath)
+            ? statSync(incidentSummaryPath).size
             : 0,
         },
         supportTickets: {
           path: "data/external/incident_prompt_pack/customer_support_tickets.csv",
-          present: fs.existsSync(supportCsvPath),
-          sizeBytes: fs.existsSync(supportCsvPath)
-            ? fs.statSync(supportCsvPath).size
+          present: existsSync(supportCsvPath),
+          sizeBytes: existsSync(supportCsvPath)
+            ? statSync(supportCsvPath).size
             : 0,
-          rowCount: countCsvRows(fs, supportCsvPath),
+          rowCount: countCsvRows(supportCsvPath),
         },
       },
     },
@@ -661,11 +662,11 @@ export function buildStagePilotReviewResourcePack(options: {
   };
 }
 
-function countCsvRows(fs: typeof import("node:fs"), filePath: string): number {
-  if (!fs.existsSync(filePath)) {
+function countCsvRows(filePath: string): number {
+  if (!existsSync(filePath)) {
     return 0;
   }
-  const raw = fs.readFileSync(filePath, "utf8").trim();
+  const raw = readFileSync(filePath, "utf8").trim();
   if (!raw) {
     return 0;
   }

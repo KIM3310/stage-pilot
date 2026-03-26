@@ -167,7 +167,7 @@ const BENCHMARK_DEFAULT_SEED = 20_260_228;
 const OPENAI_BASE_URL = "https://api.openai.com/v1";
 const OPENAI_PUBLIC_DEFAULT_DAILY_BUDGET_USD = 4;
 const OPENAI_PUBLIC_DEFAULT_MONTHLY_BUDGET_USD = 120;
-const OPENAI_PUBLIC_DEFAULT_MODEL = "gpt-4.1-mini";
+const OPENAI_PUBLIC_DEFAULT_MODEL = "gpt-5.2";
 const OPENAI_PUBLIC_DEFAULT_RPM = 6;
 const OPENAI_PUBLIC_TIMEOUT_MS = 20_000;
 const STAGEPILOT_REVIEW_ONLY_MODE_ENV_KEY = "STAGEPILOT_REVIEW_ONLY_MODE";
@@ -1000,7 +1000,7 @@ function buildMetaPayload(): JsonObject {
     killSwitch: openAi.killSwitch,
     lastLiveRunAt: lastStagePilotLiveRunAt,
     liveModel: openAi.modelPublic,
-    model: process.env.GEMINI_MODEL ?? "gemini-2.5-pro",
+    model: process.env.GEMINI_MODEL ?? "gemini-3.1-pro-preview",
     moderationEnabled: openAi.moderationEnabled,
     monthlyBudgetUsd: openAi.monthlyBudgetUsd,
     openClawConfigured,
@@ -1056,7 +1056,7 @@ function buildMetaPayload(): JsonObject {
       },
     },
     links: runtimeBrief.links,
-    model: process.env.GEMINI_MODEL ?? "gemini-2.5-pro",
+    model: process.env.GEMINI_MODEL ?? "gemini-3.1-pro-preview",
     openai: {
       dailyBudgetUsd: openAi.dailyBudgetUsd,
       deploymentMode: runtimeBrief.deploymentMode,
@@ -1114,7 +1114,7 @@ function buildRuntimeBriefPayload(): JsonObject {
     killSwitch: openAi.killSwitch,
     lastLiveRunAt: lastStagePilotLiveRunAt,
     liveModel: openAi.modelPublic,
-    model: process.env.GEMINI_MODEL ?? "gemini-2.5-pro",
+    model: process.env.GEMINI_MODEL ?? "gemini-3.1-pro-preview",
     moderationEnabled: openAi.moderationEnabled,
     monthlyBudgetUsd: openAi.monthlyBudgetUsd,
     openClawConfigured:
@@ -1520,7 +1520,7 @@ function buildSummaryPackPayload(): JsonObject {
     geminiHasApiKey:
       typeof process.env.GEMINI_API_KEY === "string" &&
       process.env.GEMINI_API_KEY.trim().length > 0,
-    model: process.env.GEMINI_MODEL ?? "gemini-2.5-pro",
+    model: process.env.GEMINI_MODEL ?? "gemini-3.1-pro-preview",
     openClawConfigured:
       Boolean(toNonEmptyString(process.env.OPENCLAW_WEBHOOK_URL)) ||
       Boolean(toNonEmptyString(process.env.OPENCLAW_CMD)),
@@ -2831,7 +2831,8 @@ async function handleInsightsRequest(options: {
       ? createStagePilotEngine(
           overrideApiKey,
           process.env.GEMINI_MODEL,
-          geminiTimeoutMs
+          geminiTimeoutMs,
+          process.env.GEMINI_FALLBACK_MODEL
         )
       : options.engine;
 
@@ -2839,6 +2840,7 @@ async function handleInsightsRequest(options: {
       ? (result: StagePilotResult) =>
           deriveStagePilotInsights({
             apiKey: overrideApiKey,
+            fallbackModel: process.env.GEMINI_FALLBACK_MODEL,
             model: process.env.GEMINI_MODEL ?? "gemini-3.1-pro-preview",
             result,
             timeoutMs: geminiTimeoutMs,
@@ -3470,6 +3472,7 @@ export function createStagePilotApiServer(
     ((result) =>
       deriveStagePilotInsights({
         apiKey: process.env.GEMINI_API_KEY,
+        fallbackModel: process.env.GEMINI_FALLBACK_MODEL,
         model: process.env.GEMINI_MODEL ?? "gemini-3.1-pro-preview",
         result,
         timeoutMs: geminiTimeoutMs,

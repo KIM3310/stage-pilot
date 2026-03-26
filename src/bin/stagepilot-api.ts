@@ -13,7 +13,7 @@ const server = createStagePilotApiServer();
 
 server.listen(port, "0.0.0.0", () => {
   const service = process.env.SERVICE_NAME_API ?? "stagepilot-api";
-  const model = process.env.GEMINI_MODEL ?? "gemini-2.5-pro";
+  const model = process.env.GEMINI_MODEL ?? "gemini-3.1-pro-preview";
   console.info(
     `[stagepilot-api] listening on 0.0.0.0:${port} service=${service} model=${model} gpu=false`
   );

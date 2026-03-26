@@ -689,7 +689,7 @@ describeIfSocketBinding("stagepilot api server", () => {
     expect(body.reportContract.schema).toBe("stagepilot-plan-report-v1");
     expect(body.diagnostics.integrationReady).toBe(true);
     expect(body.deploymentMode).toBe("public-capped-live");
-    expect(body.liveModel).toBe("gpt-4.1-mini");
+    expect(body.liveModel).toBe("gpt-5.2");
     expect(body.reviewFlow.length).toBeGreaterThanOrEqual(3);
     expect(body.routeCount).toBeGreaterThanOrEqual(10);
     expect(body.headline).toContain("orchestration");
@@ -786,7 +786,7 @@ describeIfSocketBinding("stagepilot api server", () => {
     };
     expect(body.schema).toBe("stagepilot-live-review-run-v1");
     expect(body.mode).toBe("public-capped-live");
-    expect(body.model).toBe("gpt-4.1-mini");
+    expect(body.model).toBe("gpt-5.2");
     expect(body.capped).toBe(true);
     expect(body.scenarioId).toBe("parser-drift-recovery");
     expect(body.nextReviewPath).toBe("/v1/failure-taxonomy");

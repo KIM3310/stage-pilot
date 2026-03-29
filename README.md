@@ -31,6 +31,12 @@ The repo brings together three connected surfaces:
 - **Outcome:** passed locally; 186 test files / 1,720 tests plus package and DTS build completed
 - **Notes:** optional provider integrations still remain env-gated and are not required for the local proof path
 
+## Datadog Proof Pack
+
+- Spec-first observability pack: [`docs/datadog/README.md`](docs/datadog/README.md)
+- Best use: show how StagePilot's OpenTelemetry metrics become Datadog dashboards, monitors, SLOs, and synthetic checks without turning the repo into a paid-account dependency
+- Strongest story: runtime reliability, retry pressure, parse latency, benchmark drift, and release readiness from one telemetry lane
+
 ## Why StagePilot?
 
 Large language models that lack native tool-calling support — or expose it inconsistently — produce unreliable structured output when asked to invoke external functions. A model might wrap arguments in XML one turn, switch to JSON the next, hallucinate tool names, or silently drop required parameters. In production, this means broken agent pipelines, silent data loss, and hours of forensic debugging. The baseline success rate on our 40-case benchmark is just 25%.

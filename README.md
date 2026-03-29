@@ -17,6 +17,20 @@ The repo brings together three connected surfaces:
 2. `StagePilot`: a multi-agent orchestration runtime with benchmark, API, and demo UI.
 3. `BenchLab`: prompt-mode BFCL experiment tooling, forensics, and local operator APIs.
 
+## Hiring Fit And Proof Boundary
+
+- **Best fit roles:** applied AI engineer, LLM systems engineer, runtime reliability engineer, GenAI solution architect
+- **Strongest public proof:** public npm package, checked-in benchmark artifacts, runnable API/demo surface
+- **What is real here:** parser middleware, benchmark harness, checked-in scorecards, deployment surfaces, and API runtime
+- **What is bounded here:** benchmark latency is in-process harness timing rather than end-to-end hosted-network latency; provider integrations stay optional
+
+## Latest Verified Snapshot
+
+- **Verified on:** 2026-03-28
+- **Command:** `npm run verify`
+- **Outcome:** passed locally; 186 test files / 1,720 tests plus package and DTS build completed
+- **Notes:** optional provider integrations still remain env-gated and are not required for the local proof path
+
 ## Why StagePilot?
 
 Large language models that lack native tool-calling support — or expose it inconsistently — produce unreliable structured output when asked to invoke external functions. A model might wrap arguments in XML one turn, switch to JSON the next, hallucinate tool names, or silently drop required parameters. In production, this means broken agent pipelines, silent data loss, and hours of forensic debugging. The baseline success rate on our 40-case benchmark is just 25%.

@@ -1,0 +1,78 @@
+{
+  "title": "{{PREFIX}} StagePilot Runtime Reliability",
+  "description": "Datadog board for the StagePilot parser and runtime surface.",
+  "layout_type": "ordered",
+  "is_read_only": false,
+  "widgets": [
+    {
+      "definition": {
+        "type": "note",
+        "content": "StagePilot Datadog board\\n\\nThis board assumes Prometheus/OpenMetrics or OTLP metrics are routed into Datadog for the parser runtime and benchmark surface.",
+        "background_color": "white",
+        "font_size": "16",
+        "show_tick": false,
+        "tick_pos": "50%"
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Parse Attempts by Protocol",
+        "show_legend": true,
+        "requests": [
+          {
+            "q": "sum:stagepilot_parse_attempts_total{*} by {protocol}.as_count()"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Parse Failures by Protocol",
+        "show_legend": true,
+        "requests": [
+          {
+            "q": "sum:stagepilot_parse_failures_total{*} by {protocol}.as_count()"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Parse Latency p95",
+        "show_legend": true,
+        "requests": [
+          {
+            "q": "p95:stagepilot_parse_latency_ms{*} by {protocol}"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Benchmark Runs by Strategy",
+        "show_legend": true,
+        "requests": [
+          {
+            "q": "sum:stagepilot_benchmark_runs_total{*} by {strategy}.as_count()"
+          }
+        ]
+      }
+    },
+    {
+      "definition": {
+        "type": "timeseries",
+        "title": "Process Uptime",
+        "show_legend": true,
+        "requests": [
+          {
+            "q": "avg:stagepilot_uptime_seconds{*}"
+          }
+        ]
+      }
+    }
+  ]
+}

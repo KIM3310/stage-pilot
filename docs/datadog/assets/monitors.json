@@ -1,0 +1,47 @@
+[
+  {
+    "name": "{{PREFIX}} StagePilot Parse Failures Spiking",
+    "type": "query alert",
+    "query": "sum(last_10m):sum:stagepilot_parse_failures_total{*}.as_count() > 5",
+    "message": "StagePilot parse failures spiked in the last 10 minutes. Review protocol-level errors and retry pressure for {{SERVICE}} in {{ENV}}.",
+    "tags": ["service:{{SERVICE}}", "env:{{ENV}}", "repo:stage-pilot"],
+    "options": {
+      "include_tags": true,
+      "notify_audit": false,
+      "new_host_delay": 300,
+      "thresholds": {
+        "critical": 5
+      }
+    }
+  },
+  {
+    "name": "{{PREFIX}} StagePilot Parse Latency Regressed",
+    "type": "query alert",
+    "query": "avg(last_15m):p95:stagepilot_parse_latency_ms{*} > 150",
+    "message": "StagePilot parse latency p95 exceeded 150 ms. Inspect protocol-specific latency and tool-call backlog before shipping changes.",
+    "tags": ["service:{{SERVICE}}", "env:{{ENV}}", "repo:stage-pilot"],
+    "options": {
+      "include_tags": true,
+      "notify_audit": false,
+      "new_host_delay": 300,
+      "thresholds": {
+        "critical": 150
+      }
+    }
+  },
+  {
+    "name": "{{PREFIX}} StagePilot Runtime Quiet",
+    "type": "query alert",
+    "query": "sum(last_30m):sum:stagepilot_parse_attempts_total{*}.as_count() < 1",
+    "message": "StagePilot has not seen parser traffic in the last 30 minutes. Confirm the service is healthy and the metric ingestion path is still active.",
+    "tags": ["service:{{SERVICE}}", "env:{{ENV}}", "repo:stage-pilot"],
+    "options": {
+      "include_tags": true,
+      "notify_audit": false,
+      "new_host_delay": 300,
+      "thresholds": {
+        "critical": 1
+      }
+    }
+  }
+]

@@ -31,10 +31,11 @@ The repo brings together three connected surfaces:
 - **Outcome:** passed locally; 186 test files / 1,720 tests plus package and DTS build completed
 - **Notes:** optional provider integrations still remain env-gated and are not required for the local proof path
 
-## Datadog Proof Pack
+## Datadog-Ready Pack
 
-- Spec-first observability pack: [`docs/datadog/README.md`](docs/datadog/README.md)
-- Best use: show how StagePilot's OpenTelemetry metrics become Datadog dashboards, monitors, SLOs, and synthetic checks without turning the repo into a paid-account dependency
+- Datadog-ready observability pack: [`docs/datadog/README.md`](docs/datadog/README.md)
+- Current state: asset sync and OTLP wiring are prepared, but live tenant integration is intentionally disabled by default
+- Best use: show how StagePilot's OpenTelemetry metrics would become Datadog dashboards, monitors, SLOs, and synthetic checks without turning the repo into a paid-account dependency
 - Strongest story: runtime reliability, retry pressure, parse latency, benchmark drift, and release readiness from one telemetry lane
 
 ## Why StagePilot?

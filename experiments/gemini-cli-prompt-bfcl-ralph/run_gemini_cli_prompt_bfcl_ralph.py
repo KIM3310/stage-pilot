@@ -8,7 +8,6 @@ import re
 import runpy
 import shutil
 import subprocess
-import sys
 import time
 from copy import deepcopy
 from datetime import datetime, timezone

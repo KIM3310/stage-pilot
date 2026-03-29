@@ -22,12 +22,83 @@ let _sdkInstance: { shutdown: () => Promise<void> } | undefined;
 
 const SERVICE_NAME = "stage-pilot";
 const TRACER_NAME = "stage-pilot";
+const OTEL_TRACE_PATH = "/v1/traces";
+const TRAILING_SLASHES_REGEX = /\/+$/;
+
+function readEnv(name: string): string | undefined {
+  const value = process.env[name]?.trim();
+  return value ? value : undefined;
+}
+
+/**
+ * Resolve the OTLP traces exporter URL from standard env vars.
+ *
+ * OTEL_EXPORTER_OTLP_TRACES_ENDPOINT wins when both are set. When only the
+ * generic OTLP endpoint is present, append `/v1/traces` unless the caller
+ * already provided the full traces path.
+ */
+export function resolveTraceExporterUrl(
+  rawValue = readEnv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT") ??
+    readEnv("OTEL_EXPORTER_OTLP_ENDPOINT")
+): string | undefined {
+  if (!rawValue) {
+    return undefined;
+  }
+
+  const normalized = rawValue.replace(TRAILING_SLASHES_REGEX, "");
+  if (normalized.endsWith(OTEL_TRACE_PATH)) {
+    return normalized;
+  }
+
+  return `${normalized}${OTEL_TRACE_PATH}`;
+}
+
+/**
+ * Parse OTLP exporter headers from a comma-separated env var.
+ *
+ * Example:
+ *   authorization=Bearer abc,dd-api-key=xyz
+ */
+export function parseOtelHeaders(
+  rawValue = process.env.OTEL_EXPORTER_OTLP_HEADERS ?? ""
+): Record<string, string> {
+  return rawValue
+    .split(",")
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .reduce<Record<string, string>>((headers, entry) => {
+      const separatorIndex = entry.indexOf("=");
+      if (separatorIndex <= 0) {
+        return headers;
+      }
+
+      const key = entry.slice(0, separatorIndex).trim();
+      const value = entry.slice(separatorIndex + 1).trim();
+      if (key && value) {
+        headers[key] = value;
+      }
+      return headers;
+    }, {});
+}
+
+export function getOtelConfigStatus(): {
+  enabled: boolean;
+  exporterUrl: string | null;
+  headerKeys: string[];
+} {
+  const exporterUrl = resolveTraceExporterUrl();
+  return {
+    enabled: Boolean(exporterUrl),
+    exporterUrl: exporterUrl ?? null,
+    headerKeys: Object.keys(parseOtelHeaders()),
+  };
+}
 
 /**
  * Returns true if OTEL is configured via environment variable.
  */
 export function isOtelEnabled(): boolean {
-  return !!process.env.OTEL_EXPORTER_OTLP_ENDPOINT;
+  return Boolean(resolveTraceExporterUrl());
 }
 
 /**
@@ -39,6 +110,12 @@ export async function initTelemetry(): Promise<void> {
     return;
   }
   _initialized = true;
+
+  const traceUrl = resolveTraceExporterUrl();
+  if (!traceUrl) {
+    _initialized = false;
+    return;
+  }
 
   // Dynamic imports so the SDK packages are only loaded when telemetry is active.
   const { NodeSDK } = await import("@opentelemetry/sdk-node");
@@ -58,7 +135,8 @@ export async function initTelemetry(): Promise<void> {
   });
 
   const traceExporter = new OTLPTraceExporter({
-    url: `${process.env.OTEL_EXPORTER_OTLP_ENDPOINT}/v1/traces`,
+    url: traceUrl,
+    headers: parseOtelHeaders(),
   });
 
   const sdk = new NodeSDK({

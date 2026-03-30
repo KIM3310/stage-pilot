@@ -1,8 +1,13 @@
-# StagePilot Datadog Proof Pack
+# StagePilot Datadog-Ready Pack
 
-This pack is intentionally `spec-first`.
+This pack now supports two lanes:
 
-The goal is to show how StagePilot would land in Datadog as a production-style runtime reliability surface without making a live Datadog tenant mandatory for review.
+- `spec-first` review via the markdown overview below
+- `asset-first` sync via `docs/datadog/assets/*.json` and `npm run datadog:plan`
+
+The current repo posture is `Datadog-ready, currently disabled`.
+
+The goal is still to keep local review lightweight, while making it possible to push a real dashboard and monitor pack into Datadog later if `DD_API_KEY`, `DD_APP_KEY`, and `DD_SITE` are available again.
 
 ## Why this repo is the strongest Datadog fit
 
@@ -70,11 +75,20 @@ That makes Datadog a natural extension of the runtime story rather than a cosmet
 - one synthetic-test screenshot for `/v1/metrics` or `/v1/plan`
 - one short notebook or incident-style write-up explaining how retry spikes map to tool-call instability
 
-## Minimal implementation path
+## Asset files
 
-1. Export StagePilot metrics through OTLP.
-2. Route OTLP to Datadog.
-3. Build the three dashboards above.
-4. Check in screenshots and monitor descriptions under `docs/datadog/`.
+- `docs/datadog/assets/dashboard.json`
+- `docs/datadog/assets/monitors.json`
+- `scripts/datadog-assets.mjs`
 
-If time is limited, do `Runtime Reliability Overview` first. That single board is enough to make the Datadog story credible in interviews.
+## Sync path
+
+This path is optional and is intentionally not active in the default local setup.
+
+1. Point `OTEL_EXPORTER_OTLP_ENDPOINT` at a Datadog Agent or OTEL collector.
+2. Run `npm run datadog:plan` to confirm titles, monitor names, and env config.
+3. Run `node scripts/datadog-assets.mjs validate` once `DD_API_KEY` is present.
+4. Run `npm run datadog:sync` once both `DD_API_KEY` and `DD_APP_KEY` are present.
+5. Capture screenshots and any post-sync notes under `docs/datadog/`.
+
+If time is limited, do `Runtime Reliability Overview` first. Even with live sync disabled, that single board is enough to make the Datadog story credible in interviews.

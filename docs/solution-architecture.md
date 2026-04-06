@@ -1,53 +1,50 @@
-# StagePilot Solution Architecture
+# StagePilot Architecture
 
 ## Goal
 
-StagePilot turns unreliable tool-call text from non-native models into stable, schema-aligned tool execution and measurable benchmark lift.
+Turn unreliable tool-call text from non-native models into stable, schema-correct tool execution. Measure the improvement.
 
-## Surfaces
+## Pieces
 
-- `@ai-sdk-tool/parser`
-  - parsing and coercion layer
-- `StagePilot API`
-  - orchestration workflow and runtime review surfaces
-- `BenchLab`
-  - benchmark comparison, failure taxonomy, and artifact review
+- `@ai-sdk-tool/parser` -- parsing and type coercion
+- `StagePilot API` -- orchestration and runtime endpoints
+- `BenchLab` -- benchmark comparison, failure analysis, artifact review
 
-## Deployment topology
+## How they fit together
 
 ```mermaid
 flowchart LR
-  Caller[App or Agent Runtime] --> Parser[@ai-sdk-tool/parser]
+  Caller[App / Agent] --> Parser[@ai-sdk-tool/parser]
   Parser --> StagePilot[StagePilot API]
   StagePilot --> Bench[Benchmark Summary]
-  StagePilot --> Notify[Notifications or Handoffs]
+  StagePilot --> Notify[Notifications / Handoffs]
   Bench --> Review[BenchLab Summary Pack]
 ```
 
-## Reliability posture
+## Reliability
 
-- malformed tool-call text is normalized before execution
-- benchmark summary exposes strongest and weakest strategies
-- BenchLab preserves artifact-level proof instead of anecdotal claims
-- summary pack exposes lift before anyone reads raw benchmark JSON
+- Malformed tool-call text gets normalized before execution
+- Benchmark shows which strategies work and which don't
+- BenchLab keeps artifact-level proof, not just claims
+- Summary pack shows the lift before you dig into raw JSON
 
-## What makes this useful for an AI engineer
+## For AI engineers
 
-- schema-coercion and parsing depth
-- bounded retry strategy
-- benchmark-backed performance claims
-- reusable middleware surface
+- Schema coercion and format normalization depth
+- Bounded retry strategy
+- Benchmark-backed numbers
+- Reusable middleware
 
-## What makes this useful for a solutions architect
+## For architects
 
-- clear separation between parser layer and orchestration layer
-- deployment path from local demo to Cloud Run
-- explicit integration boundary for downstream systems
-- benchmark summary makes rollout decisions defensible
+- Parser layer and orchestration layer are separate
+- Deploys from local demo to Cloud Run
+- Clear integration boundary for downstream systems
+- Benchmark data makes rollout decisions easier to justify
 
-## Production hardening next steps
+## Next steps
 
-- add hosted benchmark dashboard
-- add per-model latency and cost scorecard
-- add signed artifact snapshots for benchmark runs
-- add deployment reference docs for Cloud Run and API gateway fronting
+- Hosted benchmark dashboard
+- Per-model latency and cost scorecard
+- Signed artifact snapshots for benchmark runs
+- Deployment docs for Cloud Run + API gateway

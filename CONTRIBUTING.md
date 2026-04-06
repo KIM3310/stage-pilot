@@ -1,35 +1,33 @@
-# Contributing to StagePilot
-
-Thank you for your interest in contributing to StagePilot. This guide covers everything you need to get started.
+# Contributing
 
 ## Prerequisites
 
-- **Node.js 18+** (LTS recommended)
-- **pnpm 9+** — install via `corepack enable && corepack prepare pnpm@latest --activate`
-- **Git** with a GitHub account
+- Node.js 18+ (LTS recommended)
+- pnpm 9+ -- `corepack enable && corepack prepare pnpm@latest --activate`
+- Git + GitHub account
 
 ## Getting Started
 
-1. **Fork and clone** the repository:
+1. Fork and clone:
 
    ```bash
    git clone https://github.com/<your-username>/stage-pilot.git
    cd stage-pilot
    ```
 
-2. **Install dependencies:**
+2. Install deps:
 
    ```bash
    pnpm install
    ```
 
-3. **Copy the environment file** and fill in any required keys:
+3. Copy env file, fill in keys:
 
    ```bash
    cp .env.example .env
    ```
 
-4. **Verify your setup** by running the full check suite:
+4. Verify setup:
 
    ```bash
    pnpm verify   # runs type-check, lint, test, and build
@@ -62,7 +60,7 @@ Tests use [Vitest](https://vitest.dev/) and live in the `tests/` directory.
 pnpm test           # run all tests
 ```
 
-When adding new functionality, include corresponding tests. The benchmark harness is deterministic and runs in-process — no network calls or API keys are needed for the core test suite.
+Add tests when you add features. Benchmark harness is deterministic and in-process -- no network calls or API keys needed.
 
 ### Building
 
@@ -72,23 +70,23 @@ pnpm build          # clean build via tsup
 
 ## Making Changes
 
-1. **Create a feature branch** from `main`:
+1. Branch off `main`:
 
    ```bash
    git checkout -b feat/your-feature-name
    ```
 
-2. **Make your changes.** Keep commits focused and atomic.
+2. Make your changes. Keep commits focused.
 
-3. **Add a changeset** if your change affects the published package or public API:
+3. Add a changeset if it affects the published package:
 
    ```bash
    pnpm changeset
    ```
 
-   Follow the prompts to describe the change and select a semver bump level.
+   Follow the prompts for change description and semver bump.
 
-4. **Run the full verification** before pushing:
+4. Run verification before pushing:
 
    ```bash
    pnpm verify
@@ -102,10 +100,10 @@ pnpm build          # clean build via tsup
 4. A maintainer will review your PR. Address feedback with additional commits rather than force-pushing, so the review history stays readable.
 5. Once approved, a maintainer will squash-merge your PR.
 
-## Reporting Issues
+## Issues
 
-Use the [GitHub issue templates](https://github.com/KIM3310/stage-pilot/issues/new/choose) for bug reports and feature requests. Include reproduction steps and relevant environment details.
+Use the [issue templates](https://github.com/KIM3310/stage-pilot/issues/new/choose). Include repro steps and environment info.
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the Apache-2.0 license.
+Contributions are licensed under Apache-2.0.

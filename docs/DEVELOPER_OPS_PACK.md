@@ -1,16 +1,14 @@
 # Developer Ops Pack
 
-`/v1/developer-ops-pack` is the generic developer workflow surface for StagePilot.
+`/v1/developer-ops-pack` -- generic dev workflow surface for StagePilot.
 
-Use it when you need to explain:
+Covers:
+- MR triage
+- Pipeline recovery
+- Release-governor handoff
+- Why parser reliability and benchmark lift matter for dev automation
 
-- merge-request triage
-- pipeline recovery
-- release-governor handoff
-- why parser reliability and benchmark lift matter for developer automation
-
-Core routes:
-
+Routes:
 - `/v1/runtime-brief`
 - `/v1/runtime-scorecard`
 - `/v1/developer-ops-pack`
@@ -19,4 +17,4 @@ Core routes:
 - `/v1/summary-pack`
 - `/v1/schema/plan-report`
 
-The pack stays generic. It can back challenge submissions or interviews without turning the whole repo into a single-purpose Git tooling demo.
+Kept generic on purpose -- can back challenge submissions or interviews without making the whole repo look like a single-purpose Git tooling demo.

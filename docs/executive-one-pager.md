@@ -1,40 +1,33 @@
-# StagePilot Executive One-Pager
+# StagePilot -- What This Is
 
-## Primary read
+## tl;dr
 
-StagePilot works best as a concise sample of **runtime reliability and tool-calling validation**. It can also support broader systems and architecture conversations, but the reliability lens is the clearest starting point.
+Tool-calling reliability runtime with benchmarks. Good starting point for runtime reliability and tool-call validation conversations.
 
 ## Problem
 
-Tool-calling failures often look like model failures, but many are really parsing and handoff failures. That makes agent rollouts appear less reliable than they should be.
+Tool-call failures look like model failures, but they're usually parsing and handoff problems. Makes agent rollouts seem less reliable than they actually are.
 
-## What StagePilot changes
+## What it does
 
-- raises success rate for non-native tool-calling models
-- exposes benchmark lift through compact, bounded evidence surfaces
-- turns parser reliability and retry discipline into a productized runtime boundary
+- Improves success rate for models without native tool calling
+- Has benchmarks to back up the claims
+- Wraps parser reliability and retry logic into a reusable runtime
 
-## Review value
+## Key numbers
 
-- fewer silent tool-call failures
-- easier adoption of cheaper or non-native models
-- benchmark-backed rollout decisions instead of intuition
-- a compact way to review reliability posture without overstating hosted-platform maturity
+- Success-rate lift over baseline
+- Retry recovery rate
+- Weakest strategy bucket
+- Middleware latency overhead
 
-## Key metrics
+## Adoption path
 
-- success-rate lift over baseline
-- retry recovery rate
-- weakest strategy bucket
-- latency overhead of the middleware path
+1. Benchmark-only validation
+2. Drop middleware into one workflow
+3. Full StagePilot integration with notifications and handoff
 
-## Rollout
-
-1. benchmark-only validation
-2. middleware insertion for one workflow
-3. orchestrated StagePilot integration with notifications and handoff
-
-## Best evidence path
+## Where to look
 
 - `pnpm review:proof`
 - `/v1/runtime-brief`

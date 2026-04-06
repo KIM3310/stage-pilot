@@ -1,23 +1,21 @@
-# StagePilot validation data guide
+# Validation guide
 
-Use this guide when you want a compact, evidence-first read of the repo. Start here if you want the benchmark artifact, API proof surfaces, and implementation boundaries in a clear order.
+How to verify what this repo actually does, starting from benchmark data.
 
-## Core signal
+## What this is
 
-This repo is easiest to understand as **tool-calling reliability proof with checked-in benchmark evidence**. The key takeaway is that the work is benchmarked, bounded, and reviewable.
+Tool-calling reliability with checked-in benchmark evidence. The work is benchmarked, bounded, and you can verify it yourself.
 
-## What to believe first
+## Trust order
 
-Truth hierarchy for claims in this repo:
+1. Benchmark artifact: `docs/benchmarks/stagepilot-latest.json`
+2. API endpoints: `/v1/runtime-brief`, `/v1/summary-pack`, `/v1/benchmark-summary`
+3. These docs: this guide, `executive-one-pager.md`, `solution-architecture.md`
+4. Static site / SVG: `site/`, `docs/summary-pack.svg`
 
-1. checked-in benchmark artifact: `docs/benchmarks/stagepilot-latest.json`
-2. API review surfaces: `/v1/runtime-brief`, `/v1/summary-pack`, `/v1/benchmark-summary`
-3. checked-in docs that explain boundaries: this guide, `docs/executive-one-pager.md`, `docs/solution-architecture.md`
-4. static site / SVG supporting docs: `site/`, `docs/summary-pack.svg`
+If docs and API disagree, trust the benchmark artifact.
 
-If two surfaces disagree, trust the benchmark artifact and API summary pack over the static docs surface.
-
-## 60-second path
+## Quick path
 
 ### Local
 
@@ -28,50 +26,40 @@ pnpm api:stagepilot
 # open http://127.0.0.1:8080/demo
 ```
 
-### Read in this order
+### Reading order
 
 1. `docs/benchmarks/stagepilot-latest.json`
 2. `docs/tool-call-reliability-case-study.md`
 3. `docs/executive-one-pager.md`
 4. `docs/solution-architecture.md`
 5. `docs/summary-pack.svg`
-6. `docs/STAGEPILOT.md` only if you want runtime/operator details
+6. `docs/STAGEPILOT.md` for runtime/operator details
 
-## API evidence path
+## API evidence
 
-Start here when you want the runtime-backed dashboard instead of reading raw files.
+1. `GET /v1/runtime-brief` -- readiness, integrations
+2. `GET /v1/summary-pack` -- benchmark validation data
+3. `GET /v1/benchmark-summary` -- success-rate lift, weakest strategy
+4. `GET /v1/developer-ops-pack` -- dev workflow / release posture
+5. `GET /v1/workflow-run-replay` -- replay after execution
 
-1. `GET /v1/runtime-brief` — confirms readiness, integrations, and review posture
-2. `GET /v1/summary-pack` — benchmark-backed validation data pack
-3. `GET /v1/benchmark-summary` — concise success-rate lift and weakest-strategy story
-4. `GET /v1/developer-ops-pack` — developer workflow / release lane posture
-5. `GET /v1/workflow-run-replay` — replay-oriented review surface after execution
+## Current numbers
 
-## Current claim
+Checked-in benchmark snapshot:
+- baseline: 29.17%
+- parser middleware: 87.50%
+- bounded retry: 100.00% on the 24-case snapshot
+- delta vs baseline: +58.33pp middleware, +70.83pp loop
 
-The clearest repo headline is not "hosted agent platform." It is:
+## Honest framing
 
-> reliable tool calling for non-native models, grounded in checked-in benchmark lift, replayable traces, and ready API/docs surfaces
+- **Strong:** parser middleware + benchmark discipline + reviewable orchestration
+- **Reasonable:** runtime/API shape is practical and Cloud Run-friendly
+- **Don't oversell:** static site and docs are supporting material, not proof of live traffic
 
-Current checked-in benchmark snapshot:
-- baseline: `29.17%`
-- parser middleware: `87.50%`
-- bounded retry loop: `100.00%` on the current checked-in 24-case snapshot
-- delta vs baseline: `+58.33pp` middleware, `+70.83pp` loop
+## Two-minute version
 
-## Safe interview framing
-
-Use these boundaries to keep the project claims honest:
-
-- **Strong claim:** parser middleware + benchmark discipline + reviewable orchestration surface
-- **Careful claim:** StagePilot runtime/API shape is production-minded and Cloud Run-friendly
-- **Avoid overstating:** static site and docs are supporting docs, not proof of sustained hosted traffic
-
-## If you only have two minutes
-
-- run `pnpm review:proof`
-- open `docs/benchmarks/stagepilot-latest.json`
-- hit `/v1/summary-pack`
-- scan `docs/solution-architecture.md`
-
-That is enough to understand the repo's real value without getting lost in implementation detail.
+- `pnpm review:proof`
+- `docs/benchmarks/stagepilot-latest.json`
+- `/v1/summary-pack`
+- `docs/solution-architecture.md`

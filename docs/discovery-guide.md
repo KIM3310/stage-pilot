@@ -1,35 +1,35 @@
-# StagePilot Discovery Guide
+# Discovery guide
 
-## Best-fit signals
+## When this fits
 
-- agent workflows fail because model output is close to correct, but not executable
-- the team wants cheaper models without losing tool reliability
-- benchmark reproducibility matters more than flashy demo output
+- Agent workflows break because model output is close but not quite right
+- You want to use cheaper models without losing tool reliability
+- Benchmark reproducibility matters more than flashy demos
 
-## Discovery questions
+## Questions to ask
 
-1. Which workflows fail most often because tool arguments are malformed?
-2. What is the current baseline success rate and how is it measured?
-3. Is the blocker provider-native tools, or tool text normalization?
-4. How much latency budget can the team spend for bounded recovery?
-5. Which workflow is the right pilot for middleware insertion?
+1. Which workflows fail most because tool args are malformed?
+2. What's the current baseline success rate? How is it measured?
+3. Is the issue native tool support, or text normalization?
+4. How much latency can you spend on bounded recovery?
+5. Which workflow should pilot the middleware?
 
-## Demo path
+## Demo flow
 
-1. show `/v1/runtime-brief`
-2. show `/v1/benchmark-summary`
-3. show `/v1/summary-pack`
-4. open BenchLab summary pack
-5. inspect failure taxonomy and strongest benchmark claim
+1. `/v1/runtime-brief`
+2. `/v1/benchmark-summary`
+3. `/v1/summary-pack`
+4. BenchLab summary pack
+5. Failure taxonomy + best benchmark claim
 
-## Success criteria
+## What good looks like
 
-- success-rate lift is measurable
-- weakest strategy is explainable
-- bounded retry is acceptable to operators
-- the middleware path is easy to integrate
+- Measurable success-rate lift
+- Weakest strategy is explainable
+- Bounded retry is acceptable to ops
+- Middleware is easy to drop in
 
-## Follow-up artifacts
+## Follow-up reading
 
 - `docs/solution-architecture.md`
 - `docs/executive-one-pager.md`

@@ -1,6 +1,6 @@
-<img width="3168" height="1344" alt="StagePilot reliability runtime banner" src="https://github.com/user-attachments/assets/9a002988-e535-42ac-8baf-56ec8754410f" />
+<img width="3168" height="1344" alt="StagePilot banner" src="https://github.com/user-attachments/assets/9a002988-e535-42ac-8baf-56ec8754410f" />
 
-# StagePilot: Stage-Gated Tool-Calling Reliability Runtime
+# StagePilot
 
 [![npm - parser](https://img.shields.io/npm/v/@ai-sdk-tool/parser)](https://www.npmjs.com/package/@ai-sdk-tool/parser)
 [![npm downloads - parser](https://img.shields.io/npm/dt/@ai-sdk-tool/parser)](https://www.npmjs.com/package/@ai-sdk-tool/parser)
@@ -9,23 +9,23 @@
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 
-`StagePilot` is a TypeScript runtime and benchmark harness for stabilizing tool calls across provider families. It stage-gates unstable runs through parse, repair, replay, and review so reliability claims stay inspectable.
+TypeScript runtime for making tool calls work with models that don't natively support them (or do it inconsistently). Parses, repairs, and retries malformed tool-call output so you don't have to.
 
-The repo brings together three connected surfaces:
+Three main pieces:
 
-1. `@ai-sdk-tool/parser`: AI SDK middleware for parsing tool calls from models that do not natively support `tools`.
-2. `StagePilot`: a multi-agent orchestration runtime with benchmark, API, and demo UI.
-3. `BenchLab`: prompt-mode BFCL experiment tooling, forensics, and local operator APIs.
+1. `@ai-sdk-tool/parser` - AI SDK middleware that extracts tool calls from raw model text
+2. `StagePilot` - multi-agent orchestration runtime with benchmark + API
+3. `BenchLab` - BFCL experiment tooling for prompt-mode tool calling
 
-## Why StagePilot?
+## Why this exists
 
-Large language models that lack native tool-calling support — or expose it inconsistently — produce unreliable structured output when asked to invoke external functions. A model might wrap arguments in XML one turn, switch to JSON the next, hallucinate tool names, or silently drop required parameters. In production, this means broken agent pipelines, silent data loss, and hours of forensic debugging. The baseline success rate on our 40-case benchmark is just 25%.
+Models without native tool support produce unreliable output -- XML one turn, JSON the next, hallucinated tool names, missing args. On our 40-case benchmark, baseline success is 25%.
 
-Existing solutions tend to paper over the problem with regex-based extraction or single-pass prompt engineering. These approaches are fragile: they break when the model's output format drifts, they cannot recover from partial failures, and they give operators no visibility into _where_ or _why_ a tool call went wrong. When reliability matters — when an agent is booking real appointments, querying real databases, or orchestrating real infrastructure — "usually works" is not good enough.
+Most workarounds are regex hacks or single-pass prompts. They break when the format drifts and give you no way to see what went wrong.
 
-StagePilot takes a different approach: a **stage-gated pipeline** that decomposes tool-call handling into discrete, inspectable phases. Each stage (Eligibility, Safety, Planner, Outreach, Judge) has a single responsibility, its own pass/fail criteria, and produces structured telemetry. The parser middleware layer handles format normalization and schema coercion, while the repair-and-replay loop recovers from malformed output without re-running the entire chain. This architecture brings tool-call success from 25% to 90% at the middleware layer alone — and the multi-agent pipeline pushes reliability further while keeping every decision auditable.
+StagePilot breaks tool-call handling into stages (Eligibility, Safety, Planner, Outreach, Judge), each with its own pass/fail gate and telemetry. The parser middleware handles format normalization and schema coercion; the retry loop recovers from malformed output. This gets success from 25% to 90% with middleware+retry.
 
-## 60-Second Quick Start
+## Quick start
 
 ```bash
 pnpm install
@@ -69,39 +69,35 @@ const result = streamText({
 | `yamlXmlToolMiddleware` | XML tool tags + YAML bodies |
 | `qwen3CoderToolMiddleware` | Qwen/UI-TARS style `<tool_call>` markup |
 
-## Architecture
+## Layout
 
-- `EligibilityAgent` → `SafetyAgent` → `PlannerAgent` → `OutreachAgent` → `JudgeAgent` — orchestrated by `StagePilotEngine`
-- Parser layer: `src/core/` handles malformed tool-call text, schema coercion, streaming without native provider tooling
-- Benchmark layer: `src/stagepilot/benchmark.ts` — deterministic in-process harness, not LLM network latency
+Pipeline: `EligibilityAgent` -> `SafetyAgent` -> `PlannerAgent` -> `OutreachAgent` -> `JudgeAgent`, run by `StagePilotEngine`.
 
 ```
-stage-pilot/
-  src/
-    adapters/          # Multi-cloud integrations (AWS, GCP)
-    api/               # HTTP server, Prometheus metrics
-    core/              # Parser protocols, utilities
-    stagepilot/        # Orchestration runtime, agents, benchmark
-    telemetry/         # OpenTelemetry instrumentation
-  tests/               # 184 test files, 1,713 tests
-  infra/k8s/           # Kubernetes manifests
-  infra/terraform/     # GCP Terraform IaC
-  docs/benchmarks/     # Checked-in benchmark artifacts
-  experiments/         # Prompt-mode BFCL experiments
+src/
+  adapters/          # AWS, GCP integrations
+  api/               # HTTP server, Prometheus
+  core/              # Parser protocols, utils
+  stagepilot/        # Orchestration, agents, benchmark
+  telemetry/         # OpenTelemetry
+tests/               # ~1700 tests
+infra/               # k8s manifests, Terraform
+docs/benchmarks/     # Benchmark artifacts
+experiments/         # BFCL experiments
 ```
 
-## Core API
+## API
 
 ```bash
-pnpm api:stagepilot  # starts on http://127.0.0.1:8080
+pnpm api:stagepilot  # http://127.0.0.1:8080
 ```
 
-| Endpoint | Description |
+| Endpoint | What it does |
 |---|---|
-| `POST /v1/plan` | Route a case through the full agent pipeline |
-| `POST /v1/benchmark` | Run the 40-case benchmark suite |
-| `POST /v1/insights` | Generate narrative insights from benchmark data |
-| `POST /v1/whatif` | What-if simulation for staffing/demand deltas |
+| `POST /v1/plan` | Run a case through the agent pipeline |
+| `POST /v1/benchmark` | Run the 40-case benchmark |
+| `POST /v1/insights` | Narrative insights from benchmark data |
+| `POST /v1/whatif` | What-if sim for staffing/demand changes |
 | `GET /v1/metrics` | Prometheus metrics |
 
 ## Deployment
@@ -127,19 +123,16 @@ kubectl apply -f infra/k8s/
 
 **Vercel / Cloudflare Workers** — see `vercel.json` and `wrangler.toml`.
 
-## Tech Stack
+## Stack
 
-TypeScript · Node.js · AI SDK · Zod · Prometheus · OpenTelemetry · GCP (Cloud Run, GCS, BigQuery) · AWS (S3, CloudWatch) · Kubernetes · Terraform · Vercel · Cloudflare Workers
+TypeScript, Node.js, AI SDK, Zod, Prometheus, OpenTelemetry, GCP Cloud Run, AWS S3/CloudWatch, k8s, Terraform, Vercel, Cloudflare Workers
 
-## References
+## Links
 
 - npm: [@ai-sdk-tool/parser](https://www.npmjs.com/package/@ai-sdk-tool/parser)
-- Upstream lineage: [minpeter/ai-sdk-tool-call-middleware](https://github.com/minpeter/ai-sdk-tool-call-middleware)
-- Demo video: https://youtu.be/6trgTH1vX4M
-
-## Related Projects
-
-This repo's middleware brings tool-call success from 25% to 90%. [tool-call-finetune-lab](https://github.com/KIM3310/tool-call-finetune-lab) explores closing the remaining gap through model fine-tuning.
+- Based on: [minpeter/ai-sdk-tool-call-middleware](https://github.com/minpeter/ai-sdk-tool-call-middleware)
+- Demo: https://youtu.be/6trgTH1vX4M
+- Related: [tool-call-finetune-lab](https://github.com/KIM3310/tool-call-finetune-lab) -- fine-tuning approach for the remaining 10% gap
 
 ## License
 

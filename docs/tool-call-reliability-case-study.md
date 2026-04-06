@@ -1,41 +1,35 @@
-# StagePilot case study — one parser failure, one review path
+# Case study -- parser failure, one fix path
 
-## Failure shape
+## The failure
 
-A non-native model emits something that almost looks like a tool call, but the
-payload arrives in an unstable shape:
+A non-native model outputs something that *almost* looks like a tool call, but it's broken:
 
-- fields are split across chunks
-- one key is wrapped in explanatory text
-- the run looks fine until the downstream tool boundary breaks
+- fields split across chunks
+- one key wrapped in explanatory text
+- looks fine until the downstream tool boundary blows up
 
-Without a bounded parser and repair path, this usually gets mislabeled as
-“the model is flaky” instead of a reliability problem at the runtime boundary.
+Without a parser and repair path, this gets blamed on "the model being flaky" instead of a fixable runtime problem.
 
-## What StagePilot changes
+## What StagePilot does
 
-StagePilot treats this as a **tool-calling reliability** problem.
+Treats it as a tool-calling reliability problem.
 
-Use this review order:
+Look at it in this order:
 
-1. open `docs/benchmarks/stagepilot-latest.json`
-2. inspect `GET /v1/runtime-brief`
-3. inspect `GET /v1/summary-pack`
-4. inspect BenchLab or replay surfaces only if more detail is needed
+1. `docs/benchmarks/stagepilot-latest.json`
+2. `GET /v1/runtime-brief`
+3. `GET /v1/summary-pack`
+4. BenchLab / replay surfaces if you want more detail
 
 ## Why the benchmark matters
 
-The important claim is not just “higher score”.
+The point isn't just "higher score."
 
-The more defensible claim is:
+What's actually useful:
+- Parser middleware removes a whole class of silent tool-call failures
+- Bounded retry keeps repair behavior visible and explicit
+- Checked-in artifacts mean you can verify claims after the fact
 
-- parser middleware removes a large class of silent tool-call failures
-- bounded retry keeps repair behavior explicit
-- checked-in artifacts make the claim reviewable after the run is over
+## Bottom line
 
-## Reviewer takeaway
-
-> StagePilot turns ambiguous tool-call breakage into a bounded, replayable,
-> benchmarked runtime surface.
-
-That is the strongest and cleanest framing for this repo.
+StagePilot turns ambiguous tool-call breakage into something you can see, replay, and benchmark.

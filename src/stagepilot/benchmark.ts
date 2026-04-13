@@ -29,7 +29,17 @@ type MutationMode =
   | "wrong-tool-name"
   | "truncated-json"
   | "html-escaped-payload"
-  | "double-encoded-json";
+  | "double-encoded-json"
+  | "markdown-fenced"
+  | "yaml-body"
+  | "mixed-quotes"
+  | "comment-in-json"
+  | "bom-prefix"
+  | "null-bytes"
+  | "reversed-key-order"
+  | "multiline-values"
+  | "partial-schema"
+  | "xml-attribute-style";
 
 export type BenchmarkStrategy =
   | "baseline"
@@ -106,6 +116,16 @@ const MUTATION_SEQUENCE: MutationMode[] = [
   "truncated-json",
   "html-escaped-payload",
   "double-encoded-json",
+  "markdown-fenced",
+  "yaml-body",
+  "mixed-quotes",
+  "comment-in-json",
+  "bom-prefix",
+  "null-bytes",
+  "reversed-key-order",
+  "multiline-values",
+  "partial-schema",
+  "xml-attribute-style",
 ];
 const TOOL_INPUT_SCHEMA = {
   additionalProperties: true,
@@ -357,6 +377,84 @@ function buildPrimaryAttempt(
         name: TOOL_NAME,
       })}</tool_call>`;
     }
+    case "markdown-fenced": {
+      // Tool call wrapped in markdown code fences (common in Claude/GPT responses)
+      const json = JSON.stringify({ arguments: args, name: TOOL_NAME });
+      return `Here is the tool call:\n\n\`\`\`json\n<tool_call>${json}</tool_call>\n\`\`\``;
+    }
+    case "yaml-body": {
+      // YAML body instead of JSON inside tool_call tags
+      const risks = args.risks.map((r) => `    - ${r}`).join("\n");
+      return `<tool_call>\nname: ${TOOL_NAME}\narguments:\n  caseId: "${args.caseId}"\n  district: "${args.district}"\n  notes: "${args.notes}"\n  risks:\n${risks}\n  urgencyHint: "${args.urgencyHint}"\n  contactWindow: "${args.contactWindow ?? "18:00-21:00"}"\n</tool_call>`;
+    }
+    case "mixed-quotes": {
+      // Mix of single and double quotes in JSON
+      const risks = args.risks.map((r) => `'${r}'`).join(", ");
+      return `<tool_call>{"name": '${TOOL_NAME}', 'arguments': {"caseId": '${args.caseId}', "district": "${args.district}", 'notes': "${args.notes}", "risks": [${risks}], "urgencyHint": '${args.urgencyHint}', "contactWindow": "${args.contactWindow ?? "18:00-21:00"}"}}</tool_call>`;
+    }
+    case "comment-in-json": {
+      // JSON with comments (common when models "explain" their output)
+      const json = JSON.stringify(
+        { arguments: args, name: TOOL_NAME },
+        null,
+        2
+      );
+      const withComments = json
+        .replace('"name":', '// Tool to invoke\n  "name":')
+        .replace('"arguments":', '/* Required arguments */\n  "arguments":');
+      return `<tool_call>${withComments}</tool_call>`;
+    }
+    case "bom-prefix": {
+      // UTF-8 BOM character before the tool call
+      const json = JSON.stringify({ arguments: args, name: TOOL_NAME });
+      return `\uFEFF<tool_call>${json}</tool_call>`;
+    }
+    case "null-bytes": {
+      // Null bytes embedded in string values
+      const nullArgs = {
+        ...args,
+        caseId: `${args.caseId}\u0000`,
+        notes: `${args.notes}\u0000extra`,
+      };
+      return `<tool_call>${JSON.stringify({
+        arguments: nullArgs,
+        name: TOOL_NAME,
+      })}</tool_call>`;
+    }
+    case "reversed-key-order": {
+      // arguments key comes before name key (tests parser robustness)
+      const argsJson = JSON.stringify(args);
+      return `<tool_call>{"arguments":${argsJson},"name":"${TOOL_NAME}"}</tool_call>`;
+    }
+    case "multiline-values": {
+      // String values with embedded newlines and indentation
+      const multilineArgs = {
+        ...args,
+        notes: `${args.notes}\n  Additional context:\n    - Requires follow-up\n    - Priority routing needed`,
+        contactWindow: `${args.contactWindow ?? "18:00-21:00"}\n  (preferred)`,
+      };
+      return `<tool_call>${JSON.stringify({
+        arguments: multilineArgs,
+        name: TOOL_NAME,
+      })}</tool_call>`;
+    }
+    case "partial-schema": {
+      // Has some required fields but missing district (required) and notes (required)
+      const partial = {
+        caseId: args.caseId,
+        risks: args.risks,
+        urgencyHint: args.urgencyHint,
+      };
+      return `<tool_call>${JSON.stringify({
+        arguments: partial,
+        name: TOOL_NAME,
+      })}</tool_call>`;
+    }
+    case "xml-attribute-style": {
+      // Tool call encoded as XML attributes instead of JSON body
+      const risks = args.risks.join(",");
+      return `<tool_call name="${TOOL_NAME}" caseId="${args.caseId}" district="${args.district}" notes="${args.notes}" risks="${risks}" urgencyHint="${args.urgencyHint}" contactWindow="${args.contactWindow ?? "18:00-21:00"}" />`;
+    }
     default:
       return canonical;
   }
@@ -396,6 +494,7 @@ function buildCaseToolArguments(
 const UNRECOVERABLE_MODES: ReadonlySet<MutationMode> = new Set([
   "wrong-tool-name",
   "empty-arguments",
+  "partial-schema",
 ]);
 
 function isUnrecoverableMode(mode: MutationMode): boolean {
@@ -693,8 +792,8 @@ function findStrategy(
 export async function benchmarkStagePilotStrategies(
   options: StagePilotBenchmarkOptions = {}
 ): Promise<StagePilotBenchmarkReport> {
-  const caseCount = Math.max(1, options.caseCount ?? 40);
-  const seed = options.seed ?? 20_260_228;
+  const caseCount = Math.max(1, options.caseCount ?? 60);
+  const seed = options.seed ?? 20_260_413;
   const maxLoopAttempts = Math.max(2, options.maxLoopAttempts ?? 2);
   const cases = createBenchmarkCases(caseCount, seed);
   const context: BenchmarkContext = {

@@ -361,66 +361,6 @@ scripts/             # Build, deploy, load-test (k6)
 | [ADR-002](docs/adr/002-parser-middleware-design.md) | Parser as AI SDK Middleware | Why middleware pattern over custom wrapper or post-processing. Provider-agnostic, composable, own npm lifecycle. |
 | [ADR-003](docs/adr/003-benchmark-methodology.md) | Benchmark Methodology | Why deterministic seeded cases with 30 mutation modes. Reproducible, captures real-world failure patterns, separates format issues from model understanding gaps. |
 
-## For Different Roles
-
-<details>
-<summary><strong>🤖 For AI Engineers</strong></summary>
-
-**What you'll learn from this project:**
-- How to build a robust parser that handles 30 types of malformed LLM output
-- Stage-gated pipeline design for multi-agent systems
-- Bounded retry strategy (RALPH loop) — why 2 attempts is the sweet spot
-- Schema coercion patterns for type normalization
-- How to evaluate tool-calling reliability with reproducible benchmarks
-
-**Key files:**
-- `src/core/protocols/` — 8 parser protocol implementations
-- `src/rxml/` + `src/rjson/` — Relaxed parsers with repair heuristics
-- `src/stagepilot/agents.ts` — 5-agent implementations
-- `src/stagepilot/benchmark.ts` — 30 mutation modes
-
-**Related:** [tool-call-finetune-lab](https://github.com/KIM3310/tool-call-finetune-lab) — LoRA fine-tuning approach for the remaining 10% gap (Qwen2.5-7B, 65%→80% accuracy on BFCL)
-</details>
-
-<details>
-<summary><strong>📊 For Data Engineers</strong></summary>
-
-**What you'll learn from this project:**
-- Deterministic benchmark pipeline with seeded random generation
-- 30 mutation modes as a data quality testing framework
-- Structured artifact capture for reproducible evaluation
-- Prometheus metrics pipeline for runtime data collection
-- How to design evaluation harnesses that separate signal from noise
-
-**Key files:**
-- `src/stagepilot/benchmark.ts` — Benchmark harness with 30 mutation modes
-- `docs/benchmarks/` — Structured JSON artifacts + reports
-- `src/telemetry/metrics.ts` — Prometheus counter/histogram definitions
-- `experiments/` — 5 BFCL experiment variants with reproducible artifacts
-
-**Data stack touchpoints:** Benchmark results export to JSON → analysis in any data tool. Load test data via k6. Runtime metrics via Prometheus/Grafana.
-</details>
-
-<details>
-<summary><strong>🏗️ For Solutions Architects</strong></summary>
-
-**What you'll learn from this project:**
-- How to design a modular AI system where each layer (parser, orchestration, observability) is independently adoptable
-- Infrastructure-as-Code patterns: K8s manifests with HPA + Terraform for Cloud Run
-- Multi-cloud deployment: GCP Cloud Run, Kubernetes, Vercel, Cloudflare Workers
-- Observability architecture: OpenTelemetry → Jaeger/Datadog, Prometheus → Grafana
-- Architecture Decision Records as a communication tool
-
-**Key files:**
-- `docs/adr/` — 3 ADRs documenting key design decisions
-- `infra/k8s/` — Production K8s manifests (deployment, HPA, probes)
-- `infra/terraform/` — GCP Cloud Run with Secret Manager integration
-- `docs/solution-architecture.md` — System overview
-- `docs/datadog/` — Pre-built dashboards and monitors
-
-**Integration boundary:** Parser middleware is a standalone npm package. The full runtime adds orchestration, benchmarks, and observability. Adopters can choose either or both.
-</details>
-
 ## Tech Stack
 
 | Category | Technologies |

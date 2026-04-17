@@ -114,6 +114,7 @@
     "tsx": "^4.21.0",
     "typescript": "5.9.3",
     "ultracite": "7.2.3",
+    "vite": "^7.3.2",
     "vitest": "^4.1.4",
     "zod": "^4.3.6"
   },
@@ -122,5 +123,10 @@
     "node": ">=18",
     "pnpm": ">=9"
   },
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "pnpm": {
+    "overrides": {
+      "vite": "^7.3.2"
+    }
+  }
 }

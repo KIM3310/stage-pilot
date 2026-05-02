@@ -11,6 +11,8 @@
 
 **Tool-calling reliability runtime for LLMs.** Parses, repairs, and retries malformed tool-call output so you don't have to. Lifts baseline success from **25% to 90%** on a 60-case benchmark with 30 mutation modes.
 
+Technical review pack: [`docs/technical-review-pack.md`](docs/technical-review-pack.md)
+
 ## The Problem
 
 Models without native tool support produce unreliable output — XML one turn, JSON the next, hallucinated tool names, missing args, type mismatches. On our benchmark, **baseline success is 25%**. Most workarounds are regex hacks or single-pass prompts. They break when the format drifts and give you no way to see what went wrong.

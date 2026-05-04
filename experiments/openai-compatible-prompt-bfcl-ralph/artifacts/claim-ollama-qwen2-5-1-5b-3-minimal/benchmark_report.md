@@ -3,7 +3,7 @@
 - Generated (UTC): 2026-03-10T15:25:24.451186+00:00
 - Provider: `Ollama`
 - Model: `qwen2.5:1.5b`
-- Runtime Root: `/Users/kim/.debug-all-repos-20260310-remote/stage-pilot/experiments/prompt-bfcl-ralph-matrix/runtime-local-hunt-20260311/phase1-search/runs/openai-compatible-qwen2-5-1-5b-minimal`
+- Runtime Root: `$RUN_ROOT/stage-pilot/experiments/prompt-bfcl-ralph-matrix/runtime-local-hunt-20260311/phase1-search/runs/openai-compatible-qwen2-5-1-5b-minimal`
 - Categories: `multiple, parallel, parallel_multiple, simple_python`
 - Cases per category: `3`
 - Run-id mode: `enabled`

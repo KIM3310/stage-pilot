@@ -3,7 +3,7 @@
 - Generated (UTC): 2026-03-10T16:02:27.365012+00:00
 - Provider: `Ollama`
 - Model: `llama3.2:latest`
-- Runtime Root: `/Users/kim/.debug-all-repos-20260310-remote/stage-pilot/experiments/prompt-bfcl-ralph-matrix/runtime-local-validation5/runs/ollama-llama3-2-latest-schema-lock-v5`
+- Runtime Root: `$RUN_ROOT/stage-pilot/experiments/prompt-bfcl-ralph-matrix/runtime-local-validation5/runs/ollama-llama3-2-latest-schema-lock-v5`
 - Categories: `multiple, parallel, parallel_multiple, simple_python`
 - Cases per category: `5`
 - Run-id mode: `enabled`

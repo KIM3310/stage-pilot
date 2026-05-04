@@ -472,7 +472,7 @@ def format_missing_dependency_error(exc: ModuleNotFoundError) -> str:
     return (
         f"Missing Python dependency '{missing}'. "
         "Run with the BFCL virtualenv (for example: "
-        "/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python) "
+        "$BFCL_ROOT/.venv311/bin/python) "
         "or install BFCL requirements first."
     )
 
@@ -484,7 +484,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--bfcl-root",
         type=Path,
-        default=Path("/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard"),
+        default=Path(os.environ.get("BFCL_ROOT", "external/gorilla/berkeley-function-call-leaderboard")),
         help="Path to BFCL root directory (contains bfcl_eval package).",
     )
     parser.add_argument(

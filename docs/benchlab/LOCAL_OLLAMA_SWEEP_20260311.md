@@ -10,7 +10,7 @@
 
 ## Setup
 
-- BFCL root: `/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard`
+- BFCL root: `$BFCL_ROOT`
 - Provider: `Ollama` (`http://127.0.0.1:11434/v1`)
 - Models used in this sweep:
   - `llama3.1:8b`

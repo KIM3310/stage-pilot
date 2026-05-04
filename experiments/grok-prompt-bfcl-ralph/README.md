@@ -63,8 +63,8 @@ export REPO_ROOT="$(git rev-parse --show-toplevel)"
 ### 1) BFCL 준비
 
 ```bash
-git clone https://github.com/ShishirPatil/gorilla.git /Users/kim/Downloads/gorilla
-cd /Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard
+git clone https://github.com/ShishirPatil/gorilla.git $GORILLA_ROOT
+cd $BFCL_ROOT
 /opt/homebrew/bin/python3.11 -m venv .venv311
 .venv311/bin/pip install -e .
 .venv311/bin/pip install soundfile
@@ -79,9 +79,9 @@ export GROK_API_KEY="xai-..."
 ## Run Benchmark
 
 ```bash
-/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python \
+$BFCL_ROOT/.venv311/bin/python \
   "$REPO_ROOT/experiments/grok-prompt-bfcl-ralph/run_grok_prompt_bfcl_ralph.py" \
-  --bfcl-root /Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard \
+  --bfcl-root $BFCL_ROOT \
   --runtime-root "$REPO_ROOT/experiments/grok-prompt-bfcl-ralph/runtime" \
   --model-name grok-4-latest \
   --categories simple_python,multiple,parallel,parallel_multiple \
@@ -94,10 +94,10 @@ export GROK_API_KEY="xai-..."
 ## Preflight Only
 
 ```bash
-/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python \
+$BFCL_ROOT/.venv311/bin/python \
   "$REPO_ROOT/experiments/grok-prompt-bfcl-ralph/run_grok_prompt_bfcl_ralph.py" \
   --preflight-only \
-  --bfcl-root /Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard \
+  --bfcl-root $BFCL_ROOT \
   --runtime-root "$REPO_ROOT/experiments/grok-prompt-bfcl-ralph/runtime" \
   --model-name grok-4-latest \
   --categories simple_python,multiple,parallel \
@@ -108,8 +108,8 @@ export GROK_API_KEY="xai-..."
 
 ```bash
 cd "$REPO_ROOT/experiments/grok-prompt-bfcl-ralph"
-/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python -m py_compile run_grok_prompt_bfcl_ralph.py
-/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python -m unittest -q test_run_grok_prompt_bfcl_ralph.py
+$BFCL_ROOT/.venv311/bin/python -m py_compile run_grok_prompt_bfcl_ralph.py
+$BFCL_ROOT/.venv311/bin/python -m unittest -q test_run_grok_prompt_bfcl_ralph.py
 ```
 
 ## Release Cleanup

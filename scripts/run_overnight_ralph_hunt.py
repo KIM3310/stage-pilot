@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import csv
+import os
 import json
 import shutil
 import subprocess
@@ -15,7 +16,7 @@ from zoneinfo import ZoneInfo
 
 KST = ZoneInfo("Asia/Seoul")
 REPO_ROOT = Path(__file__).resolve().parents[1]
-BFCL_ROOT = Path("/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard")
+BFCL_ROOT = Path(os.environ.get("BFCL_ROOT", "external/gorilla/berkeley-function-call-leaderboard"))
 BFCL_PYTHON = BFCL_ROOT / ".venv311" / "bin" / "python"
 MATRIX_RUNNER = (
     REPO_ROOT
@@ -219,7 +220,8 @@ def installed_target_locals() -> set[str]:
 def find_gemini_cli() -> str | None:
     candidates = [
         shutil.which("gemini"),
-        "/Users/kim/.nvm/versions/node/v24.13.0/bin/gemini",
+        os.environ.get("GEMINI_BIN"),
+        str(Path(os.environ.get("NODE_BIN_DIR", "")) / "gemini") if os.environ.get("NODE_BIN_DIR") else None,
         "/opt/homebrew/bin/gemini",
     ]
     for candidate in candidates:

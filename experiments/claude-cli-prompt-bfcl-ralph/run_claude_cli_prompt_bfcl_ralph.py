@@ -93,7 +93,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--bfcl-root",
         type=Path,
-        default=Path("/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard"),
+        default=Path(os.environ.get("BFCL_ROOT", "external/gorilla/berkeley-function-call-leaderboard")),
         help="Path to BFCL root directory (contains bfcl_eval package).",
     )
     parser.add_argument(

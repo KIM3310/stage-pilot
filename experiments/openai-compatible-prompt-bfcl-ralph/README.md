@@ -74,8 +74,8 @@ export OPENAI_COMPATIBLE_DEFAULT_HEADERS='{"HTTP-Referer":"https://example.com",
 ## BFCL Setup
 
 ```bash
-git clone https://github.com/ShishirPatil/gorilla.git /Users/kim/Downloads/gorilla
-cd /Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard
+git clone https://github.com/ShishirPatil/gorilla.git $GORILLA_ROOT
+cd $BFCL_ROOT
 /opt/homebrew/bin/python3.11 -m venv .venv311
 .venv311/bin/pip install -e .
 .venv311/bin/pip install soundfile
@@ -84,9 +84,9 @@ cd /Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard
 ## Run Benchmark
 
 ```bash
-/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python \
+$BFCL_ROOT/.venv311/bin/python \
   "$REPO_ROOT/experiments/openai-compatible-prompt-bfcl-ralph/run_openai_compatible_prompt_bfcl_ralph.py" \
-  --bfcl-root /Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard \
+  --bfcl-root $BFCL_ROOT \
   --runtime-root "$REPO_ROOT/experiments/openai-compatible-prompt-bfcl-ralph/runtime" \
   --provider-name "${OPENAI_COMPATIBLE_PROVIDER:-OpenAI-Compatible}" \
   --model-name "$OPENAI_COMPATIBLE_MODEL" \
@@ -103,10 +103,10 @@ If your provider does not expose a standard `GET /models` endpoint, add `--skip-
 ## Preflight Only
 
 ```bash
-/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python \
+$BFCL_ROOT/.venv311/bin/python \
   "$REPO_ROOT/experiments/openai-compatible-prompt-bfcl-ralph/run_openai_compatible_prompt_bfcl_ralph.py" \
   --preflight-only \
-  --bfcl-root /Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard \
+  --bfcl-root $BFCL_ROOT \
   --runtime-root "$REPO_ROOT/experiments/openai-compatible-prompt-bfcl-ralph/runtime" \
   --provider-name "${OPENAI_COMPATIBLE_PROVIDER:-OpenAI-Compatible}" \
   --model-name "$OPENAI_COMPATIBLE_MODEL" \
@@ -118,8 +118,8 @@ If your provider does not expose a standard `GET /models` endpoint, add `--skip-
 
 ```bash
 cd "$REPO_ROOT/experiments/openai-compatible-prompt-bfcl-ralph"
-/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python -m py_compile run_openai_compatible_prompt_bfcl_ralph.py
-/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python -m unittest -q test_run_openai_compatible_prompt_bfcl_ralph.py
+$BFCL_ROOT/.venv311/bin/python -m py_compile run_openai_compatible_prompt_bfcl_ralph.py
+$BFCL_ROOT/.venv311/bin/python -m unittest -q test_run_openai_compatible_prompt_bfcl_ralph.py
 ```
 
 ## Notes

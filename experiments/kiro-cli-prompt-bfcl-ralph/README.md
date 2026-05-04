@@ -31,9 +31,9 @@
 
 ```bash
 export REPO_ROOT="$(git rev-parse --show-toplevel)"
-/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python \
+$BFCL_ROOT/.venv311/bin/python \
   "$REPO_ROOT/experiments/kiro-cli-prompt-bfcl-ralph/run_kiro_cli_prompt_bfcl_ralph.py" \
-  --bfcl-root /Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard \
+  --bfcl-root $BFCL_ROOT \
   --runtime-root "$REPO_ROOT/experiments/kiro-cli-prompt-bfcl-ralph/runtime" \
   --model-name kiro-cli-default \
   --preflight-only
@@ -43,9 +43,9 @@ export REPO_ROOT="$(git rev-parse --show-toplevel)"
 
 ```bash
 export REPO_ROOT="$(git rev-parse --show-toplevel)"
-/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python \
+$BFCL_ROOT/.venv311/bin/python \
   "$REPO_ROOT/experiments/kiro-cli-prompt-bfcl-ralph/run_kiro_cli_prompt_bfcl_ralph.py" \
-  --bfcl-root /Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard \
+  --bfcl-root $BFCL_ROOT \
   --runtime-root "$REPO_ROOT/experiments/kiro-cli-prompt-bfcl-ralph/runtime" \
   --model-name kiro-cli-default \
   --cases-per-category 3

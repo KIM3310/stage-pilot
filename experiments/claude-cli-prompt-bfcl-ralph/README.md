@@ -17,9 +17,9 @@
 ## Preflight
 
 ```bash
-/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python \
+$BFCL_ROOT/.venv311/bin/python \
   experiments/claude-cli-prompt-bfcl-ralph/run_claude_cli_prompt_bfcl_ralph.py \
-  --bfcl-root /Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard \
+  --bfcl-root $BFCL_ROOT \
   --runtime-root experiments/claude-cli-prompt-bfcl-ralph/runtime-preflight \
   --model-name claude-cli-sonnet \
   --claude-model sonnet \

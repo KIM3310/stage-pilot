@@ -3,7 +3,7 @@
 - Generated (UTC): 2026-03-11T00:13:50.748437+00:00
 - Provider: `Ollama`
 - Model: `llama3.2:latest`
-- Runtime Root: `/Users/kim/.debug-all-repos-20260310-remote/stage-pilot/experiments/openai-compatible-prompt-bfcl-ralph/runtime-llama32-10-schema-lock`
+- Runtime Root: `$RUN_ROOT/stage-pilot/experiments/openai-compatible-prompt-bfcl-ralph/runtime-llama32-10-schema-lock`
 - Categories: `multiple, parallel, parallel_multiple, simple_python`
 - Cases per category: `10`
 - Run-id mode: `enabled`

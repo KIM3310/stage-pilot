@@ -102,10 +102,10 @@ BFCL 가상환경에서 실행하는 게 안전합니다.
 
 ```bash
 export REPO_ROOT="$(git rev-parse --show-toplevel)"
-/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python \
+$BFCL_ROOT/.venv311/bin/python \
   "$REPO_ROOT/experiments/prompt-bfcl-ralph-matrix/run_prompt_bfcl_ralph_matrix.py" \
   --models-file "$REPO_ROOT/experiments/prompt-bfcl-ralph-matrix/models.example.json" \
-  --bfcl-root /Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard \
+  --bfcl-root $BFCL_ROOT \
   --runtime-root "$REPO_ROOT/experiments/prompt-bfcl-ralph-matrix/runtime" \
   --cases-per-category 3
 ```
@@ -113,7 +113,7 @@ export REPO_ROOT="$(git rev-parse --show-toplevel)"
 특정 모델만 선택:
 
 ```bash
-/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python \
+$BFCL_ROOT/.venv311/bin/python \
   "$REPO_ROOT/experiments/prompt-bfcl-ralph-matrix/run_prompt_bfcl_ralph_matrix.py" \
   --models-file "$REPO_ROOT/experiments/prompt-bfcl-ralph-matrix/models.example.json" \
   --model-ids grok-4-latest,openrouter-qwen3-coder
@@ -122,7 +122,7 @@ export REPO_ROOT="$(git rev-parse --show-toplevel)"
 사전 점검만 실행:
 
 ```bash
-/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python \
+$BFCL_ROOT/.venv311/bin/python \
   "$REPO_ROOT/experiments/prompt-bfcl-ralph-matrix/run_prompt_bfcl_ralph_matrix.py" \
   --models-file "$REPO_ROOT/experiments/prompt-bfcl-ralph-matrix/models.example.json" \
   --preflight-only
@@ -131,7 +131,7 @@ export REPO_ROOT="$(git rev-parse --show-toplevel)"
 로컬 Ollama만 바로 벤치마크:
 
 ```bash
-/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python \
+$BFCL_ROOT/.venv311/bin/python \
   "$REPO_ROOT/experiments/prompt-bfcl-ralph-matrix/run_prompt_bfcl_ralph_matrix.py" \
   --models-file "$REPO_ROOT/experiments/prompt-bfcl-ralph-matrix/models.ollama.local.example.json" \
   --runtime-root "$REPO_ROOT/experiments/prompt-bfcl-ralph-matrix/runtime-ollama" \
@@ -183,7 +183,7 @@ export REPO_ROOT="$(git rev-parse --show-toplevel)"
 로컬 Ollama만으로 variant search를 돌리려면:
 
 ```bash
-/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python \
+$BFCL_ROOT/.venv311/bin/python \
   scripts/run_overnight_ralph_hunt.py \
   --local-only \
   --runtime-root experiments/prompt-bfcl-ralph-matrix/runtime-local-hunt \

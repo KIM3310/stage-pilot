@@ -586,7 +586,7 @@ class TestRunGrokBfclRalph(unittest.TestCase):
         self.assertIn("Generation crashed", str(ctx.exception))
 
     def test_create_run_ids_map_expands_dependencies_for_memory(self) -> None:
-        bfcl_root = Path("/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard")
+        bfcl_root = Path("$BFCL_ROOT")
         if not bfcl_root.exists():
             self.skipTest("BFCL root not found; skipping dependency-expansion integration test.")
 

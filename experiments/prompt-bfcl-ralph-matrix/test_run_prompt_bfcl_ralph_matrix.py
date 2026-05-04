@@ -85,11 +85,12 @@ class TestRunPromptBfclRalphMatrix(unittest.TestCase):
             "kind": "gemini-cli",
             "model_name": "gemini-cli-flash-lite",
         }
-        with patch.dict("os.environ", {"PATH": "/usr/bin"}, clear=False):
-            env, missing = build_child_env(entry)
+        with tempfile.TemporaryDirectory() as node_bin:
+            with patch.dict("os.environ", {"PATH": "/usr/bin", "NODE_BIN_DIR": node_bin}, clear=False):
+                env, missing = build_child_env(entry)
 
         self.assertEqual(missing, [])
-        self.assertTrue(env["PATH"].startswith("/Users/kim/.nvm/versions/node/v24.13.0/bin"))
+        self.assertTrue(env["PATH"].startswith(node_bin))
         self.assertIn("/usr/bin", env["PATH"])
 
     def test_build_child_command_for_grok_and_openai_compatible(self) -> None:

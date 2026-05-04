@@ -111,7 +111,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--bfcl-root",
         type=Path,
-        default=Path("/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard"),
+        default=Path(os.environ.get("BFCL_ROOT", "external/gorilla/berkeley-function-call-leaderboard")),
         help="Path to BFCL root directory.",
     )
     parser.add_argument(
@@ -350,8 +350,8 @@ def build_child_env(entry: dict[str, Any]) -> tuple[dict[str, str], list[str]]:
     kind = entry["kind"]
 
     extra_path_entries = [
-        "/Users/kim/.nvm/versions/node/v24.13.0/bin",
-        "/Users/kim/.local/bin",
+        child_env.get("NODE_BIN_DIR", ""),
+        child_env.get("LOCAL_BIN_DIR", ""),
         "/opt/homebrew/bin",
     ]
     current_path = child_env.get("PATH", "")

@@ -28,9 +28,9 @@
 ## Preflight
 
 ```bash
-/Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard/.venv311/bin/python \
+$BFCL_ROOT/.venv311/bin/python \
   experiments/gemini-cli-prompt-bfcl-ralph/run_gemini_cli_prompt_bfcl_ralph.py \
-  --bfcl-root /Users/kim/Downloads/gorilla/berkeley-function-call-leaderboard \
+  --bfcl-root $BFCL_ROOT \
   --runtime-root experiments/gemini-cli-prompt-bfcl-ralph/runtime-preflight \
   --model-name gemini-cli-2-5-flash-lite \
   --gemini-model gemini-2.5-flash-lite \

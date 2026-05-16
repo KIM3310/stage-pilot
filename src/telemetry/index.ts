@@ -125,12 +125,12 @@ export async function initTelemetry(): Promise<void> {
   const { getNodeAutoInstrumentations } = await import(
     "@opentelemetry/auto-instrumentations-node"
   );
-  const { Resource } = await import("@opentelemetry/resources");
+  const { resourceFromAttributes } = await import("@opentelemetry/resources");
   const { ATTR_SERVICE_NAME } = await import(
     "@opentelemetry/semantic-conventions"
   );
 
-  const resource = new Resource({
+  const resource = resourceFromAttributes({
     [ATTR_SERVICE_NAME]: SERVICE_NAME,
   });
 

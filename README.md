@@ -30,6 +30,10 @@ Technical review pack: [`docs/technical-review-pack.md`](docs/technical-review-p
 - **Verification:** Run `npm run verify` or the equivalent package-manager command for check, tests, and build.
 - **Commercial read:** Sell it as npm package support plus parser reliability audits for agent runtimes.
 
+## Commercialization Playbook
+
+- [Monetization and GTM playbook](docs/monetization-playbook.md) maps the repository to buyer segments, offer ladder, pricing hypotheses, proof gates, and risk boundaries.
+
 ## The Problem
 
 Models without native tool support produce unreliable output — XML one turn, JSON the next, hallucinated tool names, missing args, type mismatches. On our benchmark, **baseline success is 25%**. Most workarounds are regex hacks or single-pass prompts. They break when the format drifts and give you no way to see what went wrong.

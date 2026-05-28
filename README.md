@@ -13,6 +13,16 @@
 
 Technical review pack: [`docs/technical-review-pack.md`](docs/technical-review-pack.md)
 
+## Product and Review Surface
+
+| Lens | Current answer |
+|---|---|
+| Buyer or user | AI platform teams and developer-tool teams shipping agents that must survive malformed tool output. |
+| Commercial route | npm package support, parser reliability audit, benchmark pack, and integration help for agent runtimes. |
+| Review signal | Published package surface, deterministic mutation benchmark, parser recovery, retry loop, and telemetry-ready runtime. |
+| Safety boundary | Tool schemas and retries are explicit; benchmark fixtures are synthetic and provider-neutral. |
+| Fast proof | `pnpm test`, `pnpm build`, [`docs/technical-review-pack.md`](docs/technical-review-pack.md), and the 25% to 90% benchmark claim. |
+
 ## The Problem
 
 Models without native tool support produce unreliable output — XML one turn, JSON the next, hallucinated tool names, missing args, type mismatches. On our benchmark, **baseline success is 25%**. Most workarounds are regex hacks or single-pass prompts. They break when the format drifts and give you no way to see what went wrong.

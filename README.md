@@ -23,6 +23,13 @@ Technical review pack: [`docs/technical-review-pack.md`](docs/technical-review-p
 | Safety boundary | Tool schemas and retries are explicit; benchmark fixtures are synthetic and provider-neutral. |
 | Fast proof | `pnpm test`, `pnpm build`, [`docs/technical-review-pack.md`](docs/technical-review-pack.md), and the 25% to 90% benchmark claim. |
 
+## Reviewer Fast Path
+
+- **First minute:** Read the 25% to 90% benchmark claim, then inspect parser recovery and mutation fixtures.
+- **Local demo:** Install with `pnpm install`, then run `pnpm api:stagepilot` and open `http://127.0.0.1:8080/demo`.
+- **Verification:** Run `npm run verify` or the equivalent package-manager command for check, tests, and build.
+- **Commercial read:** Sell it as npm package support plus parser reliability audits for agent runtimes.
+
 ## The Problem
 
 Models without native tool support produce unreliable output — XML one turn, JSON the next, hallucinated tool names, missing args, type mismatches. On our benchmark, **baseline success is 25%**. Most workarounds are regex hacks or single-pass prompts. They break when the format drifts and give you no way to see what went wrong.

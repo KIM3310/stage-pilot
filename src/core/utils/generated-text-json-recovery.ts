@@ -39,7 +39,7 @@ function parseJsonCandidate(candidateText: string): unknown {
   try {
     return parseRJSON(candidateText);
   } catch {
-    return undefined;
+    return;
   }
 }
 
@@ -175,9 +175,9 @@ function mergeJsonCandidatesByStart(
   balanced: JsonCandidate[]
 ): JsonCandidate[] {
   return [...tagged, ...codeBlocks, ...balanced].sort((a, b) =>
-    a.startIndex !== b.startIndex
-      ? a.startIndex - b.startIndex
-      : b.endIndex - a.endIndex
+    a.startIndex === b.startIndex
+      ? b.endIndex - a.endIndex
+      : a.startIndex - b.startIndex
   );
 }
 

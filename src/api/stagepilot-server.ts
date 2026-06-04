@@ -1918,7 +1918,7 @@ function parseInboxPrimitiveTypes(record: JsonObject): string | undefined {
   ) {
     return "invalid reply. expected boolean";
   }
-  return undefined;
+  return;
 }
 
 function parseInboxActionFromCommand(commandRaw: unknown): {
@@ -2051,7 +2051,7 @@ function normalizeUrgency(value: unknown): IntakeInput["urgencyHint"] {
   if (value === "high" || value === "medium" || value === "low") {
     return value;
   }
-  return undefined;
+  return;
 }
 
 function buildInboxIntake(options: {
@@ -2141,10 +2141,10 @@ function handlePrometheusMetricsRequest(
     "Content-Type": PROMETHEUS_CONTENT_TYPE,
     "Cache-Control": "no-cache, no-store, must-revalidate",
   });
-  if (options?.includeBody !== false) {
-    response.end(body);
-  } else {
+  if (options?.includeBody === false) {
     response.end();
+  } else {
+    response.end(body);
   }
 }
 

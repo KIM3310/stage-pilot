@@ -541,11 +541,9 @@ function normalizeRisks(value: unknown): RiskType[] | null {
 
   const normalized = value
     .map((risk) => String(risk).trim().toLowerCase())
-    .map((risk) => {
-      return RISK_TYPES.includes(risk as RiskType)
-        ? (risk as RiskType)
-        : "other";
-    });
+    .map((risk) =>
+      RISK_TYPES.includes(risk as RiskType) ? (risk as RiskType) : "other"
+    );
 
   return normalized;
 }

@@ -61,21 +61,22 @@ describe("stagepilot gemini gateway timeout guards", () => {
   });
 
   it("aborts hanging gemini requests and throws timeout error", async () => {
-    globalThis.fetch = vi.fn((_input, init?: RequestInit) => {
-      return new Promise<Response>((_resolve, reject) => {
-        const signal = init?.signal;
-        if (!signal) {
-          return;
-        }
+    globalThis.fetch = vi.fn(
+      (_input, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          const signal = init?.signal;
+          if (!signal) {
+            return;
+          }
 
-        const onAbort = () => reject(createAbortError());
-        if (signal.aborted) {
-          onAbort();
-          return;
-        }
-        signal.addEventListener("abort", onAbort, { once: true });
-      });
-    }) as typeof fetch;
+          const onAbort = () => reject(createAbortError());
+          if (signal.aborted) {
+            onAbort();
+            return;
+          }
+          signal.addEventListener("abort", onAbort, { once: true });
+        })
+    ) as typeof fetch;
 
     const gateway = new GeminiGateway("test-key", "gemini-test", 1000);
     await expect(
@@ -102,9 +103,9 @@ describe("stagepilot gemini gateway timeout guards", () => {
   }, 4000);
 
   it("times out when gemini response body stalls", async () => {
-    globalThis.fetch = vi.fn(() => {
-      return Promise.resolve(createStalledJsonResponse());
-    }) as typeof fetch;
+    globalThis.fetch = vi.fn(() =>
+      Promise.resolve(createStalledJsonResponse())
+    ) as typeof fetch;
 
     const gateway = new GeminiGateway("test-key", "gemini-test", 1000);
     await expect(

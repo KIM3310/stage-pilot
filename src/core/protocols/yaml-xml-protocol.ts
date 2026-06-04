@@ -398,7 +398,7 @@ function collectToolCallsForName(
     if (fullTagEnd !== -1 && fullTagEnd > contentStart) {
       const endTag = `</${toolName}>`;
       const endTagStart = fullTagEnd - endTag.length;
-      const content = text.substring(contentStart, endTagStart);
+      const content = text.slice(contentStart, endTagStart);
       toolCalls.push({
         toolName,
         startIndex: tagStart,
@@ -492,25 +492,22 @@ function processToolCallMatch(
     return currentIndex;
   }
 
-  addTextSegment(
-    text.substring(currentIndex, tc.startIndex),
-    processedElements
-  );
+  addTextSegment(text.slice(currentIndex, tc.startIndex), processedElements);
 
   const parsedArgs = parseYamlContent(tc.content, options);
-  if (parsedArgs !== null) {
+  if (parsedArgs === null) {
+    const originalText = text.slice(tc.startIndex, tc.endIndex);
+    options?.onError?.("Could not parse YAML tool call", {
+      toolCall: originalText,
+    });
+    processedElements.push({ type: "text", text: originalText });
+  } else {
     processedElements.push({
       type: "tool-call",
       toolCallId: generateToolCallId(),
       toolName: tc.toolName,
       input: JSON.stringify(parsedArgs),
     });
-  } else {
-    const originalText = text.substring(tc.startIndex, tc.endIndex);
-    options?.onError?.("Could not parse YAML tool call", {
-      toolCall: originalText,
-    });
-    processedElements.push({ type: "text", text: originalText });
   }
 
   return tc.endIndex;
@@ -555,184 +552,146 @@ function stripTrailingPartialCloseTag(
 export const yamlXmlProtocol = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars -- reserved for future extensibility
   _protocolOptions?: YamlXmlProtocolOptions
-): TCMCoreProtocol => {
-  return {
-    formatTools({ tools, toolSystemPromptTemplate }) {
-      return formatToolsWithPromptTemplate({ tools, toolSystemPromptTemplate });
-    },
+): TCMCoreProtocol => ({
+  formatTools({ tools, toolSystemPromptTemplate }) {
+    return formatToolsWithPromptTemplate({ tools, toolSystemPromptTemplate });
+  },
 
-    formatToolCall(toolCall: LanguageModelV3ToolCall): string {
-      let args: Record<string, unknown> = {};
-      if (toolCall.input != null) {
-        try {
-          args = JSON.parse(toolCall.input) as Record<string, unknown>;
-        } catch {
-          args = { value: toolCall.input };
-        }
+  formatToolCall(toolCall: LanguageModelV3ToolCall): string {
+    let args: Record<string, unknown> = {};
+    if (toolCall.input != null) {
+      try {
+        args = JSON.parse(toolCall.input) as Record<string, unknown>;
+      } catch {
+        args = { value: toolCall.input };
       }
-      const yamlContent = YAML.stringify(args);
-      return `<${toolCall.toolName}>\n${yamlContent}</${toolCall.toolName}>`;
-    },
+    }
+    const yamlContent = YAML.stringify(args);
+    return `<${toolCall.toolName}>\n${yamlContent}</${toolCall.toolName}>`;
+  },
 
-    parseGeneratedText({ text, tools, options }) {
-      const toolNames = extractToolNames(tools);
-      if (toolNames.length === 0) {
-        return [{ type: "text", text }];
-      }
+  parseGeneratedText({ text, tools, options }) {
+    const toolNames = extractToolNames(tools);
+    if (toolNames.length === 0) {
+      return [{ type: "text", text }];
+    }
 
-      const processedElements: LanguageModelV3Content[] = [];
-      let currentIndex = 0;
-      let parseText = text;
+    const processedElements: LanguageModelV3Content[] = [];
+    let currentIndex = 0;
+    let parseText = text;
 
-      let toolCalls = findToolCalls(parseText, toolNames);
-      if (toolCalls.length === 0) {
-        const repaired = tryRepairXmlSelfClosingRootWithBody(
-          parseText,
-          toolNames
-        );
-        if (repaired) {
-          const repairedCalls = findToolCalls(repaired, toolNames);
-          if (repairedCalls.length > 0) {
-            parseText = repaired;
-            toolCalls = repairedCalls;
-          }
-        }
-      }
-
-      for (const tc of toolCalls) {
-        currentIndex = processToolCallMatch(
-          parseText,
-          tc,
-          currentIndex,
-          processedElements,
-          options
-        );
-      }
-
-      if (currentIndex < parseText.length) {
-        addTextSegment(parseText.substring(currentIndex), processedElements);
-      }
-
-      return processedElements;
-    },
-
-    createStreamParser({ tools, options }) {
-      const toolNames = extractToolNames(tools);
-
-      let buffer = "";
-      let currentToolCall: {
-        name: string;
-        toolCallId: string;
-        emittedInput: string;
-      } | null = null;
-      let currentTextId: string | null = null;
-      let hasEmittedTextStart = false;
-
-      const flushText = createFlushTextHandler(
-        () => currentTextId,
-        (newId: string | null) => {
-          currentTextId = newId;
-        },
-        () => hasEmittedTextStart,
-        (value: boolean) => {
-          hasEmittedTextStart = value;
-        }
+    let toolCalls = findToolCalls(parseText, toolNames);
+    if (toolCalls.length === 0) {
+      const repaired = tryRepairXmlSelfClosingRootWithBody(
+        parseText,
+        toolNames
       );
+      if (repaired) {
+        const repairedCalls = findToolCalls(repaired, toolNames);
+        if (repairedCalls.length > 0) {
+          parseText = repaired;
+          toolCalls = repairedCalls;
+        }
+      }
+    }
 
-      const emitToolInputProgress = (
-        controller: TransformStreamDefaultController<LanguageModelV3StreamPart>,
-        toolContent: string
-      ) => {
-        if (!currentToolCall) {
-          return;
-        }
-        const parsedArgs = parseYamlContentForStreamProgress(toolContent);
-        if (parsedArgs === null) {
-          return;
-        }
-        const fullInput = stringifyToolInputWithSchema({
-          toolName: currentToolCall.name,
+    for (const tc of toolCalls) {
+      currentIndex = processToolCallMatch(
+        parseText,
+        tc,
+        currentIndex,
+        processedElements,
+        options
+      );
+    }
+
+    if (currentIndex < parseText.length) {
+      addTextSegment(parseText.slice(currentIndex), processedElements);
+    }
+
+    return processedElements;
+  },
+
+  createStreamParser({ tools, options }) {
+    const toolNames = extractToolNames(tools);
+
+    let buffer = "";
+    let currentToolCall: {
+      name: string;
+      toolCallId: string;
+      emittedInput: string;
+    } | null = null;
+    let currentTextId: string | null = null;
+    let hasEmittedTextStart = false;
+
+    const flushText = createFlushTextHandler(
+      () => currentTextId,
+      (newId: string | null) => {
+        currentTextId = newId;
+      },
+      () => hasEmittedTextStart,
+      (value: boolean) => {
+        hasEmittedTextStart = value;
+      }
+    );
+
+    const emitToolInputProgress = (
+      controller: TransformStreamDefaultController<LanguageModelV3StreamPart>,
+      toolContent: string
+    ) => {
+      if (!currentToolCall) {
+        return;
+      }
+      const parsedArgs = parseYamlContentForStreamProgress(toolContent);
+      if (parsedArgs === null) {
+        return;
+      }
+      const fullInput = stringifyToolInputWithSchema({
+        toolName: currentToolCall.name,
+        args: parsedArgs,
+        tools,
+      });
+      if (fullInput === "{}" && toolContent.trim().length === 0) {
+        return;
+      }
+      emitToolInputProgressDelta({
+        controller,
+        id: currentToolCall.toolCallId,
+        state: currentToolCall,
+        fullInput,
+      });
+    };
+
+    const processToolCallEnd = (
+      controller: TransformStreamDefaultController<LanguageModelV3StreamPart>,
+      toolContent: string,
+      toolName: string,
+      toolCallId: string
+    ) => {
+      const parsedArgs = parseYamlContent(toolContent, options);
+      flushText(controller);
+      if (parsedArgs === null) {
+        const original = `<${toolName}>${toolContent}</${toolName}>`;
+        const emitRawFallback = shouldEmitRawToolCallTextOnError(options);
+        emitFailedToolInputLifecycle({
+          controller,
+          id: toolCallId,
+          emitRawToolCallTextOnError: emitRawFallback,
+          rawToolCallText: original,
+          emitRawText: (rawText) => {
+            flushText(controller, rawText);
+          },
+        });
+        options?.onError?.("Could not parse streaming YAML tool call", {
+          toolCall: original,
+        });
+      } else {
+        const finalInput = stringifyToolInputWithSchema({
+          toolName,
           args: parsedArgs,
           tools,
         });
-        if (fullInput === "{}" && toolContent.trim().length === 0) {
-          return;
-        }
-        emitToolInputProgressDelta({
-          controller,
-          id: currentToolCall.toolCallId,
-          state: currentToolCall,
-          fullInput,
-        });
-      };
-
-      const processToolCallEnd = (
-        controller: TransformStreamDefaultController<LanguageModelV3StreamPart>,
-        toolContent: string,
-        toolName: string,
-        toolCallId: string
-      ) => {
-        const parsedArgs = parseYamlContent(toolContent, options);
-        flushText(controller);
-        if (parsedArgs !== null) {
-          const finalInput = stringifyToolInputWithSchema({
-            toolName,
-            args: parsedArgs,
-            tools,
-          });
-          if (currentToolCall && currentToolCall.toolCallId === toolCallId) {
-            emitFinalizedToolInputLifecycle({
-              controller,
-              id: toolCallId,
-              state: currentToolCall,
-              toolName,
-              finalInput,
-              onMismatch: options?.onError,
-            });
-          } else {
-            enqueueToolInputEndAndCall({
-              controller,
-              id: toolCallId,
-              toolName,
-              input: finalInput,
-            });
-          }
-        } else {
-          const original = `<${toolName}>${toolContent}</${toolName}>`;
-          const emitRawFallback = shouldEmitRawToolCallTextOnError(options);
-          emitFailedToolInputLifecycle({
-            controller,
-            id: toolCallId,
-            emitRawToolCallTextOnError: emitRawFallback,
-            rawToolCallText: original,
-            emitRawText: (rawText) => {
-              flushText(controller, rawText);
-            },
-          });
-          options?.onError?.("Could not parse streaming YAML tool call", {
-            toolCall: original,
-          });
-        }
-      };
-
-      const finalizeUnclosedToolCall = (
-        controller: TransformStreamDefaultController<LanguageModelV3StreamPart>
-      ) => {
-        if (!currentToolCall) {
-          return;
-        }
-
-        emitToolInputProgress(controller, buffer);
-        const { name: toolName, toolCallId } = currentToolCall;
-        const reconciledBuffer = stripTrailingPartialCloseTag(buffer, toolName);
-        const parsedArgs = parseYamlContent(reconciledBuffer, options);
-        flushText(controller);
-        if (parsedArgs !== null) {
-          const finalInput = stringifyToolInputWithSchema({
-            toolName,
-            args: parsedArgs,
-            tools,
-          });
+        if (currentToolCall && currentToolCall.toolCallId === toolCallId) {
           emitFinalizedToolInputLifecycle({
             controller,
             id: toolCallId,
@@ -742,191 +701,227 @@ export const yamlXmlProtocol = (
             onMismatch: options?.onError,
           });
         } else {
-          const unfinishedContent = `<${toolName}>${buffer}`;
-          const emitRawFallback = shouldEmitRawToolCallTextOnError(options);
-          emitFailedToolInputLifecycle({
+          enqueueToolInputEndAndCall({
             controller,
             id: toolCallId,
-            emitRawToolCallTextOnError: emitRawFallback,
-            rawToolCallText: unfinishedContent,
-            emitRawText: (rawText) => {
-              flushText(controller, rawText);
-            },
+            toolName,
+            input: finalInput,
           });
-          options?.onError?.(
-            "Could not complete streaming YAML tool call at finish.",
-            { toolCall: unfinishedContent }
-          );
         }
+      }
+    };
 
-        buffer = "";
-        currentToolCall = null;
-      };
+    const finalizeUnclosedToolCall = (
+      controller: TransformStreamDefaultController<LanguageModelV3StreamPart>
+    ) => {
+      if (!currentToolCall) {
+        return;
+      }
 
-      const handlePendingToolCall = (
-        controller: TransformStreamDefaultController<LanguageModelV3StreamPart>,
-        endTag: string,
-        toolName: string
-      ): boolean => {
-        const endIdx = buffer.indexOf(endTag);
-        if (endIdx === -1) {
-          emitToolInputProgress(controller, buffer);
-          return false;
-        }
-
-        const content = buffer.substring(0, endIdx);
-        emitToolInputProgress(controller, content);
-        buffer = buffer.substring(endIdx + endTag.length);
-        processToolCallEnd(
+      emitToolInputProgress(controller, buffer);
+      const { name: toolName, toolCallId } = currentToolCall;
+      const reconciledBuffer = stripTrailingPartialCloseTag(buffer, toolName);
+      const parsedArgs = parseYamlContent(reconciledBuffer, options);
+      flushText(controller);
+      if (parsedArgs === null) {
+        const unfinishedContent = `<${toolName}>${buffer}`;
+        const emitRawFallback = shouldEmitRawToolCallTextOnError(options);
+        emitFailedToolInputLifecycle({
           controller,
-          content,
-          toolName,
-          currentToolCall?.toolCallId ?? generateToolCallId()
+          id: toolCallId,
+          emitRawToolCallTextOnError: emitRawFallback,
+          rawToolCallText: unfinishedContent,
+          emitRawText: (rawText) => {
+            flushText(controller, rawText);
+          },
+        });
+        options?.onError?.(
+          "Could not complete streaming YAML tool call at finish.",
+          { toolCall: unfinishedContent }
         );
+      } else {
+        const finalInput = stringifyToolInputWithSchema({
+          toolName,
+          args: parsedArgs,
+          tools,
+        });
+        emitFinalizedToolInputLifecycle({
+          controller,
+          id: toolCallId,
+          state: currentToolCall,
+          toolName,
+          finalInput,
+          onMismatch: options?.onError,
+        });
+      }
+
+      buffer = "";
+      currentToolCall = null;
+    };
+
+    const handlePendingToolCall = (
+      controller: TransformStreamDefaultController<LanguageModelV3StreamPart>,
+      endTag: string,
+      toolName: string
+    ): boolean => {
+      const endIdx = buffer.indexOf(endTag);
+      if (endIdx === -1) {
+        emitToolInputProgress(controller, buffer);
+        return false;
+      }
+
+      const content = buffer.slice(0, endIdx);
+      emitToolInputProgress(controller, content);
+      buffer = buffer.slice(endIdx + endTag.length);
+      processToolCallEnd(
+        controller,
+        content,
+        toolName,
+        currentToolCall?.toolCallId ?? generateToolCallId()
+      );
+      currentToolCall = null;
+      return true;
+    };
+
+    const flushSafeText = (
+      controller: TransformStreamDefaultController<LanguageModelV3StreamPart>
+    ): void => {
+      const maxTagLen = toolNames.length
+        ? Math.max(...toolNames.map((n) => `<${n} />`.length))
+        : 0;
+      const tail = Math.max(0, maxTagLen - 1);
+      const safeLen = Math.max(0, buffer.length - tail);
+      if (safeLen > 0) {
+        flushText(controller, buffer.slice(0, safeLen));
+        buffer = buffer.slice(safeLen);
+      }
+    };
+
+    const handleNewToolTag = (
+      controller: TransformStreamDefaultController<LanguageModelV3StreamPart>,
+      tagIndex: number,
+      tagName: string,
+      selfClosing: boolean,
+      tagLength: number
+    ): void => {
+      if (tagIndex > 0) {
+        flushText(controller, buffer.slice(0, tagIndex));
+      }
+
+      flushText(controller);
+
+      if (selfClosing) {
+        buffer = buffer.slice(tagIndex + tagLength);
+        const toolCallId = generateToolCallId();
+        currentToolCall = {
+          name: tagName,
+          toolCallId,
+          emittedInput: "",
+        };
+        controller.enqueue({
+          type: "tool-input-start",
+          id: toolCallId,
+          toolName: tagName,
+        });
+        processToolCallEnd(controller, "", tagName, toolCallId);
         currentToolCall = null;
-        return true;
-      };
+      } else {
+        const startTag = `<${tagName}>`;
+        buffer = buffer.slice(tagIndex + startTag.length);
+        currentToolCall = {
+          name: tagName,
+          toolCallId: generateToolCallId(),
+          emittedInput: "",
+        };
+        controller.enqueue({
+          type: "tool-input-start",
+          id: currentToolCall.toolCallId,
+          toolName: tagName,
+        });
+      }
+    };
 
-      const flushSafeText = (
-        controller: TransformStreamDefaultController<LanguageModelV3StreamPart>
-      ): void => {
-        const maxTagLen = toolNames.length
-          ? Math.max(...toolNames.map((n) => `<${n} />`.length))
-          : 0;
-        const tail = Math.max(0, maxTagLen - 1);
-        const safeLen = Math.max(0, buffer.length - tail);
-        if (safeLen > 0) {
-          flushText(controller, buffer.slice(0, safeLen));
-          buffer = buffer.slice(safeLen);
-        }
-      };
-
-      const handleNewToolTag = (
-        controller: TransformStreamDefaultController<LanguageModelV3StreamPart>,
-        tagIndex: number,
-        tagName: string,
-        selfClosing: boolean,
-        tagLength: number
-      ): void => {
-        if (tagIndex > 0) {
-          flushText(controller, buffer.substring(0, tagIndex));
-        }
-
-        flushText(controller);
-
-        if (selfClosing) {
-          buffer = buffer.substring(tagIndex + tagLength);
-          const toolCallId = generateToolCallId();
-          currentToolCall = {
-            name: tagName,
-            toolCallId,
-            emittedInput: "",
-          };
-          controller.enqueue({
-            type: "tool-input-start",
-            id: toolCallId,
-            toolName: tagName,
-          });
-          processToolCallEnd(controller, "", tagName, toolCallId);
-          currentToolCall = null;
+    const processBuffer = (
+      controller: TransformStreamDefaultController<LanguageModelV3StreamPart>
+    ) => {
+      while (true) {
+        if (currentToolCall) {
+          const toolName = currentToolCall.name;
+          const endTag = `</${toolName}>`;
+          if (!handlePendingToolCall(controller, endTag, toolName)) {
+            break;
+          }
         } else {
-          const startTag = `<${tagName}>`;
-          buffer = buffer.substring(tagIndex + startTag.length);
-          currentToolCall = {
-            name: tagName,
-            toolCallId: generateToolCallId(),
-            emittedInput: "",
-          };
-          controller.enqueue({
-            type: "tool-input-start",
-            id: currentToolCall.toolCallId,
-            toolName: tagName,
-          });
+          const { index, name, selfClosing, tagLength } = findEarliestToolTag(
+            buffer,
+            toolNames
+          );
+
+          if (index === -1) {
+            flushSafeText(controller);
+            break;
+          }
+
+          handleNewToolTag(controller, index, name, selfClosing, tagLength);
         }
-      };
+      }
+    };
 
-      const processBuffer = (
-        controller: TransformStreamDefaultController<LanguageModelV3StreamPart>
-      ) => {
-        while (true) {
-          if (currentToolCall) {
-            const toolName = currentToolCall.name;
-            const endTag = `</${toolName}>`;
-            if (!handlePendingToolCall(controller, endTag, toolName)) {
-              break;
-            }
-          } else {
-            const { index, name, selfClosing, tagLength } = findEarliestToolTag(
-              buffer,
-              toolNames
-            );
-
-            if (index === -1) {
-              flushSafeText(controller);
-              break;
-            }
-
-            handleNewToolTag(controller, index, name, selfClosing, tagLength);
-          }
-        }
-      };
-
-      return new TransformStream({
-        transform(chunk, controller) {
-          if (chunk.type === "finish") {
-            if (currentToolCall) {
-              finalizeUnclosedToolCall(controller);
-            } else if (buffer) {
-              flushText(controller, buffer);
-              buffer = "";
-            }
-            flushText(controller);
-            controller.enqueue(chunk);
-            return;
-          }
-
-          if (chunk.type !== "text-delta") {
-            if (!currentToolCall && buffer) {
-              flushText(controller, buffer);
-              buffer = "";
-            }
-            controller.enqueue(chunk);
-            return;
-          }
-
-          const textContent =
-            (chunk as unknown as { delta?: string }).delta ?? "";
-          buffer += textContent;
-          processBuffer(controller);
-        },
-        flush(controller) {
+    return new TransformStream({
+      transform(chunk, controller) {
+        if (chunk.type === "finish") {
           if (currentToolCall) {
             finalizeUnclosedToolCall(controller);
           } else if (buffer) {
             flushText(controller, buffer);
             buffer = "";
           }
-          if (currentTextId && hasEmittedTextStart) {
-            controller.enqueue({
-              type: "text-end",
-              id: currentTextId,
-            });
-            hasEmittedTextStart = false;
-            currentTextId = null;
+          flushText(controller);
+          controller.enqueue(chunk);
+          return;
+        }
+
+        if (chunk.type !== "text-delta") {
+          if (!currentToolCall && buffer) {
+            flushText(controller, buffer);
+            buffer = "";
           }
-        },
-      });
-    },
+          controller.enqueue(chunk);
+          return;
+        }
 
-    extractToolCallSegments({ text, tools }) {
-      const toolNames = tools.map((t) => t.name).filter(Boolean) as string[];
-      if (toolNames.length === 0) {
-        return [];
-      }
+        const textContent =
+          (chunk as unknown as { delta?: string }).delta ?? "";
+        buffer += textContent;
+        processBuffer(controller);
+      },
+      flush(controller) {
+        if (currentToolCall) {
+          finalizeUnclosedToolCall(controller);
+        } else if (buffer) {
+          flushText(controller, buffer);
+          buffer = "";
+        }
+        if (currentTextId && hasEmittedTextStart) {
+          controller.enqueue({
+            type: "text-end",
+            id: currentTextId,
+          });
+          hasEmittedTextStart = false;
+          currentTextId = null;
+        }
+      },
+    });
+  },
 
-      return findToolCalls(text, toolNames).map(
-        (tc) => `<${tc.toolName}>${tc.content}</${tc.toolName}>`
-      );
-    },
-  };
-};
+  extractToolCallSegments({ text, tools }) {
+    const toolNames = tools.map((t) => t.name).filter(Boolean) as string[];
+    if (toolNames.length === 0) {
+      return [];
+    }
+
+    return findToolCalls(text, toolNames).map(
+      (tc) => `<${tc.toolName}>${tc.content}</${tc.toolName}>`
+    );
+  },
+});

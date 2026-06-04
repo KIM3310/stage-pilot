@@ -75,7 +75,7 @@ function processMatchedToolCall(context: ParseContext): number {
   const toolCallJson = match[1];
 
   if (startIndex > currentIndex) {
-    const textSegment = text.substring(currentIndex, startIndex);
+    const textSegment = text.slice(currentIndex, startIndex);
     addTextSegment(textSegment, processedElements);
   }
 
@@ -214,10 +214,10 @@ function extractTopLevelStringProperty(
 ): string | undefined {
   const valueStart = findTopLevelPropertyValueStart(text, property);
   if (valueStart == null || valueStart >= text.length) {
-    return undefined;
+    return;
   }
   if (text.charAt(valueStart) !== '"') {
-    return undefined;
+    return;
   }
 
   let valueEnd = valueStart + 1;
@@ -234,7 +234,7 @@ function extractTopLevelStringProperty(
     valueEnd += 1;
   }
 
-  return undefined;
+  return;
 }
 
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: Streaming JSON value slicing must handle nested arrays/objects and escaped strings.
@@ -448,7 +448,7 @@ function canonicalizeArgumentsProgressInput(
   tools: LanguageModelV3FunctionTool[]
 ): string | undefined {
   if (progress.argumentsText === undefined || !progress.argumentsComplete) {
-    return undefined;
+    return;
   }
 
   try {
@@ -460,7 +460,7 @@ function canonicalizeArgumentsProgressInput(
       fallback: canonicalizeToolInput,
     });
   } catch {
-    return undefined;
+    return;
   }
 }
 
@@ -839,7 +839,7 @@ export const hermesProtocol = ({
     }
 
     if (currentIndex < text.length) {
-      const remainingText = text.substring(currentIndex);
+      const remainingText = text.slice(currentIndex);
       addTextSegment(remainingText, processedElements);
     }
 

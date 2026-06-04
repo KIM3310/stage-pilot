@@ -93,9 +93,9 @@ function scoreProgram(program: ProgramNode, intake: IntakeInput): number {
 export function buildOntologySnapshot(input: IntakeInput): OntologySnapshot {
   const district = normalizeDistrict(input.district);
 
-  const districtAgencies = DISTRICT_AGENCIES.filter((agency) => {
-    return agency.district === district;
-  });
+  const districtAgencies = DISTRICT_AGENCIES.filter(
+    (agency) => agency.district === district
+  );
 
   const agencies = [...CITYWIDE_AGENCIES, ...districtAgencies];
   const agencyIds = new Set(agencies.map((agency) => agency.id));

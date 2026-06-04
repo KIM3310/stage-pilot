@@ -42,7 +42,7 @@ export function resolveTraceExporterUrl(
     readEnv("OTEL_EXPORTER_OTLP_ENDPOINT")
 ): string | undefined {
   if (!rawValue) {
-    return undefined;
+    return;
   }
 
   const normalized = rawValue.replace(TRAILING_SLASHES_REGEX, "");

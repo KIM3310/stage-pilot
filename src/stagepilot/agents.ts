@@ -305,13 +305,11 @@ export class PlannerAgent {
 export class OutreachAgent {
   run(input: { eligibility: EligibilityResult }): OutreachResult {
     const messages: OutreachMessage[] = input.eligibility.referrals.map(
-      (ref) => {
-        return {
-          agencyName: ref.agencyName,
-          message: `Hello, this is StagePilot case routing. We have a high-priority case for ${ref.programName}. Please confirm intake requirements and earliest contact window.`,
-          phone: ref.phone,
-        };
-      }
+      (ref) => ({
+        agencyName: ref.agencyName,
+        message: `Hello, this is StagePilot case routing. We have a high-priority case for ${ref.programName}. Please confirm intake requirements and earliest contact window.`,
+        phone: ref.phone,
+      })
     );
 
     return { messages };

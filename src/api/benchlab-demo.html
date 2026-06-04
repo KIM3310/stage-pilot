@@ -954,9 +954,7 @@ Loading checked-in artifact failure taxonomy.</pre
 
     function renderCompareControls() {
       const options = state.runs
-        .map((run) => {
-          return `<option value="${run.name}">${run.name}</option>`;
-        })
+        .map((run) => `<option value="${run.name}">${run.name}</option>`)
         .join("");
       els.compareLeft.innerHTML = options;
       els.compareRight.innerHTML = options;
@@ -1051,7 +1049,7 @@ Loading checked-in artifact failure taxonomy.</pre
     function renderRuntimeBrief(payload) {
       state.runtimeBrief = payload || null;
 
-      if (!payload || payload.status !== "ok") {
+      if (payload?.status !== "ok") {
         els.briefBadge.textContent = "brief-error";
         els.briefHeadline.textContent =
           "BenchLab operator brief is unavailable. Check /health and repository paths.";
@@ -1084,7 +1082,7 @@ Loading checked-in artifact failure taxonomy.</pre
     function renderSummaryPack(payload) {
       state.summaryPack = payload || null;
 
-      if (!payload || payload.status !== "ok") {
+      if (payload?.status !== "ok") {
         els.briefReviewSequence.textContent =
           "Summary pack unavailable. Check /health, /v1/benchlab/runtime-brief, and artifact routes.";
         return;
@@ -1150,28 +1148,28 @@ Loading checked-in artifact failure taxonomy.</pre
         .map((job) => {
           const canCancel = job.status === "running";
           return `
-              <article class="card">
-                <div class="card-top">
-                  <div class="card-title">
-                    <strong>${job.id}</strong>
-                    <span class="tiny">${job.mode} · ${job.runtimeName}</span>
-                  </div>
-                  <span class="badge ${statusClass(job.status)}">${job.status}</span>
-                </div>
-                <div class="meta-grid">
-                  <div class="meta-item"><strong>Models File</strong>${job.modelsFileName}</div>
-                  <div class="meta-item"><strong>Created</strong>${formatDate(job.createdAt)}</div>
-                  <div class="meta-item"><strong>Started</strong>${formatDate(job.startedAt)}</div>
-                  <div class="meta-item"><strong>Ended</strong>${formatDate(job.endedAt)}</div>
-                </div>
-                <div class="actions">
-                  <button class="ghost" type="button" data-run="${job.runtimeName}">Open Runtime</button>
-                  <button class="ghost" type="button" data-job="${job.id}">View Logs</button>
-                  ${canCancel ? `<button class="ghost" type="button" data-cancel="${job.id}">Cancel</button>` : ""}
-                </div>
-                ${job.errorMessage ? `<div class="tiny" style="color:var(--bad)">${job.errorMessage}</div>` : ""}
-              </article>
-            `;
+                  <article class="card">
+                    <div class="card-top">
+                      <div class="card-title">
+                        <strong>${job.id}</strong>
+                        <span class="tiny">${job.mode} · ${job.runtimeName}</span>
+                      </div>
+                      <span class="badge ${statusClass(job.status)}">${job.status}</span>
+                    </div>
+                    <div class="meta-grid">
+                      <div class="meta-item"><strong>Models File</strong>${job.modelsFileName}</div>
+                      <div class="meta-item"><strong>Created</strong>${formatDate(job.createdAt)}</div>
+                      <div class="meta-item"><strong>Started</strong>${formatDate(job.startedAt)}</div>
+                      <div class="meta-item"><strong>Ended</strong>${formatDate(job.endedAt)}</div>
+                    </div>
+                    <div class="actions">
+                      <button class="ghost" type="button" data-run="${job.runtimeName}">Open Runtime</button>
+                      <button class="ghost" type="button" data-job="${job.id}">View Logs</button>
+                      ${canCancel ? `<button class="ghost" type="button" data-cancel="${job.id}">Cancel</button>` : ""}
+                    </div>
+                    ${job.errorMessage ? `<div class="tiny" style="color:var(--bad)">${job.errorMessage}</div>` : ""}
+                  </article>
+                `;
         })
         .join("");
     }
@@ -1188,25 +1186,25 @@ Loading checked-in artifact failure taxonomy.</pre
         .map((run) => {
           const counts = run.counts || {};
           return `
-              <article class="card">
-                <div class="card-top">
-                  <div class="card-title">
-                    <strong>${run.name}</strong>
-                    <span class="tiny">${run.modelsFileName || "unknown config"}</span>
-                  </div>
-                  <span class="badge ${statusClass(run.primaryOutcome)}">${run.primaryOutcome}</span>
-                </div>
-                <div class="meta-grid">
-                  <div class="meta-item"><strong>Updated</strong>${formatDate(run.updatedAt)}</div>
-                  <div class="meta-item"><strong>Cases / Category</strong>${run.casesPerCategory ?? "-"}</div>
-                  <div class="meta-item"><strong>Counts</strong>C:${counts.completed ?? 0} I:${counts.improved ?? 0} F:${counts.flat ?? 0} R:${counts.regressed ?? 0}</div>
-                  <div class="meta-item"><strong>Categories</strong>${safeJoin(run.categories)}</div>
-                </div>
-                <div class="actions">
-                  <button class="ghost" type="button" data-run="${run.name}">Inspect</button>
-                </div>
-              </article>
-            `;
+                  <article class="card">
+                    <div class="card-top">
+                      <div class="card-title">
+                        <strong>${run.name}</strong>
+                        <span class="tiny">${run.modelsFileName || "unknown config"}</span>
+                      </div>
+                      <span class="badge ${statusClass(run.primaryOutcome)}">${run.primaryOutcome}</span>
+                    </div>
+                    <div class="meta-grid">
+                      <div class="meta-item"><strong>Updated</strong>${formatDate(run.updatedAt)}</div>
+                      <div class="meta-item"><strong>Cases / Category</strong>${run.casesPerCategory ?? "-"}</div>
+                      <div class="meta-item"><strong>Counts</strong>C:${counts.completed ?? 0} I:${counts.improved ?? 0} F:${counts.flat ?? 0} R:${counts.regressed ?? 0}</div>
+                      <div class="meta-item"><strong>Categories</strong>${safeJoin(run.categories)}</div>
+                    </div>
+                    <div class="actions">
+                      <button class="ghost" type="button" data-run="${run.name}">Inspect</button>
+                    </div>
+                  </article>
+                `;
         })
         .join("");
     }
@@ -1240,27 +1238,27 @@ Loading checked-in artifact failure taxonomy.</pre
               ? modelRun.outcome
               : modelRun.status;
           return `
-              <article class="card">
-                <div class="card-top">
-                  <div class="card-title">
-                    <strong>${modelRun.modelName || modelRun.name}</strong>
-                    <span class="tiny">${modelRun.providerName || "-"} · ${modelRun.name}</span>
-                  </div>
-                  <span class="badge ${statusClass(badgeValue)}">${badgeValue}</span>
-                </div>
-                <div class="meta-grid">
-                  <div class="meta-item"><strong>Status</strong>${modelRun.status}</div>
-                  <div class="meta-item"><strong>Progress</strong>${formatRuntimeProgress(modelRun)}</div>
-                  <div class="meta-item"><strong>Scores</strong>${formatMetric(modelRun.baselineScore)} -> ${formatMetric(modelRun.ralphScore)}</div>
-                  <div class="meta-item"><strong>Delta</strong>${formatMetric(modelRun.deltaPp)} pp</div>
-                  <div class="meta-item"><strong>Cases</strong>${modelRun.casesPerCategory ?? "-"}</div>
-                  <div class="meta-item"><strong>Categories</strong>${safeJoin(modelRun.categories)}</div>
-                </div>
-                <div class="actions">
-                  <button class="ghost" type="button" data-runtime-model="${modelKey}">Inspect</button>
-                </div>
-              </article>
-            `;
+                  <article class="card">
+                    <div class="card-top">
+                      <div class="card-title">
+                        <strong>${modelRun.modelName || modelRun.name}</strong>
+                        <span class="tiny">${modelRun.providerName || "-"} · ${modelRun.name}</span>
+                      </div>
+                      <span class="badge ${statusClass(badgeValue)}">${badgeValue}</span>
+                    </div>
+                    <div class="meta-grid">
+                      <div class="meta-item"><strong>Status</strong>${modelRun.status}</div>
+                      <div class="meta-item"><strong>Progress</strong>${formatRuntimeProgress(modelRun)}</div>
+                      <div class="meta-item"><strong>Scores</strong>${formatMetric(modelRun.baselineScore)} -> ${formatMetric(modelRun.ralphScore)}</div>
+                      <div class="meta-item"><strong>Delta</strong>${formatMetric(modelRun.deltaPp)} pp</div>
+                      <div class="meta-item"><strong>Cases</strong>${modelRun.casesPerCategory ?? "-"}</div>
+                      <div class="meta-item"><strong>Categories</strong>${safeJoin(modelRun.categories)}</div>
+                    </div>
+                    <div class="actions">
+                      <button class="ghost" type="button" data-runtime-model="${modelKey}">Inspect</button>
+                    </div>
+                  </article>
+                `;
         })
         .join("");
     }
@@ -1368,16 +1366,18 @@ Loading checked-in artifact failure taxonomy.</pre
         )
         .join("");
 
-      const bucketLines = (forensics.buckets || []).map((bucket) => {
-        return `${bucket.bucket}: baseline ${bucket.baselineCount}, ralph ${bucket.ralphCount}, delta ${formatSignedMetric(bucket.deltaCount, 0)}`;
-      });
+      const bucketLines = (forensics.buckets || []).map(
+        (bucket) =>
+          `${bucket.bucket}: baseline ${bucket.baselineCount}, ralph ${bucket.ralphCount}, delta ${formatSignedMetric(bucket.deltaCount, 0)}`
+      );
       const modelLines = (forensics.modelRuns || [])
         .filter(
           (modelRun) => modelRun.baselineErrorItems || modelRun.ralphErrorItems
         )
-        .map((modelRun) => {
-          return `${modelRun.modelName || modelRun.name}: ${modelRun.dominantBucket || "no dominant bucket"} · baseline ${modelRun.baselineErrorItems}, ralph ${modelRun.ralphErrorItems}`;
-        });
+        .map(
+          (modelRun) =>
+            `${modelRun.modelName || modelRun.name}: ${modelRun.dominantBucket || "no dominant bucket"} · baseline ${modelRun.baselineErrorItems}, ralph ${modelRun.ralphErrorItems}`
+        );
       const sections = [];
       if (bucketLines.length > 0) {
         sections.push(["[buckets]", ...bucketLines].join("\n"));
@@ -1423,9 +1423,10 @@ Loading checked-in artifact failure taxonomy.</pre
 
       const variantLines = (payload.variants || [])
         .slice(0, 6)
-        .map((variant) => {
-          return `${variant.modelKey} · ${variant.variant} · avg ${formatSignedMetric(variant.avgDeltaPp)} pp · ${variant.runsCount} run(s)`;
-        });
+        .map(
+          (variant) =>
+            `${variant.modelKey} · ${variant.variant} · avg ${formatSignedMetric(variant.avgDeltaPp)} pp · ${variant.runsCount} run(s)`
+        );
       const recommendationLines = (payload.recommendations || [])
         .slice(0, 8)
         .map((item) => {
@@ -1467,27 +1468,27 @@ Loading checked-in artifact failure taxonomy.</pre
             ? `${claimForensics.baselineErrorItems} -> ${claimForensics.ralphErrorItems}`
             : "-";
           return `
-              <article class="card">
-                <div class="card-top">
-                  <div class="card-title">
-                    <strong>${artifact.modelName || artifact.claimName}</strong>
-                    <span class="tiny">${artifact.providerName || artifact.experimentName} · ${artifact.claimName}</span>
-                  </div>
-                  <span class="badge ${statusClass(artifact.outcome)}">${artifact.outcome}</span>
-                </div>
-                <div class="meta-grid">
-                  <div class="meta-item"><strong>Cases / Category</strong>${artifact.casesPerCategory ?? "-"}</div>
-                  <div class="meta-item"><strong>Delta</strong>${formatMetric(artifact.deltaPp)} pp</div>
-                  <div class="meta-item"><strong>Baseline</strong>${formatMetric(artifact.baselineScore)}</div>
-                  <div class="meta-item"><strong>RALPH</strong>${formatMetric(artifact.ralphScore)}</div>
-                  <div class="meta-item"><strong>Failure Bucket</strong>${forensicsStatus}</div>
-                  <div class="meta-item"><strong>Error Items</strong>${errorDelta}</div>
-                </div>
-                <div class="actions">
-                  <button class="ghost" type="button" data-artifact="${artifact.id}">Inspect</button>
-                </div>
-              </article>
-            `;
+                  <article class="card">
+                    <div class="card-top">
+                      <div class="card-title">
+                        <strong>${artifact.modelName || artifact.claimName}</strong>
+                        <span class="tiny">${artifact.providerName || artifact.experimentName} · ${artifact.claimName}</span>
+                      </div>
+                      <span class="badge ${statusClass(artifact.outcome)}">${artifact.outcome}</span>
+                    </div>
+                    <div class="meta-grid">
+                      <div class="meta-item"><strong>Cases / Category</strong>${artifact.casesPerCategory ?? "-"}</div>
+                      <div class="meta-item"><strong>Delta</strong>${formatMetric(artifact.deltaPp)} pp</div>
+                      <div class="meta-item"><strong>Baseline</strong>${formatMetric(artifact.baselineScore)}</div>
+                      <div class="meta-item"><strong>RALPH</strong>${formatMetric(artifact.ralphScore)}</div>
+                      <div class="meta-item"><strong>Failure Bucket</strong>${forensicsStatus}</div>
+                      <div class="meta-item"><strong>Error Items</strong>${errorDelta}</div>
+                    </div>
+                    <div class="actions">
+                      <button class="ghost" type="button" data-artifact="${artifact.id}">Inspect</button>
+                    </div>
+                  </article>
+                `;
         })
         .join("");
     }
@@ -1533,18 +1534,22 @@ Loading checked-in artifact failure taxonomy.</pre
         )
         .join("");
 
-      const bucketLines = (payload.buckets || []).slice(0, 8).map((bucket) => {
-        return `${bucket.bucket}: ${bucket.baselineCount} -> ${bucket.ralphCount}`;
-      });
-      const gapLines = (payload.gaps || []).slice(0, 8).map((gap) => {
-        return `${gap.gap}: ${gap.modelName || gap.claimName}`;
-      });
+      const bucketLines = (payload.buckets || [])
+        .slice(0, 8)
+        .map(
+          (bucket) =>
+            `${bucket.bucket}: ${bucket.baselineCount} -> ${bucket.ralphCount}`
+        );
+      const gapLines = (payload.gaps || [])
+        .slice(0, 8)
+        .map((gap) => `${gap.gap}: ${gap.modelName || gap.claimName}`);
       const strongestClaims = (payload.claims || [])
         .filter((claim) => claim.hasErrorBuckets)
         .slice(0, 5)
-        .map((claim) => {
-          return `${claim.modelName || claim.claimName}: ${claim.baselineErrorItems} -> ${claim.ralphErrorItems} (${claim.dominantBucket || "-"})`;
-        });
+        .map(
+          (claim) =>
+            `${claim.modelName || claim.claimName}: ${claim.baselineErrorItems} -> ${claim.ralphErrorItems} (${claim.dominantBucket || "-"})`
+        );
       const sections = [];
       if (bucketLines.length > 0) {
         sections.push(["[tracked buckets]", ...bucketLines].join("\n"));
@@ -1739,9 +1744,10 @@ Loading checked-in artifact failure taxonomy.</pre
         sections.push(["[stderr tail]", detail.stderr].join("\n"));
       }
       if (detail.forensics) {
-        const bucketLines = (detail.forensics.buckets || []).map((bucket) => {
-          return `${bucket.bucket}: ${bucket.baselineCount} -> ${bucket.ralphCount}`;
-        });
+        const bucketLines = (detail.forensics.buckets || []).map(
+          (bucket) =>
+            `${bucket.bucket}: ${bucket.baselineCount} -> ${bucket.ralphCount}`
+        );
         sections.push(
           [
             "[forensics]",

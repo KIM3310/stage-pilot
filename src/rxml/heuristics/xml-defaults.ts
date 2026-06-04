@@ -277,7 +277,7 @@ function extractSchemaProperties(
 ): Record<string, unknown> | undefined {
   const unwrapped = unwrapJsonSchema(schema);
   if (!unwrapped || typeof unwrapped !== "object") {
-    return undefined;
+    return;
   }
   return (unwrapped as { properties?: Record<string, unknown> }).properties;
 }
@@ -429,10 +429,10 @@ function extractStepStatusFromString(
 }
 
 export {
-  escapeInvalidLt,
   balanceTags,
-  shouldDeduplicateStringTags,
-  getStringPropertyNames,
   dedupeSingleTag,
+  escapeInvalidLt,
+  getStringPropertyNames,
   repairParsedAgainstSchema,
+  shouldDeduplicateStringTags,
 };

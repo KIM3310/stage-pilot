@@ -10,11 +10,12 @@ const serversToClose: ReturnType<typeof createBenchLabApiServer>[] = [];
 
 afterEach(async () => {
   await Promise.all(
-    serversToClose.splice(0, serversToClose.length).map((server) => {
-      return new Promise<void>((resolve) => {
-        server.close(() => resolve());
-      });
-    })
+    serversToClose.splice(0, serversToClose.length).map(
+      (server) =>
+        new Promise<void>((resolve) => {
+          server.close(() => resolve());
+        })
+    )
   );
 });
 

@@ -84,9 +84,9 @@ describe("stagepilot insights timeout fallback", () => {
   });
 
   it("falls back when gemini response body stalls", async () => {
-    globalThis.fetch = vi.fn(() => {
-      return Promise.resolve(createStalledJsonResponse());
-    }) as typeof fetch;
+    globalThis.fetch = vi.fn(() =>
+      Promise.resolve(createStalledJsonResponse())
+    ) as typeof fetch;
 
     const insights = await deriveStagePilotInsights({
       apiKey: "test-key",

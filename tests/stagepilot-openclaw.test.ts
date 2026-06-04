@@ -142,9 +142,9 @@ describe("stagepilot openclaw notifier", () => {
     process.env.OPENCLAW_WEBHOOK_URL = "https://example.invalid/webhook";
     process.env.OPENCLAW_WEBHOOK_TIMEOUT_MS = "5000";
 
-    globalThis.fetch = vi.fn(() => {
-      return new Response("ok", { status: 200 });
-    }) as typeof fetch;
+    globalThis.fetch = vi.fn(
+      () => new Response("ok", { status: 200 })
+    ) as typeof fetch;
 
     const notifier = createStagePilotOpenClawNotifierFromEnv();
     const outcome = await notifier({
@@ -163,9 +163,9 @@ describe("stagepilot openclaw notifier", () => {
     process.env.OPENCLAW_THREAD_ID = "999";
     process.env.OPENCLAW_API_KEY = "should-not-be-sent";
 
-    const fetchMock = vi.fn(() => {
-      return new Response(null, { status: 204 });
-    }) as typeof fetch;
+    const fetchMock = vi.fn(
+      () => new Response(null, { status: 204 })
+    ) as typeof fetch;
     globalThis.fetch = fetchMock;
 
     const notifier = createStagePilotOpenClawNotifierFromEnv();
@@ -197,9 +197,9 @@ describe("stagepilot openclaw notifier", () => {
     process.env.OPENCLAW_WEBHOOK_URL =
       "https://discord.com/api/webhooks/123/token";
 
-    const fetchMock = vi.fn(() => {
-      return new Response(null, { status: 204 });
-    }) as typeof fetch;
+    const fetchMock = vi.fn(
+      () => new Response(null, { status: 204 })
+    ) as typeof fetch;
     globalThis.fetch = fetchMock;
 
     const notifier = createStagePilotOpenClawNotifierFromEnv();
@@ -218,25 +218,26 @@ describe("stagepilot openclaw notifier", () => {
     process.env.OPENCLAW_WEBHOOK_URL = "https://example.invalid/webhook";
     process.env.OPENCLAW_WEBHOOK_TIMEOUT_MS = "1000";
 
-    globalThis.fetch = vi.fn((_input, init?: RequestInit) => {
-      return new Promise<Response>((_resolve, reject) => {
-        const signal = init?.signal;
-        if (!signal) {
-          return;
-        }
+    globalThis.fetch = vi.fn(
+      (_input, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          const signal = init?.signal;
+          if (!signal) {
+            return;
+          }
 
-        const onAbort = () => {
-          const error = new Error("aborted");
-          (error as Error & { name: string }).name = "AbortError";
-          reject(error);
-        };
-        if (signal.aborted) {
-          onAbort();
-          return;
-        }
-        signal.addEventListener("abort", onAbort, { once: true });
-      });
-    }) as typeof fetch;
+          const onAbort = () => {
+            const error = new Error("aborted");
+            (error as Error & { name: string }).name = "AbortError";
+            reject(error);
+          };
+          if (signal.aborted) {
+            onAbort();
+            return;
+          }
+          signal.addEventListener("abort", onAbort, { once: true });
+        })
+    ) as typeof fetch;
 
     const notifier = createStagePilotOpenClawNotifierFromEnv();
     const outcome = await notifier({
@@ -259,9 +260,9 @@ describe("stagepilot openclaw notifier", () => {
       },
     });
 
-    globalThis.fetch = vi.fn(() => {
-      return Promise.resolve(new Response(stalledBody, { status: 500 }));
-    }) as typeof fetch;
+    globalThis.fetch = vi.fn(() =>
+      Promise.resolve(new Response(stalledBody, { status: 500 }))
+    ) as typeof fetch;
 
     const notifier = createStagePilotOpenClawNotifierFromEnv();
     const outcome = await notifier({

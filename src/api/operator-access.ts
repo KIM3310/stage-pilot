@@ -244,12 +244,15 @@ function normalizeAudience(audience: JwtPayload["aud"]): string[] {
 }
 
 function readObjectPath(source: unknown, path: string): unknown {
-  return path.split(".").reduce<unknown>((current, segment) => {
+  let current = source;
+  for (const segment of path.split(".")) {
     if (current && typeof current === "object" && segment in current) {
-      return (current as Record<string, unknown>)[segment];
+      current = (current as Record<string, unknown>)[segment];
+      continue;
     }
-    return undefined;
-  }, source);
+    return;
+  }
+  return current;
 }
 
 function normalizeRoleValues(value: unknown): string[] {

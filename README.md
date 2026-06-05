@@ -13,6 +13,13 @@
 
 Technical review pack: [`docs/technical-review-pack.md`](docs/technical-review-pack.md)
 
+## Three-Minute Proof
+
+1. Read the 25% to 90% benchmark claim, then open the mutation benchmark evidence.
+2. Inspect the parser/retry path and one malformed tool-call fixture.
+3. Run `npm run verify` or the equivalent pnpm command for checks, tests, and build.
+4. Use `pnpm api:stagepilot` only after the package proof is clear.
+
 ## Product and Review Surface
 
 | Lens | Current answer |

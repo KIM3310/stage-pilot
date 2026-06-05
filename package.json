@@ -85,7 +85,7 @@
     "smoke:stagepilot": "bash scripts/smoke-stagepilot.sh"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.67",
+    "@ai-sdk/openai": "^3.0.68",
     "@ai-sdk/provider": "3.0.10",
     "@ai-sdk/provider-utils": "4.0.27",
     "@opentelemetry/api": "^1.9.1",
@@ -101,10 +101,10 @@
     "@ai-sdk/openai-compatible": "2.0.48",
     "@biomejs/biome": "2.4.16",
     "@changesets/cli": "2.31.0",
-    "@rollup/rollup-darwin-arm64": "^4.61.0",
+    "@rollup/rollup-darwin-arm64": "^4.61.1",
     "@types/node": "^25.9.1",
     "@vitest/coverage-v8": "^4.1.8",
-    "ai": "6.0.196",
+    "ai": "6.0.197",
     "globals": "^17.6.0",
     "husky": "^9.1.7",
     "jiti": "^2.7.0",

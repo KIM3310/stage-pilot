@@ -1,6 +1,6 @@
 # Service Architecture - stage-pilot
 
-This document defines the deployment and resource plan for turning this repository into a buyer-reviewable service. It intentionally avoids public public financial assumptions, public financial guesses, or contract assumptions.
+This document defines the deployment and resource plan for turning this repository into a buyer-reviewable service. It intentionally avoids public financial assumptions, public financial guesses, or contract assumptions.
 
 ## Commercial Role
 
@@ -43,6 +43,15 @@ Visitor or operator
 
 - NPM_TOKEN when publishing
 - benchmark artifact token if external storage is used
+
+## Revenue Channel Architecture
+
+- **Primary channel:** B2B diagnostics and pilots
+- **Monetization route:** Agent runtime reliability audit, parser recovery hardening, then regression support.
+- **Acquisition motion:** Portfolio proof, GitHub evidence, direct outreach to AI, data, platform, and security leaders.
+- **Activation path:** Capture failing traces, define tool-call fixtures, and enforce recovery acceptance gates before production agent traffic.
+- **Margin control:** Keep the pilot fixed-scope, reuse templates and evidence packs, set spend limits, and add persistent infrastructure only after buyer scope is approved.
+- **Public boundary:** Keep revenue, pricing, and contract assumptions in private planning; this repository publishes service structure, resource needs, and technical proof only.
 
 ## Cost and Risk Controls
 

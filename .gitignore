@@ -56,3 +56,4 @@ tasks
 .codex_runs/
 .runtime/
 .omc/
+.wrangler/

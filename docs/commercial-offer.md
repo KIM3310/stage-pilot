@@ -21,8 +21,8 @@ This is the buyer-ready version of the repository. It turns the technical proof 
 | Offer | Scope assumption | Buyer-facing scope |
 |---|---|---|
 | npm package support | OSS free + support | Publish benchmark report |
-| Parser reliability audit | $3k-$12k audit | Create integration guide |
-| Benchmark pack and integration help | $2k-$8k/month package support | Offer parser audit |
+| Parser reliability audit | Scope after buyer intake | Create integration guide |
+| Benchmark pack and integration help | Scope after buyer intake | Offer parser audit |
 
 ## Close Path
 

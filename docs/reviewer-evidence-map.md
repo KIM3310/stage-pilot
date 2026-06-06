@@ -57,8 +57,8 @@ Use this page as the short path through the repository. It keeps the review grou
 | Possible offer | Working scope assumption |
 |---|---|
 | npm package support | OSS free + support |
-| Parser reliability audit | $3k-$12k audit |
-| Benchmark pack and integration help | $2k-$8k/month package support |
+| Parser reliability audit | Scope after buyer intake |
+| Benchmark pack and integration help | Scope after buyer intake |
 
 ## Boundaries
 

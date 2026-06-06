@@ -51,7 +51,7 @@ This note specializes the repository for service launch. It combines product str
 
 - Free proof: runnable sample, benchmark, or package install.
 - Paid entry: npm package support (OSS free + support) tied to one integration or reliability question.
-- Expansion: Parser reliability audit ($3k-$12k audit) and Benchmark pack and integration help ($2k-$8k/month package support) after internal adoption starts.
+- Expansion: Parser reliability audit (scope after buyer intake) and Benchmark pack and integration help (scope after buyer intake) after internal adoption starts.
 
 ## Scope Frame
 

@@ -52,13 +52,13 @@ Use this page as the short path through the repository. It keeps the review grou
 - Published package surface is clear
 - Benchmark claim is reproducible
 
-## Commercial Notes
+## Review Notes
 
 | Possible offer | Working scope assumption |
 |---|---|
 | npm package support | OSS free + support |
-| Parser reliability audit | Scope after buyer intake |
-| Benchmark pack and integration help | Scope after buyer intake |
+| Parser reliability audit | Scope after reviewer intake |
+| Benchmark pack and integration help | Scope after reviewer intake |
 
 ## Boundaries
 

@@ -24,8 +24,8 @@ Technical review pack: [`docs/technical-review-pack.md`](docs/technical-review-p
 
 | Lens | Current answer |
 |---|---|
-| Buyer or user | AI platform teams and developer-tool teams shipping agents that must survive malformed tool output. |
-| Commercial route | npm package support, parser reliability audit, benchmark pack, and integration help for agent runtimes. |
+| Audience | AI platform teams and developer-tool teams shipping agents that must survive malformed tool output. |
+| Review path | Validate the demo, README, architecture notes, and quality gate before deeper workflow review. |
 | Review signal | Published package surface, deterministic mutation benchmark, parser recovery, retry loop, and telemetry-ready runtime. |
 | Safety boundary | Tool schemas and retries are explicit; benchmark fixtures are synthetic and provider-neutral. |
 | Fast proof | `pnpm test`, `pnpm build`, [`docs/technical-review-pack.md`](docs/technical-review-pack.md), and the 25% to 90% benchmark claim. |
@@ -35,20 +35,16 @@ Technical review pack: [`docs/technical-review-pack.md`](docs/technical-review-p
 - **First minute:** Read the 25% to 90% benchmark claim, then inspect parser recovery and mutation fixtures.
 - **Local demo:** Install with `pnpm install`, then run `pnpm api:stagepilot` and open `http://127.0.0.1:8080/demo`.
 - **Verification:** Run `npm run verify` or the equivalent package-manager command for check, tests, and build.
-- **Commercial read:** Sell it as npm package support plus parser reliability audits for agent runtimes.
 
 ## Service Launch Playbook
 
-- [Service launch playbook](docs/service-launch-playbook.md) maps the repository to buyer segments, offer ladder, proof gates, proof gates, and risk boundaries.
+- [Service launch playbook](docs/service-launch-playbook.md) maps the repository to review audiences, offer ladder, proof gates, proof gates, and risk boundaries.
 
 ## Review Notes
 
 - [Review guide](docs/reviewer-evidence-map.md) summarizes the project angle, first files to inspect, verification commands, and known boundaries.
 - [Quality notes](docs/quality-gate.md) lists the local checks, CI surface, and release expectations for this repository.
-- [Service growth model](docs/service-growth-model.md) maps the project to an ethical service path, activation loop, scope logic, and growth experiments.
 - [Enterprise readiness notes](docs/enterprise-readiness.md) outlines security, data, operations, integration, and handoff expectations.
-- [Conversion UX model](docs/conversion-ux-model.md) maps the buyer path, behavioral design, UI/UX direction, scope frame, and ethical conversion guardrails.
-- [Commercial offer](docs/commercial-offer.md) packages the repository into a buyer-ready offer ladder, proof gate, outreach angle, and close path.
 
 ## The Problem
 
@@ -436,7 +432,7 @@ This repository includes a neutral cloud and AI engineering blueprint that maps 
 
 ## Enterprise Productization
 
-- [Product operating model](docs/product-operating-model.md) defines the buyer, paid wedge, trust boundary, operating checks, and service path for this repository.
+- [Product operating model](docs/product-operating-model.md) defines the reviewer, trust boundary, trust boundary, operating checks, and service path for this repository.
 
 ## Service Architecture
 

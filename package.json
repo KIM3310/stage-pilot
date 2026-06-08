@@ -102,7 +102,7 @@
     "@biomejs/biome": "2.4.16",
     "@changesets/cli": "2.31.0",
     "@rollup/rollup-darwin-arm64": "^4.61.1",
-    "@types/node": "^25.9.1",
+    "@types/node": "^25.9.2",
     "@vitest/coverage-v8": "^4.1.8",
     "ai": "6.0.197",
     "globals": "^17.6.0",
@@ -113,7 +113,7 @@
     "tsup": "^8.5.1",
     "tsx": "^4.22.4",
     "typescript": "6.0.3",
-    "ultracite": "7.8.1",
+    "ultracite": "7.8.2",
     "vite": "^8.0.16",
     "vitest": "^4.1.8",
     "zod": "^4.4.3"

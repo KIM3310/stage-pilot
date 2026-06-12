@@ -22,6 +22,9 @@ updates:
       prefix: "deps"
       include: "scope"
     ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
       # Aliased packages for AI SDK v5 compatibility - manually managed
       - dependency-name: "ai-v5"
       - dependency-name: "ai-v6"
@@ -40,6 +43,10 @@ updates:
       github-actions:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
     labels:
       - "dependencies"
       - "automated"
@@ -61,6 +68,10 @@ updates:
       docker-images:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
     labels:
       - "dependencies"
       - "automated"
@@ -82,6 +93,10 @@ updates:
       terraform-dependencies:
         patterns:
           - "*"
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
     labels:
       - "dependencies"
       - "automated"

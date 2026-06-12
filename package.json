@@ -126,7 +126,9 @@
   "license": "Apache-2.0",
   "pnpm": {
     "overrides": {
+      "@grpc/grpc-js": "^1.14.4",
       "protobufjs": "^7.5.8",
+      "shell-quote": "^1.8.4",
       "vite": "^8.0.16"
     }
   }

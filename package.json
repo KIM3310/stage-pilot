@@ -61,6 +61,7 @@
     "build:watch": "npm run clean && tsup --watch --tsconfig tsconfig.build.json",
     "clean": "rimraf dist *.tsbuildinfo",
     "clean:repo": "bash scripts/clean-local-artifacts.sh",
+    "lint": "npm run check",
     "typecheck": "tsc --noEmit",
     "test": "NODE_OPTIONS=--disable-warning=ExperimentalWarning vitest run",
     "check:biome": "biome check",

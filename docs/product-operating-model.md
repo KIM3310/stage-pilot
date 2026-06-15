@@ -1,28 +1,28 @@
 # Product Operating Model
 
 Repository: `stage-pilot`
-Last reviewed: 2026-06-03 KST
+Last updated: 2026-06-03 KST
 
 ## Enterprise Product Position
 
 AI SDK tool-calling middleware with multi-agent orchestration and benchmark harness
 
-This repository is packaged as a concrete system surface, not a loose code sample. The enterprise value is a narrow proof that can be inspected, run, tested, and converted into a reviewed implementation motion.
+This repository is packaged as a concrete system surface, not a loose code sample. The enterprise value is a narrow proof that can be inspected, run, tested, and converted into a scoped implementation motion.
 
 ## Audience And Service Path
 
 | Area | Position |
 | --- | --- |
-| Target reviewer | AI platform teams shipping tool-calling agents |
+| Target users | AI platform teams shipping tool-calling agents |
 | Service wedge | Developer package, support plan, and reliability audit |
-| Review signal | Runtime reliability, parser recovery, benchmark discipline |
+| System signal | Runtime reliability, parser recovery, benchmark discipline |
 | Delivery shape | Fixed-scope pilot, integration sprint, and handoff-ready operating pack |
 | Expansion path | Add customer-specific adapters, policy controls, observability, and support SLAs after the pilot proves value |
 
 ## Enterprise Trust Boundary
 
 - Keep credentials out of the repository and require environment-based configuration for live integrations.
-- Treat generated screenshots, fixtures, and sample data as non-customer proof assets unless explicitly reviewed.
+- Treat generated screenshots, fixtures, and sample data as non-customer proof assets unless explicitly approved.
 - Keep CI, repository-surface validation, architecture manifest checks, and secret scanning green before presenting the repo externally.
 - Use the architecture blueprint as the source of truth for cloud, AI, data, and operational boundaries.
 - Document any unsupported production assumption before a customer or evaluator sees the demo.

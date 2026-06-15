@@ -20,7 +20,7 @@
   <text x="664" y="154" fill="#D8B4FE" font-family="Arial, sans-serif" font-size="12" letter-spacing="1.5">BENCHLAB EVIDENCE</text>
   <text x="664" y="184" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="19" font-weight="700">runs + claims + forensics</text>
   <text x="664" y="210" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="13">Variant leaderboard, checked-in artifacts,</text>
-  <text x="664" y="230" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="13">and dominant failure buckets stay reviewable.</text>
+  <text x="664" y="230" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="13">and dominant failure buckets stay inspectable.</text>
 
   <path d="M316 192H338" stroke="#5EEAD4" stroke-width="3" stroke-linecap="round"/>
   <path d="M614 192H636" stroke="#5EEAD4" stroke-width="3" stroke-linecap="round"/>
@@ -35,7 +35,7 @@
   <text x="68" y="444" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">/v1/benchlab/runtime-brief   /v1/benchlab/summary-pack   /v1/benchlab/schema/job-report</text>
 
   <rect x="484" y="294" width="428" height="176" rx="16" fill="#0F172A" stroke="#334155"/>
-  <text x="504" y="324" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">Review Sequence</text>
+  <text x="504" y="324" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">Architecture Sequence</text>
   <text x="504" y="356" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">1. Confirm runtime and integration posture.</text>
   <text x="504" y="384" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">2. Inspect benchmark lift or checked-in claim delta.</text>
   <text x="504" y="412" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">3. Run plan or compare surfaces before promoting any claim.</text>

@@ -323,7 +323,7 @@
               vague anecdotes.
             </li>
             <li>
-              Operator review surfaces and developer-ops lanes can be documented
+              Operator architecture surfaces and developer-ops lanes can be documented
               separately from the core parser package.
             </li>
             <li>
@@ -384,7 +384,7 @@
             </p>
           </article>
           <article class="lens-card">
-            <strong>03 · Reviewer handoff</strong>
+            <strong>03 · Architecture handoff</strong>
             <p>
               Copy the review path once the benchmark story is already easy to
               repeat.
@@ -456,7 +456,7 @@
           <button id="copyReviewPathBtn" class="action-btn" type="button">
             Copy Review Path
           </button>
-          <button id="copyReviewerBriefBtn" class="action-btn" type="button">
+          <button id="copyArchitectureBriefBtn" class="action-btn" type="button">
             Copy Benchmark Brief
           </button>
           <button id="copyLaunchDeckBtn" class="action-btn" type="button">
@@ -517,8 +517,8 @@
         successLabel: "Review path copied.",
         failureLabel: "Failed to copy review path.",
       },
-      reviewerBrief: {
-        buttonId: "copyReviewerBriefBtn",
+      architectureBrief: {
+        buttonId: "copyArchitectureBriefBtn",
         payload:
           "StagePilot benchmark brief\nHeadline: Reliable tool calling for non-native models.\nBaseline: 29.17%\nMiddleware: 87.50%\nRalph loop: 100.00% on the current checked-in 24-case snapshot.\nStatic site posture: user-friendly Pages surface, runtime hosted separately.",
         successLabel: "Benchmark brief copied.",
@@ -548,13 +548,13 @@
             "Use the middleware lift as the real product proof, not as a side note.",
           ],
           [
-            "03 · Reviewer handoff",
+            "03 · Architecture handoff",
             "Copy the review path once the benchmark story is already easy to repeat.",
           ],
         ],
       },
       evaluation: {
-        headline: "Reviewer lens",
+        headline: "Architecture lens",
         summary:
           "Use this when the audience cares more about benchmark rigor, checked-in artifacts, and trust boundary than the parser headline alone.",
         cards: [
@@ -567,7 +567,7 @@
             "Explain the bounded retry as a deliberate reliability step, not magic.",
           ],
           [
-            "03 · Proof path",
+            "03 · Walkthrough path",
             "Use the copy bar after the benchmark story is grounded.",
           ],
         ],
@@ -687,7 +687,7 @@
       }
       const keyToAction = {
         c: "reviewPath",
-        b: "reviewerBrief",
+        b: "architectureBrief",
         l: "launchDeck",
       };
       const actionKey = keyToAction[key];

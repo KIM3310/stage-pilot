@@ -29,7 +29,7 @@ Tool-call failures look like model failures, but they're usually parsing and han
 
 ## Where to look
 
-- `pnpm review:proof`
+- `pnpm architecture:proof`
 - `/v1/runtime-brief`
 - `/v1/summary-pack`
 - `/v1/trace-observability-pack`

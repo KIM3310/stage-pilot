@@ -18,7 +18,7 @@ Five-stage pipeline run by `StagePilotEngine`:
 2. **SafetyAgent** -- checks against safety policies. Blocks bad requests before planning.
 3. **PlannerAgent** -- generates the tool-call plan. Parser middleware normalizes the raw output.
 4. **OutreachAgent** -- executes the tool calls, handles retries and partial failures.
-5. **JudgeAgent** -- reviews execution results. Can trigger replay if quality is off.
+5. **JudgeAgent** -- architectures execution results. Can trigger replay if quality is off.
 
 Each stage emits OpenTelemetry spans so you can trace where things broke.
 

@@ -2,12 +2,12 @@
 
 This pack now supports two lanes:
 
-- `spec-first` review via the markdown overview below
+- `spec-first` architecture via the markdown overview below
 - `asset-first` sync via `docs/datadog/assets/*.json` and `npm run datadog:plan`
 
 The current repo posture is `Datadog-ready, currently disabled`.
 
-The goal is still to keep local review lightweight, while making it possible to push a real dashboard and monitor pack into Datadog later if `DD_API_KEY`, `DD_APP_KEY`, and `DD_SITE` are available again.
+The goal is still to keep local architecture lightweight, while making it possible to push a real dashboard and monitor pack into Datadog later if `DD_API_KEY`, `DD_APP_KEY`, and `DD_SITE` are available again.
 
 ## Why this repo is the strongest Datadog fit
 
@@ -91,4 +91,4 @@ This path is optional and is intentionally not active in the default local setup
 4. Run `npm run datadog:sync` once both `DD_API_KEY` and `DD_APP_KEY` are present.
 5. Capture screenshots and any post-sync notes under `docs/datadog/`.
 
-If time is limited, do `Runtime Reliability Overview` first. Even with live sync disabled, that single board is enough to make the Datadog story credible in interviews.
+If time is limited, do `Runtime Reliability Overview` first. Even with live sync disabled, that single board is enough to make the Datadog story credible in architecture walkthroughs.

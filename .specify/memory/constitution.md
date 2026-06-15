@@ -20,4 +20,4 @@
 3. Automated tests and lint pass locally and in CI.
 4. Documentation (README/docs/STATUS) reflects latest capabilities and known limitations.
 5. Observability hooks (logging/metrics events) are either implemented or explicitly stubbed with TODOs and tracked tasks.
-6. Security review checklist completed for any new input surface.
+6. Security architecture checklist completed for any new input surface.

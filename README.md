@@ -11,7 +11,7 @@
 
 **Tool-calling reliability runtime for LLMs.** Parses, repairs, and retries malformed tool-call output so you don't have to. Lifts baseline success from **25% to 90%** on a 60-case benchmark with 30 mutation modes.
 
-Technical review pack: [`docs/technical-review-pack.md`](docs/technical-review-pack.md)
+Architecture pack: [`docs/architecture-pack.md`](docs/architecture-pack.md)
 
 ## Three-Minute Proof
 
@@ -20,17 +20,17 @@ Technical review pack: [`docs/technical-review-pack.md`](docs/technical-review-p
 3. Run `npm run verify` or the equivalent pnpm command for checks, tests, and build.
 4. Use `pnpm api:stagepilot` only after the package proof is clear.
 
-## Product and Review Surface
+## Product and System Surface
 
 | Lens | Current answer |
 |---|---|
 | Audience | AI platform teams and developer-tool teams shipping agents that must survive malformed tool output. |
-| Review path | Validate the demo, README, architecture notes, and quality gate before deeper workflow review. |
-| Architecture signal | Published package surface, deterministic mutation benchmark, parser recovery, retry loop, and telemetry-ready runtime. |
+| Architecture path | Validate the demo, README, architecture notes, and quality gate before deeper workflow architecture. |
+| System signal | Published package surface, deterministic mutation benchmark, parser recovery, retry loop, and telemetry-ready runtime. |
 | Safety boundary | Tool schemas and retries are explicit; benchmark fixtures are synthetic and provider-neutral. |
-| Fast proof | `pnpm test`, `pnpm build`, [`docs/technical-review-pack.md`](docs/technical-review-pack.md), and the 25% to 90% benchmark claim. |
+| Fast path | `pnpm test`, `pnpm build`, [`docs/architecture-pack.md`](docs/architecture-pack.md), and the 25% to 90% benchmark claim. |
 
-## Reviewer Fast Path
+## System Fast Path
 
 - **First minute:** Read the 25% to 90% benchmark claim, then inspect parser recovery and mutation fixtures.
 - **Local demo:** Install with `pnpm install`, then run `pnpm api:stagepilot` and open `http://127.0.0.1:8080/demo`.
@@ -38,11 +38,11 @@ Technical review pack: [`docs/technical-review-pack.md`](docs/technical-review-p
 
 ## Service Launch Playbook
 
-- [Service launch playbook](docs/service-launch-playbook.md) maps the repository to review audiences, proof gates, operating boundaries, and risk controls.
+- [Service launch playbook](docs/service-launch-playbook.md) maps the repository to architecture audiences, operating gates, operating boundaries, and risk controls.
 
-## Review Notes
+## Architecture Notes
 
-- [Review guide](docs/reviewer-evidence-map.md) summarizes the project angle, first files to inspect, verification commands, and known boundaries.
+- [Architecture guide](docs/architecture-evidence-map.md) summarizes the project angle, first files to inspect, runtime commands, and known boundaries.
 - [Quality notes](docs/quality-gate.md) lists the local checks, CI surface, and release expectations for this repository.
 - [Enterprise readiness notes](docs/enterprise-readiness.md) outlines security, data, operations, integration, and handoff expectations.
 
@@ -165,7 +165,7 @@ sequenceDiagram
     O-->>T: outreach_span
 
     O->>J: Execution results
-    J->>J: Quality score (0-100) + review
+    J->>J: Quality score (0-100) + architecture
     J-->>T: judge_span
 
     alt Score < threshold
@@ -432,7 +432,7 @@ This repository includes a neutral cloud and AI engineering blueprint that maps 
 
 ## Enterprise Productization
 
-- [Product operating model](docs/product-operating-model.md) defines the reviewer, trust boundary, trust boundary, operating checks, and service path for this repository.
+- [Product operating model](docs/product-operating-model.md) defines the technical reader, trust boundary, trust boundary, operating checks, and service path for this repository.
 
 ## System Architecture
 

@@ -17,4 +17,4 @@ Routes:
 - `/v1/summary-pack`
 - `/v1/schema/plan-report`
 
-Kept generic on purpose -- can back challenge submissions or interviews without making the whole repo look like a single-purpose Git tooling demo.
+Kept generic on purpose -- can back challenge submissions or architecture walkthroughs without making the whole repo look like a single-purpose Git tooling demo.

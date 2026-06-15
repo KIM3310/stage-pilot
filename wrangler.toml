@@ -8,7 +8,7 @@
 #
 # The worker exposes a lightweight demo/health surface.
 # Full API runs on Cloud Run / Kubernetes; this is a CDN-edge
-# entry point for the demo UI and review-pack endpoints.
+# entry point for the demo UI and architecture-pack endpoints.
 
 name = "stagepilot-demo"
 main = "src/api/worker-entry.ts"

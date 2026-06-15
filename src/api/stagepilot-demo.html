@@ -649,7 +649,7 @@
       <aside class="panel hero-side">
         <div class="section-head">
           <div>
-            <label class="section-label">Reviewer Warm Start</label>
+            <label class="section-label">Architecture Warm Start</label>
             <h2 style="margin: 0;">What matters first</h2>
           </div>
           <span id="heroState" class="status-pill live">Booting</span>
@@ -827,7 +827,7 @@
       <aside class="panel">
         <div class="section-head">
           <div>
-            <label class="section-label">Review Surfaces</label>
+            <label class="section-label">Architecture Surfaces</label>
             <h2 style="margin: 0;">Review control tower</h2>
           </div>
           <button id="benchmarkButton" class="btn-secondary" type="button">Run Benchmark</button>
@@ -903,7 +903,7 @@
       <article class="panel">
         <div class="section-head">
           <div>
-            <label class="section-label">Reviewer Sequence</label>
+            <label class="section-label">Architecture Sequence</label>
             <h2 style="margin: 0;">Read this order</h2>
           </div>
         </div>
@@ -1291,7 +1291,7 @@
         {
           title: "Planning utility",
           detail: missing.includes("gemini_api_key")
-            ? "Gemini is not configured, so keep this in bounded-review mode and avoid overselling live narrative synthesis."
+            ? "Gemini is not configured, so keep this in bounded-architecture mode and avoid overselling live narrative synthesis."
             : "Gemini is configured, so live planning and insight enrichment are available for real evaluation runs.",
         },
         {
@@ -1603,7 +1603,7 @@
           ...buildWhatIfBody(),
           delivery: {
             dryRun: true,
-            message: "Reviewer-controlled notify step",
+            message: "Architecture-controlled notify step",
             target: {
               channel: "openclaw-demo",
               target: "summary-pack",

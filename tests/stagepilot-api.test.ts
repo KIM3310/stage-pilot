@@ -30,7 +30,7 @@ const OPERATOR_OIDC_AUDIENCE_ENV_SNAPSHOT =
   process.env[OPERATOR_OIDC_AUDIENCE_ENV_KEY];
 const OPERATOR_OIDC_JWKS_ENV_SNAPSHOT = process.env[OPERATOR_OIDC_JWKS_ENV_KEY];
 const HTTP_STATUS_LINE_REGEX = /^HTTP\/1\.1 (\d{3})/m;
-const REVIEWER_CLAIM_TIER_REGEX =
+const ARCHITECTURE_CLAIM_TIER_REGEX =
   /runtime-backed-review-ready|bounded-review-demo/;
 const OPENCLAW_WEBHOOK_ENV_SNAPSHOT = process.env[OPENCLAW_WEBHOOK_ENV_KEY];
 const OPENAI_API_KEY_ENV_SNAPSHOT = process.env[OPENAI_API_KEY_ENV_KEY];
@@ -699,7 +699,7 @@ describeIfSocketBinding("stagepilot api server", () => {
     expect(body.links.providerBenchmarkScorecard).toBe(
       "/v1/provider-benchmark-scorecard"
     );
-    expect(body.links.reviewResourcePack).toBe("/v1/review-resource-pack");
+    expect(body.links.reviewResourcePack).toBe("/v1/architecture-resource-pack");
     expect(body.links.protocolMatrix).toBe("/v1/protocol-matrix");
     expect(body.links.regressionGatePack).toBe("/v1/regression-gate-pack");
     expect(body.links.traceObservabilityPack).toBe(
@@ -858,7 +858,7 @@ describeIfSocketBinding("stagepilot api server", () => {
     expect(body.reviewPath.length).toBeGreaterThanOrEqual(3);
   });
 
-  it("returns provider benchmark scorecard for frontier review posture", async () => {
+  it("returns provider benchmark scorecard for frontier architecture posture", async () => {
     const { baseUrl } = await startServer({
       engine: new StagePilotEngine(),
     });
@@ -1250,7 +1250,7 @@ describeIfSocketBinding("stagepilot api server", () => {
     expect(body.links.providerBenchmarkScorecard).toBe(
       "/v1/provider-benchmark-scorecard"
     );
-    expect(body.links.reviewResourcePack).toBe("/v1/review-resource-pack");
+    expect(body.links.reviewResourcePack).toBe("/v1/architecture-resource-pack");
     expect(body.links.regressionGatePack).toBe("/v1/regression-gate-pack");
     expect(body.links.traceObservabilityPack).toBe(
       "/v1/trace-observability-pack"
@@ -1274,19 +1274,19 @@ describeIfSocketBinding("stagepilot api server", () => {
       "site/"
     );
     expect(body.evidenceBundle.evaluationPosture.claimTier).toMatch(
-      REVIEWER_CLAIM_TIER_REGEX
+      ARCHITECTURE_CLAIM_TIER_REGEX
     );
     expect(body.evidenceBundle.evaluationPosture.claimRule).toContain(
       "supporting docs"
     );
   });
 
-  it("returns a checked-in review resource pack for no-key walkthroughs", async () => {
+  it("returns a checked-in architecture resource pack for no-key walkthroughs", async () => {
     const { baseUrl } = await startServer({
       engine: new StagePilotEngine(),
     });
 
-    const response = await fetch(`${baseUrl}/v1/review-resource-pack`);
+    const response = await fetch(`${baseUrl}/v1/architecture-resource-pack`);
     expect(response.status).toBe(200);
 
     const body = (await response.json()) as {
@@ -1303,14 +1303,14 @@ describeIfSocketBinding("stagepilot api server", () => {
           };
         };
       };
-      reviewerFastPath: string[];
+      architectureFastPath: string[];
       links: {
         reviewResourcePack: string;
         summaryPack: string;
       };
     };
 
-    expect(body.schema).toBe("stagepilot-review-resource-pack-v1");
+    expect(body.schema).toBe("stagepilot-architecture-resource-pack-v1");
     expect(body.summary.scenarioCount).toBeGreaterThanOrEqual(4);
     expect(body.summary.validationCaseCount).toBeGreaterThanOrEqual(4);
     expect(body.externalData.files.supportTickets.path).toBe(
@@ -1319,8 +1319,8 @@ describeIfSocketBinding("stagepilot api server", () => {
     expect(Array.isArray(body.externalData.files.supportTickets.preview)).toBe(
       true
     );
-    expect(body.reviewerFastPath[1]).toBe("/v1/review-resource-pack");
-    expect(body.links.reviewResourcePack).toBe("/v1/review-resource-pack");
+    expect(body.architectureFastPath[1]).toBe("/v1/architecture-resource-pack");
+    expect(body.links.reviewResourcePack).toBe("/v1/architecture-resource-pack");
     expect(body.links.summaryPack).toBe("/v1/summary-pack");
   });
 

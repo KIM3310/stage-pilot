@@ -21,7 +21,7 @@ If docs and API disagree, trust the benchmark artifact.
 
 ```bash
 pnpm install
-pnpm review:proof
+pnpm architecture:proof
 pnpm api:stagepilot
 # open http://127.0.0.1:8080/demo
 ```
@@ -53,13 +53,13 @@ Checked-in benchmark snapshot:
 
 ## Honest framing
 
-- **Strong:** parser middleware + benchmark discipline + reviewable orchestration
+- **Strong:** parser middleware + benchmark discipline + inspectable orchestration
 - **Reasonable:** runtime/API shape is practical and Cloud Run-friendly
 - **Don't oversell:** static site and docs are supporting material, not proof of live traffic
 
 ## Two-minute version
 
-- `pnpm review:proof`
+- `pnpm architecture:proof`
 - `docs/benchmarks/stagepilot-latest.json`
 - `/v1/summary-pack`
 - `docs/solution-architecture.md`

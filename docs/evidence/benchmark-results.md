@@ -66,7 +66,7 @@ Source: `docs/benchmarks/stagepilot-regression-gate-latest.json`
 | xml-boundary-repair-watch | watch | stream repair |
 | bounded-load-posture | **pass** | runtime pressure |
 
-**Release posture:** review-ready-with-watch-items (3 pass, 2 watch, 0 fail)
+**Release posture:** architecture-ready-with-watch-items (3 pass, 2 watch, 0 fail)
 
 ## Memory Usage (Stream Processing)
 

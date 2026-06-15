@@ -35,7 +35,7 @@ graph TB
         B2["SafetyAgent — policy enforcement"]
         B3["PlannerAgent — action plan"]
         B4["OutreachAgent — execution"]
-        B5["JudgeAgent — quality review"]
+        B5["JudgeAgent — quality architecture"]
         B1 --> B2 --> B3 --> B4 --> B5
     end
 

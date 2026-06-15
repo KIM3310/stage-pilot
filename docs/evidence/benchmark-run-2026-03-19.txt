@@ -57,4 +57,4 @@ Regression Gate Board:
   mixed-format-regression-watch: watch
   xml-boundary-repair-watch: watch
   bounded-load-posture: pass
-  Overall: review-ready-with-watch-items
+  Overall: architecture-ready-with-watch-items

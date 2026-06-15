@@ -175,7 +175,7 @@
 ### Patch Changes
 
 - b9b13bd: Simplify `formatToolResponseAsHermes` signature to match `morphFormatToolResponseAsXml` by removing optional tag parameters and hardcoding `<tool_response>` tags.
-- b9b13bd: feat: Implement PR #141 review feedback - clean up gemma support and fix documentation
+- b9b13bd: feat: Implement PR #141 architecture feedback - clean up gemma support and fix documentation
 
   - Remove all gemma model references and configurations across codebase
   - Fix broken README examples by adding proper model and middleware imports

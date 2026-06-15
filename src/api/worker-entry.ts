@@ -2,7 +2,7 @@
  * Cloudflare Workers entry point for StagePilot demo surface.
  *
  * This is a lightweight edge worker that serves the demo UI, health check,
- * and read-only review-pack endpoints. The full API (plan, benchmark, etc.)
+ * and read-only architecture-pack endpoints. The full API (plan, benchmark, etc.)
  * runs on Cloud Run or Kubernetes.
  *
  * Deploy: npx wrangler deploy
@@ -222,7 +222,7 @@ function renderDemoHtml(): string {
     </div>
     <div class="card">
       <h2>Full API</h2>
-      <p>The complete StagePilot API (plan, benchmark, insights) runs on Cloud Run or Kubernetes. This edge surface is for the demo UI and read-only review-pack routes.</p>
+      <p>The complete StagePilot API (plan, benchmark, insights) runs on Cloud Run or Kubernetes. This edge surface is for the demo UI and read-only architecture-pack routes.</p>
     </div>
   </div>
 </body>

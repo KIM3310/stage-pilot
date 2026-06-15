@@ -220,7 +220,7 @@ export function buildBenchLabSummaryPack(options: {
     generatedAt: new Date().toISOString(),
     summaryPackId: BENCHLAB_SUMMARY_PACK_ID,
     headline:
-      "BenchLab compresses configs, runtime matrices, checked-in claims, and failure forensics into one promotion-ready review surface.",
+      "BenchLab compresses configs, runtime matrices, checked-in claims, and failure forensics into one promotion-ready architecture surface.",
     operatorJourney: [
       {
         stage: "Configure",

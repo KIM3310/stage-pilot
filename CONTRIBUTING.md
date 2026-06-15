@@ -97,7 +97,7 @@ pnpm build          # clean build via tsup
 1. Push your branch and open a PR against `main`.
 2. Fill out the PR template — describe what changed, why, and how to test it.
 3. Ensure CI passes (type-check, lint, tests, build).
-4. A maintainer will review your PR. Address feedback with additional commits rather than force-pushing, so the review history stays readable.
+4. A maintainer will architecture your PR. Address feedback with additional commits rather than force-pushing, so the architecture history stays readable.
 5. Once approved, a maintainer will squash-merge your PR.
 
 ## Issues

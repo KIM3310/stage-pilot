@@ -89,7 +89,7 @@ Source: `docs/benchmarks/stagepilot-regression-gate-latest.json`
 | xml-boundary-repair-watch | watch |
 | bounded-load-posture | **pass** |
 
-**Release posture:** review-ready-with-watch-items (3 pass, 2 watch, 0 fail)
+**Release posture:** architecture-ready-with-watch-items (3 pass, 2 watch, 0 fail)
 
 ## Reproducing These Results
 
@@ -105,7 +105,7 @@ pnpm api:stagepilot &
 pnpm load:k6
 
 # Validation summary
-pnpm review:proof
+pnpm architecture:proof
 ```
 
 ## Trend Notes

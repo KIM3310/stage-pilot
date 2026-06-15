@@ -29,7 +29,7 @@ export const STAGEPILOT_TRACE_OBSERVABILITY_PACK_SCHEMA =
 export const STAGEPILOT_REGRESSION_GATE_PACK_SCHEMA =
   "stagepilot-regression-gate-pack-v1";
 export const STAGEPILOT_REVIEW_RESOURCE_PACK_SCHEMA =
-  "stagepilot-review-resource-pack-v1";
+  "stagepilot-architecture-resource-pack-v1";
 export const STAGEPILOT_LIVE_REVIEW_SCHEMA = "stagepilot-live-review-run-v1";
 const CSV_ROW_SPLIT_REGEX = /\r?\n/;
 
@@ -107,8 +107,8 @@ function buildStagePilotProofAssets() {
       kind: "doc",
     },
     {
-      label: "Review resource pack",
-      path: "/v1/review-resource-pack",
+      label: "Architecture resource pack",
+      path: "/v1/architecture-resource-pack",
       kind: "route",
     },
   ];
@@ -255,7 +255,7 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
     },
     {
       method: "GET",
-      path: "/v1/review-resource-pack",
+      path: "/v1/architecture-resource-pack",
       purpose:
         "Checked-in review scenarios, operator checks, and benchmark playbooks",
     },
@@ -471,7 +471,7 @@ export function buildStagePilotRuntimeBrief(options: {
       health: "/health",
       meta: "/v1/meta",
       runtimeBrief: "/v1/runtime-brief",
-      reviewResourcePack: "/v1/review-resource-pack",
+      reviewResourcePack: "/v1/architecture-resource-pack",
       summaryPack: "/v1/summary-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
       perfEvidencePack: "/v1/perf-evidence-pack",
@@ -534,11 +534,11 @@ export function buildStagePilotReviewResourcePack(options: {
       checkId: "confirm-runtime-brief",
       surface: "/v1/runtime-brief",
       whyItMatters:
-        "Reviewers should confirm live readiness and request boundaries before any orchestration claim.",
+        "Operators should confirm live readiness and request boundaries before any orchestration claim.",
     },
     {
       checkId: "open-resource-pack",
-      surface: "/v1/review-resource-pack",
+      surface: "/v1/architecture-resource-pack",
       whyItMatters:
         "Built-in scenarios and checks keep the repo reviewable without external keys.",
     },
@@ -585,7 +585,7 @@ export function buildStagePilotReviewResourcePack(options: {
       entrySurface: "/v1/runtime-brief",
       handoffSurface: "/v1/summary-pack",
       focus:
-        "Use when a reviewer needs the shortest trustworthy path from readiness to proof.",
+        "Use when a architecture needs the shortest trustworthy path from readiness to proof.",
     },
     {
       playbookId: "provider-tradeoff-review",
@@ -609,7 +609,7 @@ export function buildStagePilotReviewResourcePack(options: {
     generatedAt: new Date().toISOString(),
     schema: STAGEPILOT_REVIEW_RESOURCE_PACK_SCHEMA,
     headline:
-      "Checked-in review resource pack that keeps StagePilot's strongest no-key walkthrough explicit.",
+      "Checked-in architecture resource pack that keeps StagePilot's strongest no-key walkthrough explicit.",
     summary: {
       scenarioCount: resourceScenarios.length,
       operatorCheckCount: operatorChecks.length,
@@ -642,9 +642,9 @@ export function buildStagePilotReviewResourcePack(options: {
     operatorChecks,
     validationCases,
     playbooks,
-    reviewerFastPath: [
+    architectureFastPath: [
       "/v1/runtime-brief",
-      "/v1/review-resource-pack",
+      "/v1/architecture-resource-pack",
       "/v1/provider-benchmark-scorecard",
       "/v1/trace-observability-pack",
       "/v1/regression-gate-pack",
@@ -653,7 +653,7 @@ export function buildStagePilotReviewResourcePack(options: {
     ],
     links: {
       runtimeBrief: "/v1/runtime-brief",
-      reviewResourcePack: "/v1/review-resource-pack",
+      reviewResourcePack: "/v1/architecture-resource-pack",
       providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
       traceObservabilityPack: "/v1/trace-observability-pack",
       regressionGatePack: "/v1/regression-gate-pack",
@@ -1348,7 +1348,7 @@ export function buildStagePilotRegressionGatePack(options: {
     operatorNotes: [
       "This is a checked-in release board, not a substitute for live production SLO ownership.",
       "The value is explicit promotion logic: what would make a benchmark claim stronger, weaker, or blocked.",
-      "Use this pack when an interviewer asks how you decide whether a reliability surface is ready to be trusted more broadly.",
+      "Use this pack when an technical reader asks how you decide whether a reliability surface is ready to be trusted more broadly.",
     ],
     proofAssets: [
       {
@@ -1456,7 +1456,7 @@ export function buildStagePilotRuntimeScorecard(options: {
     recommendations: [
       options.geminiHasApiKey
         ? "Gemini readiness is present. Validate fresh planning runs after any prompt or parser change."
-        : "Configure GEMINI_API_KEY to move from deterministic review surfaces to live synthesis validation.",
+        : "Configure GEMINI_API_KEY to move from deterministic architecture surfaces to live synthesis validation.",
       options.openClawConfigured
         ? "OpenClaw delivery is configured. Keep notify as a final operator-confirmed step."
         : "Configure OpenClaw delivery before claiming end-to-end orchestration readiness.",
@@ -1745,8 +1745,8 @@ export function buildStagePilotSummaryPack(options: {
           "Confirm Gemini/OpenClaw readiness and request boundary before trusting orchestration.",
       },
       {
-        step: "2. Review resource pack",
-        surface: "/v1/review-resource-pack",
+        step: "2. Architecture resource pack",
+        surface: "/v1/architecture-resource-pack",
         proof:
           "Inspect fixed scenarios, operator checks, and validation cases before moving into benchmark or live lanes.",
       },
@@ -1803,7 +1803,7 @@ export function buildStagePilotSummaryPack(options: {
       health: "/health",
       meta: "/v1/meta",
       runtimeBrief: "/v1/runtime-brief",
-      reviewResourcePack: "/v1/review-resource-pack",
+      reviewResourcePack: "/v1/architecture-resource-pack",
       summaryPack: "/v1/summary-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
       perfEvidencePack: "/v1/perf-evidence-pack",

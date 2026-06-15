@@ -3020,7 +3020,7 @@ function handleReadonlyRequest(options: {
     case "/v1/runtime-scorecard":
       handleRuntimeScorecardRequest(response, telemetry, { includeBody });
       return true;
-    case "/v1/review-resource-pack":
+    case "/v1/architecture-resource-pack":
       handleReviewResourcePackRequest(response, { includeBody });
       return true;
     case "/v1/benchmark-summary":

@@ -68,7 +68,7 @@
       "durationMs": 540,
       "failureClass": "literal-tag-leakage",
       "regressionGate": "pass",
-      "operatorHandoff": "safe as a low-cost replayable proof path",
+      "operatorHandoff": "safe as a low-cost replayable workflow",
       "dashboardSurface": "/v1/workflow-run-replay"
     }
   ]

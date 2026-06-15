@@ -26,7 +26,7 @@ Technical review pack: [`docs/technical-review-pack.md`](docs/technical-review-p
 |---|---|
 | Audience | AI platform teams and developer-tool teams shipping agents that must survive malformed tool output. |
 | Review path | Validate the demo, README, architecture notes, and quality gate before deeper workflow review. |
-| Review signal | Published package surface, deterministic mutation benchmark, parser recovery, retry loop, and telemetry-ready runtime. |
+| Architecture signal | Published package surface, deterministic mutation benchmark, parser recovery, retry loop, and telemetry-ready runtime. |
 | Safety boundary | Tool schemas and retries are explicit; benchmark fixtures are synthetic and provider-neutral. |
 | Fast proof | `pnpm test`, `pnpm build`, [`docs/technical-review-pack.md`](docs/technical-review-pack.md), and the 25% to 90% benchmark claim. |
 
@@ -433,6 +433,10 @@ This repository includes a neutral cloud and AI engineering blueprint that maps 
 ## Enterprise Productization
 
 - [Product operating model](docs/product-operating-model.md) defines the reviewer, trust boundary, trust boundary, operating checks, and service path for this repository.
+
+## System Architecture
+
+- [System architecture](docs/system-architecture.md) maps the runtime boundary, data/control flow, cloud or local deployment surface, and operating assumptions for this repository.
 
 ## Service Architecture
 

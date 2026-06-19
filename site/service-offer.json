@@ -5,7 +5,7 @@
   "repository_url": "https://github.com/KIM3310/stage-pilot",
   "architecture_url": "https://github.com/KIM3310/stage-pilot/blob/main/docs/system-architecture.md",
   "revenue_architecture_url": "https://github.com/KIM3310/stage-pilot/blob/main/docs/revenue-architecture.md",
-  "lead_capture_url": "mailto:ehdjs1351@gmail.com?subject=StagePilot%20private%20workspace&body=I%20am%20interested%20in%20paid%20hosted%20regression%20workspace%2C%20private%20benchmark%20scenarios%2C%20and%20provider%20routing%20dashboard%20for%20StagePilot.",
+  "lead_capture_url": "https://github.com/KIM3310/stage-pilot/issues/new?template=service-inquiry.yml&title=Private+workspace+inquiry%3A+StagePilot",
   "productized_offer": "tool-calling reliability gateway with regression tests, provider scorecards, and trace observability",
   "first_paid_sku": "paid hosted regression workspace, private benchmark scenarios, and provider routing dashboard",
   "free_lead_magnet": "free public benchmark/demo routes and sample traces",

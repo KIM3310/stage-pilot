@@ -449,7 +449,7 @@ This repository includes a neutral cloud and AI engineering blueprint that maps 
 - Public entry: free public benchmark/demo routes and sample traces
 - Paid boundary: paid hosted regression workspace, private benchmark scenarios, and provider routing dashboard
 - Canonical URL: https://stage-pilot.pages.dev/
-- Lead capture: mailto:ehdjs1351@gmail.com?subject=StagePilot%20private%20workspace&body=I%20am%20interested%20in%20paid%20hosted%20regression%20workspace%2C%20private%20benchmark%20scenarios%2C%20and%20provider%20routing%20dashboard%20for%20StagePilot.
+- Lead capture: https://github.com/KIM3310/stage-pilot/issues/new?template=service-inquiry.yml&title=Private+workspace+inquiry%3A+StagePilot
 - Machine-readable offer: [docs/service-offer.json](docs/service-offer.json)
 - Search growth implementation: [docs/search-growth-implementation.md](docs/search-growth-implementation.md)
 - Revenue architecture: [docs/revenue-architecture.md](docs/revenue-architecture.md)

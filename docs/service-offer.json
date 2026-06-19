@@ -1,0 +1,73 @@
+{
+  "name": "StagePilot",
+  "slug": "stage-pilot",
+  "canonical_url": "https://stage-pilot.pages.dev/",
+  "repository_url": "https://github.com/KIM3310/stage-pilot",
+  "architecture_url": "https://github.com/KIM3310/stage-pilot/blob/main/docs/system-architecture.md",
+  "revenue_architecture_url": "https://github.com/KIM3310/stage-pilot/blob/main/docs/revenue-architecture.md",
+  "lead_capture_url": "mailto:ehdjs1351@gmail.com?subject=StagePilot%20private%20workspace&body=I%20am%20interested%20in%20paid%20hosted%20regression%20workspace%2C%20private%20benchmark%20scenarios%2C%20and%20provider%20routing%20dashboard%20for%20StagePilot.",
+  "productized_offer": "tool-calling reliability gateway with regression tests, provider scorecards, and trace observability",
+  "first_paid_sku": "paid hosted regression workspace, private benchmark scenarios, and provider routing dashboard",
+  "free_lead_magnet": "free public benchmark/demo routes and sample traces",
+  "search_positioning": {
+    "primary_query": "StagePilot tool-calling reliability gateway",
+    "secondary_queries": [
+      "StagePilot demo",
+      "StagePilot system architecture",
+      "StagePilot developer tool",
+      "tool-calling reliability gateway with regression tests, provider scorecards, and trace observability service"
+    ],
+    "audience_intent": "Find a runnable demo, inspect the system architecture, and decide whether a private workspace or implementation package is useful."
+  },
+  "monetization_boundary": {
+    "free": "free public benchmark/demo routes and sample traces",
+    "paid": "paid hosted regression workspace, private benchmark scenarios, and provider routing dashboard",
+    "metering_hooks": [
+      "workspace_id",
+      "plan",
+      "quota_day",
+      "export_count",
+      "lead_source"
+    ],
+    "cost_guardrails": [
+      "static first",
+      "edge functions",
+      "customer API keys",
+      "cached AI outputs",
+      "synthetic public data"
+    ]
+  },
+  "structured_data": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "StagePilot",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Web, serverless, and local development environments",
+    "url": "https://stage-pilot.pages.dev/",
+    "codeRepository": "https://github.com/KIM3310/stage-pilot",
+    "description": "StagePilot: tool-calling reliability gateway with regression tests, provider scorecards, and trace observability. Free entry point: free public benchmark/demo routes and sample traces. Paid path: paid hosted regression.",
+    "creator": {
+      "@type": "Person",
+      "name": "KIM3310",
+      "url": "https://github.com/KIM3310"
+    },
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "free public benchmark/demo routes and sample traces",
+        "price": "0",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock",
+        "url": "https://stage-pilot.pages.dev/"
+      },
+      {
+        "@type": "Offer",
+        "name": "paid hosted regression workspace, private benchmark scenarios, and provider routing dashboard",
+        "availability": "https://schema.org/LimitedAvailability",
+        "url": "https://github.com/KIM3310/stage-pilot/blob/main/docs/revenue-architecture.md"
+      }
+    ],
+    "isAccessibleForFree": true,
+    "keywords": "stage-pilot, StagePilot, tool-calling, reliability, gateway, regression, tests, provider, scorecards, trace, observability, hosted, benchmark, scenarios, routing, dashboard, routes, sample, traces, tier, Cloudflare"
+  }
+}

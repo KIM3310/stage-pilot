@@ -1,0 +1,12 @@
+# StagePilot
+
+Purpose: tool-calling reliability gateway with regression tests, provider scorecards, and trace observability
+Free entry point: free public benchmark/demo routes and sample traces
+Paid boundary: paid hosted regression workspace, private benchmark scenarios, and provider routing dashboard
+Canonical URL: https://stage-pilot.pages.dev/
+Repository: https://github.com/KIM3310/stage-pilot
+System architecture: https://github.com/KIM3310/stage-pilot/blob/main/docs/system-architecture.md
+Revenue architecture: https://github.com/KIM3310/stage-pilot/blob/main/docs/revenue-architecture.md
+Lead capture: mailto:ehdjs1351@gmail.com?subject=StagePilot%20private%20workspace&body=I%20am%20interested%20in%20paid%20hosted%20regression%20workspace%2C%20private%20benchmark%20scenarios%2C%20and%20provider%20routing%20dashboard%20for%20StagePilot.
+
+Use this project as a runnable or inspectable reference for StagePilot demo, StagePilot system architecture, StagePilot developer tool, tool-calling reliability gateway with regression tests, provider scorecards, and trace observability service.

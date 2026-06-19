@@ -7,7 +7,7 @@
     "failCount": 0
   },
   "releaseRecommendation": {
-    "posture": "review-ready-with-watch-items",
+    "posture": "architecture-ready-with-watch-items",
     "summary": "StagePilot is strong enough for frontier review conversations as long as watch items stay explicit and bounded.",
     "nextStep": "Promote provider, trace, and perf evidence together; keep mixed-format multiline outputs and XML boundary repair as watch areas."
   },

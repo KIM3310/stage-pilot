@@ -475,7 +475,7 @@ describeIfSocketBinding("benchlab api", () => {
     expect(briefPayload.reportContract.schema).toBe("benchlab-job-report-v1");
     expect(briefPayload.evidenceCounts.configs).toBe(2);
     expect(briefPayload.evidenceCounts.artifacts).toBe(2);
-    expect(briefPayload.reviewFlow).toEqual(
+    expect(briefPayload.architectureFlow).toEqual(
       expect.arrayContaining([expect.stringContaining("Validate configs")])
     );
 
@@ -491,7 +491,7 @@ describeIfSocketBinding("benchlab api", () => {
     ).toBeGreaterThanOrEqual(2);
     expect(summaryPackPayload.evidenceBundle.bestArtifact.deltaPp).toBe(1.25);
     expect(summaryPackPayload.evidenceBundle.dominantBucket).toBe("timeout");
-    expect(summaryPackPayload.twoMinuteReview).toHaveLength(4);
+    expect(summaryPackPayload.twoMinuteArchitecture).toHaveLength(4);
     expect(summaryPackPayload.proofAssets.length).toBeGreaterThanOrEqual(4);
     expect(summaryPackPayload.links.summaryPack).toBe(
       "/v1/benchlab/summary-pack"

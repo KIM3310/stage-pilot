@@ -18,7 +18,7 @@ const OPENCLAW_WEBHOOK_ENV_KEY = "OPENCLAW_WEBHOOK_URL";
 const OPENAI_API_KEY_ENV_KEY = "OPENAI_API_KEY";
 const OPENAI_KILL_SWITCH_ENV_KEY = "OPENAI_KILL_SWITCH";
 const OPENAI_PUBLIC_RPM_ENV_KEY = "OPENAI_PUBLIC_RPM";
-const STAGEPILOT_REVIEW_ONLY_ENV_KEY = "STAGEPILOT_REVIEW_ONLY_MODE";
+const STAGEPILOT_READ_ONLY_ENV_KEY = "STAGEPILOT_READ_ONLY_MODE";
 const BODY_TIMEOUT_ENV_SNAPSHOT = process.env[BODY_TIMEOUT_ENV_KEY];
 const GEMINI_API_KEY_ENV_SNAPSHOT = process.env[GEMINI_API_KEY_ENV_KEY];
 const GEMINI_TIMEOUT_ENV_SNAPSHOT = process.env[GEMINI_TIMEOUT_ENV_KEY];
@@ -31,13 +31,13 @@ const OPERATOR_OIDC_AUDIENCE_ENV_SNAPSHOT =
 const OPERATOR_OIDC_JWKS_ENV_SNAPSHOT = process.env[OPERATOR_OIDC_JWKS_ENV_KEY];
 const HTTP_STATUS_LINE_REGEX = /^HTTP\/1\.1 (\d{3})/m;
 const ARCHITECTURE_CLAIM_TIER_REGEX =
-  /runtime-backed-review-ready|bounded-review-demo/;
+  /runtime-backed-architecture-ready|bounded-architecture-demo/;
 const OPENCLAW_WEBHOOK_ENV_SNAPSHOT = process.env[OPENCLAW_WEBHOOK_ENV_KEY];
 const OPENAI_API_KEY_ENV_SNAPSHOT = process.env[OPENAI_API_KEY_ENV_KEY];
 const OPENAI_KILL_SWITCH_ENV_SNAPSHOT = process.env[OPENAI_KILL_SWITCH_ENV_KEY];
 const OPENAI_PUBLIC_RPM_ENV_SNAPSHOT = process.env[OPENAI_PUBLIC_RPM_ENV_KEY];
-const STAGEPILOT_REVIEW_ONLY_ENV_SNAPSHOT =
-  process.env[STAGEPILOT_REVIEW_ONLY_ENV_KEY];
+const STAGEPILOT_READ_ONLY_ENV_SNAPSHOT =
+  process.env[STAGEPILOT_READ_ONLY_ENV_KEY];
 
 function encodeBase64Url(value: string): string {
   return Buffer.from(value, "utf8")
@@ -173,11 +173,11 @@ afterEach(async () => {
     process.env[OPENAI_PUBLIC_RPM_ENV_KEY] = OPENAI_PUBLIC_RPM_ENV_SNAPSHOT;
   }
 
-  if (typeof STAGEPILOT_REVIEW_ONLY_ENV_SNAPSHOT === "undefined") {
-    delete process.env[STAGEPILOT_REVIEW_ONLY_ENV_KEY];
+  if (typeof STAGEPILOT_READ_ONLY_ENV_SNAPSHOT === "undefined") {
+    delete process.env[STAGEPILOT_READ_ONLY_ENV_KEY];
   } else {
-    process.env[STAGEPILOT_REVIEW_ONLY_ENV_KEY] =
-      STAGEPILOT_REVIEW_ONLY_ENV_SNAPSHOT;
+    process.env[STAGEPILOT_READ_ONLY_ENV_KEY] =
+      STAGEPILOT_READ_ONLY_ENV_SNAPSHOT;
   }
 
   vi.restoreAllMocks();
@@ -595,7 +595,7 @@ describeIfSocketBinding("stagepilot api server", () => {
     expect(body.requestLimits.bodyTimeoutMs).toBe(2100);
     expect(body.diagnostics.integrationReady).toBe(true);
     expect(body.diagnostics.missingIntegrations).toEqual([]);
-    expect(body.diagnostics.nextAction).toContain("POST /v1/live-review-run");
+    expect(body.diagnostics.nextAction).toContain("POST /v1/live-architecture-run");
     expect(body.openai.deploymentMode).toBe("public-capped-live");
     expect(body.openai.publicLiveApi).toBe(true);
     expect(body.integrations.gemini.timeoutMs).toBe(4321);
@@ -623,7 +623,7 @@ describeIfSocketBinding("stagepilot api server", () => {
         }),
         expect.objectContaining({
           method: "POST",
-          path: "/v1/live-review-run",
+          path: "/v1/live-architecture-run",
         }),
         expect.objectContaining({ method: "POST", path: "/v1/plan" }),
       ])
@@ -668,10 +668,10 @@ describeIfSocketBinding("stagepilot api server", () => {
       liveModel: string;
       links: {
         developerOpsPack: string;
-        liveReviewRun: string;
+        liveArchitectureRun: string;
         perfEvidencePack: string;
         providerBenchmarkScorecard: string;
-        reviewResourcePack: string;
+        architectureResourcePack: string;
         protocolMatrix: string;
         regressionGatePack: string;
         traceObservabilityPack: string;
@@ -681,7 +681,7 @@ describeIfSocketBinding("stagepilot api server", () => {
       reportContract: {
         schema: string;
       };
-      reviewFlow: string[];
+      architectureFlow: string[];
       routeCount: number;
     };
 
@@ -690,16 +690,16 @@ describeIfSocketBinding("stagepilot api server", () => {
     expect(body.diagnostics.integrationReady).toBe(true);
     expect(body.deploymentMode).toBe("public-capped-live");
     expect(body.liveModel).toBe("gpt-5.2");
-    expect(body.reviewFlow.length).toBeGreaterThanOrEqual(3);
+    expect(body.architectureFlow.length).toBeGreaterThanOrEqual(3);
     expect(body.routeCount).toBeGreaterThanOrEqual(10);
     expect(body.headline).toContain("orchestration");
     expect(body.links.developerOpsPack).toBe("/v1/developer-ops-pack");
-    expect(body.links.liveReviewRun).toBe("/v1/live-review-run");
+    expect(body.links.liveArchitectureRun).toBe("/v1/live-architecture-run");
     expect(body.links.perfEvidencePack).toBe("/v1/perf-evidence-pack");
     expect(body.links.providerBenchmarkScorecard).toBe(
       "/v1/provider-benchmark-scorecard"
     );
-    expect(body.links.reviewResourcePack).toBe("/v1/architecture-resource-pack");
+    expect(body.links.architectureResourcePack).toBe("/v1/architecture-resource-pack");
     expect(body.links.protocolMatrix).toBe("/v1/protocol-matrix");
     expect(body.links.regressionGatePack).toBe("/v1/regression-gate-pack");
     expect(body.links.traceObservabilityPack).toBe(
@@ -765,7 +765,7 @@ describeIfSocketBinding("stagepilot api server", () => {
       engine: new StagePilotEngine(),
     });
 
-    const response = await fetch(`${baseUrl}/v1/live-review-run`, {
+    const response = await fetch(`${baseUrl}/v1/live-architecture-run`, {
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ scenarioId: "parser-drift-recovery" }),
@@ -776,7 +776,7 @@ describeIfSocketBinding("stagepilot api server", () => {
       capped: boolean;
       mode: string;
       model: string;
-      nextReviewPath: string;
+      nextArchitecturePath: string;
       result: {
         selectedStrategy: string;
         title: string;
@@ -784,18 +784,18 @@ describeIfSocketBinding("stagepilot api server", () => {
       schema: string;
       scenarioId: string;
     };
-    expect(body.schema).toBe("stagepilot-live-review-run-v1");
+    expect(body.schema).toBe("stagepilot-live-architecture-run-v1");
     expect(body.mode).toBe("public-capped-live");
     expect(body.model).toBe("gpt-5.2");
     expect(body.capped).toBe(true);
     expect(body.scenarioId).toBe("parser-drift-recovery");
-    expect(body.nextReviewPath).toBe("/v1/failure-taxonomy");
+    expect(body.nextArchitecturePath).toBe("/v1/failure-taxonomy");
     expect(body.result.title).toBe("Parser drift recovery");
     expect(body.result.selectedStrategy).toBe("middleware+bounded-retry");
   });
 
-  it("blocks non-live mutation routes while review-only mode is enabled", async () => {
-    process.env.STAGEPILOT_REVIEW_ONLY_MODE = "1";
+  it("blocks non-live mutation routes while read-only mode is enabled", async () => {
+    process.env.STAGEPILOT_READ_ONLY_MODE = "1";
 
     const { baseUrl } = await startServer({
       engine: new StagePilotEngine(),
@@ -813,7 +813,7 @@ describeIfSocketBinding("stagepilot api server", () => {
 
     expect(denied.status).toBe(403);
     const body = (await denied.json()) as { error: string };
-    expect(body.error).toContain("/v1/live-review-run");
+    expect(body.error).toContain("/v1/live-architecture-run");
   });
 
   it("returns protocol matrix for cross-provider tool-call coverage", async () => {
@@ -840,7 +840,7 @@ describeIfSocketBinding("stagepilot api server", () => {
         protocolMatrix: string;
         summaryPack: string;
       };
-      reviewPath: string[];
+      architecturePath: string[];
     };
 
     expect(body.schema).toBe("stagepilot-protocol-matrix-v1");
@@ -855,7 +855,7 @@ describeIfSocketBinding("stagepilot api server", () => {
     ).toBe(true);
     expect(body.links.protocolMatrix).toBe("/v1/protocol-matrix");
     expect(body.links.summaryPack).toBe("/v1/summary-pack");
-    expect(body.reviewPath.length).toBeGreaterThanOrEqual(3);
+    expect(body.architecturePath.length).toBeGreaterThanOrEqual(3);
   });
 
   it("returns provider benchmark scorecard for frontier architecture posture", async () => {
@@ -878,7 +878,7 @@ describeIfSocketBinding("stagepilot api server", () => {
         provider: string;
         proofRoutes: string[];
       }>;
-      reviewPath: string[];
+      architecturePath: string[];
       schema: string;
       summary: {
         providerCount: number;
@@ -903,7 +903,7 @@ describeIfSocketBinding("stagepilot api server", () => {
       "/v1/provider-benchmark-scorecard"
     );
     expect(body.links.protocolMatrix).toBe("/v1/protocol-matrix");
-    expect(body.reviewPath.length).toBeGreaterThanOrEqual(3);
+    expect(body.architecturePath.length).toBeGreaterThanOrEqual(3);
   });
 
   it("returns perf evidence pack for runtime pressure review", async () => {
@@ -927,7 +927,7 @@ describeIfSocketBinding("stagepilot api server", () => {
           sharePct: number;
         }>;
       };
-      reviewPath: string[];
+      architecturePath: string[];
       schema: string;
       summary: {
         checksPassRatePct: number | null;
@@ -947,7 +947,7 @@ describeIfSocketBinding("stagepilot api server", () => {
     ).toBe(true);
     expect(body.links.perfEvidencePack).toBe("/v1/perf-evidence-pack");
     expect(body.links.runtimeScorecard).toBe("/v1/runtime-scorecard");
-    expect(body.reviewPath.length).toBeGreaterThanOrEqual(3);
+    expect(body.architecturePath.length).toBeGreaterThanOrEqual(3);
   });
 
   it("returns trace observability pack for frontier replay review", async () => {
@@ -968,7 +968,7 @@ describeIfSocketBinding("stagepilot api server", () => {
         failureTaxonomy: string;
         traceObservabilityPack: string;
       };
-      reviewPath: string[];
+      architecturePath: string[];
       schema: string;
       summary: {
         gate: string;
@@ -984,7 +984,7 @@ describeIfSocketBinding("stagepilot api server", () => {
 
     expect(body.schema).toBe("stagepilot-trace-observability-pack-v1");
     expect(body.headline).toContain("Trace observability pack");
-    expect(body.summary.gate).toBe("bounded-review-ready");
+    expect(body.summary.gate).toBe("bounded-architecture-ready");
     expect(body.summary.topStrategy).not.toBeNull();
     expect(body.summary.totalTraces).toBeGreaterThanOrEqual(4);
     expect(
@@ -997,7 +997,7 @@ describeIfSocketBinding("stagepilot api server", () => {
       "/v1/trace-observability-pack"
     );
     expect(body.links.failureTaxonomy).toBe("/v1/failure-taxonomy");
-    expect(body.reviewPath.length).toBeGreaterThanOrEqual(4);
+    expect(body.architecturePath.length).toBeGreaterThanOrEqual(4);
   });
 
   it("returns regression gate pack for frontier promotion review", async () => {
@@ -1021,7 +1021,7 @@ describeIfSocketBinding("stagepilot api server", () => {
       releaseRecommendation: {
         posture: string;
       };
-      reviewPath: string[];
+      architecturePath: string[];
       schema: string;
       summary: {
         gateCount: number;
@@ -1034,7 +1034,7 @@ describeIfSocketBinding("stagepilot api server", () => {
     expect(body.summary.topStrategy).not.toBeNull();
     expect(body.summary.gateCount).toBeGreaterThanOrEqual(5);
     expect(body.releaseRecommendation.posture).toBe(
-      "review-ready-with-watch-items"
+      "architecture-ready-with-watch-items"
     );
     expect(
       body.gates.some((item) => item.gate === "mixed-format-regression-watch")
@@ -1043,7 +1043,7 @@ describeIfSocketBinding("stagepilot api server", () => {
     expect(body.links.traceObservabilityPack).toBe(
       "/v1/trace-observability-pack"
     );
-    expect(body.reviewPath.length).toBeGreaterThanOrEqual(4);
+    expect(body.architecturePath.length).toBeGreaterThanOrEqual(4);
   });
 
   it("returns runtime scorecard with live route telemetry", async () => {
@@ -1148,7 +1148,7 @@ describeIfSocketBinding("stagepilot api server", () => {
         providerBenchmarkScorecard: string;
         runtimeScorecard: string;
       };
-      reviewPath: string[];
+      architecturePath: string[];
       schema: string;
       summary: {
         attentionCount: number;
@@ -1165,7 +1165,7 @@ describeIfSocketBinding("stagepilot api server", () => {
     expect(body.links.runtimeScorecard).toBe("/v1/runtime-scorecard");
     expect(body.summary.categoryCount).toBeGreaterThanOrEqual(4);
     expect(body.summary.observedRequestCount).toBeGreaterThanOrEqual(2);
-    expect(body.reviewPath.length).toBeGreaterThanOrEqual(3);
+    expect(body.architecturePath.length).toBeGreaterThanOrEqual(3);
     expect(body.headline).toContain("Failure taxonomy");
     expect(
       body.failureModes.some((item) => item.id === "parse-contract-drift")
@@ -1197,7 +1197,7 @@ describeIfSocketBinding("stagepilot api server", () => {
         benchmarkSummary: string;
         developerOpsPack: string;
         providerBenchmarkScorecard: string;
-        reviewResourcePack: string;
+        architectureResourcePack: string;
         regressionGatePack: string;
         summaryPack: string;
         traceObservabilityPack: string;
@@ -1213,7 +1213,7 @@ describeIfSocketBinding("stagepilot api server", () => {
           };
         };
         benchmarkSummarySchema: string;
-        reviewResourcePack: {
+        architectureResourcePack: {
           scenarioCount: number;
         };
         regressionGatePackSchema: string;
@@ -1225,15 +1225,15 @@ describeIfSocketBinding("stagepilot api server", () => {
         };
       };
       summaryPackId: string;
-      reviewSequence: string[];
-      twoMinuteReview: Array<{ step: string }>;
+      architectureSequence: string[];
+      twoMinuteArchitecture: Array<{ step: string }>;
     };
 
     expect(body.summaryPackId).toBe("stagepilot-summary-pack-v1");
     expect(body.links.summaryPack).toBe("/v1/summary-pack");
     expect(body.operatorJourney).toHaveLength(4);
-    expect(body.reviewSequence.length).toBeGreaterThanOrEqual(3);
-    expect(body.twoMinuteReview.length).toBe(5);
+    expect(body.architectureSequence.length).toBeGreaterThanOrEqual(3);
+    expect(body.twoMinuteArchitecture.length).toBe(5);
     expect(body.proofAssets.length).toBeGreaterThanOrEqual(5);
     expect(body.proofAssets).toEqual(
       expect.arrayContaining([
@@ -1250,7 +1250,7 @@ describeIfSocketBinding("stagepilot api server", () => {
     expect(body.links.providerBenchmarkScorecard).toBe(
       "/v1/provider-benchmark-scorecard"
     );
-    expect(body.links.reviewResourcePack).toBe("/v1/architecture-resource-pack");
+    expect(body.links.architectureResourcePack).toBe("/v1/architecture-resource-pack");
     expect(body.links.regressionGatePack).toBe("/v1/regression-gate-pack");
     expect(body.links.traceObservabilityPack).toBe(
       "/v1/trace-observability-pack"
@@ -1268,7 +1268,7 @@ describeIfSocketBinding("stagepilot api server", () => {
       "stagepilot-regression-gate-pack-v1"
     );
     expect(
-      body.evidenceBundle.reviewResourcePack.scenarioCount
+      body.evidenceBundle.architectureResourcePack.scenarioCount
     ).toBeGreaterThanOrEqual(4);
     expect(body.evidenceBundle.evaluationPosture.docsOnlySurfaces).toContain(
       "site/"
@@ -1305,7 +1305,7 @@ describeIfSocketBinding("stagepilot api server", () => {
       };
       architectureFastPath: string[];
       links: {
-        reviewResourcePack: string;
+        architectureResourcePack: string;
         summaryPack: string;
       };
     };
@@ -1320,7 +1320,7 @@ describeIfSocketBinding("stagepilot api server", () => {
       true
     );
     expect(body.architectureFastPath[1]).toBe("/v1/architecture-resource-pack");
-    expect(body.links.reviewResourcePack).toBe("/v1/architecture-resource-pack");
+    expect(body.links.architectureResourcePack).toBe("/v1/architecture-resource-pack");
     expect(body.links.summaryPack).toBe("/v1/summary-pack");
   });
 

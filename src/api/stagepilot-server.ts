@@ -69,7 +69,7 @@ import {
   buildStagePilotProtocolMatrix,
   buildStagePilotProviderBenchmarkScorecard,
   buildStagePilotRegressionGatePack,
-  buildStagePilotReviewResourcePack,
+  buildStagePilotArchitectureResourcePack,
   buildStagePilotRouteDescriptors,
   buildStagePilotRuntimeBrief,
   buildStagePilotRuntimeScorecard,
@@ -167,19 +167,19 @@ const OPENAI_PUBLIC_DEFAULT_MONTHLY_BUDGET_USD = 120;
 const OPENAI_PUBLIC_DEFAULT_MODEL = "gpt-5.2";
 const OPENAI_PUBLIC_DEFAULT_RPM = 6;
 const OPENAI_PUBLIC_TIMEOUT_MS = 20_000;
-const STAGEPILOT_REVIEW_ONLY_MODE_ENV_KEY = "STAGEPILOT_REVIEW_ONLY_MODE";
+const STAGEPILOT_READ_ONLY_MODE_ENV_KEY = "STAGEPILOT_READ_ONLY_MODE";
 
 type StagePilotDeploymentMode =
   | "artifact-refresh-only"
   | "public-capped-live"
-  | "review-only-live";
+  | "read-only-live";
 
 interface StagePilotLiveScenario {
   concern: string;
   estimatedCostUsd: number;
   failureMode: string;
   id: string;
-  nextReviewPath: string;
+  nextArchitecturePath: string;
   prompt: string;
   title: string;
   toolRegistry: string[];
@@ -202,7 +202,7 @@ const STAGEPILOT_LIVE_SCENARIOS: Record<string, StagePilotLiveScenario> = {
     title: "Parser drift recovery",
     concern: "Tool-call output drifts out of schema under provider variation.",
     failureMode: "schema-drift",
-    nextReviewPath: "/v1/failure-taxonomy",
+    nextArchitecturePath: "/v1/failure-taxonomy",
     toolRegistry: ["lookup_household", "check_eligibility", "assign_referral"],
     estimatedCostUsd: 0.01,
     prompt:
@@ -214,7 +214,7 @@ const STAGEPILOT_LIVE_SCENARIOS: Record<string, StagePilotLiveScenario> = {
     concern:
       "Runtime reliability is strong, but downstream delivery still needs explicit human confirmation.",
     failureMode: "handoff-boundary",
-    nextReviewPath: "/v1/runtime-brief",
+    nextArchitecturePath: "/v1/runtime-brief",
     toolRegistry: ["build_plan_report", "score_risk", "notify_operator"],
     estimatedCostUsd: 0.012,
     prompt:
@@ -350,11 +350,11 @@ function getStagePilotDeploymentMode(
   ) {
     return "public-capped-live";
   }
-  return "review-only-live";
+  return "read-only-live";
 }
 
 function isStagePilotReviewOnlyMode(): boolean {
-  return readBooleanEnv(STAGEPILOT_REVIEW_ONLY_MODE_ENV_KEY, false);
+  return readBooleanEnv(STAGEPILOT_READ_ONLY_MODE_ENV_KEY, false);
 }
 
 function getStagePilotLiveRequestKey(request: IncomingMessage): string {
@@ -1011,7 +1011,7 @@ function buildMetaPayload(): JsonObject {
   let nextAction: string;
   if (runtimeBrief.publicLiveApi) {
     nextAction =
-      "Run POST /v1/live-review-run with a fixed scenarioId to validate the bounded evaluation lane.";
+      "Run POST /v1/live-architecture-run with a fixed scenarioId to validate the bounded evaluation lane.";
   } else if (missingIntegrations.length === 0) {
     nextAction =
       "Run POST /v1/plan or POST /v1/benchmark to validate live flows.";
@@ -1032,7 +1032,7 @@ function buildMetaPayload(): JsonObject {
     features: {
       benchmark: true,
       insights: true,
-      liveReviewRun: true,
+      liveArchitectureRun: true,
       notify: true,
       openClawInbox: true,
       whatIf: true,
@@ -1348,7 +1348,7 @@ function _readStagePilotTraceObservabilityArtifact() {
       rule: "No checked-in trace artifact found.",
       watchCount: null,
     },
-    evaluationTier: "bounded-review-demo",
+    evaluationTier: "bounded-architecture-demo",
     tool: "checked-in frontier trace bundle",
     traces: [] as Array<{
       durationMs: number | null;
@@ -1510,8 +1510,8 @@ function buildProtocolMatrixPayload(): JsonObject {
   });
 }
 
-function buildReviewResourcePackPayload(): JsonObject {
-  return buildStagePilotReviewResourcePack({
+function buildArchitectureResourcePackPayload(): JsonObject {
+  return buildStagePilotArchitectureResourcePack({
     benchmarkSnapshot: readStagePilotBenchmarkSnapshot(),
     service: process.env.SERVICE_NAME_API ?? "stagepilot-api",
   });
@@ -2171,7 +2171,7 @@ function readStagePilotLiveScenario(body: unknown): StagePilotLiveScenario {
   return scenario;
 }
 
-async function handleLiveReviewRunRequest(options: {
+async function handleLiveArchitectureRunRequest(options: {
   logger: Pick<Console, "error" | "info" | "warn">;
   request: StagePilotTrackedRequest;
   response: ServerResponse;
@@ -2231,7 +2231,7 @@ async function handleLiveReviewRunRequest(options: {
       capped: true,
       traceId: request.requestId,
       estimatedCostUsd: scenario.estimatedCostUsd,
-      nextReviewPath: scenario.nextReviewPath,
+      nextArchitecturePath: scenario.nextArchitecturePath,
       result: {
         title: scenario.title,
         concern: scenario.concern,
@@ -2245,7 +2245,7 @@ async function handleLiveReviewRunRequest(options: {
     logStagePilotEvent(
       logger,
       httpError.statusCode >= 500 ? "error" : "warn",
-      "live-review-run-failed",
+      "live-architecture-run-failed",
       {
         error: httpError.message,
         requestId: request.requestId ?? null,
@@ -2276,11 +2276,11 @@ function handleProtocolMatrixRequest(
   sendJson(response, 200, buildProtocolMatrixPayload(), options);
 }
 
-function handleReviewResourcePackRequest(
+function handleArchitectureResourcePackRequest(
   response: ServerResponse,
   options?: { includeBody?: boolean }
 ) {
-  sendJson(response, 200, buildReviewResourcePackPayload(), options);
+  sendJson(response, 200, buildArchitectureResourcePackPayload(), options);
 }
 
 function handleBenchmarkSummaryRequest(
@@ -3021,7 +3021,7 @@ function handleReadonlyRequest(options: {
       handleRuntimeScorecardRequest(response, telemetry, { includeBody });
       return true;
     case "/v1/architecture-resource-pack":
-      handleReviewResourcePackRequest(response, { includeBody });
+      handleArchitectureResourcePackRequest(response, { includeBody });
       return true;
     case "/v1/benchmark-summary":
       handleBenchmarkSummaryRequest(response, rawUrl, { includeBody });
@@ -3106,10 +3106,10 @@ async function handlePostRequest(options: {
     return false;
   }
 
-  if (isStagePilotReviewOnlyMode() && pathname !== "/v1/live-review-run") {
+  if (isStagePilotReviewOnlyMode() && pathname !== "/v1/live-architecture-run") {
     sendJson(response, 403, {
       error:
-        "review-only mode keeps public mutation routes disabled; use POST /v1/live-review-run instead.",
+        "read-only mode keeps public mutation routes disabled; use POST /v1/live-architecture-run instead.",
       ok: false,
       path: pathname,
     });
@@ -3117,8 +3117,8 @@ async function handlePostRequest(options: {
   }
 
   switch (pathname) {
-    case "/v1/live-review-run":
-      await handleLiveReviewRunRequest({ logger, request, response });
+    case "/v1/live-architecture-run":
+      await handleLiveArchitectureRunRequest({ logger, request, response });
       return true;
     case "/v1/auth/session":
       await handleOperatorSessionCreate({ logger, request, response });

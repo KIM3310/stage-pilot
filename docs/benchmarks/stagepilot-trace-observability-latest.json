@@ -1,9 +1,9 @@
 {
   "generatedAt": "2026-03-16T11:22:00.000Z",
   "tool": "checked-in frontier trace bundle",
-  "evaluationTier": "runtime-backed-review-ready",
+  "evaluationTier": "runtime-backed-architecture-ready",
   "regressionGate": {
-    "gate": "bounded-review-ready",
+    "gate": "bounded-architecture-ready",
     "passCount": 3,
     "watchCount": 1,
     "failCount": 0,
@@ -46,7 +46,7 @@
       "durationMs": 860,
       "failureClass": "wrapper-drift",
       "regressionGate": "pass",
-      "operatorHandoff": "safe to keep as review-ready wrapper path",
+      "operatorHandoff": "safe to keep as architecture-ready wrapper path",
       "dashboardSurface": "/v1/provider-benchmark-scorecard"
     },
     {

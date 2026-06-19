@@ -907,7 +907,7 @@
             <h2 style="margin: 0;">Read this order</h2>
           </div>
         </div>
-        <div id="reviewSequence" class="stack"></div>
+        <div id="architectureSequence" class="stack"></div>
       </article>
 
       <article class="panel">
@@ -1024,7 +1024,7 @@
       proofAssets: $("#proofAssets"),
       rawOutput: $("#rawOutput"),
       referralList: $("#referralList"),
-      reviewSequence: $("#reviewSequence"),
+      architectureSequence: $("#architectureSequence"),
       reviewSummary: $("#reviewSummary"),
       runtimeReality: $("#runtimeReality"),
       riskGrid: $("#riskGrid"),
@@ -1177,7 +1177,7 @@
         },
         {
           label: "Claim Tier",
-          value: state.summaryPack?.evidenceBundle?.evaluationPosture?.claimTier === "runtime-backed-review-ready"
+          value: state.summaryPack?.evidenceBundle?.evaluationPosture?.claimTier === "runtime-backed-architecture-ready"
             ? "Runtime-backed"
             : "Bounded demo",
           note: "Docs stay supporting docs",
@@ -1218,7 +1218,7 @@
         },
         {
           title: "Claim tier",
-          detail: state.summaryPack?.evidenceBundle?.evaluationPosture?.claimTier === "runtime-backed-review-ready"
+          detail: state.summaryPack?.evidenceBundle?.evaluationPosture?.claimTier === "runtime-backed-architecture-ready"
             ? "Benchmark and integrations support runtime-backed benchmark claims."
             : "Keep the story premium but bounded: benchmark-backed proof, no oversized hosted-runtime promise.",
         },
@@ -1258,7 +1258,7 @@
     }
 
     function renderReviewSummary() {
-      const reviewRoute = (state.summaryPack?.reviewSequence || []).slice(0, 3).join(" → ");
+      const reviewRoute = (state.summaryPack?.architectureSequence || []).slice(0, 3).join(" → ");
       const items = [
         {
           title: "Start here",
@@ -1332,7 +1332,7 @@
         `- Planning utility: ${missing.includes("gemini_api_key") ? "bounded demo only" : "live-ready"}`,
         `- Delivery utility: ${missing.includes("openclaw_delivery") ? "local only" : "OpenClaw configured"}`,
         `- Next action: ${state.runtimeBrief?.diagnostics?.nextAction || "Load runtime brief first."}`,
-        `- Data route: ${(state.summaryPack?.reviewSequence || []).join(" | ") || "Load summary pack first."}`,
+        `- Data route: ${(state.summaryPack?.architectureSequence || []).join(" | ") || "Load summary pack first."}`,
       ].join("\\n");
       await navigator.clipboard.writeText(handoff);
       setWarmStatus("Runtime handoff copied. Use it to explain whether the console is live-ready or intentionally bounded.", "");
@@ -1405,9 +1405,9 @@
       `).join("");
     }
 
-    function renderReviewSequence() {
-      const items = state.summaryPack?.reviewSequence || [];
-      elements.reviewSequence.innerHTML = items.map((item, index) => `
+    function renderArchitectureSequence() {
+      const items = state.summaryPack?.architectureSequence || [];
+      elements.architectureSequence.innerHTML = items.map((item, index) => `
         <article class="card">
           <strong>Step ${index + 1}</strong>
           <p>${escapeHtml(item)}</p>
@@ -1555,7 +1555,7 @@
       renderProofAssets();
       renderBenchmarkLadder();
       renderRouteList();
-      renderReviewSequence();
+      renderArchitectureSequence();
     }
 
     async function loadOpsPack(lane) {
@@ -1570,7 +1570,7 @@
         body: JSON.stringify(buildPayload()),
       });
       renderMissionSummary(payload, "Plan");
-      setWarmStatus("Plan generated. Review actions, referrals, and judge notes before moving to delivery.", "");
+      setWarmStatus("Plan generated. Architecture actions, referrals, and judge notes before moving to delivery.", "");
     }
 
     async function runInsights() {

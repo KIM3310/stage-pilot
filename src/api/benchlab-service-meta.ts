@@ -180,7 +180,7 @@ export function buildBenchLabRuntimeBrief(options: {
       runs: options.runCount,
       artifacts: options.artifactCount,
     },
-    reviewFlow: [
+    architectureFlow: [
       "Validate configs and repo roots before launching a new runtime.",
       "Inspect run-level forensics and compare views before trusting a claim delta.",
       "Promote only artifacts with aligned summary, report, and forensics evidence.",
@@ -237,7 +237,7 @@ export function buildBenchLabSummaryPack(options: {
       {
         stage: "Compare",
         summary:
-          "Runtime compare, model summaries, and variant leaderboard make deltas reviewable before any promotion.",
+          "Runtime compare, model summaries, and variant leaderboard make deltas inspectable before any promotion.",
         surface:
           "/v1/benchlab/runs + /v1/benchlab/compare + /v1/benchlab/leaderboards/variants",
       },
@@ -248,12 +248,12 @@ export function buildBenchLabSummaryPack(options: {
         surface: "/v1/benchlab/artifacts + /v1/benchlab/artifacts/forensics",
       },
     ],
-    reviewSequence: [
+    architectureSequence: [
       "Confirm configs, jobs, and runtime counts before trusting a new claim surface.",
       "Inspect best checked-in delta and dominant failure bucket before comparing variants.",
       "Promote only artifacts with aligned summary, report, and tracked forensics evidence.",
     ],
-    twoMinuteReview: [
+    twoMinuteArchitecture: [
       {
         step: "1. Runtime brief",
         surface: "/v1/benchlab/runtime-brief",

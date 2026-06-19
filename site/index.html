@@ -369,7 +369,7 @@
         <h2 id="lensHeadline">Quick start evidence path</h2>
         <p id="lensSummary" class="hint">
           Start with benchmark lift, then show the parser recovery story, then
-          end with the copyable review path.
+          end with the copyable architecture path.
         </p>
         <div id="lensGrid" class="lens-grid">
           <article class="lens-card">
@@ -386,7 +386,7 @@
           <article class="lens-card">
             <strong>03 · Architecture handoff</strong>
             <p>
-              Copy the review path once the benchmark story is already easy to
+              Copy the architecture path once the benchmark story is already easy to
               repeat.
             </p>
           </article>
@@ -449,12 +449,12 @@
       <section class="panel quick-actions">
         <h2>Benchmark handoff bar</h2>
         <p class="hint">
-          Shortcut keys: C review path · B benchmark brief · L launch deck · ?
+          Shortcut keys: C architecture path · B benchmark brief · L launch deck · ?
           help
         </p>
         <div class="action-row">
-          <button id="copyReviewPathBtn" class="action-btn" type="button">
-            Copy Review Path
+          <button id="copyArchitecturePathBtn" class="action-btn" type="button">
+            Copy Architecture Path
           </button>
           <button id="copyArchitectureBriefBtn" class="action-btn" type="button">
             Copy Benchmark Brief
@@ -465,7 +465,7 @@
         </div>
         <p id="quickActionStatus" class="hint">
           Use this bar when you need the benchmark story, not the whole repo
-          tour. Shortcut keys: C review path · B benchmark brief · L launch deck
+          tour. Shortcut keys: C architecture path · B benchmark brief · L launch deck
           · ? help
         </p>
       </section>
@@ -510,12 +510,12 @@
     const lensEvalBtn = document.getElementById("lensEvalBtn");
     const lensPlatformBtn = document.getElementById("lensPlatformBtn");
     const quickActions = {
-      reviewPath: {
-        buttonId: "copyReviewPathBtn",
+      architecturePath: {
+        buttonId: "copyArchitecturePathBtn",
         payload:
-          "StagePilot review path\n- Read the validation data guide for the fastest grounded walkthrough.\n- Read the executive one-pager for the benchmark claim.\n- Open solution architecture for runtime boundaries.\n- Check the latest benchmark artifact before repeating the lift numbers.\n- Use the operator runbook only when the hosted runtime is actually involved.",
-        successLabel: "Review path copied.",
-        failureLabel: "Failed to copy review path.",
+          "StagePilot architecture path\n- Read the validation data guide for the fastest grounded walkthrough.\n- Read the executive one-pager for the benchmark claim.\n- Open solution architecture for runtime boundaries.\n- Check the latest benchmark artifact before repeating the lift numbers.\n- Use the operator runbook only when the hosted runtime is actually involved.",
+        successLabel: "Architecture path copied.",
+        failureLabel: "Failed to copy architecture path.",
       },
       architectureBrief: {
         buttonId: "copyArchitectureBriefBtn",
@@ -537,7 +537,7 @@
       quickstart: {
         headline: "Quick start evidence path",
         summary:
-          "Start with benchmark lift, then show the parser recovery story, then end with the copyable review path.",
+          "Start with benchmark lift, then show the parser recovery story, then end with the copyable architecture path.",
         cards: [
           [
             "01 · Raw baseline",
@@ -549,7 +549,7 @@
           ],
           [
             "03 · Architecture handoff",
-            "Copy the review path once the benchmark story is already easy to repeat.",
+            "Copy the architecture path once the benchmark story is already easy to repeat.",
           ],
         ],
       },
@@ -587,7 +587,7 @@
           ],
           [
             "03 · Repeatable route",
-            "Use the doctor deck and review path to keep the runtime story reproducible.",
+            "Use the doctor deck and architecture path to keep the runtime story reproducible.",
           ],
         ],
       },
@@ -681,12 +681,12 @@
       if (key === "?") {
         event.preventDefault();
         updateQuickActionStatus(
-          "Shortcut keys: C review path · B benchmark brief · L launch deck · ? help"
+          "Shortcut keys: C architecture path · B benchmark brief · L launch deck · ? help"
         );
         return;
       }
       const keyToAction = {
-        c: "reviewPath",
+        c: "architecturePath",
         b: "architectureBrief",
         l: "launchDeck",
       };

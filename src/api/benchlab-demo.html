@@ -468,7 +468,7 @@
           </p>
           <div class="pill-row" style="margin-top: 14px">
             <button class="ghost" id="copy-review-button" type="button">
-              Copy Review Path
+              Copy Architecture Path
             </button>
             <button class="ghost" id="copy-proof-button" type="button">
               Copy Routes
@@ -772,7 +772,7 @@ Loading checked-in artifact failure taxonomy.</pre
     const els = {
       briefBadge: document.querySelector("#brief-badge"),
       briefHeadline: document.querySelector("#brief-headline"),
-      briefReviewSequence: document.querySelector("#brief-review-sequence"),
+      briefArchitectureSequence: document.querySelector("#brief-review-sequence"),
       briefStats: document.querySelector("#brief-stats"),
       artifactForensicsBody: document.querySelector("#artifact-forensics-body"),
       artifactForensicsMeta: document.querySelector("#artifact-forensics-meta"),
@@ -1083,7 +1083,7 @@ Loading checked-in artifact failure taxonomy.</pre
       state.summaryPack = payload || null;
 
       if (payload?.status !== "ok") {
-        els.briefReviewSequence.textContent =
+        els.briefArchitectureSequence.textContent =
           "Summary pack unavailable. Check /health, /v1/benchlab/runtime-brief, and artifact routes.";
         return;
       }
@@ -1122,7 +1122,7 @@ Loading checked-in artifact failure taxonomy.</pre
             `<div class="stat"><strong>${item.label}</strong><div class="tiny">${item.value}</div></div>`
         )
         .join("");
-      els.briefReviewSequence.textContent = `[promotion flow] ${payload.reviewSequence.join(" -> ")} | top claim: ${bestClaim}`;
+      els.briefArchitectureSequence.textContent = `[promotion flow] ${payload.architectureSequence.join(" -> ")} | top claim: ${bestClaim}`;
     }
 
     function renderConfigs() {
@@ -1969,16 +1969,16 @@ Loading checked-in artifact failure taxonomy.</pre
       };
     }
 
-    async function handleCopyReviewPath() {
+    async function handleCopyArchitecturePath() {
       const counts =
         state.summaryPack?.evidenceBundle?.counts ||
         state.runtimeBrief?.evidenceCounts ||
         {};
       const steps =
-        Array.isArray(state.summaryPack?.reviewSequence) &&
-        state.summaryPack.reviewSequence.length > 0
-          ? state.summaryPack.reviewSequence
-          : [els.briefReviewSequence.textContent || "Review path unavailable"];
+        Array.isArray(state.summaryPack?.architectureSequence) &&
+        state.summaryPack.architectureSequence.length > 0
+          ? state.summaryPack.architectureSequence
+          : [els.briefArchitectureSequence.textContent || "Architecture path unavailable"];
       const text = [
         "BenchLab evaluation path",
         `Headline: ${els.briefHeadline.textContent || "-"}`,
@@ -1997,12 +1997,12 @@ Loading checked-in artifact failure taxonomy.</pre
 
       try {
         await copyTextToClipboard(text);
-        flashButtonLabel(els.copyReviewButton, "Copy Review Path", "Copied");
+        flashButtonLabel(els.copyReviewButton, "Copy Architecture Path", "Copied");
       } catch (error) {
-        console.warn("copy review path failed", error);
+        console.warn("copy architecture path failed", error);
         flashButtonLabel(
           els.copyReviewButton,
-          "Copy Review Path",
+          "Copy Architecture Path",
           "Copy failed"
         );
       }
@@ -2205,7 +2205,7 @@ Loading checked-in artifact failure taxonomy.</pre
     });
 
     els.copyReviewButton.addEventListener("click", async () => {
-      await handleCopyReviewPath();
+      await handleCopyArchitecturePath();
     });
 
     els.copyProofButton.addEventListener("click", async () => {

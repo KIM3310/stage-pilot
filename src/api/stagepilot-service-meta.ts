@@ -28,9 +28,9 @@ export const STAGEPILOT_TRACE_OBSERVABILITY_PACK_SCHEMA =
   "stagepilot-trace-observability-pack-v1";
 export const STAGEPILOT_REGRESSION_GATE_PACK_SCHEMA =
   "stagepilot-regression-gate-pack-v1";
-export const STAGEPILOT_REVIEW_RESOURCE_PACK_SCHEMA =
+export const STAGEPILOT_ARCHITECTURE_RESOURCE_PACK_SCHEMA =
   "stagepilot-architecture-resource-pack-v1";
-export const STAGEPILOT_LIVE_REVIEW_SCHEMA = "stagepilot-live-review-run-v1";
+export const STAGEPILOT_LIVE_REVIEW_SCHEMA = "stagepilot-live-architecture-run-v1";
 const CSV_ROW_SPLIT_REGEX = /\r?\n/;
 
 function buildStagePilotOperationalPosture(options: {
@@ -320,7 +320,7 @@ export function buildStagePilotRouteDescriptors(): StagePilotRouteDescriptor[] {
     },
     {
       method: "POST",
-      path: "/v1/live-review-run",
+      path: "/v1/live-architecture-run",
       purpose: "Run the bounded public OpenAI evaluation scenario",
     },
     {
@@ -387,7 +387,7 @@ export function buildStagePilotRuntimeBrief(options: {
   deploymentMode:
     | "artifact-refresh-only"
     | "public-capped-live"
-    | "review-only-live";
+    | "read-only-live";
   geminiHasApiKey: boolean;
   geminiTimeoutMs: number;
   killSwitch: boolean;
@@ -411,7 +411,7 @@ export function buildStagePilotRuntimeBrief(options: {
   let nextAction: string;
   if (options.publicLiveApi) {
     nextAction =
-      "Run POST /v1/live-review-run with a fixed scenarioId to validate the bounded public evaluation lane.";
+      "Run POST /v1/live-architecture-run with a fixed scenarioId to validate the bounded public evaluation lane.";
   } else if (missingIntegrations.length === 0) {
     nextAction =
       "Run POST /v1/plan or POST /v1/benchmark to validate live flows.";
@@ -449,9 +449,9 @@ export function buildStagePilotRuntimeBrief(options: {
     requestLimits: {
       bodyTimeoutMs: options.bodyTimeoutMs,
     },
-    reviewFlow: [
+    architectureFlow: [
       "Check health and runtime brief before trusting live plan synthesis.",
-      "Run /v1/live-review-run with a fixed scenarioId to inspect the bounded public evaluation lane.",
+      "Run /v1/live-architecture-run with a fixed scenarioId to inspect the bounded public evaluation lane.",
       "Run /v1/plan first, then enrich with /v1/insights and /v1/whatif.",
       "Treat /v1/notify as the final operator confirmation step.",
     ],
@@ -471,13 +471,13 @@ export function buildStagePilotRuntimeBrief(options: {
       health: "/health",
       meta: "/v1/meta",
       runtimeBrief: "/v1/runtime-brief",
-      reviewResourcePack: "/v1/architecture-resource-pack",
+      architectureResourcePack: "/v1/architecture-resource-pack",
       summaryPack: "/v1/summary-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
       perfEvidencePack: "/v1/perf-evidence-pack",
       traceObservabilityPack: "/v1/trace-observability-pack",
       regressionGatePack: "/v1/regression-gate-pack",
-      liveReviewRun: "/v1/live-review-run",
+      liveArchitectureRun: "/v1/live-architecture-run",
       failureTaxonomy: "/v1/failure-taxonomy",
       protocolMatrix: "/v1/protocol-matrix",
       providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
@@ -490,7 +490,7 @@ export function buildStagePilotRuntimeBrief(options: {
   };
 }
 
-export function buildStagePilotReviewResourcePack(options: {
+export function buildStagePilotArchitectureResourcePack(options: {
   benchmarkSnapshot: StagePilotBenchmarkSnapshot;
   service: string;
 }) {
@@ -540,7 +540,7 @@ export function buildStagePilotReviewResourcePack(options: {
       checkId: "open-resource-pack",
       surface: "/v1/architecture-resource-pack",
       whyItMatters:
-        "Built-in scenarios and checks keep the repo reviewable without external keys.",
+        "Built-in scenarios and checks keep the repo inspectable without external keys.",
     },
     {
       checkId: "verify-benchmark-proof",
@@ -607,7 +607,7 @@ export function buildStagePilotReviewResourcePack(options: {
     service: options.service,
     status: "ok",
     generatedAt: new Date().toISOString(),
-    schema: STAGEPILOT_REVIEW_RESOURCE_PACK_SCHEMA,
+    schema: STAGEPILOT_ARCHITECTURE_RESOURCE_PACK_SCHEMA,
     headline:
       "Checked-in architecture resource pack that keeps StagePilot's strongest no-key walkthrough explicit.",
     summary: {
@@ -653,7 +653,7 @@ export function buildStagePilotReviewResourcePack(options: {
     ],
     links: {
       runtimeBrief: "/v1/runtime-brief",
-      reviewResourcePack: "/v1/architecture-resource-pack",
+      architectureResourcePack: "/v1/architecture-resource-pack",
       providerBenchmarkScorecard: "/v1/provider-benchmark-scorecard",
       traceObservabilityPack: "/v1/trace-observability-pack",
       regressionGatePack: "/v1/regression-gate-pack",
@@ -811,7 +811,7 @@ export function buildStagePilotDeveloperOpsPack(options: {
     },
     "release-governor": {
       headline:
-        "Keep release automation reviewable by pairing runtime posture, benchmark proof, and explicit handoff gates.",
+        "Keep release automation inspectable by pairing runtime posture, benchmark proof, and explicit handoff gates.",
       operatorFlow: [
         "Start with runtime brief and scorecard before allowing release help.",
         "Check benchmark and developer-ops pack to understand the strongest and weakest automation lanes.",
@@ -836,7 +836,7 @@ export function buildStagePilotDeveloperOpsPack(options: {
         ? lane
         : "merge-request",
     headline:
-      "Developer ops pack that turns benchmarked tool-calling reliability into reviewable MR, pipeline, and release workflows.",
+      "Developer ops pack that turns benchmarked tool-calling reliability into inspectable MR, pipeline, and release workflows.",
     lanes: Object.keys(laneMap),
     selectedLane,
     benchmark: {
@@ -965,7 +965,7 @@ export function buildStagePilotProtocolMatrix(options: { service: string }) {
         "Provider-agnostic tool reliability only matters if protocol families and their failure hotspots are visible together.",
     },
     protocols,
-    reviewPath: [
+    architecturePath: [
       "Start with /v1/protocol-matrix to see which protocol families are explicitly covered.",
       "Move to /v1/provider-benchmark-scorecard to see how those protocol families map to provider-facing latency, cost, and contract confidence posture.",
       "Then inspect /v1/failure-taxonomy to connect protocol drift to runtime risk and handoff posture.",
@@ -1002,7 +1002,7 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
   const providers = [
     {
       provider: "openai-compatible",
-      posture: "review-ready",
+      posture: "architecture-ready",
       contractConfidencePct: Math.round(middlewareRate),
       latencyBandMs: "350-900",
       costBand: "high",
@@ -1022,7 +1022,7 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
     },
     {
       provider: "anthropic-xml-style",
-      posture: loopRate >= 85 ? "review-ready" : "attention",
+      posture: loopRate >= 85 ? "architecture-ready" : "attention",
       contractConfidencePct: Math.round(
         Math.min(100, baselineRate + parserLift + recoveryLift)
       ),
@@ -1040,7 +1040,7 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
     },
     {
       provider: "gemini-hybrid",
-      posture: middlewareRate >= 80 ? "review-ready" : "attention",
+      posture: middlewareRate >= 80 ? "architecture-ready" : "attention",
       contractConfidencePct: Math.round((middlewareRate + loopRate) / 2),
       latencyBandMs: "500-1400",
       costBand: "medium-high",
@@ -1060,7 +1060,7 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
     },
     {
       provider: "local-oss",
-      posture: baselineRate >= 65 ? "review-ready" : "attention",
+      posture: baselineRate >= 65 ? "architecture-ready" : "attention",
       contractConfidencePct: Math.round(loopRate),
       latencyBandMs: "120-450",
       costBand: "low",
@@ -1101,7 +1101,7 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
       recoveryLiftPct: recoveryLift,
     },
     providers,
-    reviewPath: [
+    architecturePath: [
       "Start with /v1/provider-benchmark-scorecard to explain which provider families StagePilot can currently discuss without hand-waving.",
       "Open /v1/protocol-matrix to validate the contract families behind each provider posture.",
       "Use /v1/trace-observability-pack to connect provider posture to replayable traces and regression gates before claiming frontier-runtime depth.",
@@ -1185,7 +1185,7 @@ export function buildStagePilotPerfEvidencePack(options: {
         surface: "/v1/developer-ops-pack",
       },
     ],
-    reviewPath: [
+    architecturePath: [
       "Open /v1/perf-evidence-pack to see the checked-in runtime rehearsal before making scale claims.",
       "Pair it with /v1/runtime-scorecard so local load evidence and live route telemetry stay in the same story.",
       "Use /v1/provider-benchmark-scorecard and /v1/benchmark-summary to separate raw speed from contract-safe correctness.",
@@ -1193,7 +1193,7 @@ export function buildStagePilotPerfEvidencePack(options: {
     ],
     operatorNotes: [
       "This is a checked-in local rehearsal against the StagePilot backend, not a claim of internet-scale vendor telemetry.",
-      "The strongest claim is bounded runtime discipline under reviewable load, not generic throughput bragging.",
+      "The strongest claim is bounded runtime discipline under inspectable load, not generic throughput bragging.",
       "Use the perf pack together with the benchmark and failure taxonomy before discussing frontier-runtime promotion.",
     ],
     proofAssets: [
@@ -1267,7 +1267,7 @@ export function buildStagePilotTraceObservabilityPack(options: {
     regressionGate: options.traceArtifact.regressionGate,
     hotspots: options.traceArtifact.hotspots,
     traces: options.traceArtifact.traces,
-    reviewPath: [
+    architecturePath: [
       "Start with /v1/trace-observability-pack to see whether replayable traces and regression gates agree before discussing frontier-runtime maturity.",
       "Move to /v1/provider-benchmark-scorecard and /v1/protocol-matrix so each trace stays tied to a real contract family instead of generic model talk.",
       "Use /v1/failure-taxonomy to connect the trace bundle to explicit parser/runtime classes.",
@@ -1339,7 +1339,7 @@ export function buildStagePilotRegressionGatePack(options: {
     },
     releaseRecommendation: options.regressionArtifact.releaseRecommendation,
     gates: options.regressionArtifact.gates,
-    reviewPath: [
+    architecturePath: [
       "Start with /v1/regression-gate-pack to explain what would block or allow StagePilot promotion into a stronger frontier-runtime claim tier.",
       "Pair it with /v1/trace-observability-pack so each gate stays grounded in replay evidence instead of generic scorekeeping.",
       "Use /v1/perf-evidence-pack and /v1/provider-benchmark-scorecard to show that gate posture still matches runtime pressure and provider-family tradeoffs.",
@@ -1348,7 +1348,7 @@ export function buildStagePilotRegressionGatePack(options: {
     operatorNotes: [
       "This is a checked-in release board, not a substitute for live production SLO ownership.",
       "The value is explicit promotion logic: what would make a benchmark claim stronger, weaker, or blocked.",
-      "Use this pack when an technical reader asks how you decide whether a reliability surface is ready to be trusted more broadly.",
+      "Use this pack when an architecture inspection asks how you decide whether a reliability surface is ready to be trusted more broadly.",
     ],
     proofAssets: [
       {
@@ -1645,7 +1645,7 @@ export function buildStagePilotFailureTaxonomy(options: {
       observedRequestCount: options.runtimeTelemetry.requestCount,
     },
     failureModes,
-    reviewPath: [
+    architecturePath: [
       "Start on /v1/runtime-brief to separate missing integrations from true parser/runtime defects.",
       "Use /v1/benchmark-summary and /v1/schema/plan-report to explain why tool-call hardening exists.",
       "Finish on /v1/runtime-scorecard and /v1/workflow-run-replay to show live evaluation pressure and escalation paths.",
@@ -1690,7 +1690,7 @@ export function buildStagePilotSummaryPack(options: {
     geminiHasApiKey: options.geminiHasApiKey,
     openClawConfigured: options.openClawConfigured,
   });
-  const reviewResourcePack = buildStagePilotReviewResourcePack({
+  const architectureResourcePack = buildStagePilotArchitectureResourcePack({
     benchmarkSnapshot: options.benchmarkSnapshot,
     service: options.service,
   });
@@ -1711,7 +1711,7 @@ export function buildStagePilotSummaryPack(options: {
       {
         stage: "Parse + Plan",
         summary:
-          "Parser middleware and StagePilot agents keep malformed tool-style outputs reviewable instead of silent-failing.",
+          "Parser middleware and StagePilot agents keep malformed tool-style outputs inspectable instead of silent-failing.",
         surface: "@ai-sdk-tool/parser + StagePilotEngine",
       },
       {
@@ -1732,12 +1732,12 @@ export function buildStagePilotSummaryPack(options: {
       "Parser and orchestration surfaces stay inspectable through explicit report contracts instead of opaque tool-call success claims.",
       "Notify delivery is not treated as implicit success; operators still confirm the final handoff path.",
     ],
-    reviewSequence: [
+    architectureSequence: [
       "Check /v1/runtime-brief to confirm Gemini and OpenClaw readiness before trusting live synthesis.",
       "Inspect /v1/provider-benchmark-scorecard and /v1/failure-taxonomy to validate provider tradeoffs, parser posture, and operator handoff boundaries.",
       "Run /v1/plan and /v1/benchmark before promoting any routing claim or delivery workflow.",
     ],
-    twoMinuteReview: [
+    twoMinuteArchitecture: [
       {
         step: "1. Runtime brief",
         surface: "/v1/runtime-brief",
@@ -1779,8 +1779,8 @@ export function buildStagePilotSummaryPack(options: {
           "@ai-sdk-tool/parser package plus /v1/runtime-brief and /v1/summary-pack",
         docsOnlySurfaces: ["docs/summary-pack.svg", "site/"],
         claimTier: benchmarkReadyForPromotion
-          ? "runtime-backed-review-ready"
-          : "bounded-review-demo",
+          ? "runtime-backed-architecture-ready"
+          : "bounded-architecture-demo",
         claimRule:
           "Treat static/docs surfaces as supporting docs, then repeat runtime claims only after the benchmark and live summary-pack surfaces agree.",
       },
@@ -1796,14 +1796,14 @@ export function buildStagePilotSummaryPack(options: {
       planSchema: STAGEPILOT_PLAN_REPORT_SCHEMA,
       requestBodyTimeoutMs: options.bodyTimeoutMs,
       routeCount: buildStagePilotRouteDescriptors().length,
-      reviewResourcePack: reviewResourcePack.summary,
+      architectureResourcePack: architectureResourcePack.summary,
     },
     proofAssets: buildStagePilotProofAssets(),
     links: {
       health: "/health",
       meta: "/v1/meta",
       runtimeBrief: "/v1/runtime-brief",
-      reviewResourcePack: "/v1/architecture-resource-pack",
+      architectureResourcePack: "/v1/architecture-resource-pack",
       summaryPack: "/v1/summary-pack",
       runtimeScorecard: "/v1/runtime-scorecard",
       perfEvidencePack: "/v1/perf-evidence-pack",

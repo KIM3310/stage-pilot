@@ -1,6 +1,32 @@
 {
   "models": [
     {
+      "id": "openrouter-qwen3-coder",
+      "label": "OpenRouter Qwen3 Coder",
+      "kind": "openai-compatible",
+      "enabled": false,
+      "provider_name": "OpenRouter",
+      "provider_docs_url": "https://openrouter.ai/models",
+      "provider_license": "Proprietary",
+      "model_name": "qwen/qwen3-coder",
+      "base_url": "https://openrouter.ai/api/v1",
+      "api_key_env": "OPENROUTER_API_KEY",
+      "default_headers_json_env": "OPENROUTER_DEFAULT_HEADERS"
+    },
+    {
+      "id": "openrouter-gpt-5-2-codex",
+      "label": "OpenRouter GPT-5.2 Codex",
+      "kind": "openai-compatible",
+      "enabled": false,
+      "provider_name": "OpenRouter",
+      "provider_docs_url": "https://openrouter.ai/models/openai/gpt-5.2-codex",
+      "provider_license": "Proprietary",
+      "model_name": "openai/gpt-5.2-codex",
+      "base_url": "https://openrouter.ai/api/v1",
+      "api_key_env": "OPENROUTER_API_KEY",
+      "default_headers_json_env": "OPENROUTER_DEFAULT_HEADERS"
+    },
+    {
       "id": "openai-gpt-5.2",
       "label": "OpenAI GPT-4o mini",
       "kind": "openai-compatible",

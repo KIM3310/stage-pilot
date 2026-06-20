@@ -21,6 +21,9 @@ export interface LlmGateway {
 }
 
 export const DEFAULT_GEMINI_HTTP_TIMEOUT_MS = 8000;
+export const DEFAULT_OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
+export const DEFAULT_OPENROUTER_MODEL = "qwen/qwen3-coder";
+const TRAILING_SLASHES_REGEX = /\/+$/;
 
 export function normalizeGeminiHttpTimeoutMs(
   timeoutMs: number | undefined
@@ -180,6 +183,94 @@ export class GeminiGateway implements LlmGateway {
     throw lastError instanceof Error
       ? lastError
       : new Error("Gemini request failed");
+  }
+}
+
+export class OpenRouterGateway implements LlmGateway {
+  private readonly apiKey: string;
+  private readonly appTitle: string;
+  private readonly baseUrl: string;
+  private readonly httpReferer: string;
+  private readonly model: string;
+  private readonly timeoutMs: number;
+
+  constructor(
+    apiKey: string,
+    model = DEFAULT_OPENROUTER_MODEL,
+    timeoutMs = DEFAULT_GEMINI_HTTP_TIMEOUT_MS,
+    baseUrl = DEFAULT_OPENROUTER_BASE_URL,
+    httpReferer = "https://stage-pilot.pages.dev",
+    appTitle = "stage-pilot"
+  ) {
+    this.apiKey = apiKey;
+    this.appTitle = appTitle.trim() || "stage-pilot";
+    this.baseUrl =
+      baseUrl.trim().replace(TRAILING_SLASHES_REGEX, "") ||
+      DEFAULT_OPENROUTER_BASE_URL;
+    this.httpReferer = httpReferer.trim() || "https://stage-pilot.pages.dev";
+    this.model = model.trim() || DEFAULT_OPENROUTER_MODEL;
+    this.timeoutMs = normalizeGeminiHttpTimeoutMs(timeoutMs);
+  }
+
+  async summarizePlan(input: {
+    intake: NormalizedIntake;
+    plan: PlanResult;
+    safety: SafetyResult;
+  }): Promise<string> {
+    const prompt = [
+      "Summarize this social-welfare action plan in 3 short bullet points.",
+      "Keep it operational and concrete.",
+      JSON.stringify(input),
+    ].join("\n");
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), this.timeoutMs);
+    try {
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        body: JSON.stringify({
+          model: this.model,
+          temperature: 0.2,
+          messages: [
+            {
+              role: "system",
+              content:
+                "You summarize social-welfare operations plans into concise, grounded bullets.",
+            },
+            { role: "user", content: prompt },
+          ],
+        }),
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json",
+          "HTTP-Referer": this.httpReferer,
+          "X-OpenRouter-Title": this.appTitle,
+        },
+        method: "POST",
+        signal: controller.signal,
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenRouter request failed: ${response.status}`);
+      }
+
+      const data = await readJsonWithTimeout<{
+        choices?: Array<{ message?: { content?: string } }>;
+      }>(
+        response,
+        this.timeoutMs,
+        `OpenRouter response body timed out (${this.timeoutMs}ms)`
+      );
+      const text = data.choices?.[0]?.message?.content?.trim();
+      if (!text) {
+        throw new Error("OpenRouter response did not include summary text");
+      }
+      return text;
+    } catch (error) {
+      throw isAbortError(error)
+        ? new Error(`OpenRouter request timed out (${this.timeoutMs}ms)`)
+        : error;
+    } finally {
+      clearTimeout(timeoutId);
+    }
   }
 }
 

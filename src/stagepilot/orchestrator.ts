@@ -4,6 +4,7 @@ import {
   GeminiGateway,
   JudgeAgent,
   type LlmGateway,
+  OpenRouterGateway,
   OutreachAgent,
   PlannerAgent,
   readGeminiHttpTimeoutMs,
@@ -104,6 +105,20 @@ export function createStagePilotEngine(
 }
 
 export function createStagePilotEngineFromEnv(): StagePilotEngine {
+  const openRouterApiKey = process.env.OPENROUTER_API_KEY?.trim();
+  if (openRouterApiKey) {
+    return new StagePilotEngine({
+      gateway: new OpenRouterGateway(
+        openRouterApiKey,
+        process.env.OPENROUTER_MODEL,
+        readGeminiHttpTimeoutMs(process.env.GEMINI_HTTP_TIMEOUT_MS),
+        process.env.OPENROUTER_BASE_URL,
+        process.env.OPENROUTER_HTTP_REFERER,
+        process.env.OPENROUTER_APP_TITLE
+      ),
+    });
+  }
+
   return createStagePilotEngine(
     process.env.GEMINI_API_KEY,
     process.env.GEMINI_MODEL,

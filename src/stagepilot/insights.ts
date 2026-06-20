@@ -1,8 +1,12 @@
 import {
   DEFAULT_GEMINI_HTTP_TIMEOUT_MS,
+  DEFAULT_OPENROUTER_BASE_URL,
+  DEFAULT_OPENROUTER_MODEL,
   normalizeGeminiHttpTimeoutMs,
 } from "./agents";
 import type { StagePilotResult } from "./types";
+
+const TRAILING_SLASHES_REGEX = /\/+$/;
 
 export interface StagePilotInsights {
   kpis: {
@@ -12,7 +16,7 @@ export interface StagePilotInsights {
     topPrograms: string[];
   };
   narrative: string;
-  source: "fallback" | "gemini";
+  source: "fallback" | "gemini" | "openrouter";
 }
 
 function buildFallbackNarrative(result: StagePilotResult): string {
@@ -168,10 +172,86 @@ async function summarizeWithGemini(options: {
     : new Error("Gemini insights request failed");
 }
 
+async function summarizeWithOpenRouter(options: {
+  apiKey: string;
+  appTitle?: string;
+  baseUrl?: string;
+  httpReferer?: string;
+  model: string;
+  result: StagePilotResult;
+  timeoutMs: number;
+}): Promise<string> {
+  const baseUrl = (
+    options.baseUrl?.trim() || DEFAULT_OPENROUTER_BASE_URL
+  ).replace(TRAILING_SLASHES_REGEX, "");
+  const model = options.model.trim() || DEFAULT_OPENROUTER_MODEL;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs);
+  let response: Response;
+  try {
+    response = await fetch(`${baseUrl}/chat/completions`, {
+      body: JSON.stringify({
+        model,
+        temperature: 0.2,
+        messages: [
+          {
+            role: "system",
+            content:
+              "You are helping a social-welfare operations manager. Return exactly 3 concise bullets.",
+          },
+          { role: "user", content: buildGeminiPrompt(options.result) },
+        ],
+      }),
+      headers: {
+        Authorization: `Bearer ${options.apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer":
+          options.httpReferer?.trim() || "https://stage-pilot.pages.dev",
+        "X-OpenRouter-Title": options.appTitle?.trim() || "stage-pilot",
+      },
+      method: "POST",
+      signal: controller.signal,
+    });
+  } catch (error) {
+    clearTimeout(timeoutId);
+    throw typeof error === "object" &&
+      error !== null &&
+      "name" in error &&
+      (error as { name?: string }).name === "AbortError"
+      ? new Error(
+          `OpenRouter insights request timed out (${options.timeoutMs}ms)`
+        )
+      : error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+
+  if (!response.ok) {
+    throw new Error(`OpenRouter insights request failed: ${response.status}`);
+  }
+
+  const data = await readJsonWithTimeout<{
+    choices?: Array<{ message?: { content?: string } }>;
+  }>(
+    response,
+    options.timeoutMs,
+    `OpenRouter insights response body timed out (${options.timeoutMs}ms)`
+  );
+  const text = data.choices?.[0]?.message?.content?.trim();
+  if (!text) {
+    throw new Error("OpenRouter insights response missing text");
+  }
+  return text;
+}
+
 export async function deriveStagePilotInsights(options: {
   apiKey?: string;
+  appTitle?: string;
+  baseUrl?: string;
   fallbackModel?: string;
+  httpReferer?: string;
   model?: string;
+  provider?: "gemini" | "openrouter";
   result: StagePilotResult;
   timeoutMs?: number;
 }): Promise<StagePilotInsights> {
@@ -186,7 +266,12 @@ export async function deriveStagePilotInsights(options: {
   };
 
   const apiKey = options.apiKey;
-  const model = options.model ?? "gemini-3.1-pro-preview";
+  const provider = options.provider ?? "gemini";
+  const model =
+    options.model ??
+    (provider === "openrouter"
+      ? DEFAULT_OPENROUTER_MODEL
+      : "gemini-3.1-pro-preview");
   const timeoutMs = normalizeGeminiHttpTimeoutMs(
     options.timeoutMs ?? DEFAULT_GEMINI_HTTP_TIMEOUT_MS
   );
@@ -199,6 +284,23 @@ export async function deriveStagePilotInsights(options: {
   }
 
   try {
+    if (provider === "openrouter") {
+      const narrative = await summarizeWithOpenRouter({
+        apiKey,
+        appTitle: options.appTitle,
+        baseUrl: options.baseUrl,
+        httpReferer: options.httpReferer,
+        model,
+        result: options.result,
+        timeoutMs,
+      });
+      return {
+        kpis,
+        narrative,
+        source: "openrouter",
+      };
+    }
+
     const narrative = await summarizeWithGemini({
       apiKey,
       fallbackModel: options.fallbackModel,

@@ -68,7 +68,7 @@ Optional metadata:
 export OPENAI_COMPATIBLE_PROVIDER="OpenRouter"
 export OPENAI_COMPATIBLE_DOCS_URL="https://openrouter.ai/models"
 export OPENAI_COMPATIBLE_PROVIDER_LICENSE="Proprietary"
-export OPENAI_COMPATIBLE_DEFAULT_HEADERS='{"HTTP-Referer":"https://example.com","X-Title":"bfcl-ralph"}'
+export OPENAI_COMPATIBLE_DEFAULT_HEADERS='{"HTTP-Referer":"https://stage-pilot.pages.dev","X-OpenRouter-Title":"stage-pilot BFCL RALPH"}'
 ```
 
 ## BFCL Setup

@@ -158,13 +158,16 @@ const RISK_TYPES: RiskType[] = [
 ];
 const INBOX_MESSAGE_COMMAND_REGEX = /^\/?([a-zA-Z-]+)\s*(.*)$/;
 const LEADING_SLASHES_REGEX = /^\/+/;
+const TRAILING_SLASHES_REGEX = /\/+$/;
 const BENCHMARK_DEFAULT_CASE_COUNT = 24;
 const BENCHMARK_DEFAULT_MAX_LOOP_ATTEMPTS = 2;
 const BENCHMARK_DEFAULT_SEED = 20_260_228;
 const OPENAI_BASE_URL = "https://api.openai.com/v1";
+const OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1";
 const OPENAI_PUBLIC_DEFAULT_DAILY_BUDGET_USD = 4;
 const OPENAI_PUBLIC_DEFAULT_MONTHLY_BUDGET_USD = 120;
 const OPENAI_PUBLIC_DEFAULT_MODEL = "gpt-5.2";
+const OPENROUTER_PUBLIC_DEFAULT_MODEL = "qwen/qwen3-coder";
 const OPENAI_PUBLIC_DEFAULT_RPM = 6;
 const OPENAI_PUBLIC_TIMEOUT_MS = 20_000;
 const STAGEPILOT_READ_ONLY_MODE_ENV_KEY = "STAGEPILOT_READ_ONLY_MODE";
@@ -187,7 +190,11 @@ interface StagePilotLiveScenario {
 
 interface StagePilotOpenAiConfig {
   apiKey: string;
+  appTitle: string;
+  baseUrl: string;
   dailyBudgetUsd: number;
+  gateway: "openai" | "openrouter";
+  httpReferer: string;
   killSwitch: boolean;
   modelPublic: string;
   modelRefresh: string;
@@ -309,15 +316,50 @@ function readUsdEnv(name: string, fallback: number): number {
   return Math.max(0, Math.round(parsed * 100) / 100);
 }
 
+function readTrimmedEnv(name: string, fallback = ""): string {
+  return String(process.env[name] || "").trim() || fallback;
+}
+
+function readStagePilotOpenAiModel(
+  usesOpenRouter: boolean,
+  directEnvName: string,
+  directDefault: string
+): string {
+  if (usesOpenRouter) {
+    return (
+      readTrimmedEnv("OPENROUTER_MODEL") ||
+      readTrimmedEnv(directEnvName) ||
+      OPENROUTER_PUBLIC_DEFAULT_MODEL
+    );
+  }
+  return readTrimmedEnv(directEnvName) || directDefault;
+}
+
 function readStagePilotOpenAiConfig(): StagePilotOpenAiConfig {
-  const apiKey = String(process.env.OPENAI_API_KEY || "").trim();
+  const openRouterApiKey = readTrimmedEnv("OPENROUTER_API_KEY");
+  const apiKey = openRouterApiKey || readTrimmedEnv("OPENAI_API_KEY");
+  const usesOpenRouter = Boolean(openRouterApiKey);
   return {
     apiKey,
-    modelPublic:
-      String(process.env.OPENAI_MODEL_PUBLIC || "").trim() ||
-      OPENAI_PUBLIC_DEFAULT_MODEL,
-    modelRefresh:
-      String(process.env.OPENAI_MODEL_REFRESH || "").trim() || "gpt-5.2",
+    appTitle: readTrimmedEnv("OPENROUTER_APP_TITLE", "stage-pilot"),
+    baseUrl: usesOpenRouter
+      ? readTrimmedEnv("OPENROUTER_BASE_URL", OPENROUTER_BASE_URL)
+      : OPENAI_BASE_URL,
+    gateway: usesOpenRouter ? "openrouter" : "openai",
+    httpReferer: readTrimmedEnv(
+      "OPENROUTER_HTTP_REFERER",
+      "https://stage-pilot.pages.dev"
+    ),
+    modelPublic: readStagePilotOpenAiModel(
+      usesOpenRouter,
+      "OPENAI_MODEL_PUBLIC",
+      OPENAI_PUBLIC_DEFAULT_MODEL
+    ),
+    modelRefresh: readStagePilotOpenAiModel(
+      usesOpenRouter,
+      "OPENAI_MODEL_REFRESH",
+      "gpt-5.2"
+    ),
     dailyBudgetUsd: readUsdEnv(
       "OPENAI_PUBLIC_DAILY_BUDGET_USD",
       OPENAI_PUBLIC_DEFAULT_DAILY_BUDGET_USD
@@ -335,7 +377,8 @@ function readStagePilotOpenAiConfig(): StagePilotOpenAiConfig {
       }
     ),
     killSwitch: readBooleanEnv("OPENAI_KILL_SWITCH", false),
-    moderationEnabled: readBooleanEnv("OPENAI_MODERATION_ENABLED", true),
+    moderationEnabled:
+      !usesOpenRouter && readBooleanEnv("OPENAI_MODERATION_ENABLED", true),
   };
 }
 
@@ -491,6 +534,10 @@ async function callOpenAiModeration(options: {
 
 async function callOpenAiStructuredJson(options: {
   apiKey: string;
+  appTitle?: string;
+  baseUrl?: string;
+  gateway?: "openai" | "openrouter";
+  httpReferer?: string;
   model: string;
   systemPrompt: string;
   userPrompt: string;
@@ -501,12 +548,22 @@ async function callOpenAiStructuredJson(options: {
     OPENAI_PUBLIC_TIMEOUT_MS
   );
   try {
-    const response = await fetch(`${OPENAI_BASE_URL}/chat/completions`, {
+    const baseUrl = (options.baseUrl || OPENAI_BASE_URL).replace(
+      TRAILING_SLASHES_REGEX,
+      ""
+    );
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${options.apiKey}`,
+      "Content-Type": "application/json",
+    };
+    if (options.gateway === "openrouter") {
+      headers["HTTP-Referer"] =
+        options.httpReferer || "https://stage-pilot.pages.dev";
+      headers["X-OpenRouter-Title"] = options.appTitle || "stage-pilot";
+    }
+    const response = await fetch(`${baseUrl}/chat/completions`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${options.apiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers,
       signal: controller.signal,
       body: JSON.stringify({
         model: options.model,
@@ -1053,10 +1110,14 @@ function buildMetaPayload(): JsonObject {
       },
     },
     links: runtimeBrief.links,
-    model: process.env.GEMINI_MODEL ?? "gemini-3.1-pro-preview",
+    model: process.env.OPENROUTER_API_KEY?.trim()
+      ? openAi.modelPublic
+      : (process.env.GEMINI_MODEL ?? "gemini-3.1-pro-preview"),
     openai: {
+      baseUrl: openAi.baseUrl,
       dailyBudgetUsd: openAi.dailyBudgetUsd,
       deploymentMode: runtimeBrief.deploymentMode,
+      gateway: openAi.gateway,
       killSwitch: openAi.killSwitch,
       lastLiveRunAt: lastStagePilotLiveRunAt,
       liveModel: openAi.modelPublic,
@@ -2186,7 +2247,7 @@ async function handleLiveArchitectureRunRequest(options: {
   ) {
     sendJson(response, 503, {
       error:
-        "public OpenAI live review is unavailable; configure OPENAI_API_KEY and keep budgets above zero.",
+        "public OpenRouter/OpenAI live review is unavailable; configure OPENROUTER_API_KEY or OPENAI_API_KEY and keep budgets above zero.",
       ok: false,
       schema: STAGEPILOT_LIVE_REVIEW_SCHEMA,
     });
@@ -2207,6 +2268,10 @@ async function handleLiveArchitectureRunRequest(options: {
     const runtimeBrief = buildRuntimeBriefPayload();
     const result = await callOpenAiStructuredJson({
       apiKey: openAi.apiKey,
+      appTitle: openAi.appTitle,
+      baseUrl: openAi.baseUrl,
+      gateway: openAi.gateway,
+      httpReferer: openAi.httpReferer,
       model: openAi.modelPublic,
       systemPrompt:
         "You are evaluating a public bounded tool-calling runtime. Return compact JSON only with keys summary, selectedStrategy, boundedRecovery, watchouts, handoffDecision, evaluationEvidence.",
@@ -2227,7 +2292,7 @@ async function handleLiveArchitectureRunRequest(options: {
       mode: getStagePilotDeploymentMode(openAi),
       model: openAi.modelPublic,
       scenarioId: scenario.id,
-      moderated: true,
+      moderated: openAi.moderationEnabled,
       capped: true,
       traceId: request.requestId,
       estimatedCostUsd: scenario.estimatedCostUsd,
@@ -3339,14 +3404,29 @@ export function createStagePilotApiServer(
     options.benchmarkRunner ?? benchmarkStagePilotStrategies;
   const insightDeriver: InsightDeriver =
     options.insightDeriver ??
-    ((result) =>
-      deriveStagePilotInsights({
+    ((result) => {
+      const openRouterApiKey = process.env.OPENROUTER_API_KEY?.trim();
+      if (openRouterApiKey) {
+        return deriveStagePilotInsights({
+          apiKey: openRouterApiKey,
+          appTitle: process.env.OPENROUTER_APP_TITLE,
+          baseUrl: process.env.OPENROUTER_BASE_URL,
+          httpReferer: process.env.OPENROUTER_HTTP_REFERER,
+          model:
+            process.env.OPENROUTER_MODEL ?? OPENROUTER_PUBLIC_DEFAULT_MODEL,
+          provider: "openrouter",
+          result,
+          timeoutMs: geminiTimeoutMs,
+        });
+      }
+      return deriveStagePilotInsights({
         apiKey: process.env.GEMINI_API_KEY,
         fallbackModel: process.env.GEMINI_FALLBACK_MODEL,
         model: process.env.GEMINI_MODEL ?? "gemini-3.1-pro-preview",
         result,
         timeoutMs: geminiTimeoutMs,
-      }));
+      });
+    });
   const openClawNotifier: StagePilotOpenClawNotifier =
     options.openClawNotifier ?? createStagePilotOpenClawNotifierFromEnv();
   const twinSimulator: TwinSimulator = simulateStagePilotTwin;

@@ -772,7 +772,9 @@ Loading checked-in artifact failure taxonomy.</pre
     const els = {
       briefBadge: document.querySelector("#brief-badge"),
       briefHeadline: document.querySelector("#brief-headline"),
-      briefArchitectureSequence: document.querySelector("#brief-review-sequence"),
+      briefArchitectureSequence: document.querySelector(
+        "#brief-review-sequence"
+      ),
       briefStats: document.querySelector("#brief-stats"),
       artifactForensicsBody: document.querySelector("#artifact-forensics-body"),
       artifactForensicsMeta: document.querySelector("#artifact-forensics-meta"),
@@ -1148,28 +1150,28 @@ Loading checked-in artifact failure taxonomy.</pre
         .map((job) => {
           const canCancel = job.status === "running";
           return `
-                  <article class="card">
-                    <div class="card-top">
-                      <div class="card-title">
-                        <strong>${job.id}</strong>
-                        <span class="tiny">${job.mode} · ${job.runtimeName}</span>
-                      </div>
-                      <span class="badge ${statusClass(job.status)}">${job.status}</span>
-                    </div>
-                    <div class="meta-grid">
-                      <div class="meta-item"><strong>Models File</strong>${job.modelsFileName}</div>
-                      <div class="meta-item"><strong>Created</strong>${formatDate(job.createdAt)}</div>
-                      <div class="meta-item"><strong>Started</strong>${formatDate(job.startedAt)}</div>
-                      <div class="meta-item"><strong>Ended</strong>${formatDate(job.endedAt)}</div>
-                    </div>
-                    <div class="actions">
-                      <button class="ghost" type="button" data-run="${job.runtimeName}">Open Runtime</button>
-                      <button class="ghost" type="button" data-job="${job.id}">View Logs</button>
-                      ${canCancel ? `<button class="ghost" type="button" data-cancel="${job.id}">Cancel</button>` : ""}
-                    </div>
-                    ${job.errorMessage ? `<div class="tiny" style="color:var(--bad)">${job.errorMessage}</div>` : ""}
-                  </article>
-                `;
+                      <article class="card">
+                        <div class="card-top">
+                          <div class="card-title">
+                            <strong>${job.id}</strong>
+                            <span class="tiny">${job.mode} · ${job.runtimeName}</span>
+                          </div>
+                          <span class="badge ${statusClass(job.status)}">${job.status}</span>
+                        </div>
+                        <div class="meta-grid">
+                          <div class="meta-item"><strong>Models File</strong>${job.modelsFileName}</div>
+                          <div class="meta-item"><strong>Created</strong>${formatDate(job.createdAt)}</div>
+                          <div class="meta-item"><strong>Started</strong>${formatDate(job.startedAt)}</div>
+                          <div class="meta-item"><strong>Ended</strong>${formatDate(job.endedAt)}</div>
+                        </div>
+                        <div class="actions">
+                          <button class="ghost" type="button" data-run="${job.runtimeName}">Open Runtime</button>
+                          <button class="ghost" type="button" data-job="${job.id}">View Logs</button>
+                          ${canCancel ? `<button class="ghost" type="button" data-cancel="${job.id}">Cancel</button>` : ""}
+                        </div>
+                        ${job.errorMessage ? `<div class="tiny" style="color:var(--bad)">${job.errorMessage}</div>` : ""}
+                      </article>
+                    `;
         })
         .join("");
     }
@@ -1186,25 +1188,25 @@ Loading checked-in artifact failure taxonomy.</pre
         .map((run) => {
           const counts = run.counts || {};
           return `
-                  <article class="card">
-                    <div class="card-top">
-                      <div class="card-title">
-                        <strong>${run.name}</strong>
-                        <span class="tiny">${run.modelsFileName || "unknown config"}</span>
-                      </div>
-                      <span class="badge ${statusClass(run.primaryOutcome)}">${run.primaryOutcome}</span>
-                    </div>
-                    <div class="meta-grid">
-                      <div class="meta-item"><strong>Updated</strong>${formatDate(run.updatedAt)}</div>
-                      <div class="meta-item"><strong>Cases / Category</strong>${run.casesPerCategory ?? "-"}</div>
-                      <div class="meta-item"><strong>Counts</strong>C:${counts.completed ?? 0} I:${counts.improved ?? 0} F:${counts.flat ?? 0} R:${counts.regressed ?? 0}</div>
-                      <div class="meta-item"><strong>Categories</strong>${safeJoin(run.categories)}</div>
-                    </div>
-                    <div class="actions">
-                      <button class="ghost" type="button" data-run="${run.name}">Inspect</button>
-                    </div>
-                  </article>
-                `;
+                      <article class="card">
+                        <div class="card-top">
+                          <div class="card-title">
+                            <strong>${run.name}</strong>
+                            <span class="tiny">${run.modelsFileName || "unknown config"}</span>
+                          </div>
+                          <span class="badge ${statusClass(run.primaryOutcome)}">${run.primaryOutcome}</span>
+                        </div>
+                        <div class="meta-grid">
+                          <div class="meta-item"><strong>Updated</strong>${formatDate(run.updatedAt)}</div>
+                          <div class="meta-item"><strong>Cases / Category</strong>${run.casesPerCategory ?? "-"}</div>
+                          <div class="meta-item"><strong>Counts</strong>C:${counts.completed ?? 0} I:${counts.improved ?? 0} F:${counts.flat ?? 0} R:${counts.regressed ?? 0}</div>
+                          <div class="meta-item"><strong>Categories</strong>${safeJoin(run.categories)}</div>
+                        </div>
+                        <div class="actions">
+                          <button class="ghost" type="button" data-run="${run.name}">Inspect</button>
+                        </div>
+                      </article>
+                    `;
         })
         .join("");
     }
@@ -1238,27 +1240,27 @@ Loading checked-in artifact failure taxonomy.</pre
               ? modelRun.outcome
               : modelRun.status;
           return `
-                  <article class="card">
-                    <div class="card-top">
-                      <div class="card-title">
-                        <strong>${modelRun.modelName || modelRun.name}</strong>
-                        <span class="tiny">${modelRun.providerName || "-"} · ${modelRun.name}</span>
-                      </div>
-                      <span class="badge ${statusClass(badgeValue)}">${badgeValue}</span>
-                    </div>
-                    <div class="meta-grid">
-                      <div class="meta-item"><strong>Status</strong>${modelRun.status}</div>
-                      <div class="meta-item"><strong>Progress</strong>${formatRuntimeProgress(modelRun)}</div>
-                      <div class="meta-item"><strong>Scores</strong>${formatMetric(modelRun.baselineScore)} -> ${formatMetric(modelRun.ralphScore)}</div>
-                      <div class="meta-item"><strong>Delta</strong>${formatMetric(modelRun.deltaPp)} pp</div>
-                      <div class="meta-item"><strong>Cases</strong>${modelRun.casesPerCategory ?? "-"}</div>
-                      <div class="meta-item"><strong>Categories</strong>${safeJoin(modelRun.categories)}</div>
-                    </div>
-                    <div class="actions">
-                      <button class="ghost" type="button" data-runtime-model="${modelKey}">Inspect</button>
-                    </div>
-                  </article>
-                `;
+                      <article class="card">
+                        <div class="card-top">
+                          <div class="card-title">
+                            <strong>${modelRun.modelName || modelRun.name}</strong>
+                            <span class="tiny">${modelRun.providerName || "-"} · ${modelRun.name}</span>
+                          </div>
+                          <span class="badge ${statusClass(badgeValue)}">${badgeValue}</span>
+                        </div>
+                        <div class="meta-grid">
+                          <div class="meta-item"><strong>Status</strong>${modelRun.status}</div>
+                          <div class="meta-item"><strong>Progress</strong>${formatRuntimeProgress(modelRun)}</div>
+                          <div class="meta-item"><strong>Scores</strong>${formatMetric(modelRun.baselineScore)} -> ${formatMetric(modelRun.ralphScore)}</div>
+                          <div class="meta-item"><strong>Delta</strong>${formatMetric(modelRun.deltaPp)} pp</div>
+                          <div class="meta-item"><strong>Cases</strong>${modelRun.casesPerCategory ?? "-"}</div>
+                          <div class="meta-item"><strong>Categories</strong>${safeJoin(modelRun.categories)}</div>
+                        </div>
+                        <div class="actions">
+                          <button class="ghost" type="button" data-runtime-model="${modelKey}">Inspect</button>
+                        </div>
+                      </article>
+                    `;
         })
         .join("");
     }
@@ -1468,27 +1470,27 @@ Loading checked-in artifact failure taxonomy.</pre
             ? `${claimForensics.baselineErrorItems} -> ${claimForensics.ralphErrorItems}`
             : "-";
           return `
-                  <article class="card">
-                    <div class="card-top">
-                      <div class="card-title">
-                        <strong>${artifact.modelName || artifact.claimName}</strong>
-                        <span class="tiny">${artifact.providerName || artifact.experimentName} · ${artifact.claimName}</span>
-                      </div>
-                      <span class="badge ${statusClass(artifact.outcome)}">${artifact.outcome}</span>
-                    </div>
-                    <div class="meta-grid">
-                      <div class="meta-item"><strong>Cases / Category</strong>${artifact.casesPerCategory ?? "-"}</div>
-                      <div class="meta-item"><strong>Delta</strong>${formatMetric(artifact.deltaPp)} pp</div>
-                      <div class="meta-item"><strong>Baseline</strong>${formatMetric(artifact.baselineScore)}</div>
-                      <div class="meta-item"><strong>RALPH</strong>${formatMetric(artifact.ralphScore)}</div>
-                      <div class="meta-item"><strong>Failure Bucket</strong>${forensicsStatus}</div>
-                      <div class="meta-item"><strong>Error Items</strong>${errorDelta}</div>
-                    </div>
-                    <div class="actions">
-                      <button class="ghost" type="button" data-artifact="${artifact.id}">Inspect</button>
-                    </div>
-                  </article>
-                `;
+                      <article class="card">
+                        <div class="card-top">
+                          <div class="card-title">
+                            <strong>${artifact.modelName || artifact.claimName}</strong>
+                            <span class="tiny">${artifact.providerName || artifact.experimentName} · ${artifact.claimName}</span>
+                          </div>
+                          <span class="badge ${statusClass(artifact.outcome)}">${artifact.outcome}</span>
+                        </div>
+                        <div class="meta-grid">
+                          <div class="meta-item"><strong>Cases / Category</strong>${artifact.casesPerCategory ?? "-"}</div>
+                          <div class="meta-item"><strong>Delta</strong>${formatMetric(artifact.deltaPp)} pp</div>
+                          <div class="meta-item"><strong>Baseline</strong>${formatMetric(artifact.baselineScore)}</div>
+                          <div class="meta-item"><strong>RALPH</strong>${formatMetric(artifact.ralphScore)}</div>
+                          <div class="meta-item"><strong>Failure Bucket</strong>${forensicsStatus}</div>
+                          <div class="meta-item"><strong>Error Items</strong>${errorDelta}</div>
+                        </div>
+                        <div class="actions">
+                          <button class="ghost" type="button" data-artifact="${artifact.id}">Inspect</button>
+                        </div>
+                      </article>
+                    `;
         })
         .join("");
     }
@@ -1978,7 +1980,10 @@ Loading checked-in artifact failure taxonomy.</pre
         Array.isArray(state.summaryPack?.architectureSequence) &&
         state.summaryPack.architectureSequence.length > 0
           ? state.summaryPack.architectureSequence
-          : [els.briefArchitectureSequence.textContent || "Architecture path unavailable"];
+          : [
+              els.briefArchitectureSequence.textContent ||
+                "Architecture path unavailable",
+            ];
       const text = [
         "BenchLab evaluation path",
         `Headline: ${els.briefHeadline.textContent || "-"}`,
@@ -1997,7 +2002,11 @@ Loading checked-in artifact failure taxonomy.</pre
 
       try {
         await copyTextToClipboard(text);
-        flashButtonLabel(els.copyReviewButton, "Copy Architecture Path", "Copied");
+        flashButtonLabel(
+          els.copyReviewButton,
+          "Copy Architecture Path",
+          "Copied"
+        );
       } catch (error) {
         console.warn("copy architecture path failed", error);
         flashButtonLabel(

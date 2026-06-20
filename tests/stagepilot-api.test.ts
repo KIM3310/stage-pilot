@@ -595,7 +595,9 @@ describeIfSocketBinding("stagepilot api server", () => {
     expect(body.requestLimits.bodyTimeoutMs).toBe(2100);
     expect(body.diagnostics.integrationReady).toBe(true);
     expect(body.diagnostics.missingIntegrations).toEqual([]);
-    expect(body.diagnostics.nextAction).toContain("POST /v1/live-architecture-run");
+    expect(body.diagnostics.nextAction).toContain(
+      "POST /v1/live-architecture-run"
+    );
     expect(body.openai.deploymentMode).toBe("public-capped-live");
     expect(body.openai.publicLiveApi).toBe(true);
     expect(body.integrations.gemini.timeoutMs).toBe(4321);
@@ -699,7 +701,9 @@ describeIfSocketBinding("stagepilot api server", () => {
     expect(body.links.providerBenchmarkScorecard).toBe(
       "/v1/provider-benchmark-scorecard"
     );
-    expect(body.links.architectureResourcePack).toBe("/v1/architecture-resource-pack");
+    expect(body.links.architectureResourcePack).toBe(
+      "/v1/architecture-resource-pack"
+    );
     expect(body.links.protocolMatrix).toBe("/v1/protocol-matrix");
     expect(body.links.regressionGatePack).toBe("/v1/regression-gate-pack");
     expect(body.links.traceObservabilityPack).toBe(
@@ -1250,7 +1254,9 @@ describeIfSocketBinding("stagepilot api server", () => {
     expect(body.links.providerBenchmarkScorecard).toBe(
       "/v1/provider-benchmark-scorecard"
     );
-    expect(body.links.architectureResourcePack).toBe("/v1/architecture-resource-pack");
+    expect(body.links.architectureResourcePack).toBe(
+      "/v1/architecture-resource-pack"
+    );
     expect(body.links.regressionGatePack).toBe("/v1/regression-gate-pack");
     expect(body.links.traceObservabilityPack).toBe(
       "/v1/trace-observability-pack"
@@ -1320,7 +1326,9 @@ describeIfSocketBinding("stagepilot api server", () => {
       true
     );
     expect(body.architectureFastPath[1]).toBe("/v1/architecture-resource-pack");
-    expect(body.links.architectureResourcePack).toBe("/v1/architecture-resource-pack");
+    expect(body.links.architectureResourcePack).toBe(
+      "/v1/architecture-resource-pack"
+    );
     expect(body.links.summaryPack).toBe("/v1/summary-pack");
   });
 

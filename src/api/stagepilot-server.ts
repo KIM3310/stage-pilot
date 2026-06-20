@@ -61,6 +61,7 @@ import {
 } from "./runtime-store";
 import { renderStagePilotDemoHtml } from "./stagepilot-demo";
 import {
+  buildStagePilotArchitectureResourcePack,
   buildStagePilotBenchmarkSummary,
   buildStagePilotDeveloperOpsPack,
   buildStagePilotFailureTaxonomy,
@@ -69,7 +70,6 @@ import {
   buildStagePilotProtocolMatrix,
   buildStagePilotProviderBenchmarkScorecard,
   buildStagePilotRegressionGatePack,
-  buildStagePilotArchitectureResourcePack,
   buildStagePilotRouteDescriptors,
   buildStagePilotRuntimeBrief,
   buildStagePilotRuntimeScorecard,
@@ -3106,7 +3106,10 @@ async function handlePostRequest(options: {
     return false;
   }
 
-  if (isStagePilotReviewOnlyMode() && pathname !== "/v1/live-architecture-run") {
+  if (
+    isStagePilotReviewOnlyMode() &&
+    pathname !== "/v1/live-architecture-run"
+  ) {
     sendJson(response, 403, {
       error:
         "read-only mode keeps public mutation routes disabled; use POST /v1/live-architecture-run instead.",

@@ -30,7 +30,8 @@ export const STAGEPILOT_REGRESSION_GATE_PACK_SCHEMA =
   "stagepilot-regression-gate-pack-v1";
 export const STAGEPILOT_ARCHITECTURE_RESOURCE_PACK_SCHEMA =
   "stagepilot-architecture-resource-pack-v1";
-export const STAGEPILOT_LIVE_REVIEW_SCHEMA = "stagepilot-live-architecture-run-v1";
+export const STAGEPILOT_LIVE_REVIEW_SCHEMA =
+  "stagepilot-live-architecture-run-v1";
 const CSV_ROW_SPLIT_REGEX = /\r?\n/;
 
 function buildStagePilotOperationalPosture(options: {

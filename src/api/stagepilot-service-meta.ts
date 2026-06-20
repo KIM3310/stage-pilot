@@ -585,7 +585,7 @@ export function buildStagePilotArchitectureResourcePack(options: {
       entrySurface: "/v1/runtime-brief",
       handoffSurface: "/v1/summary-pack",
       focus:
-        "Use when a architecture needs the shortest trustworthy path from readiness to proof.",
+        "Use when an architecture review needs the shortest trustworthy path from readiness to proof.",
     },
     {
       playbookId: "provider-tradeoff-review",

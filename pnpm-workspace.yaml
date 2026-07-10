@@ -1,5 +1,8 @@
 packages:
   - .
+onlyBuiltDependencies:
+  - esbuild
+  - protobufjs
 minimumReleaseAgeExclude:
   - esbuild@0.28.1
   - js-yaml@4.1.2

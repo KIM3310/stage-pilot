@@ -1409,7 +1409,7 @@ function _readStagePilotTraceObservabilityArtifact() {
       rule: "No checked-in trace artifact found.",
       watchCount: null,
     },
-    evaluationTier: "bounded-architecture-demo",
+    evaluationTier: "bounded-demo",
     tool: "checked-in frontier trace bundle",
     traces: [] as Array<{
       durationMs: number | null;

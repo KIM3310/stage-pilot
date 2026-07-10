@@ -18,6 +18,7 @@ MOD = runpy.run_path(str(SCRIPT_PATH))
 validate_args = MOD["validate_args"]
 validate_json_object = MOD["validate_json_object"]
 check_model_access = MOD["check_model_access"]
+NoRedirectHandler = MOD["NoRedirectHandler"]
 ensure_runtime_layout = MOD["ensure_runtime_layout"]
 build_markdown_report = MOD["build_markdown_report"]
 require_api_key = MOD["require_api_key"]
@@ -70,6 +71,20 @@ class TestRunOpenAICompatibleBfclRalph(unittest.TestCase):
             self.assertEqual(require_api_key(None), "test-key")
         self.assertEqual(require_api_key("cli-key"), "cli-key")
         self.assertEqual(require_base_url("https://example.com/v1/"), "https://example.com/v1")
+        self.assertEqual(
+            require_base_url("http://127.0.0.1:11434/v1/"),
+            "http://127.0.0.1:11434/v1",
+        )
+
+        for invalid_url in (
+            "file:///tmp/models",
+            "http://provider.example/v1",
+            "https://user:pass@provider.example/v1",
+            "https://provider.example/v1?tenant=one",
+        ):
+            with self.subTest(invalid_url=invalid_url):
+                with self.assertRaises(SystemExit):
+                    require_base_url(invalid_url)
 
     def test_check_model_access_rejects_invisible_model(self) -> None:
         payload = {"data": [{"id": "visible-model"}, {"id": "second-model"}]}
@@ -87,7 +102,10 @@ class TestRunOpenAICompatibleBfclRalph(unittest.TestCase):
             def read(self):
                 return payload_bytes
 
-        with patch("urllib.request.urlopen", lambda *args, **kwargs: _FakeResp()):
+        fake_opener = SimpleNamespace(open=lambda *args, **kwargs: _FakeResp())
+        with patch.dict(
+            check_model_access.__globals__, {"NO_REDIRECT_OPENER": fake_opener}
+        ):
             check_model_access(
                 api_key="key",
                 base_url="https://example.com/v1",
@@ -101,6 +119,19 @@ class TestRunOpenAICompatibleBfclRalph(unittest.TestCase):
                     model_name="missing-model",
                     default_headers_json=None,
                 )
+
+    def test_model_precheck_redirects_are_rejected(self) -> None:
+        handler = NoRedirectHandler()
+        self.assertIsNone(
+            handler.redirect_request(
+                req=None,
+                fp=None,
+                code=307,
+                msg="Temporary Redirect",
+                headers={},
+                newurl="https://attacker.example/models",
+            )
+        )
 
     def test_ensure_runtime_layout_writes_openai_env_file(self) -> None:
         with tempfile.TemporaryDirectory() as td:

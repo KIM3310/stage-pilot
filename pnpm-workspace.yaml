@@ -4,5 +4,11 @@ minimumReleaseAgeExclude:
   - esbuild@0.28.1
   - js-yaml@4.1.2
 overrides:
+  '@grpc/grpc-js': ^1.14.4
+  '@opentelemetry/core': ^2.8.0
+  protobufjs: ^7.6.3
+  shell-quote: ^1.8.4
+  vite: ^8.0.16
+  ws: ^8.20.1
   esbuild@>=0.27.3 <0.28.1: ^0.28.1
-  js-yaml@<=4.1.1: ^4.1.2
+  read-yaml-file@1.1.0: ^2.1.0

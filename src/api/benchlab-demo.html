@@ -468,7 +468,7 @@
           </p>
           <div class="pill-row" style="margin-top: 14px">
             <button class="ghost" id="copy-review-button" type="button">
-              Copy Architecture Path
+              Copy Evidence Path
             </button>
             <button class="ghost" id="copy-proof-button" type="button">
               Copy Routes
@@ -1982,7 +1982,7 @@ Loading checked-in artifact failure taxonomy.</pre
           ? state.summaryPack.architectureSequence
           : [
               els.briefArchitectureSequence.textContent ||
-                "Architecture path unavailable",
+                "Evidence path unavailable",
             ];
       const text = [
         "BenchLab evaluation path",
@@ -2002,16 +2002,12 @@ Loading checked-in artifact failure taxonomy.</pre
 
       try {
         await copyTextToClipboard(text);
-        flashButtonLabel(
-          els.copyReviewButton,
-          "Copy Architecture Path",
-          "Copied"
-        );
+        flashButtonLabel(els.copyReviewButton, "Copy Evidence Path", "Copied");
       } catch (error) {
-        console.warn("copy architecture path failed", error);
+        console.warn("copy evidence path failed", error);
         flashButtonLabel(
           els.copyReviewButton,
-          "Copy Architecture Path",
+          "Copy Evidence Path",
           "Copy failed"
         );
       }

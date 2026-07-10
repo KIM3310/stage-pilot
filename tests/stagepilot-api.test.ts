@@ -30,8 +30,7 @@ const OPERATOR_OIDC_AUDIENCE_ENV_SNAPSHOT =
   process.env[OPERATOR_OIDC_AUDIENCE_ENV_KEY];
 const OPERATOR_OIDC_JWKS_ENV_SNAPSHOT = process.env[OPERATOR_OIDC_JWKS_ENV_KEY];
 const HTTP_STATUS_LINE_REGEX = /^HTTP\/1\.1 (\d{3})/m;
-const ARCHITECTURE_CLAIM_TIER_REGEX =
-  /runtime-backed-architecture-ready|bounded-architecture-demo/;
+const EVALUATION_TIER_REGEX = /^(runtime-backed|bounded-demo)$/;
 const OPENCLAW_WEBHOOK_ENV_SNAPSHOT = process.env[OPENCLAW_WEBHOOK_ENV_KEY];
 const OPENAI_API_KEY_ENV_SNAPSHOT = process.env[OPENAI_API_KEY_ENV_KEY];
 const OPENAI_KILL_SWITCH_ENV_SNAPSHOT = process.env[OPENAI_KILL_SWITCH_ENV_KEY];
@@ -862,7 +861,7 @@ describeIfSocketBinding("stagepilot api server", () => {
     expect(body.architecturePath.length).toBeGreaterThanOrEqual(3);
   });
 
-  it("returns provider benchmark scorecard for frontier architecture posture", async () => {
+  it("returns provider benchmark scorecard for frontier review posture", async () => {
     const { baseUrl } = await startServer({
       engine: new StagePilotEngine(),
     });
@@ -988,7 +987,7 @@ describeIfSocketBinding("stagepilot api server", () => {
 
     expect(body.schema).toBe("stagepilot-trace-observability-pack-v1");
     expect(body.headline).toContain("Trace observability pack");
-    expect(body.summary.gate).toBe("bounded-architecture-ready");
+    expect(body.summary.gate).toBe("bounded");
     expect(body.summary.topStrategy).not.toBeNull();
     expect(body.summary.totalTraces).toBeGreaterThanOrEqual(4);
     expect(
@@ -1037,9 +1036,7 @@ describeIfSocketBinding("stagepilot api server", () => {
     expect(body.headline).toContain("Regression gate pack");
     expect(body.summary.topStrategy).not.toBeNull();
     expect(body.summary.gateCount).toBeGreaterThanOrEqual(5);
-    expect(body.releaseRecommendation.posture).toBe(
-      "architecture-ready-with-watch-items"
-    );
+    expect(body.releaseRecommendation.posture).toBe("promote-with-watch-items");
     expect(
       body.gates.some((item) => item.gate === "mixed-format-regression-watch")
     ).toBe(true);
@@ -1280,7 +1277,7 @@ describeIfSocketBinding("stagepilot api server", () => {
       "site/"
     );
     expect(body.evidenceBundle.evaluationPosture.claimTier).toMatch(
-      ARCHITECTURE_CLAIM_TIER_REGEX
+      EVALUATION_TIER_REGEX
     );
     expect(body.evidenceBundle.evaluationPosture.claimRule).toContain(
       "supporting docs"

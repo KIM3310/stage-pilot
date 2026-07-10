@@ -20,29 +20,29 @@ Architecture pack: [`docs/architecture-pack.md`](docs/architecture-pack.md)
 3. Run `npm run verify` or the equivalent pnpm command for checks, tests, and build.
 4. Use `pnpm api:stagepilot` only after the package proof is clear.
 
-## Product and System Surface
+## System Overview
 
 | Lens | Current answer |
 |---|---|
-| Audience | AI platform teams and developer-tool teams shipping agents that must survive malformed tool output. |
-| Architecture path | Validate the demo, README, architecture notes, and quality gate before deeper workflow architecture. |
-| System signal | Published package surface, deterministic mutation benchmark, parser recovery, retry loop, and telemetry-ready runtime. |
-| Safety boundary | Tool schemas and retries are explicit; benchmark fixtures are synthetic and provider-neutral. |
-| Fast path | `pnpm test`, `pnpm build`, [`docs/architecture-pack.md`](docs/architecture-pack.md), and the 25% to 90% benchmark claim. |
+| Users | AI platform teams and developer-tool teams shipping agents that must survive malformed tool output. |
+| Technical path | Validate the demo, README, architecture notes, and quality gate before deeper workflow review. |
+| System scope | Published package surface, deterministic mutation benchmark, parser recovery, retry loop, and telemetry-ready runtime. |
+| Operating boundary | Tool schemas and retries are explicit; benchmark fixtures are synthetic and provider-neutral. |
+| Evaluation path | `pnpm test`, `pnpm build`, [`docs/architecture-pack.md`](docs/architecture-pack.md), and the 25% to 90% benchmark claim. |
 
-## System Fast Path
+## Evaluation Path
 
-- **First minute:** Read the 25% to 90% benchmark claim, then inspect parser recovery and mutation fixtures.
+- **Start here:** Read the 25% to 90% benchmark claim, then inspect parser recovery and mutation fixtures.
 - **Local demo:** Install with `pnpm install`, then run `pnpm api:stagepilot` and open `http://127.0.0.1:8080/demo`.
-- **Verification:** Run `npm run verify` or the equivalent package-manager command for check, tests, and build.
+- **Checks:** Run `npm run verify` or the equivalent package-manager command for check, tests, and build.
 
 ## Service Launch Playbook
 
-- [Service launch playbook](docs/service-launch-playbook.md) maps the repository to architecture audiences, operating gates, operating boundaries, and risk controls.
+- [Service launch playbook](docs/service-launch-playbook.md) maps the repository to its product scope, operating gates, operating boundaries, and risk controls.
 
 ## Architecture Notes
 
-- [Architecture guide](docs/architecture-evidence-map.md) summarizes the project angle, first files to inspect, runtime commands, and known boundaries.
+- [Architecture guide](docs/architecture-evidence-map.md) summarizes the system scope, first files to inspect, runtime commands, and known boundaries.
 - [Quality notes](docs/quality-gate.md) lists the local checks, CI surface, and release expectations for this repository.
 - [Enterprise readiness notes](docs/enterprise-readiness.md) outlines security, data, operations, integration, and handoff expectations.
 
@@ -165,7 +165,7 @@ sequenceDiagram
     O-->>T: outreach_span
 
     O->>J: Execution results
-    J->>J: Quality score (0-100) + architecture
+    J->>J: Quality score (0-100) + review
     J-->>T: judge_span
 
     alt Score < threshold
@@ -424,15 +424,13 @@ Apache-2.0
 
 ## Cloud + AI Architecture
 
-This repository includes a neutral cloud and AI engineering blueprint that maps the current proof surface to runtime boundaries, data contracts, model-risk controls, deployment posture, and validation hooks.
-
 - [Cloud + AI architecture blueprint](docs/cloud-ai-architecture.md)
 - [Machine-readable architecture manifest](docs/architecture/blueprint.json)
 - Validation command: `python3 scripts/validate_architecture_blueprint.py`
 
 ## Enterprise Productization
 
-- [Product operating model](docs/product-operating-model.md) defines the architecture inspection, trust boundary, trust boundary, operating checks, and service path for this repository.
+- [Product operating model](docs/product-operating-model.md) defines the product scope, trust boundary, operating checks, and service path for this repository.
 
 ## System Architecture
 

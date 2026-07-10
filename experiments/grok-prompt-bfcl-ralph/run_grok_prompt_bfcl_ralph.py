@@ -19,6 +19,14 @@ from types import SimpleNamespace
 from typing import Any, Callable
 
 
+class NoRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+NO_REDIRECT_OPENER = urllib.request.build_opener(NoRedirectHandler())
+
+
 DEFAULT_CATEGORIES = [
     "simple_python",
     "multiple",
@@ -677,7 +685,7 @@ def check_grok_api_key(key: str, model_name: str | None = None) -> None:
         headers={"Authorization": f"Bearer {key}"},
     )
     try:
-        with urllib.request.urlopen(req, timeout=20) as resp:
+        with NO_REDIRECT_OPENER.open(req, timeout=20) as resp:
             if resp.status != 200:
                 raise RuntimeError(f"Unexpected status from xAI API: {resp.status}")
             payload_text = resp.read().decode("utf-8", "ignore")

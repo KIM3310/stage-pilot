@@ -1,7 +1,7 @@
 # Product Operating Model
 
 Repository: `stage-pilot`
-Last updated: 2026-06-03 KST
+Last reviewed: 2026-06-03 KST
 
 ## Enterprise Product Position
 

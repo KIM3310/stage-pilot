@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import os
 import runpy
@@ -9,6 +10,7 @@ import shutil
 import threading
 import urllib.error
 import urllib.request
+from urllib.parse import urlsplit
 from copy import deepcopy
 from datetime import datetime, timezone
 from pathlib import Path
@@ -50,6 +52,8 @@ resolve_report_markdown_path = SHARED["resolve_report_markdown_path"]
 resolve_error_report_json_path = SHARED["resolve_error_report_json_path"]
 clear_stale_output_file = SHARED["clear_stale_output_file"]
 resolve_categories_for_run_ids = SHARED["resolve_categories_for_run_ids"]
+NoRedirectHandler = SHARED["NoRedirectHandler"]
+NO_REDIRECT_OPENER = urllib.request.build_opener(NoRedirectHandler())
 
 
 def env_or_none(*names: str) -> str | None:
@@ -282,6 +286,26 @@ def require_base_url(cli_value: str | None) -> str:
             "Base URL is required. Set OPENAI_COMPATIBLE_BASE_URL / OPENAI_BASE_URL "
             "or pass --base-url."
         )
+    parsed = urlsplit(base_url)
+    if parsed.scheme.lower() not in {"http", "https"} or not parsed.hostname:
+        raise SystemExit("Base URL must be an absolute HTTP(S) URL.")
+    if parsed.username is not None or parsed.password is not None:
+        raise SystemExit("Base URL must not contain embedded credentials.")
+    if parsed.query or parsed.fragment:
+        raise SystemExit("Base URL must not contain a query string or fragment.")
+    try:
+        parsed.port
+    except ValueError as exc:
+        raise SystemExit(f"Base URL has an invalid port: {exc}") from exc
+
+    hostname = parsed.hostname.rstrip(".").lower()
+    try:
+        is_loopback = ipaddress.ip_address(hostname).is_loopback
+    except ValueError:
+        is_loopback = hostname == "localhost" or hostname.endswith(".localhost")
+    if parsed.scheme.lower() != "https" and not is_loopback:
+        raise SystemExit("Base URL must use HTTPS unless it targets local loopback.")
+
     return base_url.rstrip("/")
 
 
@@ -303,7 +327,7 @@ def check_model_access(
         headers=build_request_headers(api_key, default_headers_json),
     )
     try:
-        with urllib.request.urlopen(req, timeout=20) as resp:
+        with NO_REDIRECT_OPENER.open(req, timeout=20) as resp:
             if resp.status != 200:
                 raise RuntimeError(f"Unexpected status from model API: {resp.status}")
             payload_text = resp.read().decode("utf-8", "ignore")

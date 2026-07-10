@@ -432,8 +432,8 @@
               vague anecdotes.
             </li>
             <li>
-              Operator architecture surfaces and developer-ops lanes can be
-              documented separately from the core parser package.
+              Operator review surfaces and developer-ops lanes can be documented
+              separately from the core parser package.
             </li>
             <li>
               A static dashboard can still explain trust boundaries, benchmark
@@ -478,7 +478,7 @@
         <h2 id="lensHeadline">Quick start evidence path</h2>
         <p id="lensSummary" class="hint">
           Start with benchmark lift, then show the parser recovery story, then
-          end with the copyable architecture path.
+          end with the copyable evidence path.
         </p>
         <div id="lensGrid" class="lens-grid">
           <article class="lens-card">
@@ -493,10 +493,10 @@
             </p>
           </article>
           <article class="lens-card">
-            <strong>03 · Architecture handoff</strong>
+            <strong>03 · Operator handoff</strong>
             <p>
-              Copy the architecture path once the benchmark story is already
-              easy to repeat.
+              Copy the evidence path once the benchmark story is already easy to
+              repeat.
             </p>
           </article>
         </div>
@@ -558,12 +558,12 @@
       <section class="panel quick-actions">
         <h2>Benchmark handoff bar</h2>
         <p class="hint">
-          Shortcut keys: C architecture path · B benchmark brief · L launch deck
-          · ? help
+          Shortcut keys: C evidence path · B benchmark brief · L launch deck · ?
+          help
         </p>
         <div class="action-row">
           <button id="copyArchitecturePathBtn" class="action-btn" type="button">
-            Copy Architecture Path
+            Copy Evidence Path
           </button>
           <button
             id="copyArchitectureBriefBtn"
@@ -578,8 +578,8 @@
         </div>
         <p id="quickActionStatus" class="hint">
           Use this bar when you need the benchmark story, not the whole repo
-          tour. Shortcut keys: C architecture path · B benchmark brief · L
-          launch deck · ? help
+          tour. Shortcut keys: C evidence path · B benchmark brief · L launch
+          deck · ? help
         </p>
       </section>
       <!-- search-growth-offer:start -->
@@ -681,9 +681,9 @@
       architecturePath: {
         buttonId: "copyArchitecturePathBtn",
         payload:
-          "StagePilot architecture path\n- Read the validation data guide for the fastest grounded walkthrough.\n- Read the executive one-pager for the benchmark claim.\n- Open solution architecture for runtime boundaries.\n- Check the latest benchmark artifact before repeating the lift numbers.\n- Use the operator runbook only when the hosted runtime is actually involved.",
-        successLabel: "Architecture path copied.",
-        failureLabel: "Failed to copy architecture path.",
+          "StagePilot evidence path\n- Read the validation data guide for the fastest grounded walkthrough.\n- Read the executive one-pager for the benchmark claim.\n- Open solution architecture for runtime boundaries.\n- Check the latest benchmark artifact before repeating the lift numbers.\n- Use the operator runbook only when the hosted runtime is actually involved.",
+        successLabel: "Evidence path copied.",
+        failureLabel: "Failed to copy evidence path.",
       },
       architectureBrief: {
         buttonId: "copyArchitectureBriefBtn",
@@ -695,7 +695,7 @@
       launchDeck: {
         buttonId: "copyLaunchDeckBtn",
         payload:
-          "StagePilot launch deck\n- pnpm install\n- pnpm review:proof\n- pnpm build\n- pnpm check\n- pnpm exercise:runtime\n- Review benchmark and benchlab proof before hosted launch claims.",
+          "StagePilot launch deck\n- pnpm install\n- node scripts/validation-summary.mjs\n- pnpm build\n- pnpm check\n- pnpm exercise:runtime\n- Review benchmark and benchlab proof before hosted launch claims.",
         successLabel: "Launch deck copied.",
         failureLabel: "Failed to copy launch deck.",
       },
@@ -705,7 +705,7 @@
       quickstart: {
         headline: "Quick start evidence path",
         summary:
-          "Start with benchmark lift, then show the parser recovery story, then end with the copyable architecture path.",
+          "Start with benchmark lift, then show the parser recovery story, then end with the copyable evidence path.",
         cards: [
           [
             "01 · Raw baseline",
@@ -716,13 +716,13 @@
             "Use the middleware lift as the real product proof, not as a side note.",
           ],
           [
-            "03 · Architecture handoff",
-            "Copy the architecture path once the benchmark story is already easy to repeat.",
+            "03 · Operator handoff",
+            "Copy the evidence path once the benchmark story is already easy to repeat.",
           ],
         ],
       },
       evaluation: {
-        headline: "Architecture lens",
+        headline: "Evaluation lens",
         summary:
           "Use this when the audience cares more about benchmark rigor, checked-in artifacts, and trust boundary than the parser headline alone.",
         cards: [
@@ -755,7 +755,7 @@
           ],
           [
             "03 · Repeatable route",
-            "Use the doctor deck and architecture path to keep the runtime story reproducible.",
+            "Use the doctor deck and evidence path to keep the runtime story reproducible.",
           ],
         ],
       },
@@ -849,7 +849,7 @@
       if (key === "?") {
         event.preventDefault();
         updateQuickActionStatus(
-          "Shortcut keys: C architecture path · B benchmark brief · L launch deck · ? help"
+          "Shortcut keys: C evidence path · B benchmark brief · L launch deck · ? help"
         );
         return;
       }

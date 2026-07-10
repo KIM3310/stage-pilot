@@ -28,6 +28,7 @@ sanitize_result_files_to_allowed_functions = MOD[
 validate_args = MOD["validate_args"]
 validate_run_ids_categories = MOD["validate_run_ids_categories"]
 check_grok_api_key = MOD["check_grok_api_key"]
+NoRedirectHandler = MOD["NoRedirectHandler"]
 require_grok_api_key = MOD["require_grok_api_key"]
 resolve_categories_for_run_ids = MOD["resolve_categories_for_run_ids"]
 resolve_runtime_categories = MOD["resolve_runtime_categories"]
@@ -269,12 +270,28 @@ class TestRunGrokBfclRalph(unittest.TestCase):
             def read(self):
                 return payload_bytes
 
-        with patch("urllib.request.urlopen", lambda *args, **kwargs: _FakeResp()):
+        fake_opener = SimpleNamespace(open=lambda *args, **kwargs: _FakeResp())
+        with patch.dict(
+            check_grok_api_key.__globals__, {"NO_REDIRECT_OPENER": fake_opener}
+        ):
             # Visible model should pass.
             check_grok_api_key("xai-abc", model_name="grok-4-1-fast-reasoning")
             # Invisible model should be rejected.
             with self.assertRaises(SystemExit):
                 check_grok_api_key("xai-abc", model_name="grok-4-1-fast-non-reasoning")
+
+    def test_api_precheck_redirects_are_rejected(self) -> None:
+        handler = NoRedirectHandler()
+        self.assertIsNone(
+            handler.redirect_request(
+                req=None,
+                fp=None,
+                code=302,
+                msg="Found",
+                headers={},
+                newurl="https://attacker.example/models",
+            )
+        )
 
     def test_resolve_categories_for_run_ids_reports_missing_dependency(self) -> None:
         real_import = __import__

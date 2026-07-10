@@ -35,7 +35,7 @@
   <text x="68" y="444" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">/v1/benchlab/runtime-brief   /v1/benchlab/summary-pack   /v1/benchlab/schema/job-report</text>
 
   <rect x="484" y="294" width="428" height="176" rx="16" fill="#0F172A" stroke="#334155"/>
-  <text x="504" y="324" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">Architecture Sequence</text>
+  <text x="504" y="324" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="18" font-weight="700">Review Sequence</text>
   <text x="504" y="356" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">1. Confirm runtime and integration posture.</text>
   <text x="504" y="384" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">2. Inspect benchmark lift or checked-in claim delta.</text>
   <text x="504" y="412" fill="#CBD5E1" font-family="Arial, sans-serif" font-size="14">3. Run plan or compare surfaces before promoting any claim.</text>

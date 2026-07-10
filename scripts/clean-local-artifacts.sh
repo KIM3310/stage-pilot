@@ -28,6 +28,8 @@ cleanup_patterns=(
 removed_any=0
 
 for pattern in "${cleanup_patterns[@]}"; do
+  # The cleanup patterns are repo-owned glob literals; expand them intentionally.
+  # shellcheck disable=SC2206
   matches=( $pattern )
   if [ ${#matches[@]} -eq 0 ]; then
     continue

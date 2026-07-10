@@ -121,23 +121,10 @@
     "vitest": "^4.1.8",
     "zod": "^4.4.3"
   },
-  "packageManager": "pnpm@9.14.4",
+  "packageManager": "pnpm@11.11.0",
   "engines": {
     "node": "^20.19.0 || >=22.12.0",
-    "pnpm": ">=9"
+    "pnpm": ">=11"
   },
-  "license": "Apache-2.0",
-  "pnpm": {
-    "overrides": {
-      "@grpc/grpc-js": "^1.14.4",
-      "@opentelemetry/core": "^2.8.0",
-      "protobufjs": "^7.6.3",
-      "shell-quote": "^1.8.4",
-      "vite": "^8.0.16"
-    }
-  },
-  "overrides": {
-    "esbuild": "^0.28.1",
-    "ws": "^8.20.1"
-  }
+  "license": "Apache-2.0"
 }

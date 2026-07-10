@@ -1003,7 +1003,7 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
   const providers = [
     {
       provider: "openai-compatible",
-      posture: "architecture-ready",
+      posture: "benchmark-backed",
       contractConfidencePct: Math.round(middlewareRate),
       latencyBandMs: "350-900",
       costBand: "high",
@@ -1023,7 +1023,7 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
     },
     {
       provider: "anthropic-xml-style",
-      posture: loopRate >= 85 ? "architecture-ready" : "attention",
+      posture: loopRate >= 85 ? "benchmark-backed" : "attention",
       contractConfidencePct: Math.round(
         Math.min(100, baselineRate + parserLift + recoveryLift)
       ),
@@ -1041,7 +1041,7 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
     },
     {
       provider: "gemini-hybrid",
-      posture: middlewareRate >= 80 ? "architecture-ready" : "attention",
+      posture: middlewareRate >= 80 ? "benchmark-backed" : "attention",
       contractConfidencePct: Math.round((middlewareRate + loopRate) / 2),
       latencyBandMs: "500-1400",
       costBand: "medium-high",
@@ -1061,7 +1061,7 @@ export function buildStagePilotProviderBenchmarkScorecard(options: {
     },
     {
       provider: "local-oss",
-      posture: baselineRate >= 65 ? "architecture-ready" : "attention",
+      posture: baselineRate >= 65 ? "benchmark-backed" : "attention",
       contractConfidencePct: Math.round(loopRate),
       latencyBandMs: "120-450",
       costBand: "low",
@@ -1349,7 +1349,7 @@ export function buildStagePilotRegressionGatePack(options: {
     operatorNotes: [
       "This is a checked-in release board, not a substitute for live production SLO ownership.",
       "The value is explicit promotion logic: what would make a benchmark claim stronger, weaker, or blocked.",
-      "Use this pack when an architecture inspection asks how you decide whether a reliability surface is ready to be trusted more broadly.",
+      "Use this pack when a platform reviewer asks how you decide whether a reliability surface is ready to be trusted more broadly.",
     ],
     proofAssets: [
       {
@@ -1457,7 +1457,7 @@ export function buildStagePilotRuntimeScorecard(options: {
     recommendations: [
       options.geminiHasApiKey
         ? "Gemini readiness is present. Validate fresh planning runs after any prompt or parser change."
-        : "Configure GEMINI_API_KEY to move from deterministic architecture surfaces to live synthesis validation.",
+        : "Configure GEMINI_API_KEY to move from deterministic review surfaces to live synthesis validation.",
       options.openClawConfigured
         ? "OpenClaw delivery is configured. Keep notify as a final operator-confirmed step."
         : "Configure OpenClaw delivery before claiming end-to-end orchestration readiness.",
@@ -1780,8 +1780,8 @@ export function buildStagePilotSummaryPack(options: {
           "@ai-sdk-tool/parser package plus /v1/runtime-brief and /v1/summary-pack",
         docsOnlySurfaces: ["docs/summary-pack.svg", "site/"],
         claimTier: benchmarkReadyForPromotion
-          ? "runtime-backed-architecture-ready"
-          : "bounded-architecture-demo",
+          ? "runtime-backed"
+          : "bounded-demo",
         claimRule:
           "Treat static/docs surfaces as supporting docs, then repeat runtime claims only after the benchmark and live summary-pack surfaces agree.",
       },

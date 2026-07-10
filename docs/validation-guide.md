@@ -21,7 +21,7 @@ If docs and API disagree, trust the benchmark artifact.
 
 ```bash
 pnpm install
-pnpm architecture:proof
+node scripts/validation-summary.mjs
 pnpm api:stagepilot
 # open http://127.0.0.1:8080/demo
 ```
@@ -59,7 +59,7 @@ Checked-in benchmark snapshot:
 
 ## Two-minute version
 
-- `pnpm architecture:proof`
+- `node scripts/validation-summary.mjs`
 - `docs/benchmarks/stagepilot-latest.json`
 - `/v1/summary-pack`
 - `docs/solution-architecture.md`

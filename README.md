@@ -448,6 +448,7 @@ Apache-2.0
 - Paid boundary: paid hosted regression workspace, private benchmark scenarios, and provider routing dashboard
 - Canonical URL: https://stage-pilot.pages.dev/
 - Lead capture: https://github.com/KIM3310/stage-pilot/issues/new?template=service-inquiry.yml&title=Private+workspace+inquiry%3A+StagePilot
+- Commercial route: https://kim3310-doeon-kim-portfolio.pages.dev/?offer=stage-pilot#service-offers
 - Machine-readable offer: [docs/service-offer.json](docs/service-offer.json)
 - Search growth implementation: [docs/search-growth-implementation.md](docs/search-growth-implementation.md)
 - Revenue architecture: [docs/revenue-architecture.md](docs/revenue-architecture.md)

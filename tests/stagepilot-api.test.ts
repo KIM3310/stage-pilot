@@ -43,7 +43,7 @@ function encodeBase64Url(value: string): string {
     .toString("base64")
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
-    .replace(/=+$/g, "");
+    .replace(/[=]+$/g, "");
 }
 
 function createOidcToken(options: {
@@ -79,7 +79,7 @@ function createOidcToken(options: {
     .toString("base64")
     .replace(/\+/g, "-")
     .replace(/\//g, "_")
-    .replace(/=+$/g, "");
+    .replace(/[=]+$/g, "");
   return {
     jwksJson: JSON.stringify({
       keys: [{ ...publicJwk, alg: "RS256", kid, use: "sig" }],

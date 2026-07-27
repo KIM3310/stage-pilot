@@ -1,16 +1,37 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "extends": ["ultracite/biome/core"],
+  "assist": {
+    "actions": {
+      "source": {
+        "useSortedAttributes": "off",
+        "useSortedKeys": "off"
+      }
+    }
+  },
   "files": {
-    "includes": ["!!.changeset", "!!src/api/stagepilot-demo.html"]
+    "includes": ["!!.changeset", "!!src/api/stagepilot-demo.html", "!!**/*.svg"]
   },
   "linter": {
     "rules": {
+      "complexity": {
+        "noUselessReturn": "off"
+      },
+      "performance": {
+        "noAwaitInLoops": "off"
+      },
       "suspicious": {
-        "noConsole": "off"
+        "noConsole": "off",
+        "noEqualsToNull": "off",
+        "noShadow": "off",
+        "noUnnecessaryConditions": "off"
       },
       "style": {
-        "noMagicNumbers": "off"
+        "noIncrementDecrement": "off",
+        "noMagicNumbers": "off",
+        "useConsistentMethodSignatures": "off",
+        "useDestructuring": "off",
+        "useErrorCause": "off"
       }
     }
   }

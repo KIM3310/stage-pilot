@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="960" height="540" viewBox="0 0 960 540" fill="none">
+  <title>StagePilot architecture and benchmark summary</title>
   <rect width="960" height="540" fill="#0B0E14"/>
   <rect x="24" y="24" width="912" height="492" rx="24" fill="#111827" stroke="#2A3444"/>
   <text x="48" y="62" fill="#F8FAFC" font-family="Arial, sans-serif" font-size="26" font-weight="700">StagePilot Summary Pack</text>

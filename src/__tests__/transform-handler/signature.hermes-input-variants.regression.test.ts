@@ -60,7 +60,7 @@ describe("transformParams hermes tool-call signature regression", () => {
     const assistantMsg = out.prompt.find((m: any) => m.role === "assistant");
     expect(assistantMsg).toBeTruthy();
 
-    const assistantText = (assistantMsg?.content as any[])
+    const assistantText = ((assistantMsg?.content ?? []) as any[])
       .filter((c: any) => c.type === "text")
       .map((c: any) => c.text)
       .join("");
@@ -111,7 +111,7 @@ describe("transformParams hermes tool-call signature regression", () => {
     const assistantMsg = out.prompt.find((m: any) => m.role === "assistant");
     expect(assistantMsg).toBeTruthy();
 
-    const assistantText = (assistantMsg?.content as any[])
+    const assistantText = ((assistantMsg?.content ?? []) as any[])
       .filter((c: any) => c.type === "text")
       .map((c: any) => c.text)
       .join("");
@@ -162,7 +162,7 @@ describe("transformParams hermes tool-call signature regression", () => {
     const assistantMsg = out.prompt.find((m: any) => m.role === "assistant");
     expect(assistantMsg).toBeTruthy();
 
-    const assistantText = (assistantMsg?.content as any[])
+    const assistantText = ((assistantMsg?.content ?? []) as any[])
       .filter((c: any) => c.type === "text")
       .map((c: any) => c.text)
       .join("");
@@ -238,7 +238,7 @@ describe("transformParams hermes tool-call signature regression", () => {
     const assistantMsg = out.prompt.find((m: any) => m.role === "assistant");
     expect(assistantMsg).toBeTruthy();
 
-    const assistantText = (assistantMsg?.content as any[])
+    const assistantText = ((assistantMsg?.content ?? []) as any[])
       .filter((c: any) => c.type === "text")
       .map((c: any) => c.text)
       .join("");

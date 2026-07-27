@@ -1,5 +1,6 @@
 import { performance } from "node:perf_hooks";
 import type {
+  JSONSchema7,
   LanguageModelV3Content,
   LanguageModelV3FunctionTool,
 } from "@ai-sdk/provider";
@@ -127,7 +128,7 @@ const MUTATION_SEQUENCE: MutationMode[] = [
   "partial-schema",
   "xml-attribute-style",
 ];
-const TOOL_INPUT_SCHEMA = {
+const TOOL_INPUT_SCHEMA: JSONSchema7 = {
   additionalProperties: true,
   properties: {
     caseId: { type: "string" },

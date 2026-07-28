@@ -13,8 +13,8 @@ Commercial route: https://kim3310-doeon-kim-portfolio.pages.dev/?offer=stage-pil
 
 Use this project as a runnable or inspectable reference for StagePilot demo, StagePilot system architecture, StagePilot developer tool, tool-calling reliability gateway with regression tests, provider scorecards, and trace observability service.
 # ADSENSE-PUBLICATION:START
-Editorial guide: https://stage-pilot.pages.dev/guide.html
-Architecture article: https://stage-pilot.pages.dev/architecture.html
-Verification article: https://stage-pilot.pages.dev/verification.html
-Publisher information: https://stage-pilot.pages.dev/publisher.html
+Editorial guide: https://stage-pilot.pages.dev/guide
+Architecture article: https://stage-pilot.pages.dev/architecture
+Verification article: https://stage-pilot.pages.dev/verification
+Publisher information: https://stage-pilot.pages.dev/publisher
 # ADSENSE-PUBLICATION:END

@@ -41,12 +41,12 @@ for (const name of ["publisher.html", "privacy.html", "terms.html"]) {
 const sitemap = read("sitemap.xml");
 for (const route of [
   "/",
-  "/guide.html",
-  "/architecture.html",
-  "/verification.html",
-  "/publisher.html",
-  "/privacy.html",
-  "/terms.html",
+  "/guide",
+  "/architecture",
+  "/verification",
+  "/publisher",
+  "/privacy",
+  "/terms",
 ]) {
   assert.ok(
     sitemap.includes(`<loc>${origin}${route}</loc>`),

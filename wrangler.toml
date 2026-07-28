@@ -15,6 +15,11 @@ main = "src/api/worker-entry.ts"
 compatibility_date = "2024-12-01"
 compatibility_flags = ["nodejs_compat"]
 
+[assets]
+directory = "./site"
+binding = "ASSETS"
+run_worker_first = true
+
 # Account-level settings (set via env or wrangler login)
 # account_id = ""
 

@@ -25,9 +25,22 @@ interface ExportedHandler<E = Record<string, unknown>> {
 
 export interface Env {
   APP_ENV?: string;
+  ASSETS?: {
+    fetch(request: Request): Promise<Response>;
+  };
   DEPLOYMENT_TRACK?: string;
   STAGEPILOT_CORS_ORIGINS?: string;
 }
+
+const STATIC_ROOT_PATHS = new Set([
+  "/ads.txt",
+  "/robots.txt",
+  "/sitemap.xml",
+  "/privacy.html",
+  "/terms.html",
+  "/llms.txt",
+  "/service-offer.json",
+]);
 
 const BASE_JSON_HEADERS = {
   "Content-Type": "application/json; charset=utf-8",
@@ -79,9 +92,21 @@ function withCorsHeaders(
 }
 
 export default {
-  fetch(request: Request, env: Env, _ctx: ExecutionContext): Response {
+  async fetch(
+    request: Request,
+    env: Env,
+    _ctx: ExecutionContext
+  ): Promise<Response> {
     const url = new URL(request.url);
     const { pathname } = url;
+
+    if (
+      request.method === "GET" &&
+      env.ASSETS &&
+      STATIC_ROOT_PATHS.has(pathname)
+    ) {
+      return await env.ASSETS.fetch(request);
+    }
 
     // CORS preflight
     if (request.method === "OPTIONS") {

@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project Guide | StagePilot</title>
+  <meta name="description" content="Free tool-call reliability guide for parser recovery, fixtures, and deterministic runtime checks. Source-backed guide for TypeScript agent-runtime…">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <meta name="google-adsense-account" content="ca-pub-4973160293737562">
+  <link rel="canonical" href="https://stage-pilot.pages.dev/guide.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Project Guide | StagePilot">
+  <meta property="og:description" content="Free tool-call reliability guide for parser recovery, fixtures, and deterministic runtime checks. Source-backed guide for TypeScript agent-runtime maintainers.">
+  <meta property="og:url" content="https://stage-pilot.pages.dev/guide.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"Project Guide | StagePilot","description":"Free tool-call reliability guide for parser recovery, fixtures, and deterministic runtime checks. Source-backed guide for TypeScript agent-runtime maintainers.","url":"https://stage-pilot.pages.dev/guide.html","dateModified":"2026-07-28","author":{"@type":"Person","name":"KIM3310","url":"https://github.com/KIM3310"},"publisher":{"@type":"Person","name":"KIM3310","url":"https://kim3310-doeon-kim-portfolio.pages.dev"},"isAccessibleForFree":true}</script>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4973160293737562" crossorigin="anonymous"></script>
+  <style>
+    :root { color-scheme: light; --ink: #17201f; --muted: #52605d; --line: #cbd2ce; --paper: #ffffff; --ground: #f5f6f4; --green: #126455; --coral: #c94732; --gold: #b67a00; }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--ground); color: var(--ink); font: 17px/1.72 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+    a { color: var(--green); text-underline-offset: 3px; }
+    .site-header { border-bottom: 1px solid var(--line); background: rgba(245, 246, 244, .97); }
+    .site-nav, .article-shell, .site-footer-inner { width: min(920px, calc(100% - 32px)); margin: 0 auto; }
+    .site-nav { min-height: 62px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .site-nav strong { font-size: .92rem; }
+    .nav-links { display: flex; flex-wrap: wrap; gap: 14px; font-size: .84rem; }
+    .article-shell { padding: 54px 0 72px; }
+    .breadcrumbs { color: var(--muted); font-size: .82rem; }
+    .article-intro { padding: 28px 0 36px; border-bottom: 2px solid var(--ink); }
+    .kicker { color: var(--coral); font-size: .76rem; font-weight: 800; text-transform: uppercase; }
+    h1 { margin: 10px 0 16px; max-width: 18ch; font-size: 3.5rem; line-height: 1.04; letter-spacing: 0; overflow-wrap: anywhere; }
+    .lede { max-width: 68ch; color: var(--muted); font-size: 1.08rem; }
+    .review-note { margin-top: 18px; color: var(--muted); font-size: .84rem; }
+    article { padding-top: 24px; }
+    article h2 { margin: 42px 0 12px; padding-top: 6px; font-size: 1.75rem; line-height: 1.2; letter-spacing: 0; }
+    article h3 { margin: 30px 0 8px; font-size: 1.2rem; letter-spacing: 0; }
+    article h4 { margin: 24px 0 6px; font-size: 1.02rem; letter-spacing: 0; }
+    article p, article li { max-width: 76ch; }
+    article li + li { margin-top: 6px; }
+    pre { max-width: 100%; overflow: auto; border-left: 4px solid var(--gold); background: #1d2423; color: #f6f8f7; padding: 18px; border-radius: 4px; font-size: .86rem; }
+    code { overflow-wrap: anywhere; }
+    :not(pre) > code { border: 1px solid var(--line); background: var(--paper); padding: 1px 5px; border-radius: 3px; font-size: .9em; }
+    .table-scroll { overflow-x: auto; margin: 20px 0; }
+    table { width: 100%; border-collapse: collapse; background: var(--paper); font-size: .9rem; }
+    th, td { border: 1px solid var(--line); padding: 10px; text-align: left; vertical-align: top; }
+    th { background: #e9eeeb; }
+    .boundary-note { margin: 30px 0 4px; border-left: 4px solid var(--coral); background: var(--paper); padding: 18px; }
+    .source-basis { margin-top: 48px; border-top: 1px solid var(--line); padding-top: 22px; color: var(--muted); }
+    .site-footer { border-top: 1px solid var(--line); background: var(--paper); }
+    .site-footer-inner { padding: 28px 0 44px; color: var(--muted); font-size: .84rem; }
+    .site-footer-links { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 12px; }
+    @media (max-width: 720px) {
+      .site-nav { align-items: flex-start; flex-direction: column; padding: 14px 0; }
+      .article-shell { padding-top: 32px; }
+      h1 { font-size: 2.35rem; }
+    }
+  </style>
+</head>
+<body data-ad-surface="editorial">
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Primary">
+      <strong>StagePilot</strong>
+      <div class="nav-links"><a href="/">Home</a><a href="/guide.html">Project guide</a><a href="/architecture.html">Architecture</a><a href="/verification.html">Verification</a><a href="/publisher.html">Publisher</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></div>
+    </nav>
+  </header>
+  <main class="article-shell">
+    <p class="breadcrumbs"><a href="/">Home</a> / Project guide</p>
+    <header class="article-intro">
+      <div class="kicker">Project guide</div>
+      <h1>Project Guide | StagePilot</h1>
+      <p class="lede">Free tool-call reliability guide for parser recovery, fixtures, and deterministic runtime checks. This guide organizes the repository&#039;s original implementation notes for TypeScript agent-runtime maintainers.</p>
+      <p class="review-note">Reviewed 2026-07-28. This page is derived from checked-in repository evidence and links back to its source.</p>
+    </header>
+
+    <article><p>##  &lt;img width=&quot;3168&quot; height=&quot;1344&quot; alt=&quot;StagePilot banner&quot; src=&quot;https://github.com/user-attachments/assets/9a002988-e535-42ac-8baf-56ec8754410f&quot; /&gt;</p>
+<h2>StagePilot</h2>
+<p><strong>Tool-calling reliability runtime for LLMs.</strong> Parses, repairs, and retries malformed tool-call output so you don&#039;t have to. Lifts baseline success from <strong>25% to 90%</strong> on a 60-case benchmark with 30 mutation modes.</p>
+<p>Architecture pack: <a href="https://github.com/KIM3310/stage-pilot/blob/main/docs/architecture-pack.md" rel="noopener">`docs/architecture-pack.md`</a></p>
+<h3>Provenance And Ownership</h3>
+<p>StagePilot is an independent reliability lab that extends an Apache-2.0 codebase originally published by Woonggi Min at <a href="https://github.com/minpeter/ai-sdk-tool-call-middleware" rel="noopener">minpeter/ai-sdk-tool-call-middleware</a>. The upstream project owns and publishes the <a href="https://www.npmjs.com/package/@ai-sdk-tool/parser" rel="noopener">`@ai-sdk-tool/parser`</a> npm package. StagePilot does not publish or control the <code>@ai-sdk-tool/parser</code> npm package.</p>
+<p>This repository keeps the upstream copyright and license, adds the StagePilot runtime, BenchLab, adapters, service APIs, telemetry, and deployment assets, and is deliberately marked private in <code>package.json</code> to prevent accidental npm publication. See <a href="https://github.com/KIM3310/stage-pilot/blob/main/NOTICE.md" rel="noopener">`NOTICE.md`</a> for the boundary between upstream code and StagePilot additions.</p>
+<h3>Three-Minute Proof</h3>
+<ol><li>Read the 25% to 90% benchmark claim, then open the mutation benchmark evidence.</li><li>Inspect the parser/retry path and one malformed tool-call fixture.</li><li>Run <code>npm run verify</code> or the equivalent pnpm command for checks, tests, and build.</li><li>Use <code>pnpm api:stagepilot</code> only after the package proof is clear.</li></ol>
+<h3>System Overview</h3>
+<div class="table-scroll"><table><thead><tr><th>Lens</th><th>Current answer</th></tr></thead><tbody><tr><td>Users</td><td>AI platform teams and developer-tool teams shipping agents that must survive malformed tool output.</td></tr><tr><td>Technical path</td><td>Validate the demo, README, architecture notes, and quality gate before deeper workflow review.</td></tr><tr><td>System scope</td><td>Upstream parser compatibility surface, deterministic mutation benchmark, StagePilot retry loop, and telemetry-ready runtime.</td></tr><tr><td>Operating boundary</td><td>Tool schemas and retries are explicit; benchmark fixtures are synthetic and provider-neutral.</td></tr><tr><td>Evaluation path</td><td><code>pnpm test</code>, <code>pnpm build</code>, <a href="https://github.com/KIM3310/stage-pilot/blob/main/docs/architecture-pack.md" rel="noopener">`docs/architecture-pack.md`</a>, and the 25% to 90% benchmark claim.</td></tr></tbody></table></div>
+<h3>Evaluation Path</h3>
+<ul><li><strong>Start here:</strong> Read the 25% to 90% benchmark claim, then inspect parser recovery and mutation fixtures.</li><li><strong>Local demo:</strong> Install with <code>pnpm install</code>, then run <code>pnpm api:stagepilot</code> and open <code>http://127.0.0.1:8080/demo</code>.</li><li><strong>Checks:</strong> Run <code>npm run verify</code> or the equivalent package-manager command for check, tests, and build.</li></ul>
+<h3>Architecture Notes</h3>
+<ul><li><a href="https://github.com/KIM3310/stage-pilot/blob/main/docs/architecture-evidence-map.md" rel="noopener">Architecture guide</a> summarizes the system scope, first files to inspect, runtime commands, and known boundaries.</li><li><a href="https://github.com/KIM3310/stage-pilot/blob/main/docs/quality-gate.md" rel="noopener">Quality notes</a> lists the local checks, CI surface, and release expectations for this repository.</li><li><a href="https://github.com/KIM3310/stage-pilot/blob/main/docs/enterprise-readiness.md" rel="noopener">Enterprise readiness notes</a> outlines security, data, operations, integration, and handoff expectations.</li></ul>
+<h3>The Problem</h3>
+<p>Models without native tool support produce unreliable output — XML one turn, JSON the next, hallucinated tool names, missing args, type mismatches. On our benchmark, <strong>baseline success is 25%</strong>. Most workarounds are regex hacks or single-pass prompts. They break when the format drifts and give you no way to see what went wrong.</p>
+<h3>The Solution</h3>
+<p>StagePilot provides three composable pieces:</p>
+<div class="table-scroll"><table><thead><tr><th>Layer</th><th>What it does</th><th>Use independently?</th></tr></thead><tbody><tr><td><strong>Upstream <code>@ai-sdk-tool/parser</code></strong></td><td>Apache-2.0 AI SDK middleware baseline — format normalization, schema coercion, repair</td><td>✅ Install from the upstream npm package</td></tr><tr><td><strong>StagePilot Runtime</strong></td><td>5-stage multi-agent pipeline with pass/fail gates and telemetry</td><td>✅ Full API server</td></tr><tr><td><strong>BenchLab</strong></td><td>BFCL experiment tooling for prompt-mode tool calling</td><td>✅ Standalone experiments</td></tr></tbody></table></div>
+<h3>Architecture</h3>
+<pre><code>flowchart TB
+    subgraph Client[&quot;Client Application&quot;]
+        App[Your App / Agent]
+    end
+
+    subgraph Parser[&quot;@ai-sdk-tool/parser  —  npm package&quot;]
+        MW[Middleware Layer]
+        MW --&gt; Proto{Protocol Detection}
+        Proto --&gt; Hermes[Hermes JSON]
+        Proto --&gt; MorphXML[MorphXML]
+        Proto --&gt; YamlXML[YamlXML]
+        Proto --&gt; Qwen[Qwen3Coder]
+        Hermes &amp; MorphXML &amp; YamlXML &amp; Qwen --&gt; RJSON[RJSON Parser]
+        Hermes &amp; MorphXML &amp; YamlXML &amp; Qwen --&gt; RXML[RXML Parser]
+        RJSON &amp; RXML --&gt; Coerce[Schema Coercion]
+        Coerce --&gt; Repair[Repair + Retry Loop]
+    end
+
+    subgraph Pipeline[&quot;StagePilot Runtime  —  5-Stage Pipeline&quot;]
+        direction LR
+        E[Eligibility] --&gt; S[Safety]
+        S --&gt; P[Planner]
+        P --&gt; O[Outreach]
+        O --&gt; J[Judge]
+    end
+
+    subgraph Observe[&quot;Observability&quot;]
+        OTel[OpenTelemetry Spans]
+        Prom[Prometheus Metrics]
+        DD[Datadog Dashboards]
+    end
+
+    subgraph Deploy[&quot;Deployment&quot;]
+        Docker[Docker]
+        CR[GCP Cloud Run]
+        K8s[Kubernetes + HPA]
+        CF[Cloudflare Workers]
+        Vercel[Vercel]
+    end
+
+    subgraph IaC[&quot;Infrastructure as Code&quot;]
+        TF[Terraform]
+        Manifests[K8s Manifests]
+    end
+
+    App --&gt; MW
+    Repair --&gt; Pipeline
+    Pipeline --&gt; Observe
+    Pipeline --&gt; Deploy
+    Deploy --&gt; IaC
+
+    style Parser fill:#1a1a2e,stroke:#e94560,color:#fff
+    style Pipeline fill:#16213e,stroke:#0f3460,color:#fff
+    style Observe fill:#0f3460,stroke:#533483,color:#fff</code></pre>
+<h4>Stage-Gated Pipeline Detail</h4>
+<pre><code>sequenceDiagram
+    participant C as Client
+    participant MW as Parser Middleware
+    participant E as EligibilityAgent
+    participant S as SafetyAgent
+    participant P as PlannerAgent
+    participant O as OutreachAgent
+    participant J as JudgeAgent
+    participant T as Telemetry
+
+    C-&gt;&gt;MW: Raw model text
+    MW-&gt;&gt;MW: Protocol detect → Parse → Coerce → Repair
+    MW--&gt;&gt;T: parse_span (protocol, latency, status)
+
+    alt Parse failed + retry enabled
+        MW-&gt;&gt;MW: RALPH retry loop (max 2 attempts)
+    end
+
+    MW-&gt;&gt;E: Normalized tool call
+    E-&gt;&gt;E: Scope check + program matching
+    E--&gt;&gt;T: eligibility_span
+
+    alt Not eligible
+        E--&gt;&gt;C: Early rejection
+    end
+
+    E-&gt;&gt;S: Eligible intake
+    S-&gt;&gt;S: Policy enforcement (DUI, duplicates, etc.)
+    S--&gt;&gt;T: safety_span
+
+    alt Safety blocked
+        S--&gt;&gt;C: Block + reason
+    end
+
+    S-&gt;&gt;P: Safe intake
+    P-&gt;&gt;P: Generate action plan + fallback route
+    P--&gt;&gt;T: planner_span
+
+    P-&gt;&gt;O: Action plan
+    O-&gt;&gt;O: Generate outreach messages per agency
+    O--&gt;&gt;T: outreach_span
+
+    O-&gt;&gt;J: Execution results
+    J-&gt;&gt;J: Quality score (0-100) + review
+    J--&gt;&gt;T: judge_span
+
+    alt Score &lt; threshold
+        J-&gt;&gt;E: Trigger replay
+    end
+
+    J--&gt;&gt;C: Final result + audit trail</code></pre>
+<h3>Benchmark Results</h3>
+<p>Source: <a href="https://github.com/KIM3310/stage-pilot/blob/main/docs/benchmarks/stagepilot-latest.json" rel="noopener">`docs/benchmarks/stagepilot-latest.json`</a> — 60 cases, 30 mutation modes.</p>
+<div class="table-scroll"><table><thead><tr><th>Strategy</th><th>Success</th><th>Rate</th><th>Avg Latency</th><th>P95 Latency</th><th>Avg Attempts</th></tr></thead><tbody><tr><td><code>baseline</code></td><td>10 / 40</td><td>25.00%</td><td>0.02 ms</td><td>0.05 ms</td><td>1.00</td></tr><tr><td><code>middleware</code></td><td>26 / 40</td><td>65.00%</td><td>0.13 ms</td><td>0.39 ms</td><td>1.00</td></tr><tr><td><strong><code>middleware+ralph-loop</code></strong></td><td><strong>36 / 40</strong></td><td><strong>90.00%</strong></td><td>0.06 ms</td><td>0.10 ms</td><td>1.35</td></tr></tbody></table></div>
+<h4>30 Mutation Modes</h4>
+<p>Each mode simulates a real-world LLM output failure pattern:</p>
+<div class="table-scroll"><table><thead><tr><th>#</th><th>Mode</th><th>What it tests</th></tr></thead><tbody><tr><td>1</td><td><code>strict</code></td><td>Well-formed JSON baseline</td></tr><tr><td>2</td><td><code>relaxed-json</code></td><td>Unquoted keys, single quotes</td></tr><tr><td>3</td><td><code>coercible-types</code></td><td>String ↔ number type mismatches</td></tr><tr><td>4</td><td><code>missing-brace</code></td><td>Truncated JSON (missing closing brace)</td></tr><tr><td>5</td><td><code>garbage-tail</code></td><td>Extra tokens after valid JSON</td></tr><tr><td>6</td><td><code>no-tags</code></td><td>JSON without <code>&lt;tool_call&gt;</code> wrapper</td></tr><tr><td>7</td><td><code>prefixed-valid</code></td><td>Prose text before/after tool call</td></tr><tr><td>8</td><td><code>deeply-nested-args</code></td><td>6 levels of nesting</td></tr><tr><td>9</td><td><code>unicode-in-values</code></td><td>Non-ASCII / emoji in values</td></tr><tr><td>10</td><td><code>oversized-payload</code></td><td>12KB+ payload exceeding limits</td></tr><tr><td>11</td><td><code>trailing-comma-json</code></td><td>Trailing commas in JSON</td></tr><tr><td>12</td><td><code>json-in-xml-wrapper</code></td><td>Double-wrapped format</td></tr><tr><td>13</td><td><code>concurrent-tool-calls</code></td><td>Multiple tool calls in one response</td></tr><tr><td>14</td><td><code>empty-arguments</code></td><td>Correct name, empty args ⚠️</td></tr><tr><td>15</td><td><code>backreference-placeholder</code></td><td>Template variables <code>{{...}}</code></td></tr><tr><td>16</td><td><code>adversarial-injection</code></td><td>Prompt injection in values</td></tr><tr><td>17</td><td><code>wrong-tool-name</code></td><td>Hallucinated tool name ⚠️</td></tr><tr><td>18</td><td><code>truncated-json</code></td><td>Network cutoff mid-value</td></tr><tr><td>19</td><td><code>html-escaped-payload</code></td><td>HTML entity encoding</td></tr><tr><td>20</td><td><code>double-encoded-json</code></td><td><code>JSON.stringify()</code> applied twice</td></tr><tr><td>21</td><td><code>markdown-fenced</code></td><td>Tool call in <code> </code>`<code>json </code>`<code> </code> code block</td></tr><tr><td>22</td><td><code>yaml-body</code></td><td>YAML body instead of JSON</td></tr><tr><td>23</td><td><code>mixed-quotes</code></td><td>Mixed single/double quotes</td></tr><tr><td>24</td><td><code>comment-in-json</code></td><td>JSON with <code>//</code> comments</td></tr><tr><td>25</td><td><code>bom-prefix</code></td><td>UTF-8 BOM before content</td></tr><tr><td>26</td><td><code>null-bytes</code></td><td>Null bytes in strings</td></tr><tr><td>27</td><td><code>reversed-key-order</code></td><td><code>arguments</code> before <code>name</code> in JSON</td></tr><tr><td>28</td><td><code>multiline-values</code></td><td>Embedded newlines in values</td></tr><tr><td>29</td><td><code>partial-schema</code></td><td>Some required fields missing ⚠️</td></tr><tr><td>30</td><td><code>xml-attribute-style</code></td><td>Tool call as XML attributes</td></tr></tbody></table></div>
+<p>⚠️ = Unrecoverable by retry (requires model-level fix → see <a href="https://github.com/KIM3310/tool-call-finetune-lab" rel="noopener">tool-call-finetune-lab</a>)</p>
+<h4>With The Upstream Middleware</h4>
+<p>The following installs the upstream package maintained by <a href="https://github.com/minpeter" rel="noopener">`minpeter`</a>, not a package published by this repository.</p>
+<pre><code>pnpm add @ai-sdk-tool/parser</code></pre>
+<pre><code>import { morphXmlToolMiddleware } from &quot;@ai-sdk-tool/parser&quot;;
+import { wrapLanguageModel, streamText } from &quot;ai&quot;;
+
+// Works with any AI SDK provider: OpenAI, Anthropic, Google, Ollama, etc.
+const enhanced = wrapLanguageModel({
+  model: anyModel,
+  middleware: morphXmlToolMiddleware,
+});
+
+const result = await streamText({
+  model: enhanced,
+  prompt: &quot;What is the weather in Seoul?&quot;,
+  tools: {
+    get_weather: {
+      description: &quot;Get weather for a city&quot;,
+      parameters: z.object({ city: z.string() }),
+      execute: async ({ city }) =&gt; `${city}: 22°C, sunny`,
+    },
+  },
+});</code></pre>
+<h4>As full runtime (API server)</h4>
+<pre><code>git clone https://github.com/KIM3310/stage-pilot.git
+cd stage-pilot
+pnpm install
+pnpm api:stagepilot
+
+## → http://127.0.0.1:8080/demo</code></pre>
+<h4>Middleware Variants</h4>
+<div class="table-scroll"><table><thead><tr><th>Middleware</th><th>Best for</th><th>Example models</th></tr></thead><tbody><tr><td><code>hermesToolMiddleware</code></td><td>JSON-style tool payloads</td><td>Hermes, Llama</td></tr><tr><td><code>morphXmlToolMiddleware</code></td><td>XML + schema-aware coercion</td><td>Claude, GPT</td></tr><tr><td><code>yamlXmlToolMiddleware</code></td><td>XML tags + YAML bodies</td><td>Mixtral</td></tr><tr><td><code>qwen3CoderToolMiddleware</code></td><td><code>&lt;tool_call&gt;</code> markup</td><td>Qwen, UI-TARS</td></tr></tbody></table></div>
+<h3>API Endpoints</h3>
+<pre><code>pnpm api:stagepilot  # http://127.0.0.1:8080</code></pre>
+<div class="table-scroll"><table><thead><tr><th>Endpoint</th><th>Method</th><th>What it does</th></tr></thead><tbody><tr><td><code>/v1/plan</code></td><td>POST</td><td>Run a case through the 5-stage pipeline</td></tr><tr><td><code>/v1/benchmark</code></td><td>POST</td><td>Run the full benchmark suite</td></tr><tr><td><code>/v1/insights</code></td><td>POST</td><td>Narrative insights from benchmark data</td></tr><tr><td><code>/v1/whatif</code></td><td>POST</td><td>What-if simulation for staffing/demand</td></tr><tr><td><code>/v1/metrics</code></td><td>GET</td><td>Prometheus metrics (scrape-ready)</td></tr><tr><td><code>/health</code></td><td>GET</td><td>Health check (K8s probes)</td></tr><tr><td><code>/demo</code></td><td>GET</td><td>Interactive demo UI</td></tr></tbody></table></div>
+<h3>Deployment</h3>
+<p>&lt;details&gt; &lt;summary&gt;&lt;strong&gt;Docker&lt;/strong&gt;&lt;/summary&gt;</p>
+<pre><code>docker build -t stagepilot-api .
+docker run -p 8080:8080 -e GEMINI_API_KEY=&quot;$GEMINI_API_KEY&quot; stagepilot-api</code></pre>
+<p>&lt;/details&gt;</p>
+<p>&lt;details&gt; &lt;summary&gt;&lt;strong&gt;GCP Cloud Run&lt;/strong&gt; (one command)&lt;/summary&gt;</p>
+<pre><code>pnpm deploy:stagepilot</code></pre>
+<p>Infrastructure managed by Terraform:</p>
+<pre><code>cd infra/terraform
+terraform init &amp;&amp; terraform apply</code></pre>
+<p>&lt;/details&gt;</p>
+<p>&lt;details&gt; &lt;summary&gt;&lt;strong&gt;Kubernetes&lt;/strong&gt; (local/BYI manifests)&lt;/summary&gt;</p>
+<p>The checked-in Kubernetes manifests are bring-your-own-image deployment scaffolding. Before using them outside local validation, build the API image, push it to an operator-controlled registry, and substitute an immutable image reference such as a digest-pinned Artifact Registry or ECR image.</p>
+<pre><code>docker build -t &quot;$REGISTRY/stagepilot-api:$GIT_SHA&quot; .
+docker push &quot;$REGISTRY/stagepilot-api:$GIT_SHA&quot;
+
+
+## Replace the local placeholder with the pushed immutable image.
+kubectl set image -f infra/k8s/deployment.yaml \
+  stagepilot-api=&quot;$REGISTRY/stagepilot-api@$IMAGE_DIGEST&quot; \
+  --local -o yaml &gt; /tmp/stagepilot-deployment.yaml
+
+kubectl create namespace stagepilot
+kubectl create secret generic stagepilot-secrets \
+  --namespace stagepilot \
+  --from-literal=gemini-api-key=&quot;$GEMINI_API_KEY&quot;
+kubectl apply -f /tmp/stagepilot-deployment.yaml
+kubectl apply -f infra/k8s/configmap.yaml -f infra/k8s/service.yaml -f infra/k8s/hpa.yaml
+
+
+## ConfigMap, liveness/readiness/startup probes</code></pre>
+<p>Do not treat <code>infra/k8s/deployment.yaml</code> as production-ready as checked in: it uses the local placeholder image <code>stagepilot-api:latest</code> with <code>IfNotPresent</code> for developer clusters. &lt;/details&gt;</p>
+<p>&lt;details&gt; &lt;summary&gt;&lt;strong&gt;Vercel / Cloudflare Workers&lt;/strong&gt;&lt;/summary&gt;</p>
+<p>See <code>vercel.json</code> and <code>wrangler.toml</code> in the repo root. &lt;/details&gt;</p>
+<h3>Observability Stack</h3>
+<pre><code>┌─────────────────────────────────────────────────────┐
+│                  StagePilot API                      │
+│                                                     │
+│  ┌──────────┐  ┌──────────┐  ┌──────────────────┐  │
+│  │ OTel SDK │  │Prometheus│  │  Datadog Agent   │  │
+│  │  Spans   │  │ Counters │  │  (optional)      │  │
+│  └────┬─────┘  └────┬─────┘  └────────┬─────────┘  │
+│       │              │                 │            │
+└───────┼──────────────┼─────────────────┼────────────┘
+        │              │                 │
+   ┌────▼────┐   ┌─────▼─────┐   ┌──────▼──────┐
+   │  Jaeger  │   │ Grafana   │   │  Datadog    │
+   │  Zipkin  │   │ Dashboard │   │  Dashboard  │
+   └──────────┘   └───────────┘   └─────────────┘</code></pre>
+<ul><li><strong>OpenTelemetry</strong>: Per-stage spans (<code>eligibility_span</code>, <code>safety_span</code>, <code>planner_span</code>, <code>outreach_span</code>, <code>judge_span</code>, <code>parse_span</code>)</li><li><strong>Prometheus</strong>: <code>toolCallsTotal</code> counter + <code>toolCallParseDuration</code> histogram, scraped via <code>/v1/metrics</code></li><li><strong>Datadog</strong>: Pre-built dashboard + monitor configs in <code>docs/datadog/</code></li></ul>
+<h3>Project Layout</h3>
+<pre><code>src/
+  adapters/          # AWS S3/CloudWatch, GCP integrations
+  api/               # HTTP server, Prometheus metrics, sessions
+  bin/               # CLI entry points (stagepilot-api, benchlab-api)
+  community/         # Community protocols (Sijawara, UI-TARS)
+  core/              # Parser protocols (8 variants), prompts, utils
+  rjson/             # Relaxed JSON parser with repair heuristics
+  rxml/              # Relaxed XML parser with tokenizer + schema extraction
+  schema-coerce/     # Type coercion engine
+  stagepilot/        # 5-agent orchestrator, benchmark, insights, twin
+  telemetry/         # OpenTelemetry + Prometheus instrumentation
+  __tests__/         # ~174 unit test files
+tests/               # ~13 integration test files
+infra/
+  k8s/               # Local/BYI Deployment, Service, HPA, ConfigMap
+  terraform/         # GCP Cloud Run provisioning
+docs/
+  adr/               # Architecture Decision Records
+  benchmarks/        # Benchmark artifacts + reports
+  benchlab/          # BFCL experiment docs
+  datadog/           # Dashboard + monitor configs
+experiments/         # 5 BFCL experiment variants (Claude, Gemini, Grok, Kiro, OpenAI-compat)
+scripts/             # Build, deploy, load-test (k6)
+.github/workflows/   # CI/CD pipelines</code></pre></article>
+    <aside class="source-basis">
+      <strong>Source basis:</strong> <a href="https://github.com/KIM3310/stage-pilot/blob/main/README.md" rel="noopener">README.md</a>. Corrections can be proposed through the public repository without submitting private data.
+    </aside>
+  </main>
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div class="site-footer-links"><a href="/">Home</a><a href="/guide.html">Project guide</a><a href="/architecture.html">Architecture</a><a href="/verification.html">Verification</a><a href="/publisher.html">Publisher</a><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a href="https://kim3310-doeon-kim-portfolio.pages.dev/">Resource atlas</a></div>
+      <p>Advertising may appear on this public editorial page after Google approves the site. Ads are not placed inside private, transactional, diagnostic, security-response, or operational workflows.</p>
+    </div>
+  </footer>
+</body>
+</html>

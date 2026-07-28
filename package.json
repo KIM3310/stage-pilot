@@ -63,6 +63,7 @@
     "typecheck": "tsc --noEmit",
     "test": "NODE_OPTIONS=--disable-warning=ExperimentalWarning vitest run",
     "check:biome": "biome check",
+    "check:publication": "node scripts/validate-publication-surface.mjs",
     "check:types": "tsc --noEmit",
     "check": "run-p check:*",
     "verify": "pnpm run check && pnpm test && pnpm run build",

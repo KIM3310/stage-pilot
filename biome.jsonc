@@ -10,7 +10,12 @@
     }
   },
   "files": {
-    "includes": ["!!.changeset", "!!src/api/stagepilot-demo.html", "!!**/*.svg"]
+    "includes": [
+      "!!.changeset",
+      "!!src/api/stagepilot-demo.html",
+      "!!site/*.html",
+      "!!**/*.svg"
+    ]
   },
   "linter": {
     "rules": {

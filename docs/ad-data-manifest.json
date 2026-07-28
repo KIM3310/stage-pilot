@@ -6,7 +6,7 @@
   "audience": "TypeScript agent-runtime maintainers",
   "public_resource": {
     "url": "https://kim3310-doeon-kim-portfolio.pages.dev/resources/stage-pilot/",
-    "live_demo": "https://stage-pilot.pages.dev",
+    "live_demo": "https://stage-pilot.pages.dev/",
     "readiness_checklist": [
       "Architecture Summary",
       "Runtime And Data Flow",

@@ -8,7 +8,7 @@ Free tool-call reliability guide for parser recovery, fixtures, and deterministi
 
 - Audience: TypeScript agent-runtime maintainers
 - Central resource: https://kim3310-doeon-kim-portfolio.pages.dev/resources/stage-pilot/
-- Live system: https://stage-pilot.pages.dev
+- Live system: https://stage-pilot.pages.dev/
 - Advertising boundary: ads allowed only on public reliability guide pages; traces, package diagnostics, and private scenario outputs are ad-free
 - Current ad state: code-ready on the central resource; serving depends on Google AdSense site approval and consent policy.
 

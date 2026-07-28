@@ -480,9 +480,20 @@ in [`NOTICE.md`](NOTICE.md).
 - Paid boundary: paid hosted regression workspace, private benchmark scenarios, and provider routing dashboard
 - Canonical URL: https://stage-pilot.pages.dev/
 - Lead capture: https://kim3310-doeon-kim-portfolio.pages.dev/?offer=stage-pilot&inquiry=agent-reliability-audit#private-inquiry
+- Resource route: https://kim3310-doeon-kim-portfolio.pages.dev/resources/stage-pilot/
 - Commercial route: https://kim3310-doeon-kim-portfolio.pages.dev/?offer=stage-pilot#service-offers
 - Machine-readable offer: [docs/service-offer.json](docs/service-offer.json)
 - Search growth implementation: [docs/search-growth-implementation.md](docs/search-growth-implementation.md)
 - Revenue architecture: [docs/revenue-architecture.md](docs/revenue-architecture.md)
 
 <!-- search-growth-readme:end -->
+
+<!-- KIM3310:AD-DATA-PIVOT:START -->
+## Free Resource, Advertising, and Aggregate Data
+
+- [Public utility and architecture checklist](https://kim3310-doeon-kim-portfolio.pages.dev/resources/stage-pilot/)
+- Revenue model: contextual advertising on the policy-eligible central resource page.
+- Aggregate value: anonymous aggregate parser-recovery topic interest and guide-open counts
+- Boundary: ads allowed only on public reliability guide pages; traces, package diagnostics, and private scenario outputs are ad-free
+- Consent defaults off, DNT/GPC fail closed, and personal or sensitive data is never sold.
+<!-- KIM3310:AD-DATA-PIVOT:END -->

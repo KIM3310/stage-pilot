@@ -11,6 +11,7 @@ This repository now exposes a search-readable service surface in addition to the
 | System architecture | [docs/system-architecture.md](./system-architecture.md) |
 | Public canonical URL | https://stage-pilot.pages.dev/ |
 | Lead capture URL | https://kim3310-doeon-kim-portfolio.pages.dev/?offer=stage-pilot&inquiry=agent-reliability-audit#private-inquiry |
+| Repository resource route | https://kim3310-doeon-kim-portfolio.pages.dev/resources/stage-pilot/ |
 | Commercial route | https://kim3310-doeon-kim-portfolio.pages.dev/?offer=stage-pilot#service-offers |
 
 ## Search Positioning

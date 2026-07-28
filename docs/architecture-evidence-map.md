@@ -37,7 +37,7 @@ Use this page as the short path through the repository. It keeps the review grou
 - .github/workflows/code-quality.yml
 - .github/workflows/dependency-review.yml
 - .github/workflows/pages-auto-deploy.yml
-- .github/workflows/release-changeset.yml
+- NOTICE.md
 - .github/workflows/repository-health.yml
 - .github/workflows/repository-surface.yml
 - .github/workflows/secret-scan.yml
@@ -49,7 +49,7 @@ Use this page as the short path through the repository. It keeps the review grou
 - edge deployment configuration
 - containerized delivery path
 - verify passes
-- Published package surface is clear
+- Upstream parser ownership and the StagePilot modification boundary are clear
 - Benchmark claim is reproducible
 
 ## Architecture Notes

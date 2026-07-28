@@ -12,7 +12,7 @@ If you have ever shipped an LLM-based agent to production, you have experienced 
 
 Models with native tool-calling support (GPT-4o, Claude) handle this reasonably well. But the moment you use an open-source model, a smaller model, or hit an edge case, things fall apart. In our benchmarks, unassisted tool calling succeeded only **25% of the time**.
 
-This post covers how `stage-pilot` and its npm package `@ai-sdk-tool/parser` brought that number to **90%** -- a 3.6x improvement -- using parser middleware and an augmented retry loop.
+This post covers how StagePilot combines the upstream `@ai-sdk-tool/parser` middleware with an augmented retry loop to reach **90%** in this synthetic benchmark -- a 3.6x improvement over the local baseline. The npm package is owned and published by the upstream project, not StagePilot.
 
 ---
 
@@ -314,15 +314,15 @@ The current benchmark runs against a single model. We plan to run the same 40-ca
 
 ### Community Middleware Protocols
 
-We plan to standardize the middleware interface of `@ai-sdk-tool/parser` so that the community can contribute custom parsers and recovery strategies as plugins.
+StagePilot's extension path keeps compatibility with the upstream middleware interface while exploring custom recovery strategies as plugins.
 
 ---
 
 ## Closing Thoughts
 
-Tool-calling reliability is a problem that will gradually diminish as models improve. But for now, if you are running LLM agents in production, you need an application-layer fix. `stage-pilot` and `@ai-sdk-tool/parser` provide that fix in a systematic, measurable way.
+Tool-calling reliability is a problem that will gradually diminish as models improve. For now, StagePilot evaluates an application-layer approach built around an attributed upstream parser baseline, explicit retries, and measurable regression gates.
 
-The code is available on [GitHub](https://github.com/doeon-kim/stage-pilot). The package can be installed via `npm install @ai-sdk-tool/parser`.
+The StagePilot extensions are available in this [GitHub repository](https://github.com/KIM3310/stage-pilot). The separately maintained upstream package can be installed via `npm install @ai-sdk-tool/parser`.
 
 ---
 

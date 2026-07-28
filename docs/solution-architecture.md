@@ -90,11 +90,11 @@ Adopters can choose any combination:
 |---|---|---|
 | Language | TypeScript | AI SDK ecosystem is TypeScript-native. Type safety for schema coercion. |
 | Parser architecture | Custom RJSON + RXML | Off-the-shelf parsers reject malformed input. We need repair, not rejection. |
-| Middleware pattern | AI SDK `LanguageModelV2Middleware` | Provider-agnostic, composable, own npm lifecycle. See [ADR-002](adr/002-parser-middleware-design.md). |
+| Middleware pattern | AI SDK `LanguageModelV2Middleware` | Provider-agnostic, composable, and explicit about upstream package ownership. See [ADR-002](adr/002-parser-middleware-design.md). |
 | Pipeline design | Sequential 5-stage | Each stage isolates a concern. Failures are traceable. See [ADR-001](adr/001-stage-gated-pipeline.md). |
 | Benchmark | Deterministic mutation | Reproducible, fast, free. See [ADR-003](adr/003-benchmark-methodology.md). |
 | Observability | OTel + Prometheus | Industry standard. Vendor-agnostic. Pre-built Datadog dashboards for quick setup. |
-| IaC | Terraform + K8s manifests | Cloud Run for simplicity, K8s for production scale. Both from same codebase. |
+| IaC | Terraform + local/BYI K8s manifests | Cloud Run for simplicity; Kubernetes manifests are scaffolding until an operator supplies a pushed immutable image, cluster policy, and rollout controls. |
 
 ## Deployment Options
 
@@ -109,8 +109,8 @@ graph LR
         CR["GCP Cloud Run<br/>pnpm deploy:stagepilot"]
     end
 
-    subgraph Prod["Production"]
-        K8s["Kubernetes<br/>kubectl apply -f infra/k8s/"]
+    subgraph BYI["Operator Kubernetes"]
+        K8s["Kubernetes<br/>substitute immutable image, then apply infra/k8s/"]
     end
 
     subgraph Edge["Edge"]
@@ -124,6 +124,8 @@ graph LR
     Local --> Vercel
     Local --> CF
 ```
+
+The checked-in `infra/k8s/deployment.yaml` references `stagepilot-api:latest` for local or bring-your-own-image review. Production Kubernetes use requires the operator to build and push the image to their registry, pin the manifest to an immutable digest or release tag, substitute that image in the deployment, and apply cluster-specific policy, secrets, monitoring, and rollback ownership before traffic.
 
 ## Next Steps
 

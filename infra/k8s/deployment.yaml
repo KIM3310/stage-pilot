@@ -32,6 +32,8 @@ spec:
       terminationGracePeriodSeconds: 30
       containers:
         - name: stagepilot-api
+          # Local/BYI placeholder. Replace with an operator-built, pushed,
+          # immutable image reference before any production Kubernetes use.
           image: stagepilot-api:latest
           imagePullPolicy: IfNotPresent
           ports:

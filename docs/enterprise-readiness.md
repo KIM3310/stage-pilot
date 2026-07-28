@@ -42,7 +42,7 @@ This note defines what an enterprise reviewer, platform operator, serious user, 
 - .github/workflows/code-quality.yml
 - .github/workflows/dependency-review.yml
 - .github/workflows/pages-auto-deploy.yml
-- .github/workflows/release-changeset.yml
+- NOTICE.md
 - .github/workflows/repository-health.yml
 - .github/workflows/repository-surface.yml
 - .github/workflows/secret-scan.yml
@@ -64,7 +64,7 @@ This note defines what an enterprise reviewer, platform operator, serious user, 
 ## Proof Points
 
 - verify passes
-- Published package surface is clear
+- Upstream parser ownership and the StagePilot modification boundary are clear
 - Benchmark claim is reproducible
 
 ## Operating Metrics

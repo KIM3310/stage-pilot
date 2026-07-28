@@ -13,7 +13,7 @@
 - [ ] I have read the [CONTRIBUTING](../CONTRIBUTING.md) guide.
 - [ ] My changes pass `pnpm verify` (type-check, lint, tests, build).
 - [ ] I have added or updated tests for the changes.
-- [ ] I have added a changeset (`pnpm changeset`) if this affects the published package.
+- [ ] I have added a changeset (`pnpm changeset`) if this affects the versioned source API.
 - [ ] I have updated documentation where applicable.
 
 ## Breaking Changes
@@ -25,4 +25,3 @@ None.
 ## Testing
 
 <!-- Describe how you tested these changes (unit tests, manual verification, benchmark runs, etc.). -->
-

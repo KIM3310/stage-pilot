@@ -1,4 +1,8 @@
-# @ai-sdk-tool/parser
+# Upstream parser history
+
+> This historical changelog came from the Apache-2.0 upstream
+> `@ai-sdk-tool/parser` codebase. StagePilot does not publish or control that
+> npm package. See [`NOTICE.md`](NOTICE.md).
 
 ## 4.1.3
 

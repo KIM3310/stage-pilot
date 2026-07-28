@@ -2,8 +2,6 @@
 
 # StagePilot
 
-[![npm - parser](https://img.shields.io/npm/v/@ai-sdk-tool/parser)](https://www.npmjs.com/package/@ai-sdk-tool/parser)
-[![npm downloads - parser](https://img.shields.io/npm/dt/@ai-sdk-tool/parser)](https://www.npmjs.com/package/@ai-sdk-tool/parser)
 [![CI](https://github.com/KIM3310/stage-pilot/actions/workflows/ci.yml/badge.svg)](https://github.com/KIM3310/stage-pilot/actions)
 [![codecov](https://codecov.io/gh/KIM3310/stage-pilot/branch/main/graph/badge.svg)](https://codecov.io/gh/KIM3310/stage-pilot)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -12,6 +10,22 @@
 **Tool-calling reliability runtime for LLMs.** Parses, repairs, and retries malformed tool-call output so you don't have to. Lifts baseline success from **25% to 90%** on a 60-case benchmark with 30 mutation modes.
 
 Architecture pack: [`docs/architecture-pack.md`](docs/architecture-pack.md)
+
+## Provenance And Ownership
+
+StagePilot is an independent reliability lab that extends an Apache-2.0
+codebase originally published by Woonggi Min at
+[minpeter/ai-sdk-tool-call-middleware](https://github.com/minpeter/ai-sdk-tool-call-middleware).
+The upstream project owns and publishes the
+[`@ai-sdk-tool/parser`](https://www.npmjs.com/package/@ai-sdk-tool/parser)
+npm package. StagePilot does not publish or control the `@ai-sdk-tool/parser`
+npm package.
+
+This repository keeps the upstream copyright and license, adds the StagePilot
+runtime, BenchLab, adapters, service APIs, telemetry, and deployment assets,
+and is deliberately marked private in `package.json` to prevent accidental npm
+publication. See [`NOTICE.md`](NOTICE.md) for the boundary between upstream
+code and StagePilot additions.
 
 ## Three-Minute Proof
 
@@ -26,7 +40,7 @@ Architecture pack: [`docs/architecture-pack.md`](docs/architecture-pack.md)
 |---|---|
 | Users | AI platform teams and developer-tool teams shipping agents that must survive malformed tool output. |
 | Technical path | Validate the demo, README, architecture notes, and quality gate before deeper workflow review. |
-| System scope | Published package surface, deterministic mutation benchmark, parser recovery, retry loop, and telemetry-ready runtime. |
+| System scope | Upstream parser compatibility surface, deterministic mutation benchmark, StagePilot retry loop, and telemetry-ready runtime. |
 | Operating boundary | Tool schemas and retries are explicit; benchmark fixtures are synthetic and provider-neutral. |
 | Evaluation path | `pnpm test`, `pnpm build`, [`docs/architecture-pack.md`](docs/architecture-pack.md), and the 25% to 90% benchmark claim. |
 
@@ -56,7 +70,7 @@ StagePilot provides three composable pieces:
 
 | Layer | What it does | Use independently? |
 |---|---|---|
-| **`@ai-sdk-tool/parser`** | AI SDK middleware — format normalization, schema coercion, repair | ✅ `pnpm add @ai-sdk-tool/parser` |
+| **Upstream `@ai-sdk-tool/parser`** | Apache-2.0 AI SDK middleware baseline — format normalization, schema coercion, repair | ✅ Install from the upstream npm package |
 | **StagePilot Runtime** | 5-stage multi-agent pipeline with pass/fail gates and telemetry | ✅ Full API server |
 | **BenchLab** | BFCL experiment tooling for prompt-mode tool calling | ✅ Standalone experiments |
 
@@ -226,7 +240,11 @@ Each mode simulates a real-world LLM output failure pattern:
 
 ## Quick Start
 
-### As npm middleware (drop-in, 3 lines)
+### With The Upstream Middleware
+
+The following installs the upstream package maintained by
+[`minpeter`](https://github.com/minpeter), not a package published by this
+repository.
 
 ```bash
 pnpm add @ai-sdk-tool/parser
@@ -316,18 +334,31 @@ terraform init && terraform apply
 </details>
 
 <details>
-<summary><strong>Kubernetes</strong> (production)</summary>
+<summary><strong>Kubernetes</strong> (local/BYI manifests)</summary>
+
+The checked-in Kubernetes manifests are bring-your-own-image deployment scaffolding. Before using them outside local validation, build the API image, push it to an operator-controlled registry, and substitute an immutable image reference such as a digest-pinned Artifact Registry or ECR image.
 
 ```bash
+docker build -t "$REGISTRY/stagepilot-api:$GIT_SHA" .
+docker push "$REGISTRY/stagepilot-api:$GIT_SHA"
+
+# Replace the local placeholder with the pushed immutable image.
+kubectl set image -f infra/k8s/deployment.yaml \
+  stagepilot-api="$REGISTRY/stagepilot-api@$IMAGE_DIGEST" \
+  --local -o yaml > /tmp/stagepilot-deployment.yaml
+
 kubectl create namespace stagepilot
 kubectl create secret generic stagepilot-secrets \
   --namespace stagepilot \
   --from-literal=gemini-api-key="$GEMINI_API_KEY"
-kubectl apply -f infra/k8s/
+kubectl apply -f /tmp/stagepilot-deployment.yaml
+kubectl apply -f infra/k8s/configmap.yaml -f infra/k8s/service.yaml -f infra/k8s/hpa.yaml
 
 # Includes: Deployment (2 replicas), Service, HPA (2-10 pods),
 # ConfigMap, liveness/readiness/startup probes
 ```
+
+Do not treat `infra/k8s/deployment.yaml` as production-ready as checked in: it uses the local placeholder image `stagepilot-api:latest` with `IfNotPresent` for developer clusters.
 </details>
 
 <details>
@@ -376,7 +407,7 @@ src/
   __tests__/         # ~174 unit test files
 tests/               # ~13 integration test files
 infra/
-  k8s/               # Deployment, Service, HPA, ConfigMap
+  k8s/               # Local/BYI Deployment, Service, HPA, ConfigMap
   terraform/         # GCP Cloud Run provisioning
 docs/
   adr/               # Architecture Decision Records
@@ -393,7 +424,7 @@ scripts/             # Build, deploy, load-test (k6)
 | ADR | Title | Summary |
 |---|---|---|
 | [ADR-001](docs/adr/001-stage-gated-pipeline.md) | Stage-Gated Pipeline | Why 5 sequential agents instead of single-pass. Each stage isolates a concern, emits OTel spans, enables independent model selection. |
-| [ADR-002](docs/adr/002-parser-middleware-design.md) | Parser as AI SDK Middleware | Why middleware pattern over custom wrapper or post-processing. Provider-agnostic, composable, own npm lifecycle. |
+| [ADR-002](docs/adr/002-parser-middleware-design.md) | Parser as AI SDK Middleware | Why the middleware pattern stays provider-agnostic and composable while StagePilot preserves upstream attribution. |
 | [ADR-003](docs/adr/003-benchmark-methodology.md) | Benchmark Methodology | Why deterministic seeded cases with 30 mutation modes. Reproducible, captures real-world failure patterns, separates format issues from model understanding gaps. |
 
 ## Tech Stack
@@ -412,15 +443,16 @@ scripts/             # Build, deploy, load-test (k6)
 
 ## Links
 
-- **npm**: [@ai-sdk-tool/parser](https://www.npmjs.com/package/@ai-sdk-tool/parser)
+- **Upstream npm package**: [@ai-sdk-tool/parser](https://www.npmjs.com/package/@ai-sdk-tool/parser)
 - **Demo**: [YouTube](https://youtu.be/6trgTH1vX4M)
 - **Blog**: [Tool-calling 성공률을 25%에서 90%로 올린 방법](docs/blog/tool-call-reliability-ko.md) / [English](docs/blog/tool-call-reliability-en.md)
-- **Based on**: [minpeter/ai-sdk-tool-call-middleware](https://github.com/minpeter/ai-sdk-tool-call-middleware)
+- **Upstream source**: [minpeter/ai-sdk-tool-call-middleware](https://github.com/minpeter/ai-sdk-tool-call-middleware)
 - **Related**: [tool-call-finetune-lab](https://github.com/KIM3310/tool-call-finetune-lab) — Fine-tuning approach for the remaining 10% gap
 
 ## License
 
-Apache-2.0
+Apache-2.0. Upstream attribution and the modification boundary are documented
+in [`NOTICE.md`](NOTICE.md).
 
 ## Cloud + AI Architecture
 
@@ -447,7 +479,7 @@ Apache-2.0
 - Public entry: free public benchmark/demo routes and sample traces
 - Paid boundary: paid hosted regression workspace, private benchmark scenarios, and provider routing dashboard
 - Canonical URL: https://stage-pilot.pages.dev/
-- Lead capture: https://github.com/KIM3310/stage-pilot/issues/new?template=service-inquiry.yml&title=Private+workspace+inquiry%3A+StagePilot
+- Lead capture: https://kim3310-doeon-kim-portfolio.pages.dev/?offer=stage-pilot&inquiry=agent-reliability-audit#private-inquiry
 - Commercial route: https://kim3310-doeon-kim-portfolio.pages.dev/?offer=stage-pilot#service-offers
 - Machine-readable offer: [docs/service-offer.json](docs/service-offer.json)
 - Search growth implementation: [docs/search-growth-implementation.md](docs/search-growth-implementation.md)

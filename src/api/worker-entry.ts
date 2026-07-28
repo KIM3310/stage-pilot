@@ -131,7 +131,7 @@ export default {
         {
           service: "stagepilot",
           runtime: "cloudflare-workers",
-          version: "4.1.3",
+          version: "0.1.0",
           deployment: env.DEPLOYMENT_TRACK ?? "edge",
           capabilities: [
             "tool-call-parsing",

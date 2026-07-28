@@ -21,7 +21,9 @@ We looked at three options:
 
 ## Decision
 
-Implement as AI SDK middleware, published as `@ai-sdk-tool/parser`.
+Retain compatibility with the upstream AI SDK middleware published as
+`@ai-sdk-tool/parser`, while keeping StagePilot's source workspace
+non-publishable under a separate internal package identity.
 
 Each parser variant (Hermes JSON, MorphXML, YamlXML, Qwen3Coder) returns a `LanguageModelV2Middleware`. Applied with:
 

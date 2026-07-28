@@ -28,7 +28,7 @@ These notes keep the repository easy to review without overstating what is produ
 - .github/workflows/code-quality.yml
 - .github/workflows/dependency-review.yml
 - .github/workflows/pages-auto-deploy.yml
-- .github/workflows/release-changeset.yml
+- tests/provenance.test.ts
 - .github/workflows/repository-health.yml
 - .github/workflows/repository-surface.yml
 - .github/workflows/secret-scan.yml

@@ -1,13 +1,14 @@
 {
-  "name": "@ai-sdk-tool/parser",
-  "version": "4.1.3",
-  "description": "AI SDK tool-calling middleware with multi-agent orchestration and benchmark harness",
+  "name": "stagepilot-reliability-lab",
+  "version": "0.1.0",
+  "private": true,
+  "description": "StagePilot tool-calling reliability runtime, benchmark lab, and hosted-service prototype",
   "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/KIM3310/stage-pilot"
   },
-  "author": "Doeon Kim",
+  "author": "Doeon Kim (StagePilot extensions)",
   "homepage": "https://github.com/KIM3310/stage-pilot#readme",
   "bugs": {
     "url": "https://github.com/KIM3310/stage-pilot/issues"
@@ -53,9 +54,6 @@
   "files": [
     "dist/**/*"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "build": "pnpm run clean && tsup --tsconfig tsconfig.build.json",
     "build:watch": "pnpm run clean && tsup --watch --tsconfig tsconfig.build.json",
@@ -71,8 +69,6 @@
     "fmt:biome": "biome check --write",
     "fmt": "run-p fmt:*",
     "changeset": "changeset",
-    "ci:release": "pnpm run build && changeset publish",
-    "ci:version": "changeset version",
     "demo:stagepilot": "tsx src/examples/stagepilot-run.ts",
     "bench:stagepilot": "tsx src/examples/stagepilot-benchmark.ts",
     "api:stagepilot": "tsx src/bin/stagepilot-api.ts",

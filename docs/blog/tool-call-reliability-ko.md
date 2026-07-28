@@ -12,7 +12,7 @@ LLM 기반 에이전트를 프로덕션에 배포해본 분이라면, 한번쯤 
 
 GPT-4o나 Claude처럼 네이티브 tool-calling을 지원하는 모델은 비교적 안정적이지만, 오픈소스 모델이나 경량 모델을 사용하면 상황이 달라집니다. 우리 벤치마크 기준으로, 아무런 보정 없이 도구 호출을 시도하면 **성공률이 25%**에 불과했습니다.
 
-이 글에서는 `stage-pilot` 프로젝트와 npm 패키지 `@ai-sdk-tool/parser`를 통해 이 성공률을 **90%까지 끌어올린 과정**을 기술적으로 풀어보겠습니다.
+이 글에서는 upstream `@ai-sdk-tool/parser` 미들웨어에 StagePilot의 재시도 루프를 결합해 로컬 합성 벤치마크 성공률을 **90%까지 끌어올린 과정**을 기술적으로 설명합니다. npm 패키지의 소유자와 배포자는 StagePilot이 아니라 upstream 프로젝트입니다.
 
 ---
 
@@ -314,15 +314,15 @@ stage_pilot_parse_duration_seconds{quantile="0.95"}: 0.234
 
 ### 커뮤니티 미들웨어 프로토콜
 
-`@ai-sdk-tool/parser`의 미들웨어 인터페이스를 표준화하여, 커뮤니티가 자체 파서와 복구 전략을 플러그인으로 기여할 수 있는 구조를 만들 계획입니다.
+StagePilot은 upstream 미들웨어 인터페이스와의 호환성을 유지하면서 별도의 복구 전략을 플러그인으로 실험합니다.
 
 ---
 
 ## 마치며
 
-LLM 도구 호출의 신뢰성 문제는 모델이 발전할수록 줄어들겠지만, 당분간은 애플리케이션 레이어에서의 보정이 필수입니다. `stage-pilot`과 `@ai-sdk-tool/parser`는 이 보정을 체계적이고 측정 가능한 방식으로 수행합니다.
+LLM 도구 호출의 신뢰성 문제는 모델이 발전할수록 줄어들겠지만, 당분간은 애플리케이션 레이어의 보정도 필요합니다. StagePilot은 출처가 명시된 upstream 파서, 재시도, 회귀 게이트를 결합해 이 접근을 측정합니다.
 
-코드는 [GitHub](https://github.com/doeon-kim/stage-pilot)에서, 패키지는 `npm install @ai-sdk-tool/parser`로 사용할 수 있습니다.
+StagePilot 확장 코드는 이 [GitHub 저장소](https://github.com/KIM3310/stage-pilot)에서 확인할 수 있습니다. 별도로 유지되는 upstream 패키지는 `npm install @ai-sdk-tool/parser`로 설치합니다.
 
 ---
 

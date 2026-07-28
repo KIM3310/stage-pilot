@@ -102,7 +102,7 @@
     "@rollup/rollup-darwin-arm64": "^4.62.3",
     "@types/node": "^25.9.5",
     "@vitest/coverage-v8": "^4.1.10",
-    "ai": "6.0.235",
+    "ai": "6.0.236",
     "esbuild": "^0.28.1",
     "globals": "^17.8.0",
     "husky": "^9.1.7",

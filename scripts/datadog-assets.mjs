@@ -85,16 +85,33 @@ async function datadogRequest(
   return response.status === 204 ? null : response.json();
 }
 
+function configuredCredentialStatuses() {
+  let api = "not_configured";
+  let application = "not_configured";
+  if (apiKey) {
+    api = "configured";
+  }
+  if (appKey) {
+    application = "configured";
+  }
+  return { api, application };
+}
+
 async function validateCredentials() {
-  const apiValidation = apiKey
-    ? await datadogRequest("GET", "/api/v1/validate", undefined, {
-        requireAppKey: false,
-      })
-    : { valid: false, skipped: true };
+  let api = "not_configured";
+  if (apiKey) {
+    const validation = await datadogRequest(
+      "GET",
+      "/api/v1/validate",
+      undefined,
+      { requireAppKey: false }
+    );
+    api = validation?.valid === true ? "valid" : "invalid";
+  }
 
   return {
-    apiKeyValid: Boolean(apiValidation?.valid),
-    appKeyConfigured: Boolean(appKey),
+    api,
+    application: configuredCredentialStatuses().application,
   };
 }
 
@@ -153,10 +170,7 @@ async function main() {
           prefix,
           dashboard: assets.dashboard.title,
           monitors: assets.monitors.map((monitor) => monitor.name),
-          credentials: {
-            apiKeyConfigured: Boolean(apiKey),
-            appKeyConfigured: Boolean(appKey),
-          },
+          credentials: configuredCredentialStatuses(),
         },
         null,
         2

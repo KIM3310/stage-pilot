@@ -363,9 +363,8 @@ def build_child_env(entry: dict[str, Any]) -> tuple[dict[str, str], list[str]]:
 
     if kind == "grok":
         api_key = env_value_from_entry(entry, "api_key")
-        env_name = entry.get("api_key_env", "GROK_API_KEY")
         if not api_key:
-            missing.append(str(env_name))
+            missing.append("API key")
         else:
             child_env["GROK_API_KEY"] = api_key
             child_env["OPENAI_API_KEY"] = api_key
@@ -376,16 +375,15 @@ def build_child_env(entry: dict[str, Any]) -> tuple[dict[str, str], list[str]]:
         return child_env, missing
 
     api_key = env_value_from_entry(entry, "api_key")
-    env_name = entry.get("api_key_env", "OPENAI_COMPATIBLE_API_KEY")
     if not api_key:
-        missing.append(str(env_name))
+        missing.append("API key")
     else:
         child_env["OPENAI_COMPATIBLE_API_KEY"] = api_key
         child_env["OPENAI_API_KEY"] = api_key
 
     base_url = env_value_from_entry(entry, "base_url")
     if not base_url:
-        missing.append(str(entry.get("base_url_env", "base_url")))
+        missing.append("base URL")
 
     headers = env_value_from_entry(entry, "default_headers_json")
     if headers:
@@ -1639,9 +1637,9 @@ def run_single_model(
     runtime_root = matrix_runs_root / run_slug
     runtime_root.mkdir(parents=True, exist_ok=True)
 
-    child_env, missing_env = build_child_env(entry)
+    child_env, missing_config = build_child_env(entry)
     started_at = utc_now()
-    if missing_env:
+    if missing_config:
         ended_at = utc_now()
         return make_run_record(
             entry=entry,
@@ -1651,7 +1649,7 @@ def run_single_model(
             ended_at=ended_at,
             duration_sec=0.0,
             status="failed",
-            error_message=f"Missing required env vars: {', '.join(missing_env)}",
+            error_message=f"Missing required configuration: {', '.join(missing_config)}",
             summary=None,
         )
 

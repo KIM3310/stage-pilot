@@ -65,19 +65,57 @@ class TestRunPromptBfclRalphMatrix(unittest.TestCase):
             selected = select_models(models, {"grok-1"})
             self.assertEqual([item["id"] for item in selected], ["grok-1"])
 
-    def test_build_child_env_for_openai_compatible_checks_missing_envs(self) -> None:
+    def test_build_child_env_reports_static_missing_configuration(self) -> None:
         entry = {
             "id": "openrouter-qwen",
             "kind": "openai-compatible",
             "enabled": True,
             "provider_name": "OpenRouter",
             "model_name": "qwen/test",
-            "base_url_env": "OPENROUTER_BASE_URL",
-            "api_key_env": "OPENROUTER_API_KEY",
+            "base_url_env": "PRIVATE_BASE_URL_NAME",
+            "api_key_env": "PASSWORD_VALUE_THAT_MUST_NOT_BE_LOGGED",
         }
-        with patch.dict("os.environ", {}, clear=False):
+        with patch.dict("os.environ", {}, clear=True):
             _env, missing = build_child_env(entry)
-        self.assertEqual(missing, ["OPENROUTER_API_KEY", "OPENROUTER_BASE_URL"])
+        self.assertEqual(missing, ["API key", "base URL"])
+        self.assertNotIn(entry["api_key_env"], missing)
+        self.assertNotIn(entry["base_url_env"], missing)
+
+    def test_build_child_env_reports_static_missing_grok_key(self) -> None:
+        entry = {
+            "id": "grok-4",
+            "kind": "grok",
+            "model_name": "grok-4-latest",
+            "api_key_env": "GROK_PASSWORD_VALUE_THAT_MUST_NOT_BE_LOGGED",
+        }
+        with patch.dict("os.environ", {}, clear=True):
+            _env, missing = build_child_env(entry)
+        self.assertEqual(missing, ["API key"])
+        self.assertNotIn(entry["api_key_env"], missing)
+
+    def test_missing_configuration_record_excludes_configured_env_names(self) -> None:
+        entry = {
+            "id": "openrouter-qwen",
+            "kind": "openai-compatible",
+            "model_name": "qwen/test",
+            "base_url_env": "PRIVATE_BASE_URL_NAME",
+            "api_key_env": "PASSWORD_VALUE_THAT_MUST_NOT_BE_LOGGED",
+        }
+        with tempfile.TemporaryDirectory() as td, patch.dict(
+            "os.environ", {}, clear=True
+        ):
+            record = run_single_model(
+                entry=entry,
+                args=SimpleNamespace(),
+                matrix_runs_root=Path(td),
+            )
+
+        self.assertEqual(
+            record["error_message"],
+            "Missing required configuration: API key, base URL",
+        )
+        self.assertNotIn(entry["api_key_env"], record["error_message"])
+        self.assertNotIn(entry["base_url_env"], record["error_message"])
 
     def test_build_child_env_prepends_cli_paths(self) -> None:
         entry = {

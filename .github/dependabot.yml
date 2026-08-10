@@ -6,8 +6,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "09:00"
+      day: "thursday"
+      time: "10:40"
       timezone: "Asia/Seoul"
     open-pull-requests-limit: 5
     versioning-strategy: increase
@@ -42,8 +42,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "09:00"
+      day: "friday"
+      time: "10:40"
       timezone: "Asia/Seoul"
     open-pull-requests-limit: 5
     groups:
@@ -68,7 +68,7 @@ updates:
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "09:00"
+      time: "10:50"
       timezone: "Asia/Seoul"
     open-pull-requests-limit: 5
     groups:
@@ -93,8 +93,8 @@ updates:
     directory: "/infra/terraform"
     schedule:
       interval: "weekly"
-      day: "monday"
-      time: "09:00"
+      day: "tuesday"
+      time: "10:50"
       timezone: "Asia/Seoul"
     open-pull-requests-limit: 5
     groups:

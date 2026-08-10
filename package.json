@@ -3,16 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "description": "StagePilot tool-calling reliability runtime, benchmark lab, and hosted-service prototype",
-  "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/KIM3310/stage-pilot"
-  },
-  "author": "Doeon Kim (StagePilot extensions)",
-  "homepage": "https://github.com/KIM3310/stage-pilot#readme",
-  "bugs": {
-    "url": "https://github.com/KIM3310/stage-pilot/issues"
-  },
   "keywords": [
     "ai-sdk",
     "tool-calling",
@@ -21,9 +11,17 @@
     "stagepilot",
     "benchmark"
   ],
-  "main": "./dist/index.js",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "homepage": "https://github.com/KIM3310/stage-pilot#readme",
+  "bugs": {
+    "url": "https://github.com/KIM3310/stage-pilot/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KIM3310/stage-pilot"
+  },
+  "license": "Apache-2.0",
+  "author": "Doeon Kim (StagePilot extensions)",
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -51,36 +49,39 @@
       "require": "./dist/schema-coerce.cjs"
     }
   },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "files": [
     "dist/**/*"
   ],
   "scripts": {
+    "api:benchlab": "tsx src/bin/benchlab-api.ts",
+    "api:stagepilot": "tsx src/bin/stagepilot-api.ts",
+    "bench:stagepilot": "tsx src/examples/stagepilot-benchmark.ts",
     "build": "pnpm run clean && tsup --tsconfig tsconfig.build.json",
     "build:watch": "pnpm run clean && tsup --watch --tsconfig tsconfig.build.json",
-    "clean": "rimraf dist *.tsbuildinfo",
-    "clean:repo": "bash scripts/clean-local-artifacts.sh",
-    "lint": "pnpm run check",
-    "typecheck": "tsc --noEmit",
-    "test": "NODE_OPTIONS=--disable-warning=ExperimentalWarning vitest run",
+    "changeset": "changeset",
+    "check": "run-p check:*",
     "check:biome": "biome check",
     "check:publication": "node scripts/validate-publication-surface.mjs",
     "check:types": "tsc --noEmit",
-    "check": "run-p check:*",
-    "verify": "pnpm run check && pnpm test && pnpm run build",
-    "fmt:biome": "biome check --write",
-    "fmt": "run-p fmt:*",
-    "changeset": "changeset",
-    "demo:stagepilot": "tsx src/examples/stagepilot-run.ts",
-    "bench:stagepilot": "tsx src/examples/stagepilot-benchmark.ts",
-    "api:stagepilot": "tsx src/bin/stagepilot-api.ts",
-    "api:benchlab": "tsx src/bin/benchlab-api.ts",
-    "exercise:runtime": "node scripts/exercise-runtime-scorecard.mjs",
-    "load:runtime": "tsx scripts/load-runtime.ts",
-    "load:k6": "k6 run scripts/k6-runtime-scorecard.js",
+    "clean": "rimraf dist *.tsbuildinfo",
+    "clean:repo": "bash scripts/clean-local-artifacts.sh",
     "datadog:plan": "node scripts/datadog-assets.mjs plan",
     "datadog:sync": "node scripts/datadog-assets.mjs sync",
+    "demo:stagepilot": "tsx src/examples/stagepilot-run.ts",
     "deploy:stagepilot": "bash scripts/deploy-stagepilot.sh",
-    "smoke:stagepilot": "bash scripts/smoke-stagepilot.sh"
+    "exercise:runtime": "node scripts/exercise-runtime-scorecard.mjs",
+    "fmt": "run-p fmt:*",
+    "fmt:biome": "biome check --write",
+    "lint": "pnpm run check",
+    "load:k6": "k6 run scripts/k6-runtime-scorecard.js",
+    "load:runtime": "tsx scripts/load-runtime.ts",
+    "smoke:stagepilot": "bash scripts/smoke-stagepilot.sh",
+    "test": "NODE_OPTIONS=--disable-warning=ExperimentalWarning vitest run",
+    "typecheck": "tsc --noEmit",
+    "verify": "pnpm run check && pnpm test && pnpm run build"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.91",
@@ -123,5 +124,10 @@
     "node": "^20.19.0 || >=22.12.0",
     "pnpm": ">=10"
   },
-  "license": "Apache-2.0"
+  "pnpm": {
+    "overrides": {
+      "esbuild": "0.28.1",
+      "undici": "6.28.0"
+    }
+  }
 }

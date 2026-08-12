@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-- Node.js 18+ (LTS recommended)
+- Node.js ^20.19.0 or >=22.12.0
 - pnpm 9+ -- `corepack enable && corepack prepare pnpm@latest --activate`
 - Git + GitHub account
 

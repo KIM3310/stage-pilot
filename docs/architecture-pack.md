@@ -23,10 +23,10 @@ The design keeps parser behavior testable without a live model by using mutation
 ## Demo Path
 
 ```bash
-npm ci
-npm run check
-npm test
-npm run build
+pnpm install --frozen-lockfile
+pnpm run check
+pnpm test
+pnpm run build
 ```
 
 Useful entry points:

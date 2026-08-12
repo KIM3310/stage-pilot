@@ -1,16 +1,16 @@
 {
-  "caseCount": 40,
-  "generatedAt": "2026-03-24T06:16:41.757Z",
+  "caseCount": 60,
+  "generatedAt": "2026-08-12T10:13:33.251Z",
   "improvements": {
-    "loopVsBaseline": 65,
-    "loopVsMiddleware": 25,
-    "middlewareVsBaseline": 40
+    "loopVsBaseline": 56.67,
+    "loopVsMiddleware": 23.33,
+    "middlewareVsBaseline": 33.34
   },
-  "seed": 20260228,
+  "seed": 20260413,
   "strategies": [
     {
       "avgAttemptsUsed": 1,
-      "avgLatencyMs": 0.02,
+      "avgLatencyMs": 0.05,
       "failedCaseIds": [
         "bench-2",
         "bench-3",
@@ -30,29 +30,39 @@
         "bench-22",
         "bench-23",
         "bench-24",
-        "bench-25",
-        "bench-26",
-        "bench-28",
+        "bench-29",
         "bench-30",
-        "bench-31",
+        "bench-32",
         "bench-33",
         "bench-34",
+        "bench-35",
         "bench-36",
-        "bench-37",
         "bench-38",
-        "bench-39",
-        "bench-40"
+        "bench-40",
+        "bench-41",
+        "bench-43",
+        "bench-44",
+        "bench-46",
+        "bench-47",
+        "bench-48",
+        "bench-49",
+        "bench-50",
+        "bench-52",
+        "bench-53",
+        "bench-54",
+        "bench-59",
+        "bench-60"
       ],
-      "p95LatencyMs": 0.05,
-      "parseSuccessCount": 10,
-      "planSuccessCount": 10,
+      "p95LatencyMs": 0.2,
+      "parseSuccessCount": 20,
+      "planSuccessCount": 20,
       "strategy": "baseline",
-      "successRate": 25,
-      "totalCases": 40
+      "successRate": 33.33,
+      "totalCases": 60
     },
     {
       "avgAttemptsUsed": 1,
-      "avgLatencyMs": 0.13,
+      "avgLatencyMs": 0.43,
       "failedCaseIds": [
         "bench-4",
         "bench-8",
@@ -61,31 +71,44 @@
         "bench-17",
         "bench-18",
         "bench-19",
-        "bench-24",
-        "bench-28",
+        "bench-22",
+        "bench-29",
         "bench-30",
         "bench-34",
-        "bench-37",
         "bench-38",
-        "bench-39"
+        "bench-40",
+        "bench-44",
+        "bench-47",
+        "bench-48",
+        "bench-49",
+        "bench-52",
+        "bench-59",
+        "bench-60"
       ],
-      "p95LatencyMs": 0.39,
-      "parseSuccessCount": 26,
-      "planSuccessCount": 26,
+      "p95LatencyMs": 1.41,
+      "parseSuccessCount": 40,
+      "planSuccessCount": 40,
       "strategy": "middleware",
-      "successRate": 65,
-      "totalCases": 40
+      "successRate": 66.67,
+      "totalCases": 60
     },
     {
-      "avgAttemptsUsed": 1.35,
-      "avgLatencyMs": 0.06,
-      "failedCaseIds": ["bench-14", "bench-17", "bench-34", "bench-37"],
-      "p95LatencyMs": 0.1,
-      "parseSuccessCount": 36,
-      "planSuccessCount": 36,
+      "avgAttemptsUsed": 1.33,
+      "avgLatencyMs": 0.29,
+      "failedCaseIds": [
+        "bench-14",
+        "bench-17",
+        "bench-29",
+        "bench-44",
+        "bench-47",
+        "bench-59"
+      ],
+      "p95LatencyMs": 1.01,
+      "parseSuccessCount": 54,
+      "planSuccessCount": 54,
       "strategy": "middleware+ralph-loop",
       "successRate": 90,
-      "totalCases": 40
+      "totalCases": 60
     }
   ]
 }

@@ -3,11 +3,10 @@
 # StagePilot
 
 [![CI](https://github.com/KIM3310/stage-pilot/actions/workflows/ci.yml/badge.svg)](https://github.com/KIM3310/stage-pilot/actions)
-[![codecov](https://codecov.io/gh/KIM3310/stage-pilot/branch/main/graph/badge.svg)](https://codecov.io/gh/KIM3310/stage-pilot)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue.svg)](https://www.typescriptlang.org/)
 
-**Tool-calling reliability runtime for LLMs.** Parses, repairs, and retries malformed tool-call output so you don't have to. Lifts baseline success from **25% to 90%** on a 60-case benchmark with 30 mutation modes.
+**Tool-calling reliability runtime for LLMs.** Parses, repairs, and retries malformed tool-call output so you don't have to. Lifts baseline success from **33.3% to 90.0%** on a deterministic 60-case benchmark covering 30 mutation modes.
 
 Architecture pack: [`docs/architecture-pack.md`](docs/architecture-pack.md)
 
@@ -29,7 +28,7 @@ code and StagePilot additions.
 
 ## Three-Minute Proof
 
-1. Read the 25% to 90% benchmark claim, then open the mutation benchmark evidence.
+1. Read the 33.3% to 90.0% benchmark claim, then open the mutation benchmark evidence.
 2. Inspect the parser/retry path and one malformed tool-call fixture.
 3. Run `npm run verify` or the equivalent pnpm command for checks, tests, and build.
 4. Use `pnpm api:stagepilot` only after the package proof is clear.
@@ -39,14 +38,13 @@ code and StagePilot additions.
 | Lens | Current answer |
 |---|---|
 | Users | AI platform teams and developer-tool teams shipping agents that must survive malformed tool output. |
-| Technical path | Validate the demo, README, architecture notes, and quality gate before deeper workflow review. |
 | System scope | Upstream parser compatibility surface, deterministic mutation benchmark, StagePilot retry loop, and telemetry-ready runtime. |
 | Operating boundary | Tool schemas and retries are explicit; benchmark fixtures are synthetic and provider-neutral. |
-| Evaluation path | `pnpm test`, `pnpm build`, [`docs/architecture-pack.md`](docs/architecture-pack.md), and the 25% to 90% benchmark claim. |
+| Evaluation path | `pnpm test`, `pnpm build`, [`docs/architecture-pack.md`](docs/architecture-pack.md), and the 33.3% to 90.0% benchmark claim. |
 
 ## Evaluation Path
 
-- **Start here:** Read the 25% to 90% benchmark claim, then inspect parser recovery and mutation fixtures.
+- **Start here:** Read the 33.3% to 90.0% benchmark claim, then inspect parser recovery and mutation fixtures.
 - **Local demo:** Install with `pnpm install`, then run `pnpm api:stagepilot` and open `http://127.0.0.1:8080/demo`.
 - **Checks:** Run `npm run verify` or the equivalent package-manager command for check, tests, and build.
 
@@ -193,11 +191,11 @@ sequenceDiagram
 
 Source: [`docs/benchmarks/stagepilot-latest.json`](docs/benchmarks/stagepilot-latest.json) — 60 cases, 30 mutation modes.
 
-| Strategy | Success | Rate | Avg Latency | P95 Latency | Avg Attempts |
-|---|---:|---:|---:|---:|---:|
-| `baseline` | 10 / 40 | 25.00% | 0.02 ms | 0.05 ms | 1.00 |
-| `middleware` | 26 / 40 | 65.00% | 0.13 ms | 0.39 ms | 1.00 |
-| **`middleware+ralph-loop`** | **36 / 40** | **90.00%** | 0.06 ms | 0.10 ms | 1.35 |
+| Strategy | Success | Rate | Avg Attempts |
+|---|---:|---:|---:|
+| `baseline` | 20 / 60 | 33.33% | 1.00 |
+| `middleware` | 40 / 60 | 66.67% | 1.00 |
+| **`middleware+ralph-loop`** | **54 / 60** | **90.00%** | **1.33** |
 
 ### 30 Mutation Modes
 
@@ -431,7 +429,7 @@ scripts/             # Build, deploy, load-test (k6)
 
 | Category | Technologies |
 |---|---|
-| **Language** | TypeScript 5.9, Node.js 20 |
+| **Language** | TypeScript 6.0, Node.js ^20.19 or >=22.12 |
 | **AI SDK** | Vercel AI SDK 6.0, Zod 4.3 |
 | **Parsing** | Custom RJSON + RXML engines, 8 protocol variants |
 | **Observability** | OpenTelemetry (spans), Prometheus (metrics), Datadog (dashboards) |

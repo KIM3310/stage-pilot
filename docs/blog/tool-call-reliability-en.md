@@ -1,5 +1,7 @@
 # From 25% to 90%: Fixing Unreliable LLM Tool Calling with Parser Middleware
 
+> **Historical benchmark note (updated 2026-08-12):** This article analyzes the earlier deterministic 40-case, 20-mode fixture (25% to 90%). The current checked-in runner and [latest report](../benchmarks/stagepilot-latest.json) cover 60 cases and 30 mutation modes, where the same strategies score 33.3%, 66.7%, and 90.0%. These are parser-recovery fixture results, not universal model-quality estimates.
+
 > How we built a stage-gated pipeline and parser middleware to make LLM tool-calling reliable enough for production.
 
 ---
@@ -326,4 +328,4 @@ The StagePilot extensions are available in this [GitHub repository](https://gith
 
 ---
 
-**Doeon Kim** -- AI Engineer at INTERX, building production-grade AI systems. Previously at Microsoft AI School. Trilingual: Korean, English, Japanese.
+**Doeon Kim** builds reviewable AI systems, tool-reliability runtimes, and governed operations workflows. He completed Microsoft AI School and has IT infrastructure operations experience.

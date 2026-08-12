@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-LLMs without native tool-calling support produce unreliable structured output. Format varies between turns (XML, JSON, YAML), tool names get hallucinated, required arguments are omitted, and types mismatch the schema. Our benchmark shows **25% baseline success rate** — meaning 3 out of 4 tool calls fail in raw form.
+LLMs without native tool-calling support can produce unreliable structured output. Format varies between turns (XML, JSON, YAML), tool names get hallucinated, required arguments are omitted, and types mismatch the schema. In the deterministic 60-case fixture suite, the raw baseline succeeds on **33.3%** of cases; this is a parser-recovery benchmark, not a universal model-quality estimate.
 
 ## Design Principles
 

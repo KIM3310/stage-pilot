@@ -2,8 +2,9 @@
 
 This repository began from the Apache-2.0 licensed
 [`minpeter/ai-sdk-tool-call-middleware`](https://github.com/minpeter/ai-sdk-tool-call-middleware)
-project by Woonggi Min. The original copyright notice remains in
-[`LICENSE`](LICENSE).
+project by Woonggi Min (Copyright 2025 Woonggi Min). The root
+[`LICENSE`](LICENSE) contains the canonical, unmodified Apache License 2.0
+text; this notice preserves upstream attribution separately.
 
 The upstream project publishes the `@ai-sdk-tool/parser` package on npm.
 KIM3310 and StagePilot do not own, publish, or control that package or its npm

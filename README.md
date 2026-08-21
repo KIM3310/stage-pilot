@@ -60,7 +60,7 @@ code and StagePilot additions.
 
 ## The Problem
 
-Models without native tool support produce unreliable output — XML one turn, JSON the next, hallucinated tool names, missing args, type mismatches. On our benchmark, **baseline success is 25%**. Most workarounds are regex hacks or single-pass prompts. They break when the format drifts and give you no way to see what went wrong.
+Models without native tool support produce unreliable output — XML one turn, JSON the next, hallucinated tool names, missing args, type mismatches. On our 60-case benchmark, **baseline success is 33.3%**. Most workarounds are regex hacks or single-pass prompts. They break when the format drifts and give you no way to see what went wrong.
 
 ## The Solution
 

@@ -80,6 +80,7 @@
     "load:runtime": "tsx scripts/load-runtime.ts",
     "smoke:stagepilot": "bash scripts/smoke-stagepilot.sh",
     "test": "NODE_OPTIONS=--disable-warning=ExperimentalWarning vitest run",
+    "test:coverage": "NODE_OPTIONS=--disable-warning=ExperimentalWarning vitest run --coverage",
     "typecheck": "tsc --noEmit",
     "verify": "pnpm run check && pnpm test && pnpm run build"
   },
@@ -103,7 +104,7 @@
     "@changesets/cli": "2.31.1",
     "@rollup/rollup-darwin-arm64": "^4.62.4",
     "@types/node": "^25.9.5",
-    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/coverage-v8": "4.1.11",
     "ai": "6.0.246",
     "esbuild": "^0.28.1",
     "globals": "^17.9.0",
@@ -116,7 +117,7 @@
     "typescript": "6.0.3",
     "ultracite": "7.10.1",
     "vite": "^8.2.1",
-    "vitest": "^4.1.10",
+    "vitest": "4.1.11",
     "zod": "^4.4.3"
   },
   "packageManager": "pnpm@10.34.5",

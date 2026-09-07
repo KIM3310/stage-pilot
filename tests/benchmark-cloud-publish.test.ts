@@ -24,6 +24,8 @@ const report: StagePilotBenchmarkReport = {
   seed: 20_260_324,
   strategies: [
     {
+      caseResults: [],
+      failedCaseIds: [],
       avgAttemptsUsed: 1,
       avgLatencyMs: 5,
       p95LatencyMs: 9,
@@ -34,6 +36,8 @@ const report: StagePilotBenchmarkReport = {
       totalCases: 40,
     },
     {
+      caseResults: [],
+      failedCaseIds: [],
       avgAttemptsUsed: 1,
       avgLatencyMs: 6,
       p95LatencyMs: 10,
@@ -44,6 +48,8 @@ const report: StagePilotBenchmarkReport = {
       totalCases: 40,
     },
     {
+      caseResults: [],
+      failedCaseIds: [],
       avgAttemptsUsed: 1.35,
       avgLatencyMs: 7,
       p95LatencyMs: 12,

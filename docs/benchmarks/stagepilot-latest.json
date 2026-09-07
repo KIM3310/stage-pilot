@@ -1,16 +1,438 @@
 {
   "caseCount": 60,
-  "generatedAt": "2026-08-12T10:13:33.251Z",
+  "generatedAt": "2026-09-07T06:45:30.048Z",
   "improvements": {
     "loopVsBaseline": 56.67,
     "loopVsMiddleware": 23.33,
-    "middlewareVsBaseline": 33.34
+    "middlewareVsBaseline": 33.33
   },
   "seed": 20260413,
   "strategies": [
     {
       "avgAttemptsUsed": 1,
-      "avgLatencyMs": 0.05,
+      "caseResults": [
+        {
+          "attemptsUsed": 1,
+          "id": "bench-1",
+          "mode": "strict",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-2",
+          "mode": "relaxed-json",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-3",
+          "mode": "coercible-types",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-4",
+          "mode": "missing-brace",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-5",
+          "mode": "no-tags",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-6",
+          "mode": "garbage-tail",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-7",
+          "mode": "prefixed-valid",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-8",
+          "mode": "deeply-nested-args",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-9",
+          "mode": "unicode-in-values",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-10",
+          "mode": "oversized-payload",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-11",
+          "mode": "trailing-comma-json",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-12",
+          "mode": "json-in-xml-wrapper",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-13",
+          "mode": "concurrent-tool-calls",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-14",
+          "mode": "empty-arguments",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-15",
+          "mode": "backreference-placeholder",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-16",
+          "mode": "adversarial-injection",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-17",
+          "mode": "wrong-tool-name",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-18",
+          "mode": "truncated-json",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-19",
+          "mode": "html-escaped-payload",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-20",
+          "mode": "double-encoded-json",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-21",
+          "mode": "markdown-fenced",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-22",
+          "mode": "yaml-body",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-23",
+          "mode": "mixed-quotes",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-24",
+          "mode": "comment-in-json",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-25",
+          "mode": "bom-prefix",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-26",
+          "mode": "null-bytes",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-27",
+          "mode": "reversed-key-order",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-28",
+          "mode": "multiline-values",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-29",
+          "mode": "partial-schema",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-30",
+          "mode": "xml-attribute-style",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-31",
+          "mode": "strict",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-32",
+          "mode": "relaxed-json",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-33",
+          "mode": "coercible-types",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-34",
+          "mode": "missing-brace",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-35",
+          "mode": "no-tags",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-36",
+          "mode": "garbage-tail",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-37",
+          "mode": "prefixed-valid",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-38",
+          "mode": "deeply-nested-args",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-39",
+          "mode": "unicode-in-values",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-40",
+          "mode": "oversized-payload",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-41",
+          "mode": "trailing-comma-json",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-42",
+          "mode": "json-in-xml-wrapper",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-43",
+          "mode": "concurrent-tool-calls",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-44",
+          "mode": "empty-arguments",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-45",
+          "mode": "backreference-placeholder",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-46",
+          "mode": "adversarial-injection",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-47",
+          "mode": "wrong-tool-name",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-48",
+          "mode": "truncated-json",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-49",
+          "mode": "html-escaped-payload",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-50",
+          "mode": "double-encoded-json",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-51",
+          "mode": "markdown-fenced",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-52",
+          "mode": "yaml-body",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-53",
+          "mode": "mixed-quotes",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-54",
+          "mode": "comment-in-json",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-55",
+          "mode": "bom-prefix",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-56",
+          "mode": "null-bytes",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-57",
+          "mode": "reversed-key-order",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-58",
+          "mode": "multiline-values",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-59",
+          "mode": "partial-schema",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-60",
+          "mode": "xml-attribute-style",
+          "parsed": false,
+          "planned": false
+        }
+      ],
+      "avgLatencyMs": 0.01,
       "failedCaseIds": [
         "bench-2",
         "bench-3",
@@ -53,7 +475,7 @@
         "bench-59",
         "bench-60"
       ],
-      "p95LatencyMs": 0.2,
+      "p95LatencyMs": 0.06,
       "parseSuccessCount": 20,
       "planSuccessCount": 20,
       "strategy": "baseline",
@@ -62,7 +484,429 @@
     },
     {
       "avgAttemptsUsed": 1,
-      "avgLatencyMs": 0.43,
+      "caseResults": [
+        {
+          "attemptsUsed": 1,
+          "id": "bench-1",
+          "mode": "strict",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-2",
+          "mode": "relaxed-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-3",
+          "mode": "coercible-types",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-4",
+          "mode": "missing-brace",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-5",
+          "mode": "no-tags",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-6",
+          "mode": "garbage-tail",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-7",
+          "mode": "prefixed-valid",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-8",
+          "mode": "deeply-nested-args",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-9",
+          "mode": "unicode-in-values",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-10",
+          "mode": "oversized-payload",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-11",
+          "mode": "trailing-comma-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-12",
+          "mode": "json-in-xml-wrapper",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-13",
+          "mode": "concurrent-tool-calls",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-14",
+          "mode": "empty-arguments",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-15",
+          "mode": "backreference-placeholder",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-16",
+          "mode": "adversarial-injection",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-17",
+          "mode": "wrong-tool-name",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-18",
+          "mode": "truncated-json",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-19",
+          "mode": "html-escaped-payload",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-20",
+          "mode": "double-encoded-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-21",
+          "mode": "markdown-fenced",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-22",
+          "mode": "yaml-body",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-23",
+          "mode": "mixed-quotes",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-24",
+          "mode": "comment-in-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-25",
+          "mode": "bom-prefix",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-26",
+          "mode": "null-bytes",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-27",
+          "mode": "reversed-key-order",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-28",
+          "mode": "multiline-values",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-29",
+          "mode": "partial-schema",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-30",
+          "mode": "xml-attribute-style",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-31",
+          "mode": "strict",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-32",
+          "mode": "relaxed-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-33",
+          "mode": "coercible-types",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-34",
+          "mode": "missing-brace",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-35",
+          "mode": "no-tags",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-36",
+          "mode": "garbage-tail",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-37",
+          "mode": "prefixed-valid",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-38",
+          "mode": "deeply-nested-args",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-39",
+          "mode": "unicode-in-values",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-40",
+          "mode": "oversized-payload",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-41",
+          "mode": "trailing-comma-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-42",
+          "mode": "json-in-xml-wrapper",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-43",
+          "mode": "concurrent-tool-calls",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-44",
+          "mode": "empty-arguments",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-45",
+          "mode": "backreference-placeholder",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-46",
+          "mode": "adversarial-injection",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-47",
+          "mode": "wrong-tool-name",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-48",
+          "mode": "truncated-json",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-49",
+          "mode": "html-escaped-payload",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-50",
+          "mode": "double-encoded-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-51",
+          "mode": "markdown-fenced",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-52",
+          "mode": "yaml-body",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-53",
+          "mode": "mixed-quotes",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-54",
+          "mode": "comment-in-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-55",
+          "mode": "bom-prefix",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-56",
+          "mode": "null-bytes",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-57",
+          "mode": "reversed-key-order",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-58",
+          "mode": "multiline-values",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-59",
+          "mode": "partial-schema",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-60",
+          "mode": "xml-attribute-style",
+          "parsed": false,
+          "planned": false
+        }
+      ],
+      "avgLatencyMs": 0.11,
       "failedCaseIds": [
         "bench-4",
         "bench-8",
@@ -85,7 +929,7 @@
         "bench-59",
         "bench-60"
       ],
-      "p95LatencyMs": 1.41,
+      "p95LatencyMs": 0.38,
       "parseSuccessCount": 40,
       "planSuccessCount": 40,
       "strategy": "middleware",
@@ -94,7 +938,429 @@
     },
     {
       "avgAttemptsUsed": 1.33,
-      "avgLatencyMs": 0.29,
+      "caseResults": [
+        {
+          "attemptsUsed": 1,
+          "id": "bench-1",
+          "mode": "strict",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-2",
+          "mode": "relaxed-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-3",
+          "mode": "coercible-types",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-4",
+          "mode": "missing-brace",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-5",
+          "mode": "no-tags",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-6",
+          "mode": "garbage-tail",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-7",
+          "mode": "prefixed-valid",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-8",
+          "mode": "deeply-nested-args",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-9",
+          "mode": "unicode-in-values",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-10",
+          "mode": "oversized-payload",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-11",
+          "mode": "trailing-comma-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-12",
+          "mode": "json-in-xml-wrapper",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-13",
+          "mode": "concurrent-tool-calls",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-14",
+          "mode": "empty-arguments",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-15",
+          "mode": "backreference-placeholder",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-16",
+          "mode": "adversarial-injection",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-17",
+          "mode": "wrong-tool-name",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-18",
+          "mode": "truncated-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-19",
+          "mode": "html-escaped-payload",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-20",
+          "mode": "double-encoded-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-21",
+          "mode": "markdown-fenced",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-22",
+          "mode": "yaml-body",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-23",
+          "mode": "mixed-quotes",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-24",
+          "mode": "comment-in-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-25",
+          "mode": "bom-prefix",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-26",
+          "mode": "null-bytes",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-27",
+          "mode": "reversed-key-order",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-28",
+          "mode": "multiline-values",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-29",
+          "mode": "partial-schema",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-30",
+          "mode": "xml-attribute-style",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-31",
+          "mode": "strict",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-32",
+          "mode": "relaxed-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-33",
+          "mode": "coercible-types",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-34",
+          "mode": "missing-brace",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-35",
+          "mode": "no-tags",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-36",
+          "mode": "garbage-tail",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-37",
+          "mode": "prefixed-valid",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-38",
+          "mode": "deeply-nested-args",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-39",
+          "mode": "unicode-in-values",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-40",
+          "mode": "oversized-payload",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-41",
+          "mode": "trailing-comma-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-42",
+          "mode": "json-in-xml-wrapper",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-43",
+          "mode": "concurrent-tool-calls",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-44",
+          "mode": "empty-arguments",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-45",
+          "mode": "backreference-placeholder",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-46",
+          "mode": "adversarial-injection",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-47",
+          "mode": "wrong-tool-name",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-48",
+          "mode": "truncated-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-49",
+          "mode": "html-escaped-payload",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-50",
+          "mode": "double-encoded-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-51",
+          "mode": "markdown-fenced",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-52",
+          "mode": "yaml-body",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-53",
+          "mode": "mixed-quotes",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-54",
+          "mode": "comment-in-json",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-55",
+          "mode": "bom-prefix",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-56",
+          "mode": "null-bytes",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-57",
+          "mode": "reversed-key-order",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 1,
+          "id": "bench-58",
+          "mode": "multiline-values",
+          "parsed": true,
+          "planned": true
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-59",
+          "mode": "partial-schema",
+          "parsed": false,
+          "planned": false
+        },
+        {
+          "attemptsUsed": 2,
+          "id": "bench-60",
+          "mode": "xml-attribute-style",
+          "parsed": true,
+          "planned": true
+        }
+      ],
+      "avgLatencyMs": 0.06,
       "failedCaseIds": [
         "bench-14",
         "bench-17",
@@ -103,7 +1369,7 @@
         "bench-47",
         "bench-59"
       ],
-      "p95LatencyMs": 1.01,
+      "p95LatencyMs": 0.14,
       "parseSuccessCount": 54,
       "planSuccessCount": 54,
       "strategy": "middleware+ralph-loop",

@@ -56,6 +56,13 @@ export interface StagePilotBenchmarkCase {
 export interface StagePilotBenchmarkStrategyMetrics {
   avgAttemptsUsed: number;
   avgLatencyMs: number;
+  caseResults: {
+    attemptsUsed: number;
+    id: string;
+    mode: MutationMode;
+    parsed: boolean;
+    planned: boolean;
+  }[];
   failedCaseIds: string[];
   p95LatencyMs: number;
   parseSuccessCount: number;
@@ -506,6 +513,8 @@ export function createBenchmarkCases(
   caseCount: number,
   seed: number
 ): StagePilotBenchmarkCase[] {
+  validateBenchmarkInteger("caseCount", caseCount, 1, 10_000);
+  validateBenchmarkInteger("seed", seed, 0, Number.MAX_SAFE_INTEGER);
   const random = createSeededRandom(seed);
   const cases: StagePilotBenchmarkCase[] = [];
 
@@ -737,6 +746,7 @@ async function runStrategyBenchmark(
   const engine = new StagePilotEngine();
   const latencies: number[] = [];
   const failedCaseIds: string[] = [];
+  const caseResults: StagePilotBenchmarkStrategyMetrics["caseResults"] = [];
 
   let parseSuccessCount = 0;
   let planSuccessCount = 0;
@@ -755,6 +765,14 @@ async function runStrategyBenchmark(
       failedCaseIds.push(benchmarkCase.id);
     }
 
+    caseResults.push({
+      attemptsUsed: execution.attemptsUsed,
+      id: benchmarkCase.id,
+      mode: benchmarkCase.mode,
+      parsed: execution.parsedInput !== null,
+      planned: execution.parsedInput !== null,
+    });
+
     latencies.push(performance.now() - start);
   }
 
@@ -766,6 +784,7 @@ async function runStrategyBenchmark(
 
   return {
     avgAttemptsUsed: toTwoDecimals(attemptsSum / Math.max(totalCases, 1)),
+    caseResults,
     avgLatencyMs: latency.avgLatencyMs,
     failedCaseIds,
     p95LatencyMs: latency.p95LatencyMs,
@@ -788,12 +807,26 @@ function findStrategy(
   return found;
 }
 
+function validateBenchmarkInteger(
+  name: string,
+  value: number,
+  minimum: number,
+  maximum: number
+): void {
+  if (!Number.isSafeInteger(value) || value < minimum || value > maximum) {
+    throw new RangeError(
+      `${name} must be an integer between ${minimum} and ${maximum}`
+    );
+  }
+}
+
 export async function benchmarkStagePilotStrategies(
   options: StagePilotBenchmarkOptions = {}
 ): Promise<StagePilotBenchmarkReport> {
-  const caseCount = Math.max(1, options.caseCount ?? 60);
+  const caseCount = options.caseCount ?? 60;
   const seed = options.seed ?? 20_260_413;
-  const maxLoopAttempts = Math.max(2, options.maxLoopAttempts ?? 2);
+  const maxLoopAttempts = options.maxLoopAttempts ?? 2;
+  validateBenchmarkInteger("maxLoopAttempts", maxLoopAttempts, 1, 20);
   const cases = createBenchmarkCases(caseCount, seed);
   const context: BenchmarkContext = {
     cases,
@@ -817,12 +850,16 @@ export async function benchmarkStagePilotStrategies(
     caseCount,
     generatedAt: new Date().toISOString(),
     improvements: {
-      loopVsBaseline: toTwoDecimals(loop.successRate - baseline.successRate),
+      loopVsBaseline: toTwoDecimals(
+        (100 * (loop.planSuccessCount - baseline.planSuccessCount)) / caseCount
+      ),
       loopVsMiddleware: toTwoDecimals(
-        loop.successRate - middleware.successRate
+        (100 * (loop.planSuccessCount - middleware.planSuccessCount)) /
+          caseCount
       ),
       middlewareVsBaseline: toTwoDecimals(
-        middleware.successRate - baseline.successRate
+        (100 * (middleware.planSuccessCount - baseline.planSuccessCount)) /
+          caseCount
       ),
     },
     seed,
@@ -839,6 +876,8 @@ export function formatBenchmarkSummary(
     `- Generated at: ${report.generatedAt}`,
     `- Cases: ${report.caseCount}`,
     `- Seed: ${report.seed}`,
+    "- Method: synthetic parser fixtures with prewritten retry responses; no live model calls.",
+    "- Latency: local parsing and plan construction only; excludes model and network latency.",
     "",
     "| Strategy | Parse Success | Plan Success | Success Rate (%) | Avg Latency (ms) | P95 Latency (ms) | Avg Attempts |",
     "|---|---:|---:|---:|---:|---:|---:|",

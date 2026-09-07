@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { benchmarkStagePilotStrategies } from "../src/stagepilot/benchmark";
+import {
+  benchmarkStagePilotStrategies,
+  createBenchmarkCases,
+} from "../src/stagepilot/benchmark";
 
 describe("stagepilot benchmark harness", () => {
   it("shows middleware and ralph-loop gains over baseline", async () => {
@@ -35,6 +38,42 @@ describe("stagepilot benchmark harness", () => {
     expect(baseline?.successRate).toBeCloseTo(33.33, 2);
     expect(middleware?.successRate).toBeCloseTo(66.67, 2);
     expect(loop?.successRate).toBe(90);
+    expect(report.improvements.middlewareVsBaseline).toBe(33.33);
     expect(loop?.failedCaseIds?.length ?? 0).toBeGreaterThan(0);
+    for (const strategy of report.strategies) {
+      expect(strategy.caseResults).toHaveLength(60);
+      expect(
+        strategy.caseResults.filter((result) => result.planned)
+      ).toHaveLength(strategy.planSuccessCount);
+      expect(
+        strategy.caseResults
+          .filter((result) => !result.planned)
+          .map((result) => result.id)
+      ).toEqual(strategy.failedCaseIds);
+    }
   });
+
+  it("honors a one-attempt budget without silently adding a retry", async () => {
+    const report = await benchmarkStagePilotStrategies({ maxLoopAttempts: 1 });
+    const middleware = report.strategies[1];
+    const loop = report.strategies[2];
+    expect(loop?.caseResults).toEqual(middleware?.caseResults);
+    expect(loop?.avgAttemptsUsed).toBe(1);
+  });
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, -1, 0, 1.5, 10_001])(
+    "rejects invalid case count %s before constructing fixtures",
+    (value) => {
+      expect(() => createBenchmarkCases(value, 1)).toThrow(RangeError);
+    }
+  );
+
+  it.each([Number.NaN, Number.POSITIVE_INFINITY, -1, 0, 1.5, 21])(
+    "rejects invalid retry budget %s",
+    async (value) => {
+      await expect(
+        benchmarkStagePilotStrategies({ maxLoopAttempts: value })
+      ).rejects.toThrow(RangeError);
+    }
+  );
 });
